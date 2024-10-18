@@ -6,11 +6,11 @@
     --scrollbar-thumb: #909090;
     --scrollbar-track: #f1f1f1;
 }
+html,
 body {
-    /* background: #f1f1f1; */
-    font-family: Arial, Helvetica, sans-serif;
+    @apply bg-secondary;
+    min-height: 100vh;
 }
-
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -26,10 +26,4 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
-}
-
-@layer utilities {
-    .text-balance {
-        text-wrap: balance;
-    }
 }

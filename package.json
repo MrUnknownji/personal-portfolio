@@ -10,13 +10,17 @@
   },
   "dependencies": {
     "@studio-freight/lenis": "^1.0.42",
+    "framer-motion": "^11.11.9",
     "gsap": "^3.12.5",
     "locomotive-scroll": "^4.1.4",
     "lottie-react": "^2.4.0",
     "lottie-web": "^5.12.2",
+    "lucide-react": "^0.453.0",
     "next": "14.2.14",
+    "next-themes": "^0.3.0",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "typed.js": "^2.1.0"
   },
   "devDependencies": {
     "@types/node": "^20",
