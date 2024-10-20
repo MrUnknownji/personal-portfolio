@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 const Header = () => {
@@ -28,8 +29,14 @@ const Header = () => {
     >
       <div className="container mx-auto p-6">
         <nav className="flex items-center justify-between">
-          <Link href="/" className="text-primary font-bold text-3xl">
-            SK
+          <Link href="/" className="text-primary font-bold">
+            <Image
+              src="/images/logo.svg"
+              alt="Logo"
+              width={50}
+              height={50}
+              priority
+            />
           </Link>
           <a
             href="#contact"
