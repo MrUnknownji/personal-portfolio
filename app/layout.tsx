@@ -6,7 +6,7 @@ import CustomCursor from "@/components/CustomCursor";
 
 export const metadata: Metadata = {
   title: "Sandeep's Portfolio",
-  description: "How bad possibly it could be",
+  description: "How Bad Possibly It Could Be",
 };
 
 export default function RootLayout({
