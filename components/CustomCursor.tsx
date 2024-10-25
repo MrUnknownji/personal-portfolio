@@ -60,14 +60,14 @@ const CustomCursor: React.FC = () => {
     <>
       <div
         ref={cursorRingRef}
-        className={`cursor-ring fixed pointer-events-none z-50 w-10 h-10 border-2 border-primary rounded-full transition-all duration-300 ease-out ${
+        className={`cursor-ring fixed pointer-events-none z-[500] w-10 h-10 border-2 border-primary rounded-full transition-all duration-300 ease-out ${
           isPointerOrText ? "opacity-0 scale-0" : "opacity-100 scale-100"
         }`}
         style={{ transform: "translate(-50%, -50%)" }}
       />
       <div
         ref={cursorDotRef}
-        className={`cursor-dot fixed pointer-events-none z-50 bg-primary rounded-full transition-all duration-300 ease-out ${
+        className={`cursor-dot fixed pointer-events-none z-[500] bg-primary rounded-full transition-all duration-300 ease-out ${
           isPointerOrText ? "w-16 h-16 opacity-10" : "w-1.5 h-1.5 opacity-100"
         }`}
         style={{ transform: "translate(-50%, -50%)" }}

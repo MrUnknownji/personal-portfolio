@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import Typed from "typed.js";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi";
 
 const HeroSection = () => {
   const typedRef = useRef<HTMLSpanElement>(null);
@@ -35,183 +36,227 @@ const HeroSection = () => {
     }
   }, []);
 
-  // Individual element animations
+  const fadeInUpVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   const greetingOpacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
   const greetingY = useTransform(scrollYProgress, [0, 0.1], [0, -50]);
-
   const titleOpacity = useTransform(scrollYProgress, [0.05, 0.15], [1, 0]);
   const titleY = useTransform(scrollYProgress, [0.05, 0.15], [0, -50]);
-
   const subtitleOpacity = useTransform(scrollYProgress, [0.1, 0.2], [1, 0]);
   const subtitleY = useTransform(scrollYProgress, [0.1, 0.2], [0, -50]);
-
   const descriptionOpacity = useTransform(
     scrollYProgress,
     [0.15, 0.25],
     [1, 0],
   );
   const descriptionY = useTransform(scrollYProgress, [0.15, 0.25], [0, -50]);
-
   const specializationOpacity = useTransform(
     scrollYProgress,
     [0.2, 0.3],
     [1, 0],
   );
   const specializationY = useTransform(scrollYProgress, [0.2, 0.3], [0, -50]);
-
   const skillsOpacity = useTransform(scrollYProgress, [0.25, 0.35], [1, 0]);
   const skillsY = useTransform(scrollYProgress, [0.25, 0.35], [0, -50]);
-
   const ctaOpacity = useTransform(scrollYProgress, [0.3, 0.4], [1, 0]);
   const ctaY = useTransform(scrollYProgress, [0.3, 0.4], [0, -50]);
-
-  const monitorOpacity = useTransform(scrollYProgress, [0.35, 0.45], [1, 0]);
-  const monitorY = useTransform(scrollYProgress, [0.35, 0.45], [0, -50]);
-
-  // Empty card animation
   const cardOpacity = useTransform(scrollYProgress, [0.45, 0.55], [1, 0]);
   const cardScale = useTransform(scrollYProgress, [0.45, 0.55], [1, 0.95]);
 
   return (
     <div
       ref={sectionRef}
-      className="min-h-screen flex items-center justify-center p-4 font-sans"
+      className="min-h-screen flex items-center justify-center p-8 font-sans pt-16"
     >
       <motion.div
-        className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 md:p-12 w-full max-w-6xl shadow-2xl"
-        style={{ opacity: cardOpacity, scale: cardScale }}
+        className="relative w-full max-w-7xl mx-auto"
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUpVariants}
       >
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="flex-1">
-            <motion.h3
-              className="text-accent font-semibold text-xl mb-2"
-              style={{ opacity: greetingOpacity, y: greetingY }}
-            >
-              {"Hello, I'm"}
-            </motion.h3>
-            <motion.h1
-              className="text-white font-bold text-4xl md:text-5xl mb-3"
-              style={{ opacity: titleOpacity, y: titleY }}
-            >
-              Sandeep Kumar
-            </motion.h1>
-            <motion.h2
-              className="text-primary text-2xl md:text-3xl mb-4"
-              style={{ opacity: subtitleOpacity, y: subtitleY }}
-            >
-              Full Stack Developer
-            </motion.h2>
-            <motion.p
-              className="text-gray-300 mb-6 leading-relaxed"
-              style={{ opacity: descriptionOpacity, y: descriptionY }}
-            >
-              {`I'm passionate about crafting efficient, scalable solutions and
-              creating exceptional user experiences. With a focus on clean code
-              and continuous learning, I strive to make a positive impact
-              through technology.`}
-            </motion.p>
-            <motion.div
-              className="mb-6"
-              style={{ opacity: specializationOpacity, y: specializationY }}
-            >
-              <h3 className="text-white font-semibold mb-2">
-                I specialize in:
-              </h3>
-              <span ref={typedRef} className="text-accent text-xl"></span>
-            </motion.div>
-            <motion.div
-              className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6"
-              style={{ opacity: skillsOpacity, y: skillsY }}
-            >
-              {[
-                { icon: "🚀", text: "Problem Solving" },
-                { icon: "🌱", text: "Continuous Learning" },
-                { icon: "🤝", text: "Team Collaboration" },
-                { icon: "⏱️", text: "Time Management" },
-                { icon: "💡", text: "Creative Thinking" },
-                { icon: "🔍", text: "Attention to Detail" },
-              ].map((skill, index) => (
+        <motion.div
+          className="relative bg-gray-900/50 backdrop-blur-xl rounded-3xl p-8 md:p-12 border border-gray-800 shadow-2xl"
+          style={{ opacity: cardOpacity, scale: cardScale }}
+        >
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="flex-1 space-y-8">
+              <div className="space-y-4">
                 <motion.div
-                  key={index}
-                  className="bg-gray-800 p-3 rounded-lg text-center"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  className="inline-block"
+                  style={{ opacity: greetingOpacity, y: greetingY }}
                 >
-                  <div className="text-primary text-2xl mb-1">{skill.icon}</div>
-                  <div className="text-white text-sm font-medium">
-                    {skill.text}
-                  </div>
+                  <span className="inline-block px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium border border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer">
+                    Available for hire
+                  </span>
                 </motion.div>
-              ))}
-            </motion.div>
-            <motion.div style={{ opacity: ctaOpacity, y: ctaY }}>
-              <Link
-                href="/my-projects"
-                className="inline-block bg-primary text-secondary font-semibold px-6 py-3 rounded-lg"
+
+                <motion.h1
+                  className="text-white font-bold text-5xl md:text-6xl tracking-tight"
+                  style={{ opacity: titleOpacity, y: titleY }}
+                >
+                  Sandeep Kumar
+                </motion.h1>
+
+                <motion.h2
+                  className="text-primary text-2xl md:text-3xl font-semibold bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent"
+                  style={{ opacity: subtitleOpacity, y: subtitleY }}
+                >
+                  Full Stack Developer
+                </motion.h2>
+
+                <motion.p
+                  className="text-gray-300 text-lg leading-relaxed max-w-2xl"
+                  style={{ opacity: descriptionOpacity, y: descriptionY }}
+                >
+                  Transforming ideas into elegant digital solutions with clean
+                  code and innovative thinking. Specialized in building scalable
+                  web applications with modern technologies.
+                </motion.p>
+              </div>
+
+              <motion.div
+                className="space-y-4"
+                style={{ opacity: specializationOpacity, y: specializationY }}
               >
-                Explore My Projects
-              </Link>
-            </motion.div>
-          </div>
-          <motion.div
-            className="flex-1 flex justify-center items-center"
-            style={{ opacity: monitorOpacity, y: monitorY }}
-          >
-            <div className="relative w-[380px] h-[240px]">
-              <div className="absolute inset-0 bg-gray-200 rounded-lg shadow-lg overflow-hidden">
-                <div className="absolute inset-[2px] bg-gray-900 rounded-md overflow-hidden">
-                  <div className="h-5 bg-gray-800 flex items-center px-2">
-                    <div className="flex space-x-1">
-                      <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                <h3 className="text-white font-semibold text-xl">
+                  I specialize in:
+                </h3>
+                <span ref={typedRef} className="text-accent text-xl"></span>
+              </motion.div>
+
+              <motion.div
+                className="grid grid-cols-2 md:grid-cols-3 gap-4"
+                style={{ opacity: skillsOpacity, y: skillsY }}
+              >
+                {[
+                  {
+                    icon: "🚀",
+                    text: "Problem Solving",
+                    color: "from-blue-500/20 to-cyan-500/20",
+                  },
+                  {
+                    icon: "🌱",
+                    text: "Continuous Learning",
+                    color: "from-green-500/20 to-emerald-500/20",
+                  },
+                  {
+                    icon: "🤝",
+                    text: "Team Collaboration",
+                    color: "from-purple-500/20 to-pink-500/20",
+                  },
+                  {
+                    icon: "⏱️",
+                    text: "Time Management",
+                    color: "from-orange-500/20 to-yellow-500/20",
+                  },
+                  {
+                    icon: "💡",
+                    text: "Creative Thinking",
+                    color: "from-red-500/20 to-pink-500/20",
+                  },
+                  {
+                    icon: "🔍",
+                    text: "Attention to Detail",
+                    color: "from-indigo-500/20 to-purple-500/20",
+                  },
+                ].map((skill, index) => (
+                  <motion.div
+                    key={index}
+                    className={`bg-gradient-to-br ${skill.color} p-4 rounded-2xl text-center backdrop-blur-sm border border-gray-700/50 hover:border-gray-500 transition-all duration-300 hover:scale-105 hover:shadow-lg group`}
+                    whileHover={{ y: -5 }}
+                  >
+                    <div className="text-3xl mb-3 transform group-hover:scale-110 transition-transform">
+                      {skill.icon}
                     </div>
-                  </div>
-                  <div className="p-2 h-[205px] overflow-hidden">
-                    <pre className="text-green-500 text-xs whitespace-pre animate-scroll">
-                      {`const infiniteCode = () => {
-  while (true) {
-    console.log("Hello, World!");
-    setTimeout(() => {
-      fetchData();
-      updateUI();
-      optimizePerformance();
-    }, 1000);
-  }
+                    <div className="text-white text-sm font-medium">
+                      {skill.text}
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              <motion.div
+                className="flex flex-col sm:flex-row gap-4 items-center"
+                style={{ opacity: ctaOpacity, y: ctaY }}
+              >
+                <Link
+                  href="/my-projects"
+                  className="inline-block bg-gray-900 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 hover:scale-105 text-center border border-gray-700 hover:border-primary/50 hover:bg-gray-800 backdrop-blur-sm shadow-lg hover:shadow-primary/20"
+                >
+                  View My Projects
+                </Link>
+                <div className="flex gap-4">
+                  {[FiGithub, FiLinkedin, FiTwitter].map((Icon, index) => (
+                    <motion.a
+                      key={index}
+                      href="#"
+                      className="p-3 rounded-full bg-gray-800/50 hover:bg-gray-700 text-white transition-all duration-300 border border-gray-700 hover:border-gray-600"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <Icon size={20} />
+                    </motion.a>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+
+            <div className="flex-1 hidden lg:block">
+              <CodeDisplay />
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
 };
 
-function fetchData() {
-  return new Promise((resolve, reject) => {
-    // Simulating API call
-    setTimeout(() => {
-      resolve({ success: true, data: {} });
-    }, 500);
-  });
-}
-
-function updateUI() {
-  document.getElementById("app").innerHTML = "Updated!";
-}
-
-function optimizePerformance() {
-  // Implement performance optimizations
-  console.log("Optimizing...");
-}
-
-infiniteCode();
-
-// This code repeats to create scrolling effect
-          `.repeat(10)}
-                    </pre>
-                  </div>
-                </div>
+const CodeDisplay = () => {
+  return (
+    <div className="relative w-full h-full flex items-center">
+      <div className="relative w-full h-[400px] perspective-1000">
+        <motion.div
+          className="w-full h-full"
+          initial={{ rotateY: 20 }}
+          animate={{ rotateY: [20, 25, 20] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-700">
+            <div className="h-8 bg-gray-800 flex items-center px-4">
+              <div className="flex space-x-2">
+                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
               </div>
-              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gray-300 rounded-full"></div>
-              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-48 h-2 bg-gray-400 rounded-full"></div>
             </div>
-          </motion.div>
-        </div>
-      </motion.div>
+            <div className="p-4 h-[calc(100%-2rem)] overflow-hidden">
+              <pre className="text-sm font-mono">
+                <code className="text-green-400">
+                  {`const developer = {
+    name: 'Sandeep Kumar',
+    role: 'Full Stack Developer',
+    skills: ['React', 'Node.js', 'TypeScript'],
+    passion: 'Building amazing web experiences',
+
+    code() {
+      while(true) {
+        learn();
+        build();
+        improve();
+      }
+    }
+  };
+
+  developer.code();`}
+                </code>
+              </pre>
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };
