@@ -6,11 +6,7 @@
     --scrollbar-thumb: #909090;
     --scrollbar-track: #f1f1f1;
 }
-html,
-body {
-    @apply bg-secondary;
-    min-height: 100vh;
-}
+
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -27,45 +23,10 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
-@keyframes scroll {
-    0% {
-        transform: translateY(0);
-    }
-    100% {
-        transform: translateY(-50%);
-    }
-}
 
-.animate-scroll {
-    animation: scroll 30s linear infinite;
-}
-@keyframes blob {
-    0% {
-        transform: translate(0px, 0px) scale(1);
+/* Add perspective utility class to Tailwind */
+@layer utilities {
+    .perspective-1000 {
+        perspective: 1000px;
     }
-    33% {
-        transform: translate(30px, -50px) scale(1.1);
-    }
-    66% {
-        transform: translate(-20px, 20px) scale(0.9);
-    }
-    100% {
-        transform: translate(0px, 0px) scale(1);
-    }
-}
-
-.animate-blob {
-    animation: blob 7s infinite;
-}
-
-.animation-delay-2000 {
-    animation-delay: 2s;
-}
-
-.animation-delay-4000 {
-    animation-delay: 4s;
-}
-
-.perspective-1000 {
-    perspective: 1000px;
 }
