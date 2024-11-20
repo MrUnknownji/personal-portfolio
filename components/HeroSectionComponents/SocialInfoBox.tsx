@@ -7,14 +7,12 @@ interface SocialInfoBoxProps {
   socialLink: SocialLink;
   position: { x: number; y: number };
   initialY: number;
-  initialX: number;
 }
 
 const SocialInfoBox = ({
   socialLink,
   position,
   initialY,
-  initialX,
 }: SocialInfoBoxProps) => {
   return (
     <motion.div

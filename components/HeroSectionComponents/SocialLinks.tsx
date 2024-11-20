@@ -8,20 +8,17 @@ const SocialLinks = () => {
   const [activeLink, setActiveLink] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [initialY, setInitialY] = useState<number>(0);
-  const [initialX, setInitialX] = useState<number>(0);
 
   const handleMouseEnter = (
     e: React.MouseEvent<HTMLDivElement>,
     index: number,
   ) => {
     setInitialY(e.clientY);
-    setInitialX(e.clientX);
     setActiveLink(index);
   };
 
   const handleMouseLeave = () => {
     setInitialY(0);
-    setInitialX(0);
     setActiveLink(null);
   };
 
@@ -63,7 +60,6 @@ const SocialLinks = () => {
               socialLink={socialLinks[activeLink]}
               position={mousePosition}
               initialY={initialY}
-              initialX={initialX}
             />
           )}
         </AnimatePresence>
