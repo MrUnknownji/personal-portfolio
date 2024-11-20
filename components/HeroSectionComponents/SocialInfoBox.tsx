@@ -22,7 +22,7 @@ const SocialInfoBox = ({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2 }}
-      className="fixed z-[100] pointer-events-none transform"
+      className="fixed pointer-events-none transform"
       style={{
         left: `${position.x - 80}px`,
         bottom: `${initialY - position.y}px`,

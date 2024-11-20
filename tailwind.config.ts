@@ -73,6 +73,10 @@ const config: Config = {
           "0%": { transform: "translateX(-80%)" },
           "100%": { transform: "translateX(80%)" },
         },
+        "border-flow": {
+          "0%, 100%": { backgroundPosition: "200% 50%" },
+          "50%": { backgroundPosition: "0% 50%" },
+        },
       },
       animation: {
         wave: "wave 2.5s infinite",
@@ -83,6 +87,7 @@ const config: Config = {
         "border-rotate-reverse": "borderRotateReverse 3s linear infinite",
         shine: "shine 1.5s ease-in-out infinite",
         "spin-slow": "spin 3s linear infinite",
+        "border-flow": "border-flow 3s ease infinite",
       },
     },
   },

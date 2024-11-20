@@ -29,7 +29,7 @@ const CodeDisplay = () => {
   }, []);
 
   return (
-    <div ref={containerRef} className="flex-1 hidden lg:block z-10">
+    <div ref={containerRef} className="flex-1 hidden lg:block">
       <div className="relative w-full h-full flex items-center">
         <div className="relative w-full h-[400px] perspective-1000">
           <div

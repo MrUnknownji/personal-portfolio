@@ -9,9 +9,28 @@ gsap.registerPlugin(ScrollTrigger);
 const HeroSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const borderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Initial card animation
+      gsap.from(cardRef.current, {
+        scale: 0.95,
+        opacity: 0,
+        duration: 1,
+        ease: "power4.out",
+      });
+
+      // Animated border
+      gsap.to(borderRef.current, {
+        backgroundPosition: "200% 0",
+        duration: 3,
+        ease: "none",
+        repeat: -1,
+      });
+
+      // Parallax scroll effect
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top top",
@@ -28,7 +47,7 @@ const HeroSection = () => {
           }
         },
       });
-    }, sectionRef);
+    });
 
     return () => ctx.revert();
   }, []);
@@ -36,16 +55,47 @@ const HeroSection = () => {
   return (
     <div
       ref={sectionRef}
-      className="h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative z-0"
+      className="h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative"
     >
       <div className="w-full max-w-7xl mx-auto">
-        <div
-          ref={contentRef}
-          className="relative bg-gray-900/30 backdrop-blur-sm rounded-3xl p-6 md:p-8 lg:p-12 border border-gray-800/50 shadow-xl"
-        >
-          <div className="flex flex-col lg:flex-row gap-8 h-full">
-            <HeroContent />
-            <CodeDisplay />
+        <div className="relative">
+          {/* Animated border */}
+          <div className="absolute -inset-[1px] rounded-3xl overflow-hidden z-1">
+            <div
+              ref={borderRef}
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(
+                  90deg,
+                  transparent 0%,
+                  rgba(79, 209, 197, 0.2) 25%,
+                  rgba(79, 209, 197, 0.5) 50%,
+                  rgba(79, 209, 197, 0.2) 75%,
+                  transparent 100%
+                )`,
+                backgroundSize: "200% 100%",
+                backgroundPosition: "0 0",
+              }}
+            />
+          </div>
+
+          {/* Main card */}
+          <div
+            ref={cardRef}
+            className="relative backdrop-blur-sm rounded-3xl p-6 md:p-8 lg:p-12
+              bg-gray-900 border border-gray-800/50 z-10"
+          >
+            <div
+              ref={contentRef}
+              className="relative flex flex-col lg:flex-row gap-8 h-full justify-center items-center"
+            >
+              <div className="z-10 w-full h-full">
+                <HeroContent />
+              </div>
+              <div className="z-1 w-full">
+                <CodeDisplay />
+              </div>
+            </div>
           </div>
         </div>
       </div>
