@@ -2,7 +2,7 @@
 import { useState, useRef } from "react";
 import ProjectCard from "@/components/ProjectCard";
 import ProjectModal from "@/components/ProjectModal";
-import { projects } from "@/data/projects";
+import { projects } from "@/data/data";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { Project } from "@/types/Project";
 
