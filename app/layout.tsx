@@ -24,9 +24,11 @@ export default function RootLayout({
         </div>
 
         <div className="relative">
-          <CustomCursor />
+          <div className="hidden md:block [@media(hover:none)]:hidden">
+            <CustomCursor />
+          </div>
           <Header />
-          <main className="min-h-screen">{children}</main>
+          <main>{children}</main>
           <Footer />
         </div>
       </body>

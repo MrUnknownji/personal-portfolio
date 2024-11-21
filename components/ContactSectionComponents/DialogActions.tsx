@@ -1,5 +1,4 @@
-import React, { useRef, useEffect } from "react";
-import gsap from "gsap";
+import React from "react";
 import Link from "next/link";
 
 interface DialogActionsProps {
@@ -7,45 +6,57 @@ interface DialogActionsProps {
 }
 
 const DialogActions: React.FC<DialogActionsProps> = ({ onClose }) => {
-  const actionsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const actions = actionsRef.current;
-    if (!actions) return;
-
-    const actionElements = Array.from(actions.children);
-
-    gsap.fromTo(
-      actionElements,
-      { opacity: 0, y: 20 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.3,
-        stagger: 0.1,
-        delay: 0.5,
-      },
-    );
-  }, []);
-
   return (
     <div
-      ref={actionsRef}
-      className="bg-gray-800 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse"
+      className="px-6 py-4 sm:px-8 bg-secondary/50 border-t border-primary/10
+      flex flex-col sm:flex-row-reverse gap-3 sm:gap-4"
     >
       <Link
         href="#projects"
-        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-secondary hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 sm:w-auto sm:text-sm"
+        className="inline-flex justify-center items-center px-6 py-2.5
+          rounded-lg bg-primary text-secondary font-medium
+          hover:bg-opacity-90 [transition:background-color_0.3s]
+          focus:outline-none focus:ring-2 focus:ring-primary/50"
         onClick={onClose}
       >
         View Projects
+        <svg
+          className="w-4 h-4 ml-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M17 8l4 4m0 0l-4 4m4-4H3"
+          />
+        </svg>
       </Link>
+
       <button
         type="button"
-        className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-700 text-base font-medium text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+        className="inline-flex justify-center items-center px-6 py-2.5
+          rounded-lg border border-primary/20 text-gray-300 font-medium
+          hover:bg-primary/10 [transition:background-color_0.3s]
+          focus:outline-none focus:ring-2 focus:ring-primary/50"
         onClick={onClose}
       >
         Close
+        <svg
+          className="w-4 h-4 ml-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
       </button>
     </div>
   );

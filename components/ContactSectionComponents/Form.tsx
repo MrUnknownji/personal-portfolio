@@ -9,28 +9,47 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    subject: "",
     message: "",
   });
 
   const formRef = useRef<HTMLFormElement>(null);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const form = formRef.current;
-    if (!form) return;
+    const formFields = formRef.current?.querySelectorAll(".form-field");
+    const submitButton = submitButtonRef.current;
 
-    const formElements = Array.from(form.children);
+    if (formFields && submitButton) {
+      const tl = gsap.timeline();
 
-    gsap.fromTo(
-      formElements,
-      { opacity: 0, y: 20 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        stagger: 0.1,
-        ease: "power2.out",
-      },
-    );
+      tl.fromTo(
+        Array.from(formFields),
+        {
+          opacity: 0,
+          y: 20,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          stagger: 0.1,
+          duration: 0.6,
+          ease: "power2.out",
+        },
+      ).fromTo(
+        submitButton,
+        {
+          opacity: 0,
+          y: 20,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power2.out",
+        },
+      );
+    }
   }, []);
 
   const handleChange = (
@@ -40,19 +59,25 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    gsap.to(submitButtonRef.current, {
+      scale: 0.95,
+      duration: 0.1,
+      yoyo: true,
+      repeat: 1,
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log("Form submitted:", formData);
-    setFormData({ name: "", email: "", message: "" });
+    setFormData({ name: "", email: "", subject: "", message: "" });
     onSubmitSuccess();
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="flex-1 space-y-6">
-      <div>
-        <label htmlFor="name" className="block text-accent mb-2">
-          Name
-        </label>
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
+      <InputWrapper key="name">
         <input
           type="text"
           id="name"
@@ -60,13 +85,14 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           value={formData.name}
           onChange={handleChange}
           required
-          className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary transition duration-300"
+          placeholder="Your Name"
+          className="peer w-full bg-secondary/50 rounded-lg px-4 py-3 text-gray-100
+              placeholder:text-gray-500 focus:outline-none border border-primary/10
+              focus:border-primary/30 transition-colors duration-300 mb-1"
         />
-      </div>
-      <div>
-        <label htmlFor="email" className="block text-accent mb-2">
-          Email
-        </label>
+      </InputWrapper>
+
+      <InputWrapper key="email">
         <input
           type="email"
           id="email"
@@ -74,13 +100,29 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           value={formData.email}
           onChange={handleChange}
           required
-          className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary transition duration-300"
+          placeholder="Your Email"
+          className="peer w-full bg-secondary/50 rounded-lg px-4 py-3 text-gray-100
+              placeholder:text-gray-500 focus:outline-none border border-primary/10
+              focus:border-primary/30 transition-colors duration-300 mb-1"
         />
-      </div>
-      <div>
-        <label htmlFor="message" className="block text-accent mb-2">
-          Message
-        </label>
+      </InputWrapper>
+
+      <InputWrapper key="subject">
+        <input
+          type="text"
+          id="subject"
+          name="subject"
+          value={formData.subject}
+          onChange={handleChange}
+          required
+          placeholder="Subject"
+          className="peer w-full bg-secondary/50 rounded-lg px-4 py-3 text-gray-100
+              placeholder:text-gray-500 focus:outline-none border border-primary/10
+              focus:border-primary/30 transition-colors duration-300 mb-1"
+        />
+      </InputWrapper>
+
+      <InputWrapper key="message">
         <textarea
           id="message"
           name="message"
@@ -88,17 +130,41 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           onChange={handleChange}
           required
           rows={4}
-          className="w-full bg-gray-800 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-primary transition duration-300"
+          placeholder="Your Message"
+          className="peer w-full bg-secondary/50 rounded-lg px-4 py-3 text-gray-100
+              placeholder:text-gray-500 focus:outline-none border border-primary/10
+              focus:border-primary/30 transition-colors duration-300 resize-none"
         />
-      </div>
+      </InputWrapper>
+
       <button
+        ref={submitButtonRef}
         type="submit"
-        className="w-full bg-primary text-secondary font-semibold px-6 py-3 rounded-lg hover:bg-opacity-90 transition duration-300"
+        className="w-full bg-primary text-secondary font-medium px-6 py-3 rounded-lg
+            relative overflow-hidden group hover:ring-2 hover:ring-primary/50
+            transition-all duration-300 active:scale-95"
       >
-        Send Message
+        <span className="relative z-10">Send Message</span>
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-accent to-primary
+            opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        />
       </button>
     </form>
   );
 };
+
+const InputWrapper = ({ children }: { children: React.ReactNode }) => (
+  <div className="form-field relative">
+    {children}
+    <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-gray-700/50 mt-1">
+      <div
+        className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent
+            transform origin-left scale-x-0 transition-transform duration-300 ease-out
+            peer-focus:scale-x-100"
+      />
+    </div>
+  </div>
+);
 
 export default Form;

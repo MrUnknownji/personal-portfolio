@@ -19,10 +19,8 @@ const TypedText = () => {
     if (!containerRef.current || isAnimating) return;
     setIsAnimating(true);
 
-    // Clear previous content
     containerRef.current.innerHTML = "";
 
-    // First create temporary spans to measure positions
     const measureDiv = document.createElement("div");
     measureDiv.style.visibility = "hidden";
     measureDiv.style.position = "absolute";
@@ -41,7 +39,6 @@ const TypedText = () => {
     });
     measureDiv.remove();
 
-    // Create actual characters
     const chars = text.split("").map((char, index) => {
       const span = document.createElement("span");
       span.textContent = char === " " ? "\u00A0" : char;
@@ -52,27 +49,23 @@ const TypedText = () => {
       return span;
     });
 
-    // Initial position - reduced vertical distance to 30px
     gsap.set(chars, {
       y: -30,
       opacity: 0,
     });
 
-    // Fall down animation with reduced bounce
     await gsap.to(chars, {
       y: 0,
       duration: 0.6,
       stagger: 0.05,
-      ease: "back.out(1.7)", // Changed to back.out for a smoother animation
+      ease: "back.out(1.7)",
       opacity: 1,
     });
 
-    // Wait before fading out
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // Fade out animation instead of dropping
     await gsap.to(chars, {
-      y: 20, // Slight downward movement while fading
+      y: 20,
       duration: 0.4,
       stagger: 0.02,
       ease: "power2.in",
@@ -90,7 +83,7 @@ const TypedText = () => {
   }, [currentTextIndex, isAnimating]);
 
   return (
-    <div className="min-h-[2rem]">
+    <div className="min-h-[2rem] overflow-x-hidden">
       <div
         ref={containerRef}
         className="text-accent text-xl relative"

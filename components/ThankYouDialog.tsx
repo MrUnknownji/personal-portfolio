@@ -9,18 +9,34 @@ interface ThankYouDialogProps {
 }
 
 const ThankYouDialog: React.FC<ThankYouDialogProps> = ({ isOpen, onClose }) => {
+  const overlayRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isOpen) {
+    const overlay = overlayRef.current;
+    const dialog = dialogRef.current;
+
+    if (isOpen && overlay && dialog) {
       document.body.style.overflow = "hidden";
-      gsap.fromTo(
-        dialogRef.current,
-        { opacity: 0, scale: 0.95, y: 20 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.3 },
+
+      const tl = gsap.timeline();
+
+      tl.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.3 }).fromTo(
+        dialog,
+        {
+          opacity: 0,
+          scale: 0.95,
+          y: 20,
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 0.4,
+          ease: "power3.out",
+        },
+        "-=0.1",
       );
-    } else {
-      document.body.style.overflow = "unset";
     }
 
     return () => {
@@ -28,13 +44,36 @@ const ThankYouDialog: React.FC<ThankYouDialogProps> = ({ isOpen, onClose }) => {
     };
   }, [isOpen]);
 
+  const handleClose = async () => {
+    const tl = gsap.timeline();
+
+    await tl
+      .to(dialogRef.current, {
+        opacity: 0,
+        scale: 0.95,
+        y: 20,
+        duration: 0.3,
+        ease: "power3.in",
+      })
+      .to(overlayRef.current, {
+        opacity: 0,
+        duration: 0.2,
+      });
+
+    onClose();
+  };
+
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0">
-          <div className="absolute inset-0 bg-gray-900 opacity-75"></div>
+      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center">
+        <div
+          ref={overlayRef}
+          className="fixed inset-0 backdrop-blur-sm"
+          onClick={handleClose}
+        >
+          <div className="absolute inset-0 bg-black/75" />
         </div>
 
         <span className="hidden sm:inline-block sm:align-middle sm:h-screen">
@@ -43,10 +82,34 @@ const ThankYouDialog: React.FC<ThankYouDialogProps> = ({ isOpen, onClose }) => {
 
         <div
           ref={dialogRef}
-          className="inline-block align-bottom bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg text-left overflow-hidden shadow-xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+          className="relative inline-block bg-secondary rounded-xl
+            overflow-hidden shadow-2xl sm:max-w-lg w-full text-left
+            border border-primary/20"
         >
+          <div
+            className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r
+            from-transparent via-primary to-transparent"
+          />
+
           <DialogContent />
-          <DialogActions onClose={onClose} />
+          <DialogActions onClose={handleClose} />
+
+          <div
+            className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2
+            border-primary rounded-tl-xl"
+          />
+          <div
+            className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2
+            border-primary rounded-tr-xl"
+          />
+          <div
+            className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2
+            border-primary rounded-bl-xl"
+          />
+          <div
+            className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2
+            border-primary rounded-br-xl"
+          />
         </div>
       </div>
     </div>

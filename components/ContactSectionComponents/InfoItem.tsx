@@ -1,32 +1,26 @@
-import React, { useRef, useEffect } from "react";
-import gsap from "gsap";
+import React, { useRef } from "react";
 
 interface InfoItemProps {
   icon: "email" | "phone" | "location";
   text: string;
+  link: string;
 }
 
-const InfoItem: React.FC<InfoItemProps> = ({ icon, text }) => {
-  const itemRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    gsap.fromTo(
-      itemRef.current,
-      { opacity: 0, x: -20 },
-      { opacity: 1, x: 0, duration: 0.5, delay: 0.2 },
-    );
-  }, []);
+const InfoItem: React.FC<InfoItemProps> = ({ icon, text, link }) => {
+  const itemRef = useRef<HTMLAnchorElement>(null);
 
   const renderIcon = () => {
+    const commonClasses =
+      "w-5 h-5 text-primary group-hover:text-accent [transition:color_0.3s]";
+
     switch (icon) {
       case "email":
         return (
           <svg
-            className="w-6 h-6 text-primary mr-4"
+            className={commonClasses}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
           >
             <path
               strokeLinecap="round"
@@ -39,11 +33,10 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, text }) => {
       case "phone":
         return (
           <svg
-            className="w-6 h-6 text-primary mr-4"
+            className={commonClasses}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
           >
             <path
               strokeLinecap="round"
@@ -56,11 +49,10 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, text }) => {
       case "location":
         return (
           <svg
-            className="w-6 h-6 text-primary mr-4"
+            className={commonClasses}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
           >
             <path
               strokeLinecap="round"
@@ -80,10 +72,43 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, text }) => {
   };
 
   return (
-    <div ref={itemRef} className="flex items-center">
-      {renderIcon()}
-      <span className="text-gray-300">{text}</span>
-    </div>
+    <a
+      ref={itemRef}
+      href={link}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="info-item group flex items-center p-3 rounded-lg
+        bg-secondary/50 border border-primary/10
+        hover:border-primary/30 [transition:border-color_0.3s]"
+    >
+      <div
+        className="p-2 rounded-lg bg-primary/10 mr-4
+        group-hover:bg-primary/20 [transition:background-color_0.3s]"
+      >
+        {renderIcon()}
+      </div>
+      <span
+        className="text-gray-300 group-hover:text-gray-100
+        [transition:color_0.3s]"
+      >
+        {text}
+      </span>
+      <svg
+        className="w-4 h-4 ml-auto text-primary opacity-0 group-hover:opacity-100
+          transform translate-x-2 group-hover:translate-x-0
+          [transition:all_0.3s]"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 5l7 7-7 7"
+        />
+      </svg>
+    </a>
   );
 };
 

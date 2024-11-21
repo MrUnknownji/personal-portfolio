@@ -14,7 +14,6 @@ const HeroSection = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Initial card animation
       gsap.from(cardRef.current, {
         scale: 0.95,
         opacity: 0,
@@ -22,7 +21,6 @@ const HeroSection = () => {
         ease: "power4.out",
       });
 
-      // Animated border
       gsap.to(borderRef.current, {
         backgroundPosition: "200% 0",
         duration: 3,
@@ -30,7 +28,6 @@ const HeroSection = () => {
         repeat: -1,
       });
 
-      // Parallax scroll effect
       ScrollTrigger.create({
         trigger: sectionRef.current,
         start: "top top",
@@ -55,11 +52,10 @@ const HeroSection = () => {
   return (
     <div
       ref={sectionRef}
-      className="h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative"
+      className="h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative mt-24 sm:mt-6"
     >
-      <div className="w-full max-w-7xl mx-auto">
+      <div className="w-full max-w-7xl mx-auto mt-24 sm:mt-0">
         <div className="relative">
-          {/* Animated border */}
           <div className="absolute -inset-[1px] rounded-3xl overflow-hidden z-1">
             <div
               ref={borderRef}
@@ -79,7 +75,6 @@ const HeroSection = () => {
             />
           </div>
 
-          {/* Main card */}
           <div
             ref={cardRef}
             className="relative backdrop-blur-sm rounded-3xl p-6 md:p-8 lg:p-12
@@ -92,7 +87,7 @@ const HeroSection = () => {
               <div className="z-10 w-full h-full">
                 <HeroContent />
               </div>
-              <div className="z-1 w-full">
+              <div className="z-1 w-full sm:visible hidden">
                 <CodeDisplay />
               </div>
             </div>
