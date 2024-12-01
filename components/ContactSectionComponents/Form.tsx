@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useRef, useEffect } from "react";
 import gsap from "gsap";
 
@@ -17,7 +18,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
   const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const formFields = formRef.current?.querySelectorAll(".form-field");
+    const formFields = formRef.current?.querySelectorAll("input, textarea");
     const submitButton = submitButtonRef.current;
 
     if (formFields && submitButton) {
@@ -75,67 +76,56 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     onSubmitSuccess();
   };
 
+  const inputClassName = `w-full bg-secondary/50 rounded-lg px-4 py-3 text-gray-100
+    placeholder:text-gray-500 focus:outline-none border border-primary/10
+    focus:border-primary/30 transition-colors duration-300`;
+
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
-      <InputWrapper key="name">
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-          placeholder="Your Name"
-          className="peer w-full bg-secondary/50 rounded-lg px-4 py-3 text-gray-100
-              placeholder:text-gray-500 focus:outline-none border border-primary/10
-              focus:border-primary/30 transition-colors duration-300 mb-1"
-        />
-      </InputWrapper>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        value={formData.name}
+        onChange={handleChange}
+        required
+        placeholder="Your Name"
+        className={inputClassName}
+      />
 
-      <InputWrapper key="email">
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          placeholder="Your Email"
-          className="peer w-full bg-secondary/50 rounded-lg px-4 py-3 text-gray-100
-              placeholder:text-gray-500 focus:outline-none border border-primary/10
-              focus:border-primary/30 transition-colors duration-300 mb-1"
-        />
-      </InputWrapper>
+      <input
+        type="email"
+        id="email"
+        name="email"
+        value={formData.email}
+        onChange={handleChange}
+        required
+        placeholder="Your Email"
+        className={inputClassName}
+      />
 
-      <InputWrapper key="subject">
-        <input
-          type="text"
-          id="subject"
-          name="subject"
-          value={formData.subject}
-          onChange={handleChange}
-          required
-          placeholder="Subject"
-          className="peer w-full bg-secondary/50 rounded-lg px-4 py-3 text-gray-100
-              placeholder:text-gray-500 focus:outline-none border border-primary/10
-              focus:border-primary/30 transition-colors duration-300 mb-1"
-        />
-      </InputWrapper>
+      <input
+        type="text"
+        id="subject"
+        name="subject"
+        value={formData.subject}
+        onChange={handleChange}
+        required
+        placeholder="Subject"
+        className={inputClassName}
+      />
 
-      <InputWrapper key="message">
-        <textarea
-          id="message"
-          name="message"
-          value={formData.message}
-          onChange={handleChange}
-          required
-          rows={4}
-          placeholder="Your Message"
-          className="peer w-full bg-secondary/50 rounded-lg px-4 py-3 text-gray-100
-              placeholder:text-gray-500 focus:outline-none border border-primary/10
-              focus:border-primary/30 transition-colors duration-300 resize-none"
-        />
-      </InputWrapper>
+      <textarea
+        id="message"
+        name="message"
+        value={formData.message}
+        onChange={handleChange}
+        required
+        rows={4}
+        placeholder="Your Message"
+        className={`${inputClassName} resize-none`}
+        spellCheck="false"
+      />
 
       <button
         ref={submitButtonRef}
@@ -153,18 +143,5 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     </form>
   );
 };
-
-const InputWrapper = ({ children }: { children: React.ReactNode }) => (
-  <div className="form-field relative">
-    {children}
-    <div className="absolute -bottom-1 left-0 w-full h-[2px] bg-gray-700/50 mt-1">
-      <div
-        className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent
-            transform origin-left scale-x-0 transition-transform duration-300 ease-out
-            peer-focus:scale-x-100"
-      />
-    </div>
-  </div>
-);
 
 export default Form;

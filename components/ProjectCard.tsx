@@ -1,6 +1,8 @@
+"use client";
 import Image from "next/image";
 import { Project } from "@/types/Project";
-import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
 
 interface ProjectCardProps {
   project: Project;
@@ -13,23 +15,53 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   onClick,
   index,
 }) => {
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    // Initial animation
+    gsap.fromTo(
+      cardRef.current,
+      {
+        opacity: 0,
+        y: 50,
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        delay: index * 0.1,
+      },
+    );
+  }, [index]);
+
+  // Hover animations
+  const handleMouseEnter = () => {
+    gsap.to(cardRef.current, {
+      scale: 1.05,
+      duration: 0.3,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    gsap.to(cardRef.current, {
+      scale: 1,
+      duration: 0.3,
+    });
+  };
+
   return (
-    <motion.div
+    <div
+      ref={cardRef}
       className="bg-gray-800 rounded-lg overflow-hidden shadow-lg cursor-pointer group"
       onClick={onClick}
-      variants={{
-        hidden: { opacity: 0, y: 50 },
-        visible: { opacity: 1, y: 0 },
-      }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      whileHover={{ scale: 1.05 }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="relative h-60 overflow-hidden">
         <Image
           src={project.image}
           alt={project.title}
-          layout="fill"
-          objectFit="cover"
+          fill
           className="transition-transform duration-300 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-6">
@@ -57,7 +89,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

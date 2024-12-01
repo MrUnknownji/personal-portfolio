@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/dist/ScrollTrigger";
@@ -75,22 +76,9 @@ const SkillsSection = () => {
       className="relative bg-secondary p-6 sm:p-8 rounded-lg
         [@media(hover:hover)]:hover:scale-[1.02]
         [transition:transform_0.3s_ease-out]
-        border border-primary/20 overflow-hidden"
+        border border-primary/20"
     >
-      <div className="absolute inset-0 opacity-5">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-12 h-12 border border-primary transform rotate-45"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative z-10">
+      <div className="relative">
         <div className="flex justify-between items-center mb-4 sm:mb-6">
           <h3 className="text-xl sm:text-2xl font-semibold text-primary tracking-wide">
             Core Skills

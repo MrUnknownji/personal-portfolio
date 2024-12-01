@@ -1,17 +1,22 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import ProjectCard from "@/components/ProjectCard";
 import ProjectModal from "@/components/ProjectModal";
 import { projects } from "@/data/data";
-import { motion, AnimatePresence, useInView } from "framer-motion";
 import { Project } from "@/types/Project";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function MyProjects() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [filter, setFilter] = useState("All");
 
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
+  const headerRef = useRef<HTMLHeadingElement>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
+  const projectsRef = useRef<HTMLDivElement>(null);
+  const noProjectsRef = useRef<HTMLParagraphElement>(null);
 
   const filteredProjects =
     filter === "All"
@@ -23,27 +28,75 @@ export default function MyProjects() {
     ...Array.from(new Set(projects.map((project) => project.category))),
   ];
 
+  useEffect(() => {
+    // Header animation
+    gsap.fromTo(
+      headerRef.current,
+      { opacity: 0, y: -50 },
+      { opacity: 1, y: 0, duration: 0.5 },
+    );
+
+    // Filter buttons animation
+    gsap.fromTo(
+      filterRef.current,
+      { opacity: 0, y: 50 },
+      { opacity: 1, y: 0, duration: 0.5, delay: 0.2 },
+    );
+
+    // Projects grid animation
+    gsap.from(projectsRef.current?.children || [], {
+      opacity: 0,
+      y: 50,
+      duration: 0.5,
+      stagger: 0.1,
+      scrollTrigger: {
+        trigger: projectsRef.current,
+        start: "top center+=100",
+      },
+    });
+  }, []);
+
+  // Handle filter changes
+  useEffect(() => {
+    if (projectsRef.current) {
+      gsap.from(projectsRef.current.children, {
+        opacity: 0,
+        y: 20,
+        duration: 0.3,
+        stagger: 0.05,
+        ease: "power2.out",
+      });
+    }
+  }, [filter]);
+
+  const handleButtonHover = (e: React.MouseEvent<HTMLButtonElement>) => {
+    gsap.to(e.currentTarget, {
+      scale: 1.05,
+      duration: 0.2,
+    });
+  };
+
+  const handleButtonLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+    gsap.to(e.currentTarget, {
+      scale: 1,
+      duration: 0.2,
+    });
+  };
+
   return (
     <div className="min-h-screen py-20 bg-gradient-to-b from-secondary to-gray-900">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.h1
+        <h1
+          ref={headerRef}
           className="text-6xl font-bold text-primary mb-16 text-center"
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
         >
           My Projects
-        </motion.h1>
+        </h1>
 
-        <motion.div
-          className="mb-12 space-y-4"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
+        <div ref={filterRef} className="mb-12 space-y-4">
           <div className="flex justify-center flex-wrap gap-4">
             {categories.map((category) => (
-              <motion.button
+              <button
                 key={category}
                 className={`px-6 py-3 rounded-full text-lg font-medium transition-colors duration-300 ${
                   filter === category
@@ -51,55 +104,45 @@ export default function MyProjects() {
                     : "bg-gray-700 text-gray-300 hover:bg-gray-600"
                 }`}
                 onClick={() => setFilter(category)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                onMouseEnter={handleButtonHover}
+                onMouseLeave={handleButtonLeave}
               >
                 {category}
-              </motion.button>
+              </button>
             ))}
           </div>
-        </motion.div>
+        </div>
 
-        <AnimatePresence>
-          <motion.div
-            ref={ref}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-            initial="hidden"
-            animate={isInView ? "visible" : "hidden"}
-            variants={{
-              visible: { transition: { staggerChildren: 0.1 } },
-            }}
-          >
-            {filteredProjects.map((project, index) => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                onClick={() => setSelectedProject(project)}
-                index={index}
-              />
-            ))}
-          </motion.div>
-        </AnimatePresence>
+        <div
+          ref={projectsRef}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
+          {filteredProjects.map((project, index) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onClick={() => setSelectedProject(project)}
+              index={index}
+            />
+          ))}
+        </div>
 
         {filteredProjects.length === 0 && (
-          <motion.p
+          <p
+            ref={noProjectsRef}
             className="text-center text-gray-400 mt-8 text-xl"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
           >
             No projects found in this category. Try selecting a different
             category.
-          </motion.p>
+          </p>
         )}
       </div>
-      <AnimatePresence>
-        {selectedProject && (
-          <ProjectModal
-            project={selectedProject}
-            onClose={() => setSelectedProject(null)}
-          />
-        )}
-      </AnimatePresence>
+      {selectedProject && (
+        <ProjectModal
+          project={selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
+      )}
     </div>
   );
 }

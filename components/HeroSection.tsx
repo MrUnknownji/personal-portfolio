@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
@@ -82,7 +83,7 @@ const HeroSection = () => {
           >
             <div
               ref={contentRef}
-              className="relative flex flex-col lg:flex-row gap-8 h-full justify-center items-center"
+              className="relative flex flex-row lg:flex-row gap-8 h-full justify-center items-center"
             >
               <div className="z-10 w-full h-full">
                 <HeroContent />

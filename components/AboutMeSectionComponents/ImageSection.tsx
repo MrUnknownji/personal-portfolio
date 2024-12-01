@@ -75,9 +75,8 @@ const ImageSection = () => {
               <div className="relative w-full h-full rounded-full overflow-hidden transition-all duration-500">
                 <Image
                   src="/images/logo.svg"
+                  fill
                   alt="Sandeep Kumar"
-                  layout="fill"
-                  objectFit="cover"
                   className="rounded-full"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 to-transparent opacity-0 transition-all duration-500 [@media(hover:hover)]:hover:opacity-100" />

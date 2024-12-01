@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { FiArrowUpRight } from "react-icons/fi";
 import { SocialLink } from "../../types/social";
-import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
 
 interface SocialInfoBoxProps {
   socialLink: SocialLink;
@@ -14,16 +15,45 @@ const SocialInfoBox = ({
   position,
   initialY,
 }: SocialInfoBoxProps) => {
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (boxRef.current) {
+      gsap.fromTo(
+        boxRef.current,
+        {
+          opacity: 0,
+          scale: 0.95,
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.2,
+          ease: "power2.out",
+        },
+      );
+    }
+
+    return () => {
+      if (boxRef.current) {
+        gsap.to(boxRef.current, {
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.2,
+          ease: "power2.in",
+        });
+      }
+    };
+  }, []);
+
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.2 }}
+    <div
+      ref={boxRef}
       className="fixed pointer-events-none transform"
       style={{
         left: `${position.x - 80}px`,
         bottom: `${initialY - position.y}px`,
+        opacity: 0,
       }}
     >
       <div
@@ -76,7 +106,7 @@ const SocialInfoBox = ({
           </a>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

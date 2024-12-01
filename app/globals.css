@@ -7,7 +7,6 @@
     --scrollbar-track: #f1f1f1;
 }
 
-body,
 html {
     width: 100vw;
     overflow-x: hidden;
@@ -30,7 +29,6 @@ html {
     background: #555;
 }
 
-/* Add perspective utility class to Tailwind */
 @layer utilities {
     .perspective-1000 {
         perspective: 1000px;

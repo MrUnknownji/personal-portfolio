@@ -10,7 +10,6 @@ const ViewProjectsButton = () => {
     const ctx = gsap.context(() => {
       if (!sweepRef.current) return;
 
-      // Initial position (out of view, top-right)
       gsap.set(sweepRef.current, {
         rotate: -45,
         x: "100%",
