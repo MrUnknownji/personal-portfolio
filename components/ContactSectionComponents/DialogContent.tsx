@@ -1,87 +1,71 @@
-import React, { useRef, useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { FiMail } from "react-icons/fi";
 import gsap from "gsap";
 
-const DialogContent: React.FC = () => {
+interface DialogContentProps {
+  email: string;
+  onCopy: () => void;
+}
+
+const DialogContent = ({ email, onCopy }: DialogContentProps) => {
+  const iconWrapperRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const iconRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
-    const icon = iconRef.current;
-    const contentElements =
-      contentRef.current?.querySelectorAll(".animate-content");
+    if (!iconWrapperRef.current || !contentRef.current) return;
 
-    if (icon && contentElements) {
-      const tl = gsap.timeline();
+    const tl = gsap.timeline();
 
-      tl.fromTo(
-        icon,
-        {
-          scale: 0,
-          rotate: -180,
-        },
-        {
-          scale: 1,
-          rotate: 0,
-          duration: 0.6,
-          ease: "back.out(1.7)",
-        },
-      ).fromTo(
-        Array.from(contentElements),
-        {
-          opacity: 0,
-          y: 20,
-        },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.1,
-          duration: 0.4,
-          ease: "power2.out",
-        },
-        "-=0.2",
-      );
-    }
+    tl.fromTo(
+      iconWrapperRef.current,
+      {
+        scale: 0,
+        rotate: -180,
+      },
+      {
+        scale: 1,
+        rotate: 0,
+        duration: 0.6,
+        ease: "back.out(1.7)",
+      }
+    ).fromTo(
+      contentRef.current.querySelectorAll(".animate-content"),
+      {
+        opacity: 0,
+        y: 20,
+      },
+      {
+        opacity: 1,
+        y: 0,
+        stagger: 0.1,
+        duration: 0.4,
+        ease: "power2.out",
+      },
+      "-=0.2"
+    );
+
+    return () => {
+      tl.kill();
+    };
   }, []);
 
   return (
     <div ref={contentRef} className="p-6 sm:p-8">
-      <div className="flex items-center mb-6">
-        <div
-          className="w-12 h-12 rounded-full bg-primary/10
-          flex items-center justify-center mr-4"
-        >
-          <svg
-            ref={iconRef}
-            className="w-6 h-6 text-primary"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
+      <div className="flex items-center justify-center mb-4">
+        <div ref={iconWrapperRef} className="p-3 bg-primary/10 rounded-full">
+          <FiMail className="w-12 h-12 text-primary" />
         </div>
-        <h3
-          className="animate-content text-3xl font-bold
-          bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
-        >
-          Thank You!
-        </h3>
       </div>
-
-      <div className="space-y-4">
-        <p className="animate-content text-xl text-accent">
-          Your message has been successfully sent.
-        </p>
-        <p className="animate-content text-gray-300 leading-relaxed">
-          {`I appreciate you taking the time to reach out. I'll get back to you as
-            soon as possible.`}
-        </p>
-      </div>
+      <h3 className="text-xl font-semibold text-center mb-2 animate-content">
+        Email Address
+      </h3>
+      <p className="text-gray-400 text-center mb-6 animate-content">{email}</p>
+      <button
+        onClick={onCopy}
+        className="w-full py-2 px-4 bg-primary text-secondary rounded-lg hover:bg-primary/90 transition-colors animate-content"
+      >
+        Copy to Clipboard
+      </button>
     </div>
   );
 };

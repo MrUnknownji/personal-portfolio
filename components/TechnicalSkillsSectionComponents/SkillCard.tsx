@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { FiChevronRight } from "react-icons/fi";
 
 interface SkillCardProps {
   skill: string;
@@ -61,19 +62,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
             className="text-primary [transition:transform_0.3s,opacity_0.3s]
             opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0"
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
-            </svg>
+            <FiChevronRight className="w-5 h-5" />
           </span>
         </div>
 

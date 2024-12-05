@@ -32,5 +32,5 @@ export default function SmoothScroll({
     };
   }, []);
 
-  return <>{children}</>;
+    return <>{children}</>;
 }

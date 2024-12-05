@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { FiChevronRight, FiX } from "react-icons/fi";
 
 interface DialogActionsProps {
   onClose: () => void;
@@ -20,19 +21,7 @@ const DialogActions: React.FC<DialogActionsProps> = ({ onClose }) => {
         onClick={onClose}
       >
         View Projects
-        <svg
-          className="w-4 h-4 ml-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M17 8l4 4m0 0l-4 4m4-4H3"
-          />
-        </svg>
+        <FiChevronRight className="w-4 h-4 ml-2" />
       </Link>
 
       <button
@@ -44,19 +33,7 @@ const DialogActions: React.FC<DialogActionsProps> = ({ onClose }) => {
         onClick={onClose}
       >
         Close
-        <svg
-          className="w-4 h-4 ml-2"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
+        <FiX className="w-4 h-4 ml-2" />
       </button>
     </div>
   );

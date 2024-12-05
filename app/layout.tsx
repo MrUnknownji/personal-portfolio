@@ -1,6 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import LayoutClient from "./layout-client";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export const metadata: Metadata = {
   title: "Sandeep's Portfolio",
@@ -14,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 w-screen overflow-x-hidden">
+      <body className="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 overflow-x-hidden">
         <LayoutClient>{children}</LayoutClient>
       </body>
     </html>

@@ -1,29 +1,26 @@
-"use client";
-import { Project } from "@/types/Project";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+import { FiExternalLink, FiGithub, FiX } from "react-icons/fi";
+import { Dialog } from "@/components/ui/Dialog";
+import { Project } from "@/types/Project";
 import gsap from "gsap";
 
 interface ProjectModalProps {
   project: Project;
+  isOpen: boolean;
   onClose: () => void;
 }
 
-const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
-  const overlayRef = useRef(null);
-  const modalRef = useRef(null);
+const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Store ref values in variables
-    const overlay = overlayRef.current;
-    const modal = modalRef.current;
+    if (!isOpen || !overlayRef.current || !contentRef.current) return;
 
-    // Animate overlay
-    gsap.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.3 });
-
-    // Animate modal
+    gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 0.6, duration: 0.3 });
     gsap.fromTo(
-      modal,
+      contentRef.current,
       {
         opacity: 0,
         scale: 0.9,
@@ -36,20 +33,18 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
       },
     );
 
-    // Cleanup animation on unmount
     return () => {
-      gsap.killTweensOf([overlay, modal]);
+      gsap.killTweensOf([overlayRef.current, contentRef.current]);
     };
-  }, []);
+  }, [isOpen]);
 
   const handleClose = () => {
-    // Animate out
     gsap.to(overlayRef.current, {
       opacity: 0,
       duration: 0.3,
     });
 
-    gsap.to(modalRef.current, {
+    gsap.to(contentRef.current, {
       opacity: 0,
       scale: 0.9,
       duration: 0.3,
@@ -58,110 +53,99 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) => {
   };
 
   return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-    >
-      <div
-        ref={modalRef}
-        className="bg-gray-800 rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto relative"
-      >
-        <div className="relative h-64">
-          <Image src={project.image} alt={project.title} fill />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-800 to-transparent" />
-          <h2 className="absolute bottom-4 left-6 text-3xl font-bold text-white">
-            {project.title}
-          </h2>
-        </div>
-        <div className="p-6">
-          <p className="text-gray-300 mb-6 text-lg">
-            {project.longDescription}
-          </p>
-          <div className="mb-6">
-            <h3 className="text-xl font-semibold text-accent mb-3">
-              Key Features:
-            </h3>
-            <ul className="space-y-2">
-              {project.features.map((feature, index) => (
-                <li key={index} className="flex items-start">
-                  <svg
-                    className="w-6 h-6 text-primary mr-2 flex-shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
+    <Dialog open={isOpen} onClose={onClose}>
+      <div className="min-h-screen px-4 text-center">
+        <div
+          ref={overlayRef}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm opacity-0"
+        />
+
+        <div
+          ref={contentRef}
+          className="inline-block w-full max-w-2xl p-6 my-8 text-left align-middle bg-gray-900 shadow-xl rounded-2xl"
+        >
+          <div className="relative">
+            <button
+              onClick={handleClose}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100/10 rounded-lg transition-colors"
+            >
+              <FiX className="w-6 h-6 text-gray-400" />
+            </button>
+
+            <div className="relative w-full h-48 mb-6 overflow-hidden rounded-lg">
+              <Image
+                src={project.image}
+                alt={project.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+
+            <Dialog.Title className="text-2xl font-bold text-white mb-2">
+              {project.title}
+            </Dialog.Title>
+
+            <p className="text-gray-400 mb-4">{project.longDescription}</p>
+
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">Features</h3>
+                <ul className="space-y-2">
+                  {project.features.map((feature, index) => (
+                    <li key={index} className="flex items-start">
+                      <FiX className="w-6 h-6 text-primary mr-2 flex-shrink-0" />
+                      <span className="text-gray-300">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Technologies
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {project.technologies.map((tech, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 text-sm text-primary bg-primary/10 rounded-full"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-4 mt-6">
+                {project.demoLink && (
+                  <a
+                    href={project.demoLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M5 13l4 4L19 7"
-                    ></path>
-                  </svg>
-                  <span className="text-gray-300">{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="mb-6">
-            <h3 className="text-xl font-semibold text-accent mb-3">
-              Technologies Used:
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {project.technologies.map((tech, index) => (
-                <span
-                  key={index}
-                  className="bg-gray-700 text-accent text-sm px-3 py-1 rounded-full"
-                >
-                  {tech}
-                </span>
-              ))}
+                    <FiExternalLink className="w-5 h-5" />
+                    <span>Live Demo</span>
+                  </a>
+                )}
+                {project.githubLink && (
+                  <a
+                    href={project.githubLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+                  >
+                    <FiGithub className="w-5 h-5" />
+                    <span>View Code</span>
+                  </a>
+                )}
+              </div>
             </div>
           </div>
-          <div className="flex space-x-4">
-            {project.demoLink && (
-              <a
-                href={project.demoLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-primary text-secondary font-semibold px-6 py-3 rounded-full hover:bg-opacity-90 transition duration-300"
-              >
-                Live Demo
-              </a>
-            )}
-            {project.githubLink && (
-              <a
-                href={project.githubLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-gray-700 text-white font-semibold px-6 py-3 rounded-full hover:bg-gray-600 transition duration-300"
-              >
-                GitHub Repo
-              </a>
-            )}
-          </div>
         </div>
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 text-white hover:text-primary transition-colors duration-300"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-8 w-8"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
       </div>
-    </div>
+    </Dialog>
   );
 };
 
