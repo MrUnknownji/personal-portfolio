@@ -14,30 +14,42 @@ interface ProjectModalProps {
 const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  const animationRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
-    if (!isOpen || !overlayRef.current || !contentRef.current) return;
-
     const overlay = overlayRef.current;
     const content = contentRef.current;
 
-    gsap.fromTo(overlay, { opacity: 0 }, { opacity: 0.6, duration: 0.3 });
-    gsap.fromTo(
-      content,
-      {
-        opacity: 0,
-        scale: 0.9,
-      },
-      {
-        opacity: 1,
-        scale: 1,
-        duration: 0.5,
-        ease: "back.out(1.7)",
-      },
-    );
+    if (!isOpen || !overlay || !content) {
+      if (animationRef.current) {
+        animationRef.current.kill();
+      }
+      return;
+    }
 
+    animationRef.current = gsap.timeline();
+
+    animationRef.current
+      .fromTo(overlay, { opacity: 0 }, { opacity: 0.6, duration: 0.3 })
+      .fromTo(
+        content,
+        {
+          opacity: 0,
+          scale: 0.9,
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          duration: 0.5,
+          ease: "back.out(1.7)",
+        },
+      );
     return () => {
-      gsap.killTweensOf([overlay, content]);
+      if (animationRef.current) {
+        animationRef.current.kill();
+      }
     };
   }, [isOpen]);
 
@@ -46,18 +58,18 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
 
     const overlay = overlayRef.current;
     const content = contentRef.current;
-
-    gsap.to(overlay, {
-      opacity: 0,
-      duration: 0.3,
-    });
-
-    gsap.to(content, {
-      opacity: 0,
-      scale: 0.9,
-      duration: 0.3,
-      onComplete: onClose,
-    });
+    gsap
+      .timeline()
+      .to(overlay, {
+        opacity: 0,
+        duration: 0.3,
+      })
+      .to(content, {
+        opacity: 0,
+        scale: 0.9,
+        duration: 0.3,
+        onComplete: onClose,
+      });
   };
 
   return (
@@ -66,16 +78,19 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         <div
           ref={overlayRef}
           className="fixed inset-0 bg-black/60 backdrop-blur-sm opacity-0"
+          onClick={handleClose}
         />
 
         <div
           ref={contentRef}
-          className="inline-block w-full max-w-2xl p-6 my-8 text-left align-middle bg-gray-900 shadow-xl rounded-2xl"
+          className="inline-block w-full max-w-2xl p-6 my-8 text-left align-middle bg-gray-900 shadow-xl rounded-2xl relative"
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="relative">
             <button
+              ref={closeButtonRef}
               onClick={handleClose}
-              className="absolute top-4 right-4 p-2 hover:bg-gray-100/10 rounded-lg transition-colors"
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100/10 rounded-lg transition-colors z-10"
             >
               <FiX className="w-6 h-6 text-gray-400" />
             </button>

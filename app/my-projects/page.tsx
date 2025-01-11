@@ -16,7 +16,6 @@ export default function MyProjects() {
   const headerRef = useRef<HTMLHeadingElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
   const projectsRef = useRef<HTMLDivElement>(null);
-  const noProjectsRef = useRef<HTMLParagraphElement>(null);
 
   const filteredProjects =
     filter === "All"
@@ -40,28 +39,21 @@ export default function MyProjects() {
       { opacity: 0, y: 50 },
       { opacity: 1, y: 0, duration: 0.5, delay: 0.2 },
     );
-
-    gsap.from(projectsRef.current?.children || [], {
-      opacity: 0,
-      y: 50,
-      duration: 0.5,
-      stagger: 0.1,
-      scrollTrigger: {
-        trigger: projectsRef.current,
-        start: "top center+=100",
-      },
-    });
   }, []);
 
   useEffect(() => {
     if (projectsRef.current) {
-      gsap.from(projectsRef.current.children, {
-        opacity: 0,
-        y: 20,
-        duration: 0.3,
-        stagger: 0.05,
-        ease: "power2.out",
-      });
+      gsap.fromTo(
+        projectsRef.current.children,
+        { opacity: 0, y: 50 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.1,
+          ease: "power2.out",
+        },
+      );
     }
   }, [filter]);
 
@@ -113,21 +105,17 @@ export default function MyProjects() {
           ref={projectsRef}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {filteredProjects.map((project, index) => (
+          {filteredProjects.map((project) => (
             <ProjectCard
               key={project.id}
               project={project}
               onClick={() => setSelectedProject(project)}
-              index={index}
             />
           ))}
         </div>
 
         {filteredProjects.length === 0 && (
-          <p
-            ref={noProjectsRef}
-            className="text-center text-gray-400 mt-8 text-xl"
-          >
+          <p className="text-center text-gray-400 mt-8 text-xl">
             No projects found in this category. Try selecting a different
             category.
           </p>

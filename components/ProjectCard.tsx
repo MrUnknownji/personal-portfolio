@@ -1,47 +1,37 @@
 "use client";
 import Image from "next/image";
 import { Project } from "@/types/Project";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import gsap from "gsap";
 
 interface ProjectCardProps {
   project: Project;
   onClick: () => void;
-  index: number;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({
-  project,
-  onClick,
-  index,
-}) => {
-  const cardRef = useRef(null);
-
-  useEffect(() => {
-    gsap.fromTo(
-      cardRef.current,
-      {
-        opacity: 0,
-        y: 50,
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        delay: index * 0.1,
-      },
-    );
-  }, [index]);
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleMouseEnter = () => {
+    if (!cardRef.current || !containerRef.current) return;
     gsap.to(cardRef.current, {
       scale: 1.05,
+      duration: 0.3,
+    });
+    gsap.to(containerRef.current, {
+      scale: 1.1,
       duration: 0.3,
     });
   };
 
   const handleMouseLeave = () => {
+    if (!cardRef.current || !containerRef.current) return;
     gsap.to(cardRef.current, {
+      scale: 1,
+      duration: 0.3,
+    });
+    gsap.to(containerRef.current, {
       scale: 1,
       duration: 0.3,
     });
@@ -50,17 +40,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   return (
     <div
       ref={cardRef}
+      style={{ willChange: "transform" }}
       className="bg-gray-800 rounded-lg overflow-hidden shadow-lg cursor-pointer group"
       onClick={onClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="relative h-60 overflow-hidden">
+      <div ref={containerRef} className="relative h-60 overflow-hidden">
         <Image
           src={project.image}
           alt={project.title}
           fill
-          className="transition-transform duration-300 group-hover:scale-110"
+          className="transition-transform duration-300"
+          style={{ objectFit: "cover" }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-6">
           <span className="text-white text-xl font-semibold">View Details</span>
