@@ -1,59 +1,29 @@
 import Image from "next/image";
 import { FiArrowUpRight } from "react-icons/fi";
 import { SocialLink } from "../../types/social";
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
+import { useRef } from "react";
 
 interface SocialInfoBoxProps {
   socialLink: SocialLink;
   position: { x: number; y: number };
-  initialY: number;
+  opacity: number;
 }
 
 const SocialInfoBox = ({
   socialLink,
   position,
-  initialY,
+  opacity,
 }: SocialInfoBoxProps) => {
   const boxRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (boxRef.current) {
-      gsap.fromTo(
-        boxRef.current,
-        {
-          opacity: 0,
-          scale: 0.95,
-        },
-        {
-          opacity: 1,
-          scale: 1,
-          duration: 0.2,
-          ease: "power2.out",
-        },
-      );
-    }
-
-    return () => {
-      if (boxRef.current) {
-        gsap.to(boxRef.current, {
-          opacity: 0,
-          scale: 0.95,
-          duration: 0.2,
-          ease: "power2.in",
-        });
-      }
-    };
-  }, []);
 
   return (
     <div
       ref={boxRef}
       className="fixed pointer-events-none transform"
       style={{
-        left: `${position.x - 80}px`,
-        bottom: `${initialY - position.y}px`,
-        opacity: 0,
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        opacity: opacity,
       }}
     >
       <div

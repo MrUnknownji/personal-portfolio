@@ -29,21 +29,18 @@ export default function MyProjects() {
   ];
 
   useEffect(() => {
-    // Header animation
     gsap.fromTo(
       headerRef.current,
       { opacity: 0, y: -50 },
       { opacity: 1, y: 0, duration: 0.5 },
     );
 
-    // Filter buttons animation
     gsap.fromTo(
       filterRef.current,
       { opacity: 0, y: 50 },
       { opacity: 1, y: 0, duration: 0.5, delay: 0.2 },
     );
 
-    // Projects grid animation
     gsap.from(projectsRef.current?.children || [], {
       opacity: 0,
       y: 50,
@@ -56,7 +53,6 @@ export default function MyProjects() {
     });
   }, []);
 
-  // Handle filter changes
   useEffect(() => {
     if (projectsRef.current) {
       gsap.from(projectsRef.current.children, {
@@ -141,6 +137,7 @@ export default function MyProjects() {
         <ProjectModal
           project={selectedProject}
           onClose={() => setSelectedProject(null)}
+          isOpen
         />
       )}
     </div>

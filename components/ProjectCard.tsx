@@ -18,7 +18,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   const cardRef = useRef(null);
 
   useEffect(() => {
-    // Initial animation
     gsap.fromTo(
       cardRef.current,
       {
@@ -34,7 +33,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
     );
   }, [index]);
 
-  // Hover animations
   const handleMouseEnter = () => {
     gsap.to(cardRef.current, {
       scale: 1.05,

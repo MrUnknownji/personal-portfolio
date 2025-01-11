@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Footer from "@/components/Footer";
 
-// Dynamically import CustomCursor to reduce initial bundle size
 const CustomCursor = dynamic(() => import("@/components/CustomCursor"), {
   ssr: false,
 });

@@ -83,12 +83,12 @@ const HeroSection = () => {
           >
             <div
               ref={contentRef}
-              className="relative flex flex-row lg:flex-row gap-8 h-full justify-center items-center"
+              className="relative flex flex-col lg:flex-row gap-8 h-full justify-center items-center"
             >
               <div className="z-10 w-full h-full">
                 <HeroContent />
               </div>
-              <div className="z-1 w-full sm:visible hidden">
+              <div className="z-1 w-full lg:block hidden">
                 <CodeDisplay />
               </div>
             </div>

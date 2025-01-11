@@ -25,7 +25,6 @@ const Header = () => {
       prevScrollPos = currentScrollPos;
     };
 
-    // Initial animations
     const ctx = gsap.context(() => {
       gsap.from(logoRef.current, {
         opacity: 0,

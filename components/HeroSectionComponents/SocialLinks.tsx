@@ -7,19 +7,33 @@ import gsap from "gsap";
 const SocialLinks = () => {
   const [activeLink, setActiveLink] = useState<number | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [initialY, setInitialY] = useState<number>(0);
   const infoBoxRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<gsap.core.Tween | null>(null);
+  const [infoBoxDimensions, setInfoBoxDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+  const [infoBoxOpacity, setInfoBoxOpacity] = useState(0);
 
   const handleMouseEnter = (
     e: React.MouseEvent<HTMLDivElement>,
     index: number,
   ) => {
-    setInitialY(e.clientY);
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    if (containerRect) {
+      setMousePosition({
+        x: e.clientX,
+        y: e.clientY - containerRect.top,
+      });
+    }
+
     setActiveLink(index);
 
-    // Animate info box in
     if (infoBoxRef.current) {
-      gsap.fromTo(
+      setInfoBoxOpacity(1);
+      animationRef.current?.kill();
+      animationRef.current = gsap.fromTo(
         infoBoxRef.current,
         {
           opacity: 0,
@@ -32,19 +46,21 @@ const SocialLinks = () => {
           ease: "power2.out",
         },
       );
+      const rect = infoBoxRef.current.getBoundingClientRect();
+      setInfoBoxDimensions({ width: rect.width, height: rect.height });
     }
   };
 
   const handleMouseLeave = () => {
-    // Animate info box out
     if (infoBoxRef.current) {
-      gsap.to(infoBoxRef.current, {
+      animationRef.current?.kill();
+      animationRef.current = gsap.to(infoBoxRef.current, {
         opacity: 0,
         y: 20,
         duration: 0.2,
         ease: "power2.in",
         onComplete: () => {
-          setInitialY(0);
+          setInfoBoxOpacity(0);
           setActiveLink(null);
         },
       });
@@ -53,10 +69,11 @@ const SocialLinks = () => {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (activeLink !== null) {
+      if (activeLink !== null && containerRef.current) {
+        const containerRect = containerRef.current.getBoundingClientRect();
         setMousePosition({
           x: e.clientX,
-          y: e.clientY,
+          y: e.clientY - containerRect.top,
         });
       }
     };
@@ -65,8 +82,12 @@ const SocialLinks = () => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [activeLink]);
 
+  const calculatedPosition = {
+    x: mousePosition.x - infoBoxDimensions.width / 4,
+    y: mousePosition.y + 20,
+  };
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <div className="flex gap-6">
         {socialLinks.map((link, index) => (
           <div
@@ -83,15 +104,15 @@ const SocialLinks = () => {
         className="fixed inset-0 pointer-events-none"
         style={{ zIndex: 9999 }}
       >
-        {activeLink !== null && (
-          <div ref={infoBoxRef} style={{ opacity: 0 }}>
+        <div ref={infoBoxRef} style={{ opacity: 0 }}>
+          {activeLink !== null && (
             <SocialInfoBox
               socialLink={socialLinks[activeLink]}
-              position={mousePosition}
-              initialY={initialY}
+              position={calculatedPosition}
+              opacity={infoBoxOpacity}
             />
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

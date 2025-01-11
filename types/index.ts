@@ -1,4 +1,3 @@
-// Project Types
 export interface Project {
   id: number;
   title: string;
@@ -12,7 +11,6 @@ export interface Project {
   category: string;
 }
 
-// Skill Types
 export interface Skill {
   name: string;
   icon: string;
@@ -20,9 +18,8 @@ export interface Skill {
   category: SkillCategory;
 }
 
-export type SkillCategory = 'frontend' | 'backend' | 'tools' | 'other';
+export type SkillCategory = "frontend" | "backend" | "tools" | "other";
 
-// Section Types
 export interface Section {
   id: string;
   title: string;
@@ -30,7 +27,6 @@ export interface Section {
   content: string;
 }
 
-// Animation Types
 export interface AnimationConfig {
   duration?: number;
   ease?: string;
@@ -38,7 +34,6 @@ export interface AnimationConfig {
   stagger?: number;
 }
 
-// Component Props Types
 export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -46,30 +41,27 @@ export interface ModalProps {
 }
 
 export interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'outline';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary" | "outline";
+  size?: "sm" | "md" | "lg";
   children: React.ReactNode;
   onClick?: () => void;
   className?: string;
   disabled?: boolean;
-  type?: 'button' | 'submit' | 'reset';
+  type?: "button" | "submit" | "reset";
 }
 
-// Contact Form Types
 export interface ContactForm {
   name: string;
   email: string;
   message: string;
 }
 
-// Social Media Types
 export interface SocialLink {
   platform: string;
   url: string;
   icon: string;
 }
 
-// Navigation Types
 export interface NavItem {
   label: string;
   href: string;

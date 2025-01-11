@@ -9,9 +9,10 @@ const CodeDisplay = () => {
     if (!containerRef.current || !codeBlockRef.current) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(containerRef.current,
+      gsap.fromTo(
+        containerRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 1, delay: 0.5 }
+        { opacity: 1, duration: 1, delay: 0.5 },
       );
 
       gsap.to(codeBlockRef.current, {
@@ -27,7 +28,10 @@ const CodeDisplay = () => {
   }, []);
 
   return (
-    <div ref={containerRef} className="flex-1 hidden xl:block w-full max-w-4xl mx-auto opacity-0">
+    <div
+      ref={containerRef}
+      className="flex-1 w-full max-w-4xl mx-auto opacity-0"
+    >
       <div className="relative p-4 h-full">
         <div className="relative h-[600px] perspective-1000">
           <div
@@ -45,16 +49,14 @@ const CodeDisplay = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-gray-800/90 to-gray-900/90 rounded-2xl shadow-2xl overflow-hidden border border-gray-700/50">
               <div className="h-8 bg-gray-800/90 flex items-center px-4">
                 <div className="flex space-x-2">
-                  {[
-                    "bg-red-500",
-                    "bg-yellow-500",
-                    "bg-green-500"
-                  ].map((color, index) => (
-                    <div
-                      key={index}
-                      className={`w-3 h-3 rounded-full ${color}`}
-                    />
-                  ))}
+                  {["bg-red-500", "bg-yellow-500", "bg-green-500"].map(
+                    (color, index) => (
+                      <div
+                        key={index}
+                        className={`w-3 h-3 rounded-full ${color}`}
+                      />
+                    ),
+                  )}
                 </div>
               </div>
               <div className="p-4">
