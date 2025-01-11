@@ -33,7 +33,7 @@ const CodeDisplay = () => {
       className="flex-1 w-full max-w-4xl mx-auto opacity-0"
     >
       <div className="relative p-4 h-full">
-        <div className="relative h-[600px] perspective-1000">
+        <div className="relative h-[400px] perspective-1000">
           <div
             ref={codeBlockRef}
             className="w-full h-full transform-gpu group"
@@ -61,7 +61,7 @@ const CodeDisplay = () => {
               </div>
               <div className="p-4">
                 <pre className="text-sm">
-                  <code className="text-gray-300">
+                  <code className="text-primary">
                     {`const Portfolio = {
   name: "Sandeep Kumar",
   role: "Full Stack Developer",

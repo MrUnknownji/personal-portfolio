@@ -89,7 +89,7 @@ const TypedText = () => {
   }, [currentTextIndex, isAnimating, animateText, texts]);
 
   return (
-    <div className="min-h-[2rem] overflow-x-hidden">
+    <div className="min-h-[2rem] overflow-hidden">
       <div
         ref={containerRef}
         className="text-accent text-xl relative"

@@ -98,9 +98,11 @@ const SkillsSection = () => {
           <h4 className="text-xl sm:text-2xl font-semibold text-primary mb-3">
             {AboutMeSkills[activeSkill].name}
           </h4>
-          <p className="text-gray-200 leading-relaxed">
-            {AboutMeSkills[activeSkill].description}
-          </p>
+          <div className="text-gray-200 leading-relaxed h-[calc(1.5rem*2)] overflow-hidden">
+            <p className="inline-block">
+              {AboutMeSkills[activeSkill].description}
+            </p>
+          </div>
         </div>
 
         <div className="mt-6">

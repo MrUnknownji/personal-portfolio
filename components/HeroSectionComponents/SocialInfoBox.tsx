@@ -1,20 +1,29 @@
 import Image from "next/image";
 import { FiArrowUpRight } from "react-icons/fi";
 import { SocialLink } from "../../types/social";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 
 interface SocialInfoBoxProps {
   socialLink: SocialLink;
   position: { x: number; y: number };
   opacity: number;
+  onHeightChange: (height: number) => void;
 }
 
 const SocialInfoBox = ({
   socialLink,
   position,
   opacity,
+  onHeightChange,
 }: SocialInfoBoxProps) => {
   const boxRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (boxRef.current) {
+      const height = boxRef.current.offsetHeight;
+      onHeightChange(height);
+    }
+  }, [onHeightChange]);
 
   return (
     <div
