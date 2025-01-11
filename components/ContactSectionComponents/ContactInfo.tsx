@@ -96,15 +96,19 @@ const ContactInfo: React.FC = () => {
 
         <div className="space-y-6">
           <InfoItem
-            icon="email"
-            text="example@email.com"
-            link="mailto:example@email.com"
+            type="email"
+            title="example@email.com"
+            value="mailto:example@email.com"
           />
-          <InfoItem icon="phone" text="+1 234 567 890" link="tel:+1234567890" />
           <InfoItem
-            icon="location"
-            text="New York, NY"
-            link="https://maps.google.com"
+            type="phone"
+            title="+1 234 567 890"
+            value="tel:+1234567890"
+          />
+          <InfoItem
+            type="location"
+            title="New York, NY"
+            value="https://maps.google.com"
           />
         </div>
       </div>

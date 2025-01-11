@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import DialogContent from "./ContactSectionComponents/DialogContent";
 import DialogActions from "./ContactSectionComponents/DialogActions";
@@ -7,11 +7,28 @@ import DialogActions from "./ContactSectionComponents/DialogActions";
 interface ThankYouDialogProps {
   isOpen: boolean;
   onClose: () => void;
+  email?: string; // Optional email prop.
 }
 
-const ThankYouDialog: React.FC<ThankYouDialogProps> = ({ isOpen, onClose }) => {
+const ThankYouDialog: React.FC<ThankYouDialogProps> = ({
+  isOpen,
+  onClose,
+  email,
+}) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const [isEmailCopied, setIsEmailCopied] = useState(false);
+
+  const handleCopyEmail = () => {
+    if (email) {
+      navigator.clipboard.writeText(email);
+      setIsEmailCopied(true);
+
+      setTimeout(() => {
+        setIsEmailCopied(false);
+      }, 3000);
+    }
+  };
 
   useEffect(() => {
     const overlay = overlayRef.current;
@@ -92,8 +109,8 @@ const ThankYouDialog: React.FC<ThankYouDialogProps> = ({ isOpen, onClose }) => {
             from-transparent via-primary to-transparent"
           />
 
-          <DialogContent />
-          <DialogActions onClose={handleClose} />
+          <DialogContent email={email ?? " "} onCopy={handleCopyEmail} />
+          <DialogActions onClose={handleClose} isEmailCopied={isEmailCopied} />
 
           <div
             className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2

@@ -1,12 +1,16 @@
 import React from "react";
 import Link from "next/link";
-import { FiChevronRight, FiX } from "react-icons/fi";
+import { FiChevronRight, FiX, FiCheck } from "react-icons/fi";
 
 interface DialogActionsProps {
   onClose: () => void;
+  isEmailCopied?: boolean; // Added isEmailCopied prop, optional
 }
 
-const DialogActions: React.FC<DialogActionsProps> = ({ onClose }) => {
+const DialogActions: React.FC<DialogActionsProps> = ({
+  onClose,
+  isEmailCopied,
+}) => {
   return (
     <div
       className="px-6 py-4 sm:px-8 bg-secondary/50 border-t border-primary/10
@@ -32,8 +36,17 @@ const DialogActions: React.FC<DialogActionsProps> = ({ onClose }) => {
           focus:outline-none focus:ring-2 focus:ring-primary/50"
         onClick={onClose}
       >
-        Close
-        <FiX className="w-4 h-4 ml-2" />
+        {isEmailCopied ? (
+          <>
+            <FiCheck className="w-4 h-4 mr-2 text-primary" />
+            <span>Copied!</span>
+          </>
+        ) : (
+          <>
+            Close
+            <FiX className="w-4 h-4 ml-2" />
+          </>
+        )}
       </button>
     </div>
   );

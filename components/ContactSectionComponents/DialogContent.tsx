@@ -27,7 +27,7 @@ const DialogContent = ({ email, onCopy }: DialogContentProps) => {
         rotate: 0,
         duration: 0.6,
         ease: "back.out(1.7)",
-      }
+      },
     ).fromTo(
       contentRef.current.querySelectorAll(".animate-content"),
       {
@@ -41,7 +41,7 @@ const DialogContent = ({ email, onCopy }: DialogContentProps) => {
         duration: 0.4,
         ease: "power2.out",
       },
-      "-=0.2"
+      "-=0.2",
     );
 
     return () => {
@@ -56,7 +56,7 @@ const DialogContent = ({ email, onCopy }: DialogContentProps) => {
           <FiMail className="w-12 h-12 text-primary" />
         </div>
       </div>
-      <h3 className="text-xl font-semibold text-center mb-2 animate-content">
+      <h3 className="text-xl font-semibold text-white text-center mb-2 animate-content">
         Email Address
       </h3>
       <p className="text-gray-400 text-center mb-6 animate-content">{email}</p>

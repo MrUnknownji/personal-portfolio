@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { FiExternalLink, FiGithub, FiX } from "react-icons/fi";
-import { Dialog } from "@/components/ui/Dialog";
+import { Dialog, DialogTitle } from "@/components/ui/Dialog";
 import { Project } from "@/types/Project";
 import gsap from "gsap";
 
@@ -18,9 +18,12 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   useEffect(() => {
     if (!isOpen || !overlayRef.current || !contentRef.current) return;
 
-    gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 0.6, duration: 0.3 });
+    const overlay = overlayRef.current;
+    const content = contentRef.current;
+
+    gsap.fromTo(overlay, { opacity: 0 }, { opacity: 0.6, duration: 0.3 });
     gsap.fromTo(
-      contentRef.current,
+      content,
       {
         opacity: 0,
         scale: 0.9,
@@ -34,17 +37,22 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     );
 
     return () => {
-      gsap.killTweensOf([overlayRef.current, contentRef.current]);
+      gsap.killTweensOf([overlay, content]);
     };
   }, [isOpen]);
 
   const handleClose = () => {
-    gsap.to(overlayRef.current, {
+    if (!overlayRef.current || !contentRef.current) return;
+
+    const overlay = overlayRef.current;
+    const content = contentRef.current;
+
+    gsap.to(overlay, {
       opacity: 0,
       duration: 0.3,
     });
 
-    gsap.to(contentRef.current, {
+    gsap.to(content, {
       opacity: 0,
       scale: 0.9,
       duration: 0.3,
@@ -53,7 +61,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   };
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
+    <Dialog open={isOpen} onClose={handleClose}>
       <div className="min-h-screen px-4 text-center">
         <div
           ref={overlayRef}
@@ -82,15 +90,17 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
               />
             </div>
 
-            <Dialog.Title className="text-2xl font-bold text-white mb-2">
+            <DialogTitle className="text-2xl font-bold text-white mb-2">
               {project.title}
-            </Dialog.Title>
+            </DialogTitle>
 
             <p className="text-gray-400 mb-4">{project.longDescription}</p>
 
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold text-white mb-2">Features</h3>
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Features
+                </h3>
                 <ul className="space-y-2">
                   {project.features.map((feature, index) => (
                     <li key={index} className="flex items-start">

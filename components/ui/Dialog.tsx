@@ -1,15 +1,20 @@
-import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { createPortal } from 'react-dom';
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { createPortal } from "react-dom";
+import React, { ReactNode, ReactPortal, FC, PropsWithChildren } from "react";
 
 interface DialogProps {
   open: boolean;
   onClose: () => void;
-  children: React.ReactNode;
   className?: string;
 }
 
-export const Dialog = ({ open, onClose, children, className = '' }: DialogProps) => {
+export const Dialog: FC<PropsWithChildren<DialogProps>> = ({
+  open,
+  onClose,
+  children,
+  className = "",
+}) => {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,7 +27,7 @@ export const Dialog = ({ open, onClose, children, className = '' }: DialogProps)
       tl.fromTo(
         dialog,
         { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }
+        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" },
       );
     }
 
@@ -48,17 +53,18 @@ export const Dialog = ({ open, onClose, children, className = '' }: DialogProps)
         </div>
       </div>
     </div>,
-    document.body
-  );
+    document.body,
+  ) as ReactPortal;
 };
 
 interface DialogTitleProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 
-export const DialogTitle = ({ children, className = '' }: DialogTitleProps) => (
+export const DialogTitle: FC<DialogTitleProps> = ({
+  children,
+  className = "",
+}) => (
   <h2 className={`text-lg font-medium leading-6 ${className}`}>{children}</h2>
 );
-
-Dialog.Title = DialogTitle;
