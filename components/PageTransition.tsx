@@ -1,7 +1,7 @@
 "use client";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 export default function PageTransition() {
   const overlayRef = useRef<HTMLDivElement>(null);
