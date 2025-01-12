@@ -17,6 +17,7 @@ export const projects: Project[] = [
       "Real-time inventory management",
       "Order tracking and history",
       "Admin dashboard for product and order management",
+      "Payment processing with Stripe integration",
     ],
     demoLink: "https://myecommerce-demo.com",
     githubLink: "https://github.com/yourusername/ecommerce-project",

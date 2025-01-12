@@ -10,8 +10,12 @@ const config: Config = {
     extend: {
       colors: {
         primary: "#00ff9f",
-        secondary: "#1A202C",
-        accent: "#81E6D9",
+        secondary: "#1E1E1E",
+        accent: "#00D1FF",
+        dark: "#141414",
+        light: "#F1F1F1",
+        neutral: "#333333",
+        muted: "#666666",
       },
       fontFamily: {
         sans: ["Poppins", "sans-serif"],

@@ -42,14 +42,14 @@ export const Dialog: FC<PropsWithChildren<DialogProps>> = ({
 
   return createPortal(
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="min-h-screen px-4 text-center">
+      <div className="min-h-screen flex items-center justify-center px-4">
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm"
           onClick={onClose}
         />
         <div
           ref={dialogRef}
-          className={`inline-block w-full text-left align-middle transition-all transform ${className}`}
+          className={`relative w-full text-left align-middle transition-all transform ${className}`}
         >
           {children}
         </div>

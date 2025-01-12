@@ -5,6 +5,8 @@ import { Dialog, DialogTitle } from "@/components/ui/Dialog";
 import { Project } from "@/types/Project";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { ExpandableSection } from "./ProjectModalComponents/ExpandableSection";
+import { TechStack } from "./ProjectModalComponents/TechStack";
 
 interface ProjectModalProps {
   project: Project;
@@ -69,10 +71,10 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         />
         <div
           ref={contentRef}
-          className="inline-block w-full max-w-xl md:max-w-2xl p-6 my-8 overflow-hidden text-left align-middle bg-gray-800 shadow-xl rounded-2xl relative transform transition-all duration-300"
+          className="inline-block w-full max-w-5xl p-6 my-8 overflow-hidden text-left align-middle bg-gray-800 shadow-xl rounded-2xl relative transform transition-all duration-300 h-[90vh]"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="relative">
+          <div className="h-full flex flex-col">
             <button
               onClick={onClose}
               className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-700 rounded-lg transition-colors z-10"
@@ -80,76 +82,66 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
               <FiX className="w-5 h-5" />
             </button>
 
-            <div className="relative w-full aspect-video mb-6 overflow-hidden rounded-lg shadow-md">
-              <Image
-                src={project.image}
-                alt={project.title}
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-
-            <DialogTitle className="text-2xl font-bold text-white mb-3">
-              {project.title}
-            </DialogTitle>
-
-            <p className="text-gray-400 mb-5">{project.longDescription}</p>
-
-            <div className="space-y-5">
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-3">
-                  Features
-                </h3>
-                <ul className="space-y-3">
-                  {project.features.map((feature, index) => (
-                    <li key={index} className="flex items-start">
-                      <FiX className="w-5 h-5 text-primary mr-2 flex-shrink-0" />
-                      <span className="text-gray-300">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-3">
-                  Technologies
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {project.technologies.map((tech, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 text-sm text-primary bg-primary/10 rounded-full"
-                    >
-                      {tech}
-                    </span>
-                  ))}
+            <div className="flex flex-col md:flex-row gap-6 h-full">
+              <div className="md:w-1/2">
+                <div className="relative w-full aspect-video mb-4 overflow-hidden rounded-lg shadow-md">
+                  <Image
+                    src={project.image}
+                    alt={project.title}
+                    fill
+                    className="object-cover"
+                    priority
+                  />
                 </div>
+                <DialogTitle className="text-2xl font-bold text-white mb-3">
+                  {project.title}
+                </DialogTitle>
               </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                {project.demoLink && (
-                  <a
-                    href={project.demoLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-secondary hover:bg-primary/90 transition-colors shadow-sm"
-                  >
-                    <FiExternalLink className="w-4 h-4" />
-                    <span>Live Demo</span>
-                  </a>
-                )}
-                {project.githubLink && (
-                  <a
-                    href={project.githubLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors shadow-sm"
-                  >
-                    <FiGithub className="w-4 h-4" />
-                    <span>View Code</span>
-                  </a>
-                )}
+              <div className="md:w-1/2 flex flex-col h-full">
+                <div className="flex flex-col h-full gap-6">
+                  <div className="h-[35vh]">
+                    <ExpandableSection
+                      title="Description"
+                      content={project.longDescription}
+                      isList={false}
+                    />
+                  </div>
+                  <div className="h-[35vh]">
+                    <ExpandableSection
+                      title="Features"
+                      content={project.features}
+                      isList={true}
+                    />
+                  </div>
+                  <div className="mt-auto space-y-6">
+                    <TechStack technologies={project.technologies} />
+                    <div className="flex flex-col sm:flex-row gap-4 mt-6">
+                      {" "}
+                      {project.demoLink && (
+                        <a
+                          href={project.demoLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-secondary hover:bg-primary/90 transition-colors shadow-sm"
+                        >
+                          <FiExternalLink className="w-4 h-4" />
+                          <span>Live Demo</span>
+                        </a>
+                      )}
+                      {project.githubLink && (
+                        <a
+                          href={project.githubLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors shadow-sm"
+                        >
+                          <FiGithub className="w-4 h-4" />
+                          <span>View Code</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
