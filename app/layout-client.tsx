@@ -34,7 +34,7 @@ export default function LayoutClient({
   return (
     <>
       <BackgroundBlobs />
-      <div>
+      <div suppressHydrationWarning>
         <div className="hidden md:block [@media(hover:none)]:hidden">
           <CustomCursor />
         </div>

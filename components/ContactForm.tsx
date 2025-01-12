@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useLayoutEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import ContactInfo from "./ContactSectionComponents/ContactInfo";
@@ -10,10 +10,17 @@ gsap.registerPlugin(ScrollTrigger);
 
 const ContactForm: React.FC = () => {
   const [isThankYouOpen, setIsThankYouOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!isMounted) return;
+
     const title = sectionRef.current?.querySelector(".title-container");
     const container = containerRef.current;
 
@@ -56,17 +63,26 @@ const ContactForm: React.FC = () => {
         "-=0.4",
       );
     }
-  }, []);
+
+    return () => {
+      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
+    };
+  }, [isMounted]);
 
   const handleFormSubmit = () => {
     setIsThankYouOpen(true);
   };
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <section
       ref={sectionRef}
       id="contact"
       className="relative py-24 overflow-hidden"
+      suppressHydrationWarning
     >
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
 
@@ -85,6 +101,7 @@ const ContactForm: React.FC = () => {
         <div
           ref={containerRef}
           className="relative bg-secondary/95 rounded-xl overflow-hidden"
+          suppressHydrationWarning
         >
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
 
@@ -95,7 +112,6 @@ const ContactForm: React.FC = () => {
             </div>
           </div>
 
-          {/* Decorative elements */}
           <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary rounded-tl-xl" />
           <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary rounded-tr-xl" />
           <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary rounded-bl-xl" />

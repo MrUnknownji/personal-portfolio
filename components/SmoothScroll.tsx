@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import Lenis from "@studio-freight/lenis";
+import Lenis from "lenis";
 
 export default function SmoothScroll({
   children,
@@ -11,11 +11,10 @@ export default function SmoothScroll({
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      direction: "vertical",
-      gestureDirection: "vertical",
-      smooth: true,
-      mouseMultiplier: 1,
-      smoothTouch: false,
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      lerp: 0.1,
+      wheelMultiplier: 1,
       touchMultiplier: 2,
       infinite: false,
     });
@@ -32,5 +31,5 @@ export default function SmoothScroll({
     };
   }, []);
 
-    return <>{children}</>;
+  return <>{children}</>;
 }

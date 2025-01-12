@@ -20,7 +20,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 overflow-x-hidden">
+      <body
+        className="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 overflow-x-hidden"
+        suppressHydrationWarning
+      >
         <LayoutClient>{children}</LayoutClient>
       </body>
     </html>
