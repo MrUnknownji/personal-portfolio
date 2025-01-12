@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
+import { useRef } from "react";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 
 interface SkillCardProps {
   icon: string;
@@ -10,27 +11,32 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(cardRef.current, {
-        opacity: 0,
-        y: 20,
-        duration: 0.6,
-        ease: "power2.out",
-      });
+  useGSAP(() => {
+    if (!cardRef.current || !iconRef.current) return;
 
-      const hoverTl = gsap.timeline({ paused: true });
-      hoverTl.to(iconRef.current, {
-        scale: 1.1,
-        duration: 0.3,
-        ease: "power2.out",
-      });
+    gsap.from(cardRef.current, {
+      opacity: 0,
+      y: 20,
+      duration: 0.6,
+      ease: "power2.out",
+    });
 
-      cardRef.current?.addEventListener("mouseenter", () => hoverTl.play());
-      cardRef.current?.addEventListener("mouseleave", () => hoverTl.reverse());
-    }, cardRef);
+    const hoverTl = gsap.timeline({ paused: true });
+    hoverTl.to(iconRef.current, {
+      scale: 1.1,
+      duration: 0.3,
+      ease: "power2.out",
+    });
 
-    return () => ctx.revert();
+    cardRef.current.addEventListener("mouseenter", () => hoverTl.play());
+    cardRef.current.addEventListener("mouseleave", () => hoverTl.reverse());
+
+    return () => {
+      cardRef.current?.removeEventListener("mouseenter", () => hoverTl.play());
+      cardRef.current?.removeEventListener("mouseleave", () =>
+        hoverTl.reverse(),
+      );
+    };
   }, []);
 
   return (

@@ -1,58 +1,55 @@
 import Link from "next/link";
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
+import { useRef } from "react";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const ViewProjectsButton = () => {
   const buttonRef = useRef<HTMLDivElement>(null);
   const sweepRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      if (!sweepRef.current) return;
+  useGSAP(() => {
+    if (!sweepRef.current || !buttonRef.current) return;
 
-      gsap.set(sweepRef.current, {
-        rotate: -45,
+    gsap.set(sweepRef.current, {
+      rotate: -45,
+      x: "100%",
+      y: "-100%",
+      opacity: 0,
+    });
+
+    const tl = gsap.timeline({ paused: true });
+
+    tl.to(sweepRef.current, {
+      x: "-100%",
+      y: "100%",
+      opacity: 1,
+      duration: 1,
+      ease: "power2.inOut",
+    });
+
+    const handleEnter = () => {
+      gsap.set(sweepRef.current, { x: "100%", y: "-100%", opacity: 0 });
+      tl.play(0);
+    };
+
+    const handleLeave = () => {
+      gsap.set(sweepRef.current, { x: "-100%", y: "100%", opacity: 1 });
+      gsap.to(sweepRef.current, {
         x: "100%",
         y: "-100%",
         opacity: 0,
-      });
-
-      const tl = gsap.timeline({ paused: true });
-
-      tl.to(sweepRef.current, {
-        x: "-100%",
-        y: "100%",
-        opacity: 1,
         duration: 1,
         ease: "power2.inOut",
       });
+    };
 
-      const handleEnter = () => {
-        gsap.set(sweepRef.current, { x: "100%", y: "-100%", opacity: 0 });
-        tl.play(0);
-      };
+    buttonRef.current.addEventListener("mouseenter", handleEnter);
+    buttonRef.current.addEventListener("mouseleave", handleLeave);
 
-      const handleLeave = () => {
-        gsap.set(sweepRef.current, { x: "-100%", y: "100%", opacity: 1 });
-        gsap.to(sweepRef.current, {
-          x: "100%",
-          y: "-100%",
-          opacity: 0,
-          duration: 1,
-          ease: "power2.inOut",
-        });
-      };
-
-      buttonRef.current?.addEventListener("mouseenter", handleEnter);
-      buttonRef.current?.addEventListener("mouseleave", handleLeave);
-
-      return () => {
-        buttonRef.current?.removeEventListener("mouseenter", handleEnter);
-        buttonRef.current?.removeEventListener("mouseleave", handleLeave);
-      };
-    });
-
-    return () => ctx.revert();
+    return () => {
+      buttonRef.current?.removeEventListener("mouseenter", handleEnter);
+      buttonRef.current?.removeEventListener("mouseleave", handleLeave);
+    };
   }, []);
 
   return (
@@ -63,7 +60,6 @@ const ViewProjectsButton = () => {
           bg-primary/10 backdrop-blur-[2px] border border-white/20
           transition-all duration-300 hover:border-white/40"
       >
-        {/* Glass sweep effect */}
         <div
           ref={sweepRef}
           className="absolute inset-0 w-[200%] h-[200%] top-[-50%] left-[-50%]"
@@ -74,15 +70,12 @@ const ViewProjectsButton = () => {
           }}
         />
 
-        {/* Glass highlights */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
 
-        {/* Button content */}
         <div className="relative flex items-center justify-center">
           <span className="text-white font-medium z-10">View My Projects</span>
         </div>
 
-        {/* Inner glow effect */}
         <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
           <div
             className="absolute inset-0 rounded-xl"

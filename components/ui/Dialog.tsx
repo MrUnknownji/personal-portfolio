@@ -1,13 +1,27 @@
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
+import React, {
+  useRef,
+  ReactNode,
+  ReactPortal,
+  FC,
+  PropsWithChildren,
+} from "react";
 import { createPortal } from "react-dom";
-import React, { ReactNode, ReactPortal, FC, PropsWithChildren } from "react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
 interface DialogProps {
   open: boolean;
   onClose: () => void;
   className?: string;
 }
+
+const DIALOG_ANIMATION_DURATION: number = 0.3;
+const DIALOG_INITIAL_Y: number = 20;
+const DIALOG_OPACITY_VISIBLE: number = 1;
+const DIALOG_OPACITY_HIDDEN: number = 0;
+const DIALOG_EASE_IN: string = "power2.in";
+const DIALOG_EASE_OUT: string = "power2.out";
+const DIALOG_Z_INDEX: number = 50;
 
 export const Dialog: FC<PropsWithChildren<DialogProps>> = ({
   open,
@@ -17,31 +31,44 @@ export const Dialog: FC<PropsWithChildren<DialogProps>> = ({
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useGSAP(() => {
     if (!dialogRef.current) return;
 
     const dialog = dialogRef.current;
-    const tl = gsap.timeline();
+    const timeline = gsap.timeline();
 
     if (open) {
-      tl.fromTo(
+      timeline.fromTo(
         dialog,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" },
+        { opacity: DIALOG_OPACITY_HIDDEN, y: DIALOG_INITIAL_Y },
+        {
+          opacity: DIALOG_OPACITY_VISIBLE,
+          y: 0,
+          duration: DIALOG_ANIMATION_DURATION,
+          ease: DIALOG_EASE_OUT,
+        },
       );
     } else {
-      tl.to(dialog, { opacity: 0, y: 20, duration: 0.3, ease: "power2.in" });
+      timeline.to(dialog, {
+        opacity: DIALOG_OPACITY_HIDDEN,
+        y: DIALOG_INITIAL_Y,
+        duration: DIALOG_ANIMATION_DURATION,
+        ease: DIALOG_EASE_IN,
+      });
     }
 
     return () => {
-      tl.kill();
+      timeline.kill();
     };
   }, [open]);
 
   if (!open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div
+      className="fixed inset-0 overflow-y-auto"
+      style={{ zIndex: DIALOG_Z_INDEX }}
+    >
       <div className="min-h-screen flex items-center justify-center px-4">
         <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm"

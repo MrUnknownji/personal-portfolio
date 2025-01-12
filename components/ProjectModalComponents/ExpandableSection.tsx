@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Dialog } from "@/components/ui/Dialog";
 import gsap from "gsap";
 import { FiChevronRight, FiX } from "react-icons/fi";
@@ -9,30 +9,30 @@ interface ExpandableSectionProps {
   isList?: boolean;
 }
 
-const ExpandableSection = ({
+const ExpandableSection: React.FC<ExpandableSectionProps> = ({
   title,
   content,
   isList,
-}: ExpandableSectionProps) => {
+}) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [needsFade, setNeedsFade] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const checkOverflow = () => {
-      if (contentRef.current && containerRef.current) {
-        const isOverflowing =
-          contentRef.current.scrollHeight > containerRef.current.clientHeight;
-        setNeedsFade(isOverflowing);
-      }
-    };
+  const checkOverflow = useCallback(() => {
+    if (contentRef.current && containerRef.current) {
+      const isOverflowing =
+        contentRef.current.scrollHeight > containerRef.current.clientHeight;
+      setNeedsFade(isOverflowing);
+    }
+  }, []);
 
+  useEffect(() => {
     checkOverflow();
     window.addEventListener("resize", checkOverflow);
     return () => window.removeEventListener("resize", checkOverflow);
-  }, [content]);
+  }, [checkOverflow]);
 
   const handleOpenDialog = useCallback(() => {
     setIsDialogOpen(true);

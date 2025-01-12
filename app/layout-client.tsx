@@ -8,7 +8,7 @@ const CustomCursor = dynamic(() => import("@/components/CustomCursor"), {
   ssr: false,
 });
 
-const BackgroundBlobs = () => (
+const BackgroundBlobs: React.FC = () => (
   <div className="fixed inset-0 blur-3xl opacity-10 pointer-events-none select-none">
     <div className="absolute top-0 -left-4 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-blob" />
     <div className="absolute top-0 -right-4 w-64 h-64 bg-yellow-500 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000" />
@@ -16,11 +16,9 @@ const BackgroundBlobs = () => (
   </div>
 );
 
-export default function LayoutClient({
+const LayoutClient: React.FC<{ children: React.ReactNode }> = ({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}) => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -44,4 +42,6 @@ export default function LayoutClient({
       </div>
     </>
   );
-}
+};
+
+export default LayoutClient;

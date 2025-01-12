@@ -1,8 +1,8 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import ScrollTrigger from "gsap/dist/ScrollTrigger";
+import { useRef, useState } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { AboutMeSkills } from "@/data/data";
+import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,10 +12,8 @@ const SkillsSection = () => {
   const skillContentRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveSkill((prev) => (prev + 1) % AboutMeSkills.length);
-    }, 5000);
+  useGSAP(() => {
+    if (!skillsRef.current) return;
 
     gsap.fromTo(
       skillsRef.current,
@@ -38,11 +36,11 @@ const SkillsSection = () => {
         ease: "power3.out",
       },
     );
-
-    return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
+  useGSAP(() => {
+    if (!progressRef.current || !skillContentRef.current) return;
+
     gsap.fromTo(
       progressRef.current,
       { width: "0%" },
@@ -69,6 +67,14 @@ const SkillsSection = () => {
       },
     );
   }, [activeSkill]);
+
+  useGSAP(() => {
+    const timer = setInterval(() => {
+      setActiveSkill((prev) => (prev + 1) % AboutMeSkills.length);
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <div

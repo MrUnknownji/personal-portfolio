@@ -1,10 +1,15 @@
-import { useEffect } from "react";
-import gsap from "gsap";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
 import SplitType from "split-type";
+import { useGSAP } from "@gsap/react";
 
 export const Description = () => {
-  useEffect(() => {
-    const descriptionSplit = new SplitType(".hero-description", {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const descriptionRef = useRef<HTMLParagraphElement>(null);
+
+  useGSAP(() => {
+    if (!descriptionRef.current) return;
+    const descriptionSplit = new SplitType(descriptionRef.current, {
       types: "chars",
     });
     if (!descriptionSplit.chars) return;
@@ -23,18 +28,13 @@ export const Description = () => {
       "-=0.5",
     );
 
-    const container = document.querySelector(".description-container");
-    if (!container) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
 
-    const handleMouseMove = (e: Event) => {
-      const mouseEvent = e as MouseEvent;
-      const rect = container.getBoundingClientRect();
-      const mouseX = mouseEvent.clientX - rect.left;
-      const mouseY = mouseEvent.clientY - rect.top;
-
-      if (!descriptionSplit.chars) return;
-
-      descriptionSplit.chars.forEach((char) => {
+      descriptionSplit.chars?.forEach((char) => {
         if (!char) return;
         const charRect = char.getBoundingClientRect();
         const charCenterX = charRect.left + charRect.width / 2 - rect.left;
@@ -80,21 +80,27 @@ export const Description = () => {
       });
     };
 
-    container.addEventListener("mousemove", handleMouseMove as EventListener);
-    container.addEventListener("mouseleave", handleMouseLeave);
+    containerRef.current?.addEventListener(
+      "mousemove",
+      handleMouseMove as EventListener,
+    );
+    containerRef.current?.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
-      container.removeEventListener(
+      containerRef.current?.removeEventListener(
         "mousemove",
         handleMouseMove as EventListener,
       );
-      container.removeEventListener("mouseleave", handleMouseLeave);
+      containerRef.current?.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, []);
 
   return (
-    <div className="description-container overflow-hidden cursor-pointer">
-      <p className="hero-description text-gray-300 text-lg leading-relaxed max-w-2xl">
+    <div ref={containerRef} className="overflow-hidden cursor-pointer">
+      <p
+        ref={descriptionRef}
+        className="hero-description text-gray-300 text-lg leading-relaxed max-w-2xl"
+      >
         Transforming ideas into elegant digital solutions with clean code and
         innovative thinking.
       </p>

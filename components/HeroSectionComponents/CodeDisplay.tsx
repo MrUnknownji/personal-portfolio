@@ -1,30 +1,27 @@
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
+import { useRef } from "react";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const CodeDisplay = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const codeBlockRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useGSAP(() => {
     if (!containerRef.current || !codeBlockRef.current) return;
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        containerRef.current,
-        { opacity: 0 },
-        { opacity: 1, duration: 1, delay: 0.5 },
-      );
+    gsap.fromTo(
+      containerRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 1, delay: 0.5 },
+    );
 
-      gsap.to(codeBlockRef.current, {
-        rotateY: "+=3",
-        duration: 3,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-      });
+    gsap.to(codeBlockRef.current, {
+      rotateY: "+=3",
+      duration: 3,
+      ease: "sine.inOut",
+      repeat: -1,
+      yoyo: true,
     });
-
-    return () => ctx.revert();
   }, []);
 
   return (

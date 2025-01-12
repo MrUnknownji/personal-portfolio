@@ -1,6 +1,13 @@
 import React from "react";
 import { FiMail, FiPhone, FiMapPin, FiArrowRight } from "react-icons/fi";
 
+interface InfoItemProps {
+  type: string;
+  title: string;
+  value: string;
+  onClick?: () => void;
+}
+
 const getIcon = (type: string) => {
   switch (type) {
     case "email":
@@ -13,13 +20,6 @@ const getIcon = (type: string) => {
       return null;
   }
 };
-
-interface InfoItemProps {
-  type: string;
-  title: string;
-  value: string;
-  onClick?: () => void;
-}
 
 const InfoItem: React.FC<InfoItemProps> = ({ type, title, value, onClick }) => {
   return (
@@ -34,9 +34,7 @@ const InfoItem: React.FC<InfoItemProps> = ({ type, title, value, onClick }) => {
         <h3 className="text-white font-medium">{title}</h3>
         <p className="text-gray-400">{value}</p>
       </div>
-      {onClick && (
-        <FiArrowRight className="w-5 h-5 text-primary" />
-      )}
+      {onClick && <FiArrowRight className="w-5 h-5 text-primary" />}
     </div>
   );
 };

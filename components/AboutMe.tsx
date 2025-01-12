@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/dist/ScrollTrigger";
 import ImageSection from "./AboutMeSectionComponents/ImageSection";
@@ -10,6 +10,9 @@ import Title from "./AboutMeSectionComponents/Title";
 gsap.registerPlugin(ScrollTrigger);
 
 const AboutMe = () => {
+  const SECTION_PADDING_Y: number = 20;
+  const STICKY_TOP_OFFSET: number = 24;
+
   useEffect(() => {
     ScrollTrigger.refresh();
 
@@ -19,7 +22,7 @@ const AboutMe = () => {
   }, []);
 
   return (
-    <section className="py-20">
+    <section className={`py-${SECTION_PADDING_Y}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Title />
         <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-16">

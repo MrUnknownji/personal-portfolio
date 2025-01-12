@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
 interface CategoryButtonProps {
@@ -18,34 +19,21 @@ const CategoryButton: React.FC<CategoryButtonProps> = ({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const borderRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useGSAP(() => {
+    if (!buttonRef.current) return;
     gsap.fromTo(
       buttonRef.current,
-      {
-        opacity: 0,
-        y: 20,
-        scale: 0.95,
-      },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.6,
-        ease: "power2.out",
-      },
+      { opacity: 0, y: 20, scale: 0.95 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power2.out" },
     );
   }, []);
 
-  useEffect(() => {
-    if (isActive) {
+  useGSAP(() => {
+    if (isActive && borderRef.current) {
       gsap.fromTo(
         borderRef.current,
         { width: "0%" },
-        {
-          width: "100%",
-          duration: 0.4,
-          ease: "power1.out",
-        },
+        { width: "100%", duration: 0.4, ease: "power1.out" },
       );
     }
   }, [isActive]);

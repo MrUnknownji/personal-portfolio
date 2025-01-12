@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { FiMail } from "react-icons/fi";
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
 interface DialogContentProps {
@@ -7,47 +8,35 @@ interface DialogContentProps {
   onCopy: () => void;
 }
 
-const DialogContent = ({ email, onCopy }: DialogContentProps) => {
+const DialogContent: React.FC<DialogContentProps> = ({ email, onCopy }) => {
   const iconWrapperRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!iconWrapperRef.current || !contentRef.current) return;
+  useGSAP(
+    () => {
+      if (!iconWrapperRef.current || !contentRef.current) return;
 
-    const tl = gsap.timeline();
+      const timeline = gsap.timeline();
 
-    tl.fromTo(
-      iconWrapperRef.current,
-      {
-        scale: 0,
-        rotate: -180,
-      },
-      {
-        scale: 1,
-        rotate: 0,
-        duration: 0.6,
-        ease: "back.out(1.7)",
-      },
-    ).fromTo(
-      contentRef.current.querySelectorAll(".animate-content"),
-      {
-        opacity: 0,
-        y: 20,
-      },
-      {
-        opacity: 1,
-        y: 0,
-        stagger: 0.1,
-        duration: 0.4,
-        ease: "power2.out",
-      },
-      "-=0.2",
-    );
+      timeline
+        .fromTo(
+          iconWrapperRef.current,
+          { scale: 0, rotate: -180 },
+          { scale: 1, rotate: 0, duration: 0.6, ease: "back.out(1.7)" },
+        )
+        .fromTo(
+          contentRef.current.querySelectorAll(".animate-content"),
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" },
+          "-=0.2",
+        );
 
-    return () => {
-      tl.kill();
-    };
-  }, []);
+      return () => {
+        timeline.kill();
+      };
+    },
+    { scope: contentRef },
+  );
 
   return (
     <div ref={contentRef} className="p-6 sm:p-8">

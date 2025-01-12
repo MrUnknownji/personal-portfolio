@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import SocialLinkButton from "./SocialLinkButton";
 import SocialInfoBox from "./SocialInfoBox";
 import { socialLinks } from "@/data/SocialLink";
 import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const SocialLinks = () => {
   const [activeLink, setActiveLink] = useState<number | null>(null);
@@ -55,7 +56,7 @@ const SocialLinks = () => {
     }
   };
 
-  useEffect(() => {
+  useGSAP(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (activeLink !== null && containerRef.current) {
         const containerRect = containerRef.current.getBoundingClientRect();

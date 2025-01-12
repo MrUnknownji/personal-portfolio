@@ -1,11 +1,19 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import HeroContent from "./HeroSectionComponents/HeroContent";
 import CodeDisplay from "./HeroSectionComponents/CodeDisplay";
+import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const HERO_SECTION_ANIMATION_DURATION = 1;
+const HERO_SECTION_BORDER_ANIMATION_DURATION = 3;
+const HERO_SECTION_CONTENT_SCROLL_DURATION = 0.1;
+const HERO_SECTION_CONTENT_SCROLL_DISTANCE = -50;
+const HERO_SECTION_CONTENT_OPACITY_FACTOR = 0.5;
+const HERO_SECTION_BORDER_ANIMATION_REPEAT = -1;
 
 const HeroSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -13,41 +21,37 @@ const HeroSection = () => {
   const cardRef = useRef<HTMLDivElement>(null);
   const borderRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(cardRef.current, {
-        scale: 0.95,
-        opacity: 0,
-        duration: 1,
-        ease: "power4.out",
-      });
-
-      gsap.to(borderRef.current, {
-        backgroundPosition: "200% 0",
-        duration: 3,
-        ease: "none",
-        repeat: -1,
-      });
-
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: "top top",
-        end: "bottom top",
-        scrub: 0.5,
-        onUpdate: (self) => {
-          if (contentRef.current) {
-            gsap.to(contentRef.current, {
-              y: self.progress * -50,
-              opacity: 1 - self.progress * 0.5,
-              duration: 0.1,
-              ease: "none",
-            });
-          }
-        },
-      });
+  useGSAP(() => {
+    gsap.from(cardRef.current, {
+      scale: 0.95,
+      opacity: 0,
+      duration: HERO_SECTION_ANIMATION_DURATION,
+      ease: "power4.out",
     });
 
-    return () => ctx.revert();
+    gsap.to(borderRef.current, {
+      backgroundPosition: "200% 0",
+      duration: HERO_SECTION_BORDER_ANIMATION_DURATION,
+      ease: "none",
+      repeat: HERO_SECTION_BORDER_ANIMATION_REPEAT,
+    });
+
+    ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: "top top",
+      end: "bottom top",
+      scrub: 0.5,
+      onUpdate: (self) => {
+        if (contentRef.current) {
+          gsap.to(contentRef.current, {
+            y: self.progress * HERO_SECTION_CONTENT_SCROLL_DISTANCE,
+            opacity: 1 - self.progress * HERO_SECTION_CONTENT_OPACITY_FACTOR,
+            duration: HERO_SECTION_CONTENT_SCROLL_DURATION,
+            ease: "none",
+          });
+        }
+      },
+    });
   }, []);
 
   return (
@@ -78,7 +82,7 @@ const HeroSection = () => {
 
           <div
             ref={cardRef}
-            className="relative backdrop-blur-sm rounded-3xl p-6 md:p-8 lg:p-12
+            className="relative rounded-3xl p-6 md:p-8 lg:p-12
               bg-gray-900 border border-gray-800/50 z-10"
           >
             <div

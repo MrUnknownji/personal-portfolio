@@ -1,83 +1,65 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef } from "react";
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import InfoItem from "./InfoItem";
 import { FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
 
 const ContactInfo: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const socialLinks = [
+
+  const SOCIAL_LINKS = [
     { icon: <FaGithub />, url: "#", label: "GitHub" },
     { icon: <FaLinkedin />, url: "#", label: "LinkedIn" },
     { icon: <FaTwitter />, url: "#", label: "Twitter" },
   ];
 
-  useEffect(() => {
-    const title = containerRef.current?.querySelector(".title");
-    const description = containerRef.current?.querySelector(".description");
-    const infoItems = containerRef.current?.querySelectorAll(".info-item");
-    const socialLinks = containerRef.current?.querySelector(".social-links");
+  useGSAP(
+    () => {
+      if (!containerRef.current) return;
 
-    if (title && description && infoItems && socialLinks) {
-      const tl = gsap.timeline();
+      const title = containerRef.current.querySelector(".title");
+      const description = containerRef.current.querySelector(".description");
+      const infoItems = containerRef.current.querySelectorAll(".info-item");
+      const socialLinks = containerRef.current.querySelector(".social-links");
 
-      tl.fromTo(
-        title,
-        {
-          opacity: 0,
-          x: -20,
-        },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.6,
-          ease: "power2.out",
-        },
-      )
-        .fromTo(
-          description,
-          {
-            opacity: 0,
-            x: -20,
-          },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.6,
-            ease: "power2.out",
-          },
-          "-=0.4",
-        )
-        .fromTo(
-          Array.from(infoItems),
-          {
-            opacity: 0,
-            x: -20,
-          },
-          {
-            opacity: 1,
-            x: 0,
-            stagger: 0.1,
-            duration: 0.6,
-            ease: "power2.out",
-          },
-          "-=0.4",
-        )
-        .fromTo(
-          socialLinks,
-          {
-            opacity: 0,
-            y: 20,
-          },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: "power2.out",
-          },
-          "-=0.4",
-        );
-    }
-  }, []);
+      if (title && description && infoItems && socialLinks) {
+        const timeline = gsap.timeline();
+
+        timeline
+          .fromTo(
+            title,
+            { opacity: 0, x: -20 },
+            { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" },
+          )
+          .fromTo(
+            description,
+            { opacity: 0, x: -20 },
+            { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" },
+            "-=0.4",
+          )
+          .fromTo(
+            Array.from(infoItems),
+            { opacity: 0, x: -20 },
+            {
+              opacity: 1,
+              x: 0,
+              stagger: 0.1,
+              duration: 0.6,
+              ease: "power2.out",
+            },
+            "-=0.4",
+          )
+          .fromTo(
+            socialLinks,
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+            "-=0.4",
+          );
+      }
+    },
+    { scope: containerRef },
+  );
+
   return (
     <div
       ref={containerRef}
@@ -116,7 +98,7 @@ const ContactInfo: React.FC = () => {
       <div className="social-links">
         <h4 className="text-accent font-medium mb-4">Connect with me</h4>
         <div className="flex space-x-4">
-          {socialLinks.map((link) => (
+          {SOCIAL_LINKS.map((link) => (
             <a
               key={link.label}
               href={link.url}

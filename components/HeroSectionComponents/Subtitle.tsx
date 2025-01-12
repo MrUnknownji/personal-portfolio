@@ -1,10 +1,17 @@
-import { useEffect } from "react";
-import gsap from "gsap";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
 import SplitType from "split-type";
+import { useGSAP } from "@gsap/react";
 
 export const Subtitle = () => {
-  useEffect(() => {
-    const subtitleSplit = new SplitType(".hero-subtitle", { types: "chars" });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const subtitleRef = useRef<HTMLHeadingElement>(null);
+
+  useGSAP(() => {
+    if (!subtitleRef.current) return;
+    const subtitleSplit = new SplitType(subtitleRef.current, {
+      types: "chars",
+    });
     if (!subtitleSplit.chars) return;
 
     const tl = gsap.timeline({
@@ -21,17 +28,12 @@ export const Subtitle = () => {
       "-=0.5",
     );
 
-    const container = document.querySelector(".subtitle-container");
-    if (!container) return;
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
 
-    const handleMouseMove = (e: Event) => {
-      const mouseEvent = e as MouseEvent;
-      const rect = container.getBoundingClientRect();
-      const mouseX = mouseEvent.clientX - rect.left;
-
-      if (!subtitleSplit.chars) return;
-
-      subtitleSplit.chars.forEach((char) => {
+      subtitleSplit.chars?.forEach((char) => {
         if (!char) return;
         const charRect = char.getBoundingClientRect();
         const charCenter = charRect.left + charRect.width / 2 - rect.left;
@@ -69,21 +71,27 @@ export const Subtitle = () => {
       });
     };
 
-    container.addEventListener("mousemove", handleMouseMove as EventListener);
-    container.addEventListener("mouseleave", handleMouseLeave);
+    containerRef.current?.addEventListener(
+      "mousemove",
+      handleMouseMove as EventListener,
+    );
+    containerRef.current?.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
-      container.removeEventListener(
+      containerRef.current?.removeEventListener(
         "mousemove",
         handleMouseMove as EventListener,
       );
-      container.removeEventListener("mouseleave", handleMouseLeave);
+      containerRef.current?.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, []);
 
   return (
-    <div className="subtitle-container">
-      <h2 className="hero-subtitle text-2xl md:text-3xl font-semibold text-[#4FD1C5]">
+    <div ref={containerRef} className="subtitle-container">
+      <h2
+        ref={subtitleRef}
+        className="hero-subtitle text-2xl md:text-3xl font-semibold text-[#4FD1C5]"
+      >
         Full Stack Developer
       </h2>
     </div>

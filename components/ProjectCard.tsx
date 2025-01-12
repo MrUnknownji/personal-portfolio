@@ -10,6 +10,11 @@ interface ProjectCardProps {
   onClick: () => void;
 }
 
+const CARD_SCALE_ON_HOVER = 1.06;
+const CONTAINER_SCALE_ON_HOVER = 1.12;
+const ANIMATION_DURATION = 0.2;
+const EASE_TYPE = "power3.out";
+
 const ProjectCardComponent: React.FC<ProjectCardProps> = ({
   project,
   onClick,
@@ -25,15 +30,15 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
   const handleMouseEnter = () => {
     if (!cardRef.current || !containerRef.current) return;
     gsap.to(cardRef.current, {
-      scale: 1.06,
-      duration: 0.2,
-      ease: "power3.out",
+      scale: CARD_SCALE_ON_HOVER,
+      duration: ANIMATION_DURATION,
+      ease: EASE_TYPE,
       overwrite: true,
     });
     gsap.to(containerRef.current, {
-      scale: 1.12,
-      duration: 0.2,
-      ease: "power3.out",
+      scale: CONTAINER_SCALE_ON_HOVER,
+      duration: ANIMATION_DURATION,
+      ease: EASE_TYPE,
       overwrite: true,
     });
   };
@@ -42,14 +47,14 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
     if (!cardRef.current || !containerRef.current) return;
     gsap.to(cardRef.current, {
       scale: 1,
-      duration: 0.2,
-      ease: "power3.out",
+      duration: ANIMATION_DURATION,
+      ease: EASE_TYPE,
       overwrite: true,
     });
     gsap.to(containerRef.current, {
       scale: 1,
-      duration: 0.2,
-      ease: "power3.out",
+      duration: ANIMATION_DURATION,
+      ease: EASE_TYPE,
       overwrite: true,
     });
   };

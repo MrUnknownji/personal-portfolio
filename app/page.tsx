@@ -2,10 +2,12 @@
 import SmoothScroll from "@/components/SmoothScroll";
 import Home from "./home";
 
-export default function HomePage() {
+const HomePage: React.FC = () => {
   return (
     <SmoothScroll>
       <Home />
     </SmoothScroll>
   );
-}
+};
+
+export default HomePage;

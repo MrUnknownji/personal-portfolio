@@ -1,38 +1,45 @@
 "use client";
 import Link from "next/link";
-import { FiGithub, FiLinkedin, FiTwitter, FiMail, FiPhone, FiMapPin } from "react-icons/fi";
+import {
+  FiGithub,
+  FiLinkedin,
+  FiTwitter,
+  FiMail,
+  FiPhone,
+  FiMapPin,
+} from "react-icons/fi";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const socialLinks = [
+const SOCIAL_LINKS = [
   {
     href: "https://github.com/yourusername",
     icon: <FiGithub className="w-6 h-6" />,
-    label: "GitHub"
+    label: "GitHub",
   },
   {
     href: "https://linkedin.com/in/yourusername",
     icon: <FiLinkedin className="w-6 h-6" />,
-    label: "LinkedIn"
+    label: "LinkedIn",
   },
   {
     href: "https://twitter.com/yourusername",
     icon: <FiTwitter className="w-6 h-6" />,
-    label: "Twitter"
-  }
+    label: "Twitter",
+  },
 ];
 
-const quickLinks = [
+const QUICK_LINKS = [
   { href: "/", text: "Home" },
   { href: "#about", text: "About" },
   { href: "#projects", text: "Projects" },
   { href: "#contact", text: "Contact" },
 ];
 
-const contactInfo = [
+const CONTACT_INFO = [
   {
     icon: <FiMail className="w-5 h-5 text-primary" />,
     text: "example@email.com",
@@ -47,33 +54,41 @@ const contactInfo = [
   },
 ];
 
+const FOOTER_PADDING_Y: number = 16;
+const ANIMATION_INITIAL_Y: number = 20;
+const ANIMATION_OPACITY_HIDDEN: number = 0;
+const ANIMATION_OPACITY_VISIBLE: number = 1;
+const ANIMATION_DURATION: number = 0.6;
+const ANIMATION_DELAY_MULTIPLIER: number = 0.1;
+const SCROLL_TRIGGER_OFFSET: number = 100;
+
 const Footer = () => {
   const footerRef = useRef<HTMLElement>(null);
-  const currentYear = new Date().getFullYear();
+  const currentYear: number = new Date().getFullYear();
 
   useEffect(() => {
     if (!footerRef.current) return;
 
     const elements = footerRef.current.querySelectorAll(".animate-footer");
-    
+
     elements.forEach((element, index) => {
       gsap.fromTo(
         element,
         {
-          opacity: 0,
-          y: 20,
+          opacity: ANIMATION_OPACITY_HIDDEN,
+          y: ANIMATION_INITIAL_Y,
         },
         {
-          opacity: 1,
+          opacity: ANIMATION_OPACITY_VISIBLE,
           y: 0,
-          duration: 0.6,
-          delay: index * 0.1,
+          duration: ANIMATION_DURATION,
+          delay: index * ANIMATION_DELAY_MULTIPLIER,
           scrollTrigger: {
             trigger: element,
-            start: "top bottom-=100",
+            start: `top bottom-=${SCROLL_TRIGGER_OFFSET}`,
             toggleActions: "play none none reverse",
           },
-        }
+        },
       );
     });
   }, []);
@@ -90,7 +105,7 @@ const Footer = () => {
               Connect With Me
             </h2>
             <div className="flex items-center gap-4">
-              {socialLinks.map((social, index) => (
+              {SOCIAL_LINKS.map((social, index) => (
                 <a
                   key={index}
                   href={social.href}
@@ -110,7 +125,7 @@ const Footer = () => {
               Quick Links
             </h2>
             <ul className="space-y-2">
-              {quickLinks.map((link, index) => (
+              {QUICK_LINKS.map((link, index) => (
                 <li key={index}>
                   <Link
                     href={link.href}
@@ -128,7 +143,7 @@ const Footer = () => {
               Contact Info
             </h2>
             <ul className="space-y-4">
-              {contactInfo.map((item, index) => (
+              {CONTACT_INFO.map((item, index) => (
                 <li key={index} className="flex items-center space-x-3">
                   {item.icon}
                   <span className="text-white/70 hover:text-primary transition-colors duration-300">
@@ -142,8 +157,8 @@ const Footer = () => {
 
         <div className="mt-16 pt-8 border-t border-white/10 text-center animate-footer">
           <p className="text-white/60">
-            {currentYear} <span className="text-primary">Sandeep Kumar</span>
-            . All rights reserved.
+            {currentYear} <span className="text-primary">Sandeep Kumar</span>.
+            All rights reserved.
           </p>
         </div>
       </div>

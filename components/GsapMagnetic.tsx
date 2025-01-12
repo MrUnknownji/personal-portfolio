@@ -7,6 +7,9 @@ interface GsapMagneticProps {
   strength?: number;
 }
 
+const MAGNETIC_ANIMATION_DURATION: number = 1;
+const MAGNETIC_EASE: string = "elastic.out(1, 0.3)";
+
 const GsapMagnetic: React.FC<GsapMagneticProps> = ({
   children,
   strength = 0.5,
@@ -18,12 +21,12 @@ const GsapMagnetic: React.FC<GsapMagneticProps> = ({
     if (!element) return;
 
     const xTo = gsap.quickTo(element, "x", {
-      duration: 1,
-      ease: "elastic.out(1, 0.3)",
+      duration: MAGNETIC_ANIMATION_DURATION,
+      ease: MAGNETIC_EASE,
     });
     const yTo = gsap.quickTo(element, "y", {
-      duration: 1,
-      ease: "elastic.out(1, 0.3)",
+      duration: MAGNETIC_ANIMATION_DURATION,
+      ease: MAGNETIC_EASE,
     });
 
     const mouseMove = (e: MouseEvent) => {

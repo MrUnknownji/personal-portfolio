@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useLayoutEffect } from "react";
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import SkillCard from "./SkillCard";
 
@@ -7,30 +8,31 @@ interface SkillsGridProps {
   skills: string[];
 }
 
+const ANIMATION_DURATION = 0.4;
+const STAGGER_DELAY = 0.05;
+const ANIMATION_EASE = "power2.out";
+const INITIAL_Y_OFFSET = 20;
+
 const SkillsGrid: React.FC<SkillsGridProps> = ({ activeCategory, skills }) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        ".skill-card",
-        {
-          opacity: 0,
-          y: 20,
-        },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.4,
-          stagger: 0.05,
-          ease: "power2.out",
-        },
-      );
-    }, gridRef);
+  useGSAP(() => {
+    if (!gridRef.current) return;
+    const skillCards = gridRef.current.querySelectorAll(".skill-card");
 
-    return () => ctx.revert();
-  }, [activeCategory]);
+    gsap.fromTo(
+      skillCards,
+      { opacity: 0, y: INITIAL_Y_OFFSET },
+      {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_DURATION,
+        stagger: STAGGER_DELAY,
+        ease: ANIMATION_EASE,
+      },
+    );
+  }, [skills]);
 
   return (
     <div ref={gridRef} className="relative">

@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import gsap from "gsap";
+import { useRef, useState, useCallback, useMemo } from "react";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const TypedText = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const texts = useMemo(
+  const TEXTS = useMemo(
     () => [
       "Building robust backend systems",
       "Crafting intuitive front-end interfaces",
@@ -77,16 +78,16 @@ const TypedText = () => {
       });
 
       setIsAnimating(false);
-      setCurrentTextIndex((prev) => (prev + 1) % texts.length);
+      setCurrentTextIndex((prev) => (prev + 1) % TEXTS.length);
     },
-    [isAnimating, texts],
+    [isAnimating, TEXTS],
   );
 
-  useEffect(() => {
+  useGSAP(() => {
     if (!isAnimating) {
-      animateText(texts[currentTextIndex]);
+      animateText(TEXTS[currentTextIndex]);
     }
-  }, [currentTextIndex, isAnimating, animateText, texts]);
+  }, [currentTextIndex, isAnimating, animateText, TEXTS]);
 
   return (
     <div className="min-h-[2rem] overflow-hidden">
@@ -98,7 +99,7 @@ const TypedText = () => {
           minHeight: "2rem",
           whiteSpace: "nowrap",
         }}
-        aria-label={texts[currentTextIndex]}
+        aria-label={TEXTS[currentTextIndex]}
       />
     </div>
   );

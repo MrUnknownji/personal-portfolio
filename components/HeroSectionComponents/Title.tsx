@@ -1,10 +1,15 @@
-import { useEffect } from "react";
-import gsap from "gsap";
+import { useRef } from "react";
+import { gsap } from "gsap";
 import SplitType from "split-type";
+import { useGSAP } from "@gsap/react";
 
 export const Title = () => {
-  useEffect(() => {
-    const titleSplit = new SplitType(".hero-title", { types: "chars" });
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useGSAP(() => {
+    if (!titleRef.current) return;
+
+    const titleSplit = new SplitType(titleRef.current, { types: "chars" });
     if (!titleSplit.chars) return;
 
     const tl = gsap.timeline({
@@ -82,7 +87,10 @@ export const Title = () => {
 
   return (
     <div className="overflow-hidden py-2">
-      <h1 className="hero-title text-white font-bold text-4xl md:text-5xl lg:text-6xl tracking-tight">
+      <h1
+        ref={titleRef}
+        className="hero-title text-white font-bold text-4xl md:text-5xl lg:text-6xl tracking-tight"
+      >
         Sandeep Kumar
       </h1>
     </div>

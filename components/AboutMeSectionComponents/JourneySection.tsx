@@ -1,6 +1,7 @@
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import ScrollTrigger from "gsap/dist/ScrollTrigger";
+import { useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -9,7 +10,9 @@ const JourneySection = () => {
   const textRef = useRef<HTMLParagraphElement>(null);
   const borderRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useGSAP(() => {
+    if (!journeyRef.current || !textRef.current || !borderRef.current) return;
+
     gsap.fromTo(
       journeyRef.current,
       {
@@ -46,7 +49,7 @@ const JourneySection = () => {
       },
     );
 
-    const words = textRef.current?.children;
+    const words = textRef.current.children;
     if (words) {
       gsap.fromTo(
         words,
@@ -69,7 +72,7 @@ const JourneySection = () => {
     }
   }, []);
 
-  const description =
+  const DESCRIPTION =
     "From writing my first line of code to developing complex web applications, every step of my journey has been driven by a passion for problem-solving and a desire to create impactful digital experiences. I thrive on challenges and continuously push myself to learn and grow in this ever-evolving field.";
 
   return (
@@ -95,7 +98,7 @@ const JourneySection = () => {
           ref={textRef}
           className="text-gray-200 text-lg leading-relaxed tracking-wide"
         >
-          {description.split(" ").map((word, index) => (
+          {DESCRIPTION.split(" ").map((word, index) => (
             <span
               key={index}
               className="inline-block mr-1 [transition:color_0.2s_ease-out]
@@ -107,7 +110,6 @@ const JourneySection = () => {
         </p>
       </div>
 
-      {/* Decorative corner elements */}
       <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-primary rounded-tl-lg" />
       <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-primary rounded-tr-lg" />
       <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-primary rounded-bl-lg" />

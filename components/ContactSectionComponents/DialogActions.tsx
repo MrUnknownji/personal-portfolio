@@ -4,7 +4,7 @@ import { FiChevronRight, FiX, FiCheck } from "react-icons/fi";
 
 interface DialogActionsProps {
   onClose: () => void;
-  isEmailCopied?: boolean; // Added isEmailCopied prop, optional
+  isEmailCopied?: boolean;
 }
 
 const DialogActions: React.FC<DialogActionsProps> = ({

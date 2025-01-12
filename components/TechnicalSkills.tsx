@@ -5,8 +5,22 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { TechnicalSectionSkills } from "@/data/data";
 import CategoryButton from "./TechnicalSkillsSectionComponents/CategoryButton";
 import SkillsGrid from "./TechnicalSkillsSectionComponents/SkillsGrid";
+import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const TITLE_ANIMATION_DURATION = 0.8;
+const CATEGORIES_ANIMATION_DURATION = 0.6;
+const CONTENT_ANIMATION_DURATION = 0.6;
+const ANIMATION_EASE_TITLE = "power3.out";
+const ANIMATION_EASE_CATEGORIES = "power2.out";
+const ANIMATION_EASE_CONTENT = "power2.out";
+const TITLE_INITIAL_Y = 30;
+const CATEGORIES_INITIAL_Y = 20;
+const CONTENT_INITIAL_Y = 20;
+const TITLE_INITIAL_SCALE = 0.9;
+const ANIMATION_TRIGGER_START = "top 60%";
+const ANIMATION_TRIGGER_END = "center center";
 
 const TechnicalSkills: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState(
@@ -17,12 +31,12 @@ const TechnicalSkills: React.FC = () => {
   const categoriesRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useGSAP(() => {
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
-        start: "top 60%",
-        end: "center center",
+        start: ANIMATION_TRIGGER_START,
+        end: ANIMATION_TRIGGER_END,
         toggleActions: "play none none reverse",
       },
     });
@@ -31,28 +45,28 @@ const TechnicalSkills: React.FC = () => {
       titleRef.current,
       {
         opacity: 0,
-        y: 30,
-        scale: 0.9,
+        y: TITLE_INITIAL_Y,
+        scale: TITLE_INITIAL_SCALE,
       },
       {
         opacity: 1,
         y: 0,
         scale: 1,
-        duration: 0.8,
-        ease: "power3.out",
+        duration: TITLE_ANIMATION_DURATION,
+        ease: ANIMATION_EASE_TITLE,
       },
     )
       .fromTo(
         categoriesRef.current,
         {
           opacity: 0,
-          y: 20,
+          y: CATEGORIES_INITIAL_Y,
         },
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
-          ease: "power2.out",
+          duration: CATEGORIES_ANIMATION_DURATION,
+          ease: ANIMATION_EASE_CATEGORIES,
         },
         "-=0.4",
       )
@@ -60,13 +74,13 @@ const TechnicalSkills: React.FC = () => {
         contentRef.current,
         {
           opacity: 0,
-          y: 20,
+          y: CONTENT_INITIAL_Y,
         },
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
-          ease: "power2.out",
+          duration: CONTENT_ANIMATION_DURATION,
+          ease: ANIMATION_EASE_CONTENT,
         },
         "-=0.3",
       );

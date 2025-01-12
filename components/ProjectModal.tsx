@@ -14,6 +14,16 @@ interface ProjectModalProps {
   onClose: () => void;
 }
 
+const OVERLAY_OPACITY_OPEN = 0.5;
+const OVERLAY_OPACITY_CLOSE = 0;
+const CONTENT_SCALE_OPEN = 1;
+const CONTENT_SCALE_CLOSE = 0.95;
+const ANIMATION_DURATION_CLOSE = 0.3;
+const ANIMATION_DURATION_OPEN_OVERLAY = 0.3;
+const ANIMATION_DURATION_OPEN_CONTENT = 0.4;
+const EASE_TYPE_OPEN = "expo.out";
+const EASE_TYPE_CLOSE = "power2.in";
+
 const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -22,16 +32,16 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     if (!overlayRef.current || !contentRef.current) return;
 
     gsap.to(overlayRef.current, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power2.in",
+      opacity: OVERLAY_OPACITY_CLOSE,
+      duration: ANIMATION_DURATION_CLOSE,
+      ease: EASE_TYPE_CLOSE,
       overwrite: true,
     });
     gsap.to(contentRef.current, {
-      opacity: 0,
-      scale: 0.95,
-      duration: 0.3,
-      ease: "power2.in",
+      opacity: OVERLAY_OPACITY_CLOSE,
+      scale: CONTENT_SCALE_CLOSE,
+      duration: ANIMATION_DURATION_CLOSE,
+      ease: EASE_TYPE_CLOSE,
       overwrite: true,
       onComplete: onClose,
     });
@@ -41,23 +51,31 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     if (isOpen && overlayRef.current && contentRef.current) {
       gsap.fromTo(
         overlayRef.current,
-        { opacity: 0 },
-        { opacity: 0.5, duration: 0.3, ease: "power2.out", overwrite: true },
+        { opacity: OVERLAY_OPACITY_CLOSE },
+        {
+          opacity: OVERLAY_OPACITY_OPEN,
+          duration: ANIMATION_DURATION_OPEN_OVERLAY,
+          ease: EASE_TYPE_OPEN,
+          overwrite: true,
+        },
       );
       gsap.fromTo(
         contentRef.current,
-        { opacity: 0, scale: 0.95 },
+        { opacity: OVERLAY_OPACITY_CLOSE, scale: CONTENT_SCALE_CLOSE },
         {
           opacity: 1,
-          scale: 1,
-          duration: 0.4,
-          ease: "expo.out",
+          scale: CONTENT_SCALE_OPEN,
+          duration: ANIMATION_DURATION_OPEN_CONTENT,
+          ease: EASE_TYPE_OPEN,
           overwrite: true,
         },
       );
     } else if (!isOpen && overlayRef.current && contentRef.current) {
-      gsap.set(overlayRef.current, { opacity: 0 });
-      gsap.set(contentRef.current, { opacity: 0, scale: 0.95 });
+      gsap.set(overlayRef.current, { opacity: OVERLAY_OPACITY_CLOSE });
+      gsap.set(contentRef.current, {
+        opacity: OVERLAY_OPACITY_CLOSE,
+        scale: CONTENT_SCALE_CLOSE,
+      });
     }
   }, [isOpen]);
 

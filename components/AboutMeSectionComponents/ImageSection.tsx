@@ -1,6 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
-import gsap from "gsap";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const ImageSection = () => {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -8,7 +12,9 @@ const ImageSection = () => {
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const rotatingBorderRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useGSAP(() => {
+    if (!containerRef.current || !rotatingBorderRef.current) return;
+
     gsap.fromTo(
       containerRef.current,
       {

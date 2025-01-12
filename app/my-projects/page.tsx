@@ -10,6 +10,16 @@ import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const HEADER_ANIMATION_DURATION = 0.6;
+const FILTER_ANIMATION_DURATION = 0.6;
+const PROJECTS_ANIMATION_DURATION = 0.6;
+const STAGGER_DELAY = 0.08;
+const BUTTON_SCALE_ON_HOVER = 1.1;
+const ANIMATION_EASE = "power3.out";
+const FILTER_ANIMATION_DELAY = 0.1;
+const INITIAL_Y_OFFSET = 30;
+const INITIAL_HEADER_Y_OFFSET = -30;
+
 export default function MyProjects() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [filter, setFilter] = useState("All");
@@ -31,14 +41,25 @@ export default function MyProjects() {
   useGSAP(() => {
     gsap.fromTo(
       headerRef.current,
-      { opacity: 0, y: -30 },
-      { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
+      { opacity: 0, y: INITIAL_HEADER_Y_OFFSET },
+      {
+        opacity: 1,
+        y: 0,
+        duration: HEADER_ANIMATION_DURATION,
+        ease: ANIMATION_EASE,
+      },
     );
 
     gsap.fromTo(
       filterRef.current,
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, duration: 0.6, delay: 0.1, ease: "power3.out" },
+      { opacity: 0, y: INITIAL_Y_OFFSET },
+      {
+        opacity: 1,
+        y: 0,
+        duration: FILTER_ANIMATION_DURATION,
+        delay: FILTER_ANIMATION_DELAY,
+        ease: ANIMATION_EASE,
+      },
     );
   }, []);
 
@@ -46,13 +67,13 @@ export default function MyProjects() {
     if (projectsRef.current) {
       gsap.fromTo(
         projectsRef.current.children,
-        { opacity: 0, y: 30 },
+        { opacity: 0, y: INITIAL_Y_OFFSET },
         {
           opacity: 1,
           y: 0,
-          duration: 0.6,
-          stagger: 0.08,
-          ease: "power3.out",
+          duration: PROJECTS_ANIMATION_DURATION,
+          stagger: STAGGER_DELAY,
+          ease: ANIMATION_EASE,
           willChange: "opacity, transform",
         },
       );
@@ -62,9 +83,9 @@ export default function MyProjects() {
   const handleButtonHover = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       gsap.to(e.currentTarget, {
-        scale: 1.1,
+        scale: BUTTON_SCALE_ON_HOVER,
         duration: 0.2,
-        ease: "power3.out",
+        ease: ANIMATION_EASE,
         overwrite: true,
       });
     },
@@ -76,7 +97,7 @@ export default function MyProjects() {
       gsap.to(e.currentTarget, {
         scale: 1,
         duration: 0.2,
-        ease: "power3.out",
+        ease: ANIMATION_EASE,
         overwrite: true,
       });
     },

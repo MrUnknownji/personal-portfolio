@@ -4,7 +4,7 @@ import HeroSection from "@/components/HeroSection";
 import TechnicalSkills from "@/components/TechnicalSkills";
 import AboutMe from "@/components/AboutMe";
 
-export default function Home() {
+const Home: React.FC = () => {
   return (
     <div className="min-h-screen">
       <HeroSection />
@@ -13,4 +13,6 @@ export default function Home() {
       <ContactForm />
     </div>
   );
-}
+};
+
+export default Home;

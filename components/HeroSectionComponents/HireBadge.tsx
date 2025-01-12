@@ -1,39 +1,41 @@
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
+import { useRef } from "react";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const HireBadge = () => {
   const badgeRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const hoverTl = gsap.timeline({ paused: true });
+  useGSAP(() => {
+    if (!badgeRef.current) return;
 
-      if (badgeRef.current) {
-        hoverTl
-          .to(badgeRef.current, {
-            scale: 1.05,
-            duration: 0.2,
-            ease: "power2.out",
-          })
-          .to(
-            ".pulse-ring",
-            {
-              scale: 1.5,
-              opacity: 0,
-              duration: 0.8,
-              ease: "power2.out",
-            },
-            0,
-          );
+    const hoverTl = gsap.timeline({ paused: true });
 
-        badgeRef.current.addEventListener("mouseenter", () => hoverTl.play());
-        badgeRef.current.addEventListener("mouseleave", () =>
-          hoverTl.reverse(),
-        );
-      }
-    }, badgeRef);
+    hoverTl
+      .to(badgeRef.current, {
+        scale: 1.05,
+        duration: 0.2,
+        ease: "power2.out",
+      })
+      .to(
+        ".pulse-ring",
+        {
+          scale: 1.5,
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.out",
+        },
+        0,
+      );
 
-    return () => ctx.revert();
+    badgeRef.current.addEventListener("mouseenter", () => hoverTl.play());
+    badgeRef.current.addEventListener("mouseleave", () => hoverTl.reverse());
+
+    return () => {
+      badgeRef.current?.removeEventListener("mouseenter", () => hoverTl.play());
+      badgeRef.current?.removeEventListener("mouseleave", () =>
+        hoverTl.reverse(),
+      );
+    };
   }, []);
 
   return (

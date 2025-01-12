@@ -8,6 +8,18 @@ import ThankYouDialog from "./ThankYouDialog";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const CONTACT_SECTION_PADDING_Y: number = 24;
+const TITLE_ANIMATION_DURATION: number = 0.8;
+const CONTAINER_ANIMATION_DURATION: number = 1;
+const INITIAL_OPACITY_HIDDEN: number = 0;
+const INITIAL_TITLE_Y: number = 30;
+const INITIAL_CONTAINER_Y: number = 40;
+const INITIAL_SCALE: number = 0.95;
+const OPACITY_VISIBLE: number = 1;
+const SCALE_VISIBLE: number = 1;
+const ANIMATION_EASE: string = "power3.out";
+const TITLE_ANIMATION_DELAY: number = 0.4;
+
 const ContactForm: React.FC = () => {
   const [isThankYouOpen, setIsThankYouOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -25,7 +37,7 @@ const ContactForm: React.FC = () => {
     const container = containerRef.current;
 
     if (title && container) {
-      const tl = gsap.timeline({
+      const timeline = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top 60%",
@@ -34,34 +46,36 @@ const ContactForm: React.FC = () => {
         },
       });
 
-      tl.fromTo(
-        title,
-        {
-          opacity: 0,
-          y: 30,
-        },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: "power3.out",
-        },
-      ).fromTo(
-        container,
-        {
-          opacity: 0,
-          y: 40,
-          scale: 0.95,
-        },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 1,
-          ease: "power3.out",
-        },
-        "-=0.4",
-      );
+      timeline
+        .fromTo(
+          title,
+          {
+            opacity: INITIAL_OPACITY_HIDDEN,
+            y: INITIAL_TITLE_Y,
+          },
+          {
+            opacity: OPACITY_VISIBLE,
+            y: 0,
+            duration: TITLE_ANIMATION_DURATION,
+            ease: ANIMATION_EASE,
+          },
+        )
+        .fromTo(
+          container,
+          {
+            opacity: INITIAL_OPACITY_HIDDEN,
+            y: INITIAL_CONTAINER_Y,
+            scale: INITIAL_SCALE,
+          },
+          {
+            opacity: OPACITY_VISIBLE,
+            y: 0,
+            scale: SCALE_VISIBLE,
+            duration: CONTAINER_ANIMATION_DURATION,
+            ease: ANIMATION_EASE,
+          },
+          `-=${TITLE_ANIMATION_DELAY}`,
+        );
     }
 
     return () => {
@@ -81,7 +95,7 @@ const ContactForm: React.FC = () => {
     <section
       ref={sectionRef}
       id="contact"
-      className="relative py-24 overflow-hidden"
+      className={`relative py-${CONTACT_SECTION_PADDING_Y} overflow-hidden`}
       suppressHydrationWarning
     >
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />

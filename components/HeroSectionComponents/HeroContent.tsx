@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
+import { useRef } from "react";
+import { gsap } from "gsap";
 import TypedText from "./TypedText";
 import SkillCard from "./SkillCard";
 import SocialLinks from "./SocialLinks";
@@ -7,39 +7,37 @@ import { HeroSectionSkills as skills } from "@/data/data";
 import HireBadge from "./HireBadge";
 import HeroText from "./HeroText";
 import ViewProjectsButton from "./ViewProjectsButton";
+import { useGSAP } from "@gsap/react";
 
 const HeroContent = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const elements = {
-        badge: ".hire-badge",
-        skills: ".skills-section",
-        actions: ".actions-section",
-      };
+  useGSAP(() => {
+    if (!containerRef.current) return;
+    const elements = {
+      badge: ".hire-badge",
+      skills: ".skills-section",
+      actions: ".actions-section",
+    };
 
-      const elementsToAnimate = [
-        elements.badge,
-        elements.skills,
-        elements.actions,
-      ];
+    const elementsToAnimate = [
+      elements.badge,
+      elements.skills,
+      elements.actions,
+    ];
 
-      gsap.set(elementsToAnimate, {
-        opacity: 0,
-        y: 20,
-      });
+    gsap.set(elementsToAnimate, {
+      opacity: 0,
+      y: 20,
+    });
 
-      gsap.to(elementsToAnimate, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        stagger: 0.2,
-        ease: "power2.out",
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
+    gsap.to(elementsToAnimate, {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      stagger: 0.2,
+      ease: "power2.out",
+    });
   }, []);
 
   return (

@@ -1,6 +1,24 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 
+const CURSOR_RING_SIZE: number = 10;
+const CURSOR_DOT_SIZE: number = 1.5;
+const CURSOR_RING_BORDER_WIDTH: number = 2;
+const CURSOR_RING_OPACITY: number = 100;
+const CURSOR_DOT_OPACITY: number = 100;
+const CURSOR_RING_TRANSITION_DURATION: number = 300;
+const CURSOR_DOT_TRANSITION_DURATION: number = 300;
+const CURSOR_RING_SCALE_VISIBLE: number = 100;
+const CURSOR_RING_SCALE_HIDDEN: number = 0;
+const CURSOR_RING_OPACITY_HIDDEN: number = 0;
+const CURSOR_DOT_OPACITY_HOVER: number = 10;
+const CURSOR_DOT_HOVER_SIZE: number = 16;
+const CURSOR_RING_EASE: string = "ease-out";
+const CURSOR_DOT_EASE: string = "ease-out";
+const CURSOR_RING_SMOOTHING: number = 0.3;
+const CURSOR_DOT_SMOOTHING: number = 0.4;
+const CURSOR_Z_INDEX: number = 500;
+
 const CustomCursor: React.FC = () => {
   const cursorRingRef = useRef<HTMLDivElement>(null);
   const cursorDotRef = useRef<HTMLDivElement>(null);
@@ -25,13 +43,13 @@ const CustomCursor: React.FC = () => {
     };
 
     const updateCursorPosition = () => {
-      ringX += (mouseX - ringX) * 0.3;
-      ringY += (mouseY - ringY) * 0.3;
+      ringX += (mouseX - ringX) * CURSOR_RING_SMOOTHING;
+      ringY += (mouseY - ringY) * CURSOR_RING_SMOOTHING;
       cursorRing.style.left = `${ringX}px`;
       cursorRing.style.top = `${ringY}px`;
 
-      dotX += (mouseX - dotX) * 0.4;
-      dotY += (mouseY - dotY) * 0.4;
+      dotX += (mouseX - dotX) * CURSOR_DOT_SMOOTHING;
+      dotY += (mouseY - dotY) * CURSOR_DOT_SMOOTHING;
       cursorDot.style.left = `${dotX}px`;
       cursorDot.style.top = `${dotY}px`;
 
@@ -60,15 +78,19 @@ const CustomCursor: React.FC = () => {
     <>
       <div
         ref={cursorRingRef}
-        className={`cursor-ring fixed pointer-events-none z-[500] w-10 h-10 border-2 border-primary rounded-full transition-all duration-300 ease-out ${
-          isPointerOrText ? "opacity-0 scale-0" : "opacity-100 scale-100"
+        className={`cursor-ring fixed pointer-events-none z-[${CURSOR_Z_INDEX}] w-${CURSOR_RING_SIZE} h-${CURSOR_RING_SIZE} border-${CURSOR_RING_BORDER_WIDTH} border-primary rounded-full transition-all duration-${CURSOR_RING_TRANSITION_DURATION} ${CURSOR_RING_EASE} ${
+          isPointerOrText
+            ? `opacity-${CURSOR_RING_OPACITY_HIDDEN} scale-${CURSOR_RING_SCALE_HIDDEN}`
+            : `opacity-${CURSOR_RING_OPACITY} scale-${CURSOR_RING_SCALE_VISIBLE}`
         }`}
         style={{ transform: "translate(-50%, -50%)" }}
       />
       <div
         ref={cursorDotRef}
-        className={`cursor-dot fixed pointer-events-none z-[500] bg-primary rounded-full transition-all duration-300 ease-out ${
-          isPointerOrText ? "w-16 h-16 opacity-10" : "w-1.5 h-1.5 opacity-100"
+        className={`cursor-dot fixed pointer-events-none z-[${CURSOR_Z_INDEX}] bg-primary rounded-full transition-all duration-${CURSOR_DOT_TRANSITION_DURATION} ${CURSOR_DOT_EASE} ${
+          isPointerOrText
+            ? `w-${CURSOR_DOT_HOVER_SIZE} h-${CURSOR_DOT_HOVER_SIZE} opacity-${CURSOR_DOT_OPACITY_HOVER}`
+            : `w-${CURSOR_DOT_SIZE} h-${CURSOR_DOT_SIZE} opacity-${CURSOR_DOT_OPACITY}`
         }`}
         style={{ transform: "translate(-50%, -50%)" }}
       />

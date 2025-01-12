@@ -1,14 +1,29 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import gsap from "gsap";
 import DialogContent from "./ContactSectionComponents/DialogContent";
 import DialogActions from "./ContactSectionComponents/DialogActions";
+import { useGSAP } from "@gsap/react";
 
 interface ThankYouDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  email?: string; // Optional email prop.
+  email?: string;
 }
+
+const OVERLAY_OPACITY_OPEN = 1;
+const OVERLAY_OPACITY_CLOSE = 0;
+const DIALOG_SCALE_OPEN = 1;
+const DIALOG_SCALE_CLOSE = 0.95;
+const DIALOG_Y_OPEN = 0;
+const DIALOG_Y_CLOSE = 20;
+const ANIMATION_DURATION_OPEN_OVERLAY = 0.3;
+const ANIMATION_DURATION_OPEN_DIALOG = 0.4;
+const ANIMATION_DURATION_CLOSE_DIALOG = 0.3;
+const ANIMATION_DURATION_CLOSE_OVERLAY = 0.2;
+const EASE_TYPE_OPEN = "power3.out";
+const EASE_TYPE_CLOSE = "power3.in";
+const COPY_MESSAGE_DURATION = 3000;
 
 const ThankYouDialog: React.FC<ThankYouDialogProps> = ({
   isOpen,
@@ -19,39 +34,45 @@ const ThankYouDialog: React.FC<ThankYouDialogProps> = ({
   const dialogRef = useRef<HTMLDivElement>(null);
   const [isEmailCopied, setIsEmailCopied] = useState(false);
 
-  const handleCopyEmail = () => {
+  const handleCopyEmail = useCallback(() => {
     if (email) {
       navigator.clipboard.writeText(email);
       setIsEmailCopied(true);
 
       setTimeout(() => {
         setIsEmailCopied(false);
-      }, 3000);
+      }, COPY_MESSAGE_DURATION);
     }
-  };
+  }, [email]);
 
-  useEffect(() => {
+  useGSAP(() => {
     const overlay = overlayRef.current;
     const dialog = dialogRef.current;
 
     if (isOpen && overlay && dialog) {
       document.body.style.overflow = "hidden";
-
       const tl = gsap.timeline();
 
-      tl.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.3 }).fromTo(
+      tl.fromTo(
+        overlay,
+        { opacity: OVERLAY_OPACITY_CLOSE },
+        {
+          opacity: OVERLAY_OPACITY_OPEN,
+          duration: ANIMATION_DURATION_OPEN_OVERLAY,
+        },
+      ).fromTo(
         dialog,
         {
-          opacity: 0,
-          scale: 0.95,
-          y: 20,
+          opacity: OVERLAY_OPACITY_CLOSE,
+          scale: DIALOG_SCALE_CLOSE,
+          y: DIALOG_Y_CLOSE,
         },
         {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.4,
-          ease: "power3.out",
+          opacity: OVERLAY_OPACITY_OPEN,
+          scale: DIALOG_SCALE_OPEN,
+          y: DIALOG_Y_OPEN,
+          duration: ANIMATION_DURATION_OPEN_DIALOG,
+          ease: EASE_TYPE_OPEN,
         },
         "-=0.1",
       );
@@ -62,24 +83,24 @@ const ThankYouDialog: React.FC<ThankYouDialogProps> = ({
     };
   }, [isOpen]);
 
-  const handleClose = async () => {
+  const handleClose = useCallback(async () => {
     const tl = gsap.timeline();
 
     await tl
       .to(dialogRef.current, {
-        opacity: 0,
-        scale: 0.95,
-        y: 20,
-        duration: 0.3,
-        ease: "power3.in",
+        opacity: OVERLAY_OPACITY_CLOSE,
+        scale: DIALOG_SCALE_CLOSE,
+        y: DIALOG_Y_CLOSE,
+        duration: ANIMATION_DURATION_CLOSE_DIALOG,
+        ease: EASE_TYPE_CLOSE,
       })
       .to(overlayRef.current, {
-        opacity: 0,
-        duration: 0.2,
+        opacity: OVERLAY_OPACITY_CLOSE,
+        duration: ANIMATION_DURATION_CLOSE_OVERLAY,
       });
 
     onClose();
-  };
+  }, [onClose]);
 
   if (!isOpen) return null;
 

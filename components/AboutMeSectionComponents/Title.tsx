@@ -1,10 +1,16 @@
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
+import { useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Title = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
 
-  useEffect(() => {
+  useGSAP(() => {
+    if (!titleRef.current) return;
+
     gsap.fromTo(
       titleRef.current,
       { opacity: 0, y: 30 },

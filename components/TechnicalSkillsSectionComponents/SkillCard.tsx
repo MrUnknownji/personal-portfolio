@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { FiChevronRight } from "react-icons/fi";
 
@@ -11,20 +12,25 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    gsap.fromTo(
-      progressRef.current,
-      { width: "0%" },
-      {
-        width: "100%",
-        duration: 0.6,
-        delay: 0.2 + index * 0.1,
-        ease: "power2.inOut",
-      },
-    );
-  }, [index]);
+  useGSAP(
+    ({ scope }) => {
+      if (!progressRef.current) return;
+      gsap.fromTo(
+        progressRef.current,
+        { width: "0%" },
+        {
+          width: "100%",
+          duration: 0.6,
+          delay: 0.2 + index * 0.1,
+          ease: "power2.inOut",
+        },
+      );
+    },
+    { scope: progressRef },
+  );
 
   const handleMouseEnter = () => {
+    if (!cardRef.current) return;
     gsap.to(cardRef.current, {
       y: -5,
       scale: 1.02,
@@ -34,6 +40,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
   };
 
   const handleMouseLeave = () => {
+    if (!cardRef.current) return;
     gsap.to(cardRef.current, {
       y: 0,
       scale: 1,

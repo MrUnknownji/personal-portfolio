@@ -4,6 +4,13 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
+const HEADER_ANIMATION_DURATION: number = 0.6;
+const HEADER_OPACITY_HIDDEN: number = 0;
+const HEADER_INITIAL_X_LOGO: number = -20;
+const HEADER_INITIAL_X_CONTACT: number = 20;
+const HEADER_EASE: string = "power2.out";
+const HEADER_SCROLL_THRESHOLD: number = 10;
+
 const Header = () => {
   const headerRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
@@ -17,7 +24,8 @@ const Header = () => {
       const currentScrollPos = window.scrollY;
       if (header) {
         header.style.transform = `translateY(${
-          prevScrollPos > currentScrollPos || currentScrollPos < 10
+          prevScrollPos > currentScrollPos ||
+          currentScrollPos < HEADER_SCROLL_THRESHOLD
             ? "0"
             : "-100%"
         })`;
@@ -27,17 +35,17 @@ const Header = () => {
 
     const ctx = gsap.context(() => {
       gsap.from(logoRef.current, {
-        opacity: 0,
-        x: -20,
-        duration: 0.6,
-        ease: "power2.out",
+        opacity: HEADER_OPACITY_HIDDEN,
+        x: HEADER_INITIAL_X_LOGO,
+        duration: HEADER_ANIMATION_DURATION,
+        ease: HEADER_EASE,
       });
 
       gsap.from(contactRef.current, {
-        opacity: 0,
-        x: 20,
-        duration: 0.6,
-        ease: "power2.out",
+        opacity: HEADER_OPACITY_HIDDEN,
+        x: HEADER_INITIAL_X_CONTACT,
+        duration: HEADER_ANIMATION_DURATION,
+        ease: HEADER_EASE,
       });
     });
 
@@ -74,15 +82,12 @@ const Header = () => {
               border border-gray-700 shadow-lg transition-all duration-300
               hover:border-primary/50 hover:shadow-primary/20 hover:bg-gray-800"
           >
-            {/* Glass effect */}
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent
                 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"
               />
             </div>
-
-            {/* Button text */}
             <span className="relative z-10">Contact Me</span>
           </button>
         </nav>

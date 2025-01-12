@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
+import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
 interface FormProps {
@@ -17,51 +18,39 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
   const formRef = useRef<HTMLFormElement>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    const formFields = formRef.current?.querySelectorAll("input, textarea");
-    const submitButton = submitButtonRef.current;
+  useGSAP(
+    () => {
+      if (!formRef.current || !submitButtonRef.current) return;
 
-    if (formFields && submitButton) {
-      const tl = gsap.timeline();
+      const formFields = formRef.current.querySelectorAll("input, textarea");
+      const submitButton = submitButtonRef.current;
 
-      tl.fromTo(
-        Array.from(formFields),
-        {
-          opacity: 0,
-          y: 20,
-        },
-        {
-          opacity: 1,
-          y: 0,
-          stagger: 0.1,
-          duration: 0.6,
-          ease: "power2.out",
-        },
-      ).fromTo(
-        submitButton,
-        {
-          opacity: 0,
-          y: 20,
-        },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: "power2.out",
-        },
-      );
-    }
-  }, []);
+      const timeline = gsap.timeline();
+
+      timeline
+        .fromTo(
+          Array.from(formFields),
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, stagger: 0.1, duration: 0.6, ease: "power2.out" },
+        )
+        .fromTo(
+          submitButton,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+        );
+    },
+    { scope: formRef },
+  );
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value } = event.target;
+    setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
     gsap.to(submitButtonRef.current, {
       scale: 0.95,
@@ -76,7 +65,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     onSubmitSuccess();
   };
 
-  const inputClassName = `w-full bg-secondary/50 rounded-lg px-4 py-3 text-gray-100
+  const INPUT_CLASS_NAME = `w-full bg-secondary/50 rounded-lg px-4 py-3 text-gray-100
     placeholder:text-gray-500 focus:outline-none border border-primary/10
     focus:border-primary/30 transition-colors duration-300`;
 
@@ -90,7 +79,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         onChange={handleChange}
         required
         placeholder="Your Name"
-        className={inputClassName}
+        className={INPUT_CLASS_NAME}
       />
 
       <input
@@ -101,7 +90,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         onChange={handleChange}
         required
         placeholder="Your Email"
-        className={inputClassName}
+        className={INPUT_CLASS_NAME}
       />
 
       <input
@@ -112,7 +101,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         onChange={handleChange}
         required
         placeholder="Subject"
-        className={inputClassName}
+        className={INPUT_CLASS_NAME}
       />
 
       <textarea
@@ -123,7 +112,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         required
         rows={4}
         placeholder="Your Message"
-        className={`${inputClassName} resize-none`}
+        className={`${INPUT_CLASS_NAME} resize-none`}
         spellCheck="false"
       />
 
