@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import LayoutClient from "./layout-client";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -13,17 +14,28 @@ export const metadata: Metadata = {
   description: "How Bad Possibly It Could Be",
 };
 
-const RootLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
+      <head>
+        <style>{`
+          body {
+            background-color: rgb(3, 7, 18);
+          }
+        `}</style>
+      </head>
       <body
         className="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 overflow-x-hidden"
         suppressHydrationWarning
       >
-        <LayoutClient>{children}</LayoutClient>
+        <Header />
+        {children}
+        <Footer />
       </body>
     </html>
   );
-};
-
-export default RootLayout;
+}

@@ -10,6 +10,11 @@
 html {
     width: 100vw;
     overflow-x: hidden;
+    background-color: rgb(3, 7, 18);
+}
+
+body {
+    background-color: rgb(3, 7, 18);
 }
 
 ::-webkit-scrollbar {

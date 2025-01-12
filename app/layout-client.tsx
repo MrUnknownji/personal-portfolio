@@ -1,8 +1,13 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { usePathname } from "next/navigation";
 import Header from "../components/Header";
 import Footer from "@/components/Footer";
+import PageLoader from "@/components/PageLoader";
+import PageTransition from "@/components/PageTransition";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const CustomCursor = dynamic(() => import("@/components/CustomCursor"), {
   ssr: false,
@@ -19,26 +24,61 @@ const BackgroundBlobs: React.FC = () => (
 const LayoutClient: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const pathname = usePathname();
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  if (!mounted) {
-    return null;
+  useEffect(() => {
+    setIsTransitioning(true);
+    const timer = setTimeout(() => {
+      setIsTransitioning(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [pathname]);
+
+  useGSAP(() => {
+    if (!isLoading && !isTransitioning && contentRef.current) {
+      gsap.fromTo(
+        contentRef.current,
+        {
+          opacity: 0,
+        },
+        {
+          opacity: 1,
+          duration: 0.5,
+          delay: 0.3,
+        },
+      );
+    }
+  }, [isLoading, isTransitioning]);
+
+  if (isLoading) {
+    return <PageLoader />;
   }
 
   return (
     <>
-      <BackgroundBlobs />
-      <div suppressHydrationWarning>
-        <div className="hidden md:block [@media(hover:none)]:hidden">
-          <CustomCursor />
+      {isTransitioning && <PageTransition />}
+      <div ref={contentRef} className={`${isTransitioning ? "opacity-0" : ""}`}>
+        <BackgroundBlobs />
+        <div suppressHydrationWarning>
+          <div className="hidden md:block [@media(hover:none)]:hidden">
+            <CustomCursor />
+          </div>
+          <Header />
+          <main>{children}</main>
+          <Footer />
         </div>
-        <Header />
-        <main>{children}</main>
-        <Footer />
       </div>
     </>
   );
