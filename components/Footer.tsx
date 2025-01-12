@@ -54,7 +54,6 @@ const CONTACT_INFO = [
   },
 ];
 
-const FOOTER_PADDING_Y: number = 16;
 const ANIMATION_INITIAL_Y: number = 20;
 const ANIMATION_OPACITY_HIDDEN: number = 0;
 const ANIMATION_OPACITY_VISIBLE: number = 1;

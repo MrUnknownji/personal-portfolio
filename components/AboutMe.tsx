@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import gsap from "gsap";
 import ScrollTrigger from "gsap/dist/ScrollTrigger";
 import ImageSection from "./AboutMeSectionComponents/ImageSection";
@@ -11,7 +11,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 const AboutMe = () => {
   const SECTION_PADDING_Y: number = 20;
-  const STICKY_TOP_OFFSET: number = 24;
 
   useEffect(() => {
     ScrollTrigger.refresh();

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import gsap from "gsap";
 import DialogContent from "./ContactSectionComponents/DialogContent";
 import DialogActions from "./ContactSectionComponents/DialogActions";

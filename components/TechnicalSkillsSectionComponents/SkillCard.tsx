@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { FiChevronRight } from "react-icons/fi";
@@ -13,7 +13,7 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
   const progressRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
-    ({ scope }) => {
+    () => {
       if (!progressRef.current) return;
       gsap.fromTo(
         progressRef.current,
