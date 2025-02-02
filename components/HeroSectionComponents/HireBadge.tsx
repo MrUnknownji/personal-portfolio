@@ -7,34 +7,28 @@ const HireBadge = () => {
 
   useGSAP(() => {
     if (!badgeRef.current) return;
-
     const hoverTl = gsap.timeline({ paused: true });
-
     hoverTl
-      .to(badgeRef.current, {
-        scale: 1.05,
-        duration: 0.2,
-        ease: "power2.out",
-      })
+      .to(badgeRef.current, { scale: 1.05, duration: 0.2, ease: "power2.out" })
       .to(
         ".pulse-ring",
-        {
-          scale: 1.5,
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.out",
-        },
-        0,
+        { scale: 1.5, opacity: 0, duration: 0.8, ease: "power2.out" },
+        0
       );
 
-    badgeRef.current.addEventListener("mouseenter", () => hoverTl.play());
-    badgeRef.current.addEventListener("mouseleave", () => hoverTl.reverse());
+    const handleMouseEnter = () => {
+      hoverTl.play();
+    };
+    const handleMouseLeave = () => {
+      hoverTl.reverse();
+    };
+
+    badgeRef.current.addEventListener("mouseenter", handleMouseEnter);
+    badgeRef.current.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
-      badgeRef.current?.removeEventListener("mouseenter", () => hoverTl.play());
-      badgeRef.current?.removeEventListener("mouseleave", () =>
-        hoverTl.reverse(),
-      );
+      badgeRef.current?.removeEventListener("mouseenter", handleMouseEnter);
+      badgeRef.current?.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, []);
 

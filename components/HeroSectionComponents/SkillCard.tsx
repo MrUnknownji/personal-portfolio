@@ -13,29 +13,28 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
 
   useGSAP(() => {
     if (!cardRef.current || !iconRef.current) return;
-
     gsap.from(cardRef.current, {
       opacity: 0,
       y: 20,
       duration: 0.6,
       ease: "power2.out",
     });
-
     const hoverTl = gsap.timeline({ paused: true });
-    hoverTl.to(iconRef.current, {
-      scale: 1.1,
-      duration: 0.3,
-      ease: "power2.out",
-    });
+    hoverTl.to(iconRef.current, { scale: 1.1, duration: 0.3, ease: "power2.out" });
 
-    cardRef.current.addEventListener("mouseenter", () => hoverTl.play());
-    cardRef.current.addEventListener("mouseleave", () => hoverTl.reverse());
+    const handleMouseEnter = () => {
+      hoverTl.play();
+    };
+    const handleMouseLeave = () => {
+      hoverTl.reverse();
+    };
+
+    cardRef.current.addEventListener("mouseenter", handleMouseEnter);
+    cardRef.current.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
-      cardRef.current?.removeEventListener("mouseenter", () => hoverTl.play());
-      cardRef.current?.removeEventListener("mouseleave", () =>
-        hoverTl.reverse(),
-      );
+      cardRef.current?.removeEventListener("mouseenter", handleMouseEnter);
+      cardRef.current?.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, []);
 

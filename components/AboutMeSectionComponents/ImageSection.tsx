@@ -4,8 +4,6 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
-gsap.registerPlugin(ScrollTrigger);
-
 const ImageSection = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -13,28 +11,22 @@ const ImageSection = () => {
   const rotatingBorderRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    if (!containerRef.current || !rotatingBorderRef.current) return;
-
+    if (!containerRef.current) return;
     gsap.fromTo(
       containerRef.current,
+      { opacity: 0, y: 50 },
       {
-        opacity: 0,
-        y: 50,
-        scale: 0.95,
-      },
-      {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power3.out",
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 80%",
           end: "top 30%",
           toggleActions: "play none none reverse",
         },
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 1,
-        ease: "power3.out",
-      },
+      }
     );
 
     gsap.to(rotatingBorderRef.current, {

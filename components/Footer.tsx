@@ -8,11 +8,10 @@ import {
   FiPhone,
   FiMapPin,
 } from "react-icons/fi";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useGSAP } from "@gsap/react";
 
 const SOCIAL_LINKS = [
   {
@@ -54,42 +53,31 @@ const CONTACT_INFO = [
   },
 ];
 
-const ANIMATION_INITIAL_Y: number = 20;
-const ANIMATION_OPACITY_HIDDEN: number = 0;
-const ANIMATION_OPACITY_VISIBLE: number = 1;
-const ANIMATION_DURATION: number = 0.6;
-const ANIMATION_DELAY_MULTIPLIER: number = 0.1;
-const SCROLL_TRIGGER_OFFSET: number = 100;
+gsap.registerPlugin(ScrollTrigger);
 
 const Footer = () => {
   const footerRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const currentYear: number = new Date().getFullYear();
 
-  useEffect(() => {
-    if (!footerRef.current) return;
-
-    const elements = footerRef.current.querySelectorAll(".animate-footer");
-
-    elements.forEach((element, index) => {
-      gsap.fromTo(
-        element,
-        {
-          opacity: ANIMATION_OPACITY_HIDDEN,
-          y: ANIMATION_INITIAL_Y,
+  useGSAP(() => {
+    if (contentRef.current && footerRef.current) {
+      ScrollTrigger.create({
+        trigger: footerRef.current,
+        start: "top bottom",
+        end: "bottom bottom",
+        scrub: 0.5,
+        markers: true,
+        onUpdate: (self) => {
+          gsap.set(contentRef.current, {
+            y: self.progress * -50,
+            opacity: 1 - self.progress * 0.5,
+          });
         },
-        {
-          opacity: ANIMATION_OPACITY_VISIBLE,
-          y: 0,
-          duration: ANIMATION_DURATION,
-          delay: index * ANIMATION_DELAY_MULTIPLIER,
-          scrollTrigger: {
-            trigger: element,
-            start: `top bottom-=${SCROLL_TRIGGER_OFFSET}`,
-            toggleActions: "play none none reverse",
-          },
-        },
-      );
-    });
+      });
+
+      ScrollTrigger.refresh();
+    }
   }, []);
 
   return (
@@ -97,9 +85,9 @@ const Footer = () => {
       ref={footerRef}
       className="w-full bg-gray-900/50 backdrop-blur-sm py-16"
     >
-      <div className="container mx-auto px-4">
+      <div ref={contentRef} className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          <div className="animate-footer">
+          <div>
             <h2 className="text-xl font-semibold text-white mb-4">
               Connect With Me
             </h2>
@@ -110,7 +98,7 @@ const Footer = () => {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/70 hover:text-primary transition-colors duration-300"
+                  className="text-white/70 hover:text-primary"
                   aria-label={social.label}
                 >
                   {social.icon}
@@ -119,7 +107,7 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="animate-footer">
+          <div>
             <h2 className="text-xl font-semibold text-white mb-4">
               Quick Links
             </h2>
@@ -128,7 +116,7 @@ const Footer = () => {
                 <li key={index}>
                   <Link
                     href={link.href}
-                    className="text-white/70 hover:text-primary transition-colors duration-300"
+                    className="text-white/70 hover:text-primary"
                   >
                     {link.text}
                   </Link>
@@ -137,7 +125,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div className="animate-footer">
+          <div>
             <h2 className="text-xl font-semibold text-white mb-4">
               Contact Info
             </h2>
@@ -145,7 +133,7 @@ const Footer = () => {
               {CONTACT_INFO.map((item, index) => (
                 <li key={index} className="flex items-center space-x-3">
                   {item.icon}
-                  <span className="text-white/70 hover:text-primary transition-colors duration-300">
+                  <span className="text-white/70 hover:text-primary">
                     {item.text}
                   </span>
                 </li>
@@ -154,7 +142,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-white/10 text-center animate-footer">
+        <div className="mt-16 pt-8 border-t border-white/10 text-center">
           <p className="text-white/60">
             {currentYear} <span className="text-primary">Sandeep Kumar</span>.
             All rights reserved.

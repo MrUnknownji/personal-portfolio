@@ -6,12 +6,12 @@ import AboutMe from "@/components/AboutMe";
 
 const Home: React.FC = () => {
   return (
-    <div className="min-h-screen">
+    <>
       <HeroSection />
       <AboutMe />
       <TechnicalSkills />
       <ContactForm />
-    </div>
+    </>
   );
 };
 

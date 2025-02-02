@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
 
 const config: Config = {
   content: [
@@ -95,6 +96,15 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(({ addBase, theme }) => {
+      addBase({
+        "::selection": {
+          backgroundColor: theme("colors.primary"),
+          color: theme("colors.dark"),
+        },
+      });
+    }),
+  ],
 };
 export default config;

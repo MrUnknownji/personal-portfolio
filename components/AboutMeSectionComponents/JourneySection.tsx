@@ -3,36 +3,26 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
-gsap.registerPlugin(ScrollTrigger);
-
 const JourneySection = () => {
   const journeyRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const borderRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    if (!journeyRef.current || !textRef.current || !borderRef.current) return;
-
+    if (!journeyRef.current) return;
     gsap.fromTo(
       journeyRef.current,
+      { opacity: 0, y: 50 },
       {
-        opacity: 0,
-        y: 50,
-        scale: 0.95,
-      },
-      {
-        scrollTrigger: {
-          trigger: journeyRef.current,
-          start: "top 80%",
-          end: "top 30%",
-          toggleActions: "play none none reverse",
-        },
         opacity: 1,
         y: 0,
-        scale: 1,
         duration: 1,
         ease: "power3.out",
-      },
+        scrollTrigger: {
+          trigger: journeyRef.current,
+          start: "top 75%",
+        },
+      }
     );
 
     gsap.fromTo(
@@ -49,25 +39,19 @@ const JourneySection = () => {
       },
     );
 
-    const words = textRef.current.children;
-    if (words) {
+    if (textRef.current) {
+      const words = textRef.current.children;
       gsap.fromTo(
         words,
+        { opacity: 0, y: 20 },
         {
-          opacity: 0,
-          y: 20,
-        },
-        {
-          scrollTrigger: {
-            trigger: textRef.current,
-            start: "top 75%",
-          },
+          scrollTrigger: { trigger: textRef.current, start: "top 75%" },
           opacity: 1,
           y: 0,
           stagger: 0.03,
           duration: 0.7,
           ease: "power2.out",
-        },
+        }
       );
     }
   }, []);

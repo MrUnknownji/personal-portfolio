@@ -25,7 +25,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
           ">-0.1",
         )
         .then(() => setIsTransitioning(false));
-    }, 2000); // Initial loading time
+    }, 2000); 
 
     return () => clearTimeout(timer);
   }, []);

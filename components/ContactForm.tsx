@@ -1,24 +1,22 @@
 "use client";
-import React, { useState, useRef, useLayoutEffect } from "react";
+import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import ContactInfo from "./ContactSectionComponents/ContactInfo";
 import Form from "./ContactSectionComponents/Form";
 import ThankYouDialog from "./ThankYouDialog";
 
-gsap.registerPlugin(ScrollTrigger);
-
-const CONTACT_SECTION_PADDING_Y: number = 24;
-const TITLE_ANIMATION_DURATION: number = 0.8;
-const CONTAINER_ANIMATION_DURATION: number = 1;
-const INITIAL_OPACITY_HIDDEN: number = 0;
-const INITIAL_TITLE_Y: number = 30;
-const INITIAL_CONTAINER_Y: number = 40;
-const INITIAL_SCALE: number = 0.95;
-const OPACITY_VISIBLE: number = 1;
-const SCALE_VISIBLE: number = 1;
-const ANIMATION_EASE: string = "power3.out";
-const TITLE_ANIMATION_DELAY: number = 0.4;
+const CONTACT_SECTION_PADDING_Y = 24;
+const TITLE_ANIMATION_DURATION = 0.8;
+const CONTAINER_ANIMATION_DURATION = 1;
+const INITIAL_OPACITY_HIDDEN = 0;
+const INITIAL_TITLE_Y = 30;
+const INITIAL_CONTAINER_Y = 40;
+const INITIAL_SCALE = 0.95;
+const OPACITY_VISIBLE = 1;
+const SCALE_VISIBLE = 1;
+const ANIMATION_EASE = "power3.out";
+const TITLE_ANIMATION_DELAY = 0.4;
 
 const ContactForm: React.FC = () => {
   const [isThankYouOpen, setIsThankYouOpen] = useState(false);
@@ -26,61 +24,49 @@ const ContactForm: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setIsMounted(true);
   }, []);
 
   useLayoutEffect(() => {
-    if (!isMounted) return;
-
-    const title = sectionRef.current?.querySelector(".title-container");
-    const container = containerRef.current;
-
-    if (title && container) {
-      const timeline = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 60%",
-          end: "center center",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      timeline
-        .fromTo(
-          title,
-          {
-            opacity: INITIAL_OPACITY_HIDDEN,
-            y: INITIAL_TITLE_Y,
+    if (!isMounted || !sectionRef.current) return;
+    const ctx = gsap.context(() => {
+      const title = sectionRef.current?.querySelector(".title-container");
+      const container = containerRef.current;
+      if (title && container) {
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 60%",
+            end: "center center",
+            toggleActions: "play none none reverse",
           },
-          {
-            opacity: OPACITY_VISIBLE,
-            y: 0,
-            duration: TITLE_ANIMATION_DURATION,
-            ease: ANIMATION_EASE,
-          },
-        )
-        .fromTo(
-          container,
-          {
-            opacity: INITIAL_OPACITY_HIDDEN,
-            y: INITIAL_CONTAINER_Y,
-            scale: INITIAL_SCALE,
-          },
-          {
-            opacity: OPACITY_VISIBLE,
-            y: 0,
-            scale: SCALE_VISIBLE,
-            duration: CONTAINER_ANIMATION_DURATION,
-            ease: ANIMATION_EASE,
-          },
-          `-=${TITLE_ANIMATION_DELAY}`,
-        );
-    }
-
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
+        })
+          .fromTo(
+            title,
+            { opacity: INITIAL_OPACITY_HIDDEN, y: INITIAL_TITLE_Y },
+            {
+              opacity: OPACITY_VISIBLE,
+              y: 0,
+              duration: TITLE_ANIMATION_DURATION,
+              ease: ANIMATION_EASE,
+            }
+          )
+          .fromTo(
+            container,
+            { opacity: INITIAL_OPACITY_HIDDEN, y: INITIAL_CONTAINER_Y, scale: INITIAL_SCALE },
+            {
+              opacity: OPACITY_VISIBLE,
+              y: 0,
+              scale: SCALE_VISIBLE,
+              duration: CONTAINER_ANIMATION_DURATION,
+              ease: ANIMATION_EASE,
+            },
+            `-=${TITLE_ANIMATION_DELAY}`
+          );
+      }
+    }, sectionRef);
+    return () => ctx.revert();
   }, [isMounted]);
 
   const handleFormSubmit = () => {

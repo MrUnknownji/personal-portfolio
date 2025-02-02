@@ -6,8 +6,6 @@ import HeroContent from "./HeroSectionComponents/HeroContent";
 import CodeDisplay from "./HeroSectionComponents/CodeDisplay";
 import { useGSAP } from "@gsap/react";
 
-gsap.registerPlugin(ScrollTrigger);
-
 const HERO_SECTION_ANIMATION_DURATION = 1;
 const HERO_SECTION_BORDER_ANIMATION_DURATION = 3;
 const HERO_SECTION_CONTENT_SCROLL_DURATION = 0.1;
@@ -43,11 +41,9 @@ const HeroSection = () => {
       scrub: 0.5,
       onUpdate: (self) => {
         if (contentRef.current) {
-          gsap.to(contentRef.current, {
+          gsap.set(contentRef.current, {
             y: self.progress * HERO_SECTION_CONTENT_SCROLL_DISTANCE,
             opacity: 1 - self.progress * HERO_SECTION_CONTENT_OPACITY_FACTOR,
-            duration: HERO_SECTION_CONTENT_SCROLL_DURATION,
-            ease: "none",
           });
         }
       },

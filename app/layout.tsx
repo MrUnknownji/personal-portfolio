@@ -21,20 +21,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head>
-        <style>{`
-          body {
-            background-color: rgb(3, 7, 18);
-          }
-        `}</style>
-      </head>
       <body
         className="bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950 overflow-x-hidden"
         suppressHydrationWarning
       >
         <Header />
-        {children}
-        <Footer />
+        <div className="min-h-screen">
+          {children}
+        </div>
+          <Footer />
       </body>
     </html>
   );
