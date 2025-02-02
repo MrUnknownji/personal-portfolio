@@ -3,13 +3,7 @@ import React, { useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface WavesProps {
-  /**
-   * Color of the wave lines
-   */
   lineColor?: string;
-  /**
-   * Background color of the container
-   */
   backgroundColor?: string;
   waveSpeedX?: number;
   waveSpeedY?: number;
@@ -99,7 +93,7 @@ class Noise {
     seed = Math.floor(seed);
     if (seed < 256) seed |= seed << 8;
     for (let i = 0; i < 256; i++) {
-      let v = i & 1 ? this.p[i] ^ (seed & 255) : this.p[i] ^ ((seed >> 8) & 255);
+      const v = i & 1 ? this.p[i] ^ (seed & 255) : this.p[i] ^ ((seed >> 8) & 255);
       this.perm[i] = this.perm[i + 256] = v;
       this.gradP[i] = this.gradP[i + 256] = this.grad3[v % 12];
     }
