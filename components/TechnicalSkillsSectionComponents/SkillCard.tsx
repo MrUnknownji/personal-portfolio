@@ -32,10 +32,11 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
   const handleMouseEnter = () => {
     if (!cardRef.current) return;
     gsap.to(cardRef.current, {
-      y: -5,
-      scale: 1.02,
-      duration: 0.3,
-      ease: "power2.out",
+      y: -8,
+      scale: 1.04,
+      boxShadow: "0px 6px 16px rgba(0, 0, 0, 0.2)",
+      duration: 0.35,
+      ease: "power3.out"
     });
   };
 
@@ -44,8 +45,9 @@ const SkillCard: React.FC<SkillCardProps> = ({ skill, index }) => {
     gsap.to(cardRef.current, {
       y: 0,
       scale: 1,
-      duration: 0.3,
-      ease: "power2.out",
+      boxShadow: "0px 0px 0px rgba(0, 0, 0, 0)",
+      duration: 0.35,
+      ease: "power3.out"
     });
   };
 

@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
 const ImageSection = () => {
@@ -110,7 +109,7 @@ const ImageSection = () => {
           </div>
         </div>
 
-        <div className="absolute -right-2 -top-2 text-xs text-primary/70 transition-all duration-500 [@media(hover:hover)]:hover:text-accent">
+        <div className="absolute -right-2 -top-2 text-xs text-primary/70 cursor-pointer transition-all duration-500 [@media(hover:hover)]:hover:text-accent">
           Click to flip
         </div>
       </div>

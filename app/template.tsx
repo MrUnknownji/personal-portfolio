@@ -1,7 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import PageLoader from "@/components/PageLoader";
+
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -12,20 +17,25 @@ export default function Template({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
       setIsTransitioning(true);
 
-      const tl = gsap.timeline();
+      const tl = gsap.timeline({
+        onComplete: () => {
+          setIsTransitioning(false);
+          ScrollTrigger.refresh();
+        }
+      });
+
       tl.fromTo(
         ".transition-overlay",
         { yPercent: 100 },
-        { yPercent: 0, duration: 0.5, ease: "power4.inOut" },
+        { yPercent: 0, duration: 0.5, ease: "power4.inOut" }
       )
         .fromTo(
           ".page-content",
           { opacity: 0, y: 20 },
           { opacity: 1, y: 0, duration: 0.5 },
-          ">-0.1",
-        )
-        .then(() => setIsTransitioning(false));
-    }, 2000); 
+          ">-0.1"
+        );
+    }, 2000); // simulate a loading delay
 
     return () => clearTimeout(timer);
   }, []);
@@ -34,19 +44,23 @@ export default function Template({ children }: { children: React.ReactNode }) {
     if (!isLoading) {
       const handleRouteChange = () => {
         setIsTransitioning(true);
-        const tl = gsap.timeline();
+        const tl = gsap.timeline({
+          onComplete: () => {
+            setIsTransitioning(false);
+            ScrollTrigger.refresh();
+          }
+        });
         tl.fromTo(
           ".transition-overlay",
           { yPercent: 100 },
-          { yPercent: 0, duration: 0.5, ease: "power4.inOut" },
+          { yPercent: 0, duration: 0.5, ease: "power4.inOut" }
         )
           .fromTo(
             ".page-content",
             { opacity: 0, y: 20 },
             { opacity: 1, y: 0, duration: 0.5 },
-            ">-0.1",
-          )
-          .then(() => setIsTransitioning(false));
+            ">-0.1"
+          );
       };
 
       window.addEventListener("popstate", handleRouteChange);

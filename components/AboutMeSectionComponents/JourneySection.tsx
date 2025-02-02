@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
 const JourneySection = () => {
@@ -21,6 +20,7 @@ const JourneySection = () => {
         scrollTrigger: {
           trigger: journeyRef.current,
           start: "top 75%",
+          toggleActions: "play none none reverse",
         },
       }
     );
@@ -32,6 +32,7 @@ const JourneySection = () => {
         scrollTrigger: {
           trigger: journeyRef.current,
           start: "top 75%",
+          toggleActions: "play none none reverse",
         },
         width: "100%",
         duration: 1.2,
@@ -45,10 +46,14 @@ const JourneySection = () => {
         words,
         { opacity: 0, y: 20 },
         {
-          scrollTrigger: { trigger: textRef.current, start: "top 75%" },
+          scrollTrigger: {
+            trigger: textRef.current,
+            start: "top 75%",
+            toggleActions: "play none none reverse",
+          },
           opacity: 1,
           y: 0,
-          stagger: 0.03,
+          stagger: 0.05,
           duration: 0.7,
           ease: "power2.out",
         }

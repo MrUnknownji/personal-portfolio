@@ -10,7 +10,6 @@ import {
 } from "react-icons/fi";
 import { useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
 const SOCIAL_LINKS = [
@@ -53,8 +52,6 @@ const CONTACT_INFO = [
   },
 ];
 
-gsap.registerPlugin(ScrollTrigger);
-
 const Footer = () => {
   const footerRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -62,21 +59,87 @@ const Footer = () => {
 
   useGSAP(() => {
     if (contentRef.current && footerRef.current) {
-      ScrollTrigger.create({
-        trigger: footerRef.current,
-        start: "top bottom",
-        end: "bottom bottom",
-        scrub: 0.5,
-        markers: true,
-        onUpdate: (self) => {
-          gsap.set(contentRef.current, {
-            y: self.progress * -50,
-            opacity: 1 - self.progress * 0.5,
-          });
+      const gridContainer = contentRef.current.querySelector(".grid");
+      const gridItems = gridContainer
+        ? gridContainer.querySelectorAll(".grid-item")
+        : null;
+      const footerBottom = contentRef.current.querySelector(".footer-bottom");
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: "top 80%",
+          end: "bottom bottom",
+          toggleActions: "play none none reverse",
         },
       });
 
-      ScrollTrigger.refresh();
+      tl.from(contentRef.current, {
+        y: 50,
+        opacity: 0,
+        duration: 1,
+        ease: "power2.out",
+      });
+
+      if (gridItems) {
+        tl.from(
+          gridItems,
+          {
+            y: 20,
+            opacity: 0,
+            rotation: -2,
+            duration: 0.6,
+            ease: "power2.out",
+            stagger: 0.2,
+          },
+          "-=0.5"
+        );
+      }
+
+      const socialAnchors = contentRef.current.querySelectorAll(
+        ".grid-item:first-child .flex a"
+      );
+      if (socialAnchors.length) {
+        tl.from(
+          socialAnchors,
+          {
+            y: 10,
+            opacity: 0,
+            scale: 0.9,
+            duration: 0.6,
+            ease: "back.out(1.7)",
+            stagger: 0.1,
+          },
+          "-=0.5"
+        );
+      }
+
+      const listItems = contentRef.current.querySelectorAll(".grid-item ul li");
+      if (listItems.length) {
+        tl.from(
+          listItems,
+          {
+            y: 10,
+            opacity: 0,
+            duration: 0.6,
+            ease: "back.out(1.7)",
+            stagger: 0.1,
+          },
+          "-=0.3"
+        );
+      }
+
+      if (footerBottom) {
+        tl.from(
+          footerBottom,
+          {
+            y: 20,
+            opacity: 0,
+            duration: 0.6,
+            ease: "power2.out",
+          },
+          "-=0.4"
+        );
+      }
     }
   }, []);
 
@@ -87,7 +150,7 @@ const Footer = () => {
     >
       <div ref={contentRef} className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          <div>
+          <div className="grid-item">
             <h2 className="text-xl font-semibold text-white mb-4">
               Connect With Me
             </h2>
@@ -107,7 +170,7 @@ const Footer = () => {
             </div>
           </div>
 
-          <div>
+          <div className="grid-item">
             <h2 className="text-xl font-semibold text-white mb-4">
               Quick Links
             </h2>
@@ -125,7 +188,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div>
+          <div className="grid-item">
             <h2 className="text-xl font-semibold text-white mb-4">
               Contact Info
             </h2>
@@ -142,7 +205,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-16 pt-8 border-t border-white/10 text-center">
+        <div className="footer-bottom mt-16 pt-8 border-t border-white/10 text-center">
           <p className="text-white/60">
             {currentYear} <span className="text-primary">Sandeep Kumar</span>.
             All rights reserved.

@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import ContactInfo from "./ContactSectionComponents/ContactInfo";
 import Form from "./ContactSectionComponents/Form";
 import ThankYouDialog from "./ThankYouDialog";

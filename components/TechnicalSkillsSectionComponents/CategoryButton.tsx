@@ -38,21 +38,43 @@ const CategoryButton: React.FC<CategoryButtonProps> = ({
     }
   }, [isActive]);
 
+  const handleMouseEnter = () => {
+    if (!buttonRef.current) return;
+    gsap.to(buttonRef.current, {
+      scale: isActive ? 1.07 : 1.03,
+      boxShadow: isActive
+        ? "0px 6px 12px rgba(0, 0, 0, 0.2)"
+        : "0px 4px 10px rgba(0, 0, 0, 0.15)",
+      duration: 0.3,
+      ease: "power3.out"
+    });
+  };
+
+  const handleMouseLeave = () => {
+    if (!buttonRef.current) return;
+    gsap.to(buttonRef.current, {
+      scale: 1,
+      boxShadow: "0px 0px 0px rgba(0, 0, 0, 0)",
+      duration: 0.3,
+      ease: "power3.out"
+    });
+  };
+
   return (
     <button
       ref={buttonRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={onClick}
       className={`
         relative px-6 py-3 rounded-lg font-medium
-        transition-all duration-300 ease-out
-        transform hover:scale-105 active:scale-95
         flex items-center gap-2 min-w-[140px] justify-center
         ${
           isActive
-            ? "bg-secondary text-primary border border-primary/30"
-            : "bg-secondary/50 text-gray-400 hover:text-gray-200 border border-gray-800"
+            ? "bg-secondary text-primary border border-primary/30 shadow-lg"
+            : "bg-secondary/50 text-gray-400 border border-gray-800"
         }
       `}
-      onClick={onClick}
     >
       <span
         className={`text-lg transition-transform duration-300
@@ -78,14 +100,6 @@ const CategoryButton: React.FC<CategoryButtonProps> = ({
           <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-primary rounded-bl-md" />
           <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-primary rounded-br-md" />
         </>
-      )}
-
-      {!isActive && (
-        <div
-          className="absolute inset-0 rounded-lg opacity-0 hover:opacity-100
-          transition-opacity duration-300
-          bg-gradient-to-r from-primary/5 via-transparent to-primary/5"
-        />
       )}
     </button>
   );
