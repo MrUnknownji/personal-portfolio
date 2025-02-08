@@ -128,7 +128,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         type="submit"
         className="w-full bg-primary text-secondary font-medium px-6 py-3 rounded-lg
             relative overflow-hidden group hover:ring-2 hover:ring-primary/50
-            transition-all duration-300 active:scale-95"
+            hover:transition-all hover:duration-300 active:scale-95"
       >
         <span className="relative z-10">Send Message</span>
         <div

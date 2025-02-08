@@ -63,8 +63,29 @@ const ContactInfo: React.FC = () => {
         tl.fromTo(
           socialLinks,
           { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.15,
+            duration: 0.6,
+            ease: "power2.out",
+          },
           "start+=0.7",
+        );
+      }
+
+      if (socialIcons) {
+        tl.fromTo(
+          socialIcons,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.15,
+            duration: 0.6,
+            ease: "power2.out",
+          },
+          "start+=0.9",
         );
       }
 
@@ -119,8 +140,8 @@ const ContactInfo: React.FC = () => {
               rel="noopener noreferrer"
               className="w-10 h-10 rounded-lg bg-secondary/50 border border-primary/20
                 flex items-center justify-center text-primary hover:text-accent
-                hover:border-accent/50 hover:scale-110 transform
-                transition-transform duration-300"
+                hover:border-accent/50 transform
+                transition-colors duration-300"
               aria-label={link.label}
             >
               {link.icon}
