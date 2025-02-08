@@ -1,87 +1,103 @@
 "use client";
-import React, { useState, useRef, useLayoutEffect, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 import ContactInfo from "./ContactSectionComponents/ContactInfo";
 import Form from "./ContactSectionComponents/Form";
 import ThankYouDialog from "./ThankYouDialog";
 
-const CONTACT_SECTION_PADDING_Y = 24;
-const TITLE_ANIMATION_DURATION = 0.8;
-const CONTAINER_ANIMATION_DURATION = 1;
-const INITIAL_OPACITY_HIDDEN = 0;
-const INITIAL_TITLE_Y = 30;
-const INITIAL_CONTAINER_Y = 40;
-const INITIAL_SCALE = 0.95;
-const OPACITY_VISIBLE = 1;
-const SCALE_VISIBLE = 1;
-const ANIMATION_EASE = "power3.out";
-const TITLE_ANIMATION_DELAY = 0.4;
+gsap.registerPlugin(ScrollTrigger);
 
 const ContactForm: React.FC = () => {
   const [isThankYouOpen, setIsThankYouOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  useGSAP(
+    () => {
+      if (!sectionRef.current) return;
 
-  useLayoutEffect(() => {
-    if (!isMounted || !sectionRef.current) return;
-    const ctx = gsap.context(() => {
-      const title = sectionRef.current?.querySelector(".title-container");
+      const title = sectionRef.current.querySelector(".title-container");
       const container = containerRef.current;
-      if (title && container) {
-        gsap.timeline({
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 60%",
-            end: "center center",
-            toggleActions: "play none none reverse",
-          },
-        })
-          .fromTo(
-            title,
-            { opacity: INITIAL_OPACITY_HIDDEN, y: INITIAL_TITLE_Y },
-            {
-              opacity: OPACITY_VISIBLE,
-              y: 0,
-              duration: TITLE_ANIMATION_DURATION,
-              ease: ANIMATION_EASE,
-            }
-          )
-          .fromTo(
-            container,
-            { opacity: INITIAL_OPACITY_HIDDEN, y: INITIAL_CONTAINER_Y, scale: INITIAL_SCALE },
-            {
-              opacity: OPACITY_VISIBLE,
-              y: 0,
-              scale: SCALE_VISIBLE,
-              duration: CONTAINER_ANIMATION_DURATION,
-              ease: ANIMATION_EASE,
-            },
-            `-=${TITLE_ANIMATION_DELAY}`
-          );
+      const contactInfo = container?.querySelector(".contact-info");
+      const form = container?.querySelector("form");
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          end: "bottom bottom",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      if (title) {
+        tl.fromTo(
+          title,
+          { opacity: 0, y: 50 },
+          { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
+        );
       }
-    }, sectionRef);
-    return () => ctx.revert();
-  }, [isMounted]);
+
+      if (container) {
+        tl.fromTo(
+          container,
+          {
+            opacity: 0,
+            y: 40,
+            scale: 0.9,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.6,
+            ease: "power3.out",
+          },
+          "-=0.4",
+        );
+      }
+
+      if (contactInfo) {
+        tl.fromTo(
+          contactInfo,
+          { opacity: 0, x: -50 },
+          { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" },
+          "-=0.2",
+        );
+      }
+
+      if (form) {
+        const formElements = form.querySelectorAll("input, textarea, button");
+        tl.fromTo(
+          formElements,
+          { opacity: 0, y: 30 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            stagger: 0.15,
+            ease: "power3.out",
+          },
+          "-=0.5",
+        );
+      }
+
+      return () => tl.kill();
+    },
+    { scope: sectionRef },
+  );
 
   const handleFormSubmit = () => {
     setIsThankYouOpen(true);
   };
 
-  if (!isMounted) {
-    return null;
-  }
-
   return (
     <section
       ref={sectionRef}
       id="contact"
-      className={`relative py-${CONTACT_SECTION_PADDING_Y} overflow-hidden`}
-      suppressHydrationWarning
+      className={`relative py-24 overflow-hidden`}
     >
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
 
@@ -100,7 +116,6 @@ const ContactForm: React.FC = () => {
         <div
           ref={containerRef}
           className="relative bg-secondary/95 rounded-xl overflow-hidden"
-          suppressHydrationWarning
         >
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
 

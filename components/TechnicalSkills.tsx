@@ -10,7 +10,9 @@ import { useGSAP } from "@gsap/react";
 gsap.registerPlugin(ScrollTrigger);
 
 const TechnicalSkills: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState(TechnicalSectionSkills[0].category);
+  const [activeCategory, setActiveCategory] = useState(
+    TechnicalSectionSkills[0].category,
+  );
   const sectionRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const categoriesRef = useRef<HTMLDivElement>(null);
@@ -20,27 +22,35 @@ const TechnicalSkills: React.FC = () => {
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
-        start: "top 60%",
-        end: "center center",
+        start: "top 80%",
+        end: "top 50%",
         toggleActions: "play none none reverse",
       },
     });
+
     tl.fromTo(
       titleRef.current,
-      { opacity: 0, y: 40, scale: 0.9 },
-      { opacity: 1, y: 0, scale: 1, duration: 1.0, ease: "power3.out" }
+      { opacity: 0, y: 50, scale: 0.8 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out" },
     )
       .fromTo(
         categoriesRef.current,
-        { opacity: 0, y: 20, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power3.out" },
-        "-=0.6"
+        { opacity: 0, y: 30, scale: 0.9 },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.7,
+          ease: "power3.out",
+          stagger: 0.1,
+        },
+        "-=0.5",
       )
       .fromTo(
         contentRef.current,
-        { opacity: 0, y: 20, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.8, ease: "power2.out" },
-        "-=0.6"
+        { opacity: 0, y: 30, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power2.out" },
+        "-=0.5",
       );
   }, []);
 
@@ -54,7 +64,10 @@ const TechnicalSkills: React.FC = () => {
           </h2>
           <div className="h-1 w-24 mx-auto bg-gradient-to-r from-transparent via-primary to-transparent" />
         </div>
-        <div ref={categoriesRef} className="flex flex-wrap justify-center gap-4 mb-16">
+        <div
+          ref={categoriesRef}
+          className="flex flex-wrap justify-center gap-4 mb-16"
+        >
           {TechnicalSectionSkills.map((skillSet) => (
             <CategoryButton
               key={skillSet.category}
@@ -68,7 +81,9 @@ const TechnicalSkills: React.FC = () => {
           <SkillsGrid
             activeCategory={activeCategory}
             skills={
-              TechnicalSectionSkills.find((set) => set.category === activeCategory)?.items || []
+              TechnicalSectionSkills.find(
+                (set) => set.category === activeCategory,
+              )?.items || []
             }
           />
         </div>

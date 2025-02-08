@@ -20,24 +20,31 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
   useGSAP(
     () => {
-      if (!formRef.current || !submitButtonRef.current) return;
+      if (!formRef.current) return;
 
       const formFields = formRef.current.querySelectorAll("input, textarea");
       const submitButton = submitButtonRef.current;
 
-      const timeline = gsap.timeline();
+      const tl = gsap.timeline();
+      tl.addLabel("formStart");
 
-      timeline
-        .fromTo(
+      if (formFields) {
+        tl.fromTo(
           Array.from(formFields),
           { opacity: 0, y: 20 },
           { opacity: 1, y: 0, stagger: 0.1, duration: 0.6, ease: "power2.out" },
-        )
-        .fromTo(
+          "formStart",
+        );
+      }
+      if (submitButton) {
+        tl.fromTo(
           submitButton,
           { opacity: 0, y: 20 },
           { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+          "formStart+=0.6",
         );
+      }
+      return () => tl.kill();
     },
     { scope: formRef },
   );

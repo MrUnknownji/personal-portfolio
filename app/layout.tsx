@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-// import { Waves } from "@/components/WavesBackground";
+import ScrollToTop from "@/components/ScrollToTop";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -22,34 +22,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body
-        className="overflow-x-hidden relative"
-        suppressHydrationWarning
-      >
-        {/* <div className="fixed top-0 left-0 w-screen h-screen">
-
-        <Waves
-          lineColor="rgba(255, 255, 255, 0.25)"
-          backgroundColor="transparent"
-          waveSpeedX={0.02}
-          waveSpeedY={0.01}
-          waveAmpX={40}
-          waveAmpY={20}
-          friction={0.9}
-          tension={0.01}
-          maxCursorMove={120}
-          xGap={12}
-          yGap={36}
-          />
-          </div> */}
+      <body className="overflow-x-hidden relative" suppressHydrationWarning>
         <div className="relative z-10">
           <Header />
-          <div className="min-h-screen">
-            {children}
-          </div>
+          <div className="min-h-screen">{children}</div>
           <Footer />
         </div>
+        <ScrollToTop />
       </body>
     </html>
   );
-} 
+}

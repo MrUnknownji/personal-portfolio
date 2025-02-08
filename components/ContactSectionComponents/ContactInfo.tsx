@@ -21,41 +21,54 @@ const ContactInfo: React.FC = () => {
       const description = containerRef.current.querySelector(".description");
       const infoItems = containerRef.current.querySelectorAll(".info-item");
       const socialLinks = containerRef.current.querySelector(".social-links");
+      const socialIcons =
+        containerRef.current.querySelectorAll(".social-links a");
 
-      if (title && description && infoItems && socialLinks) {
-        const timeline = gsap.timeline();
+      const tl = gsap.timeline();
+      tl.addLabel("start");
 
-        timeline
-          .fromTo(
-            title,
-            { opacity: 0, x: -20 },
-            { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" },
-          )
-          .fromTo(
-            description,
-            { opacity: 0, x: -20 },
-            { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" },
-            "-=0.4",
-          )
-          .fromTo(
-            Array.from(infoItems),
-            { opacity: 0, x: -20 },
-            {
-              opacity: 1,
-              x: 0,
-              stagger: 0.1,
-              duration: 0.6,
-              ease: "power2.out",
-            },
-            "-=0.4",
-          )
-          .fromTo(
-            socialLinks,
-            { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
-            "-=0.4",
-          );
+      if (title) {
+        tl.fromTo(
+          title,
+          { opacity: 0, x: -20 },
+          { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" },
+          "start",
+        );
       }
+      if (description) {
+        tl.fromTo(
+          description,
+          { opacity: 0, x: -20 },
+          { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" },
+          "start+=0.2",
+        );
+      }
+
+      if (infoItems) {
+        tl.fromTo(
+          Array.from(infoItems),
+          { opacity: 0, x: -20 },
+          {
+            opacity: 1,
+            x: 0,
+            stagger: 0.15,
+            duration: 0.6,
+            ease: "power2.out",
+          },
+          "start+=0.4",
+        );
+      }
+
+      if (socialLinks) {
+        tl.fromTo(
+          socialLinks,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" },
+          "start+=0.7",
+        );
+      }
+
+      return () => tl.kill();
     },
     { scope: containerRef },
   );
@@ -63,7 +76,7 @@ const ContactInfo: React.FC = () => {
   return (
     <div
       ref={containerRef}
-      className="flex flex-col h-full justify-between space-y-8"
+      className="flex flex-col h-full justify-between space-y-8 contact-info"
     >
       <div className="space-y-6">
         <div>
@@ -107,7 +120,7 @@ const ContactInfo: React.FC = () => {
               className="w-10 h-10 rounded-lg bg-secondary/50 border border-primary/20
                 flex items-center justify-center text-primary hover:text-accent
                 hover:border-accent/50 hover:scale-110 transform
-                [transition:all_0.3s_cubic-bezier(0.4,0,0.2,1)]"
+                transition-transform duration-300"
               aria-label={link.label}
             >
               {link.icon}
@@ -115,11 +128,6 @@ const ContactInfo: React.FC = () => {
           ))}
         </div>
       </div>
-
-      <div
-        className="absolute bottom-0 left-0 w-full h-1/2
-        bg-gradient-to-t from-primary/5 to-transparent pointer-events-none"
-      />
     </div>
   );
 };

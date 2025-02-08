@@ -15,18 +15,27 @@ const SkillsGrid: React.FC<SkillsGridProps> = ({ activeCategory, skills }) => {
   useGSAP(() => {
     if (!gridRef.current) return;
     const skillCards = gridRef.current.querySelectorAll(".skill-card");
-    gsap.fromTo(
-      skillCards,
-      { opacity: 0, y: 20, scale: 0.97 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.55,
-        stagger: 0.12,
-        ease: "power3.out",
-      }
-    );
+    gsap.set(skillCards, { opacity: 0, y: 30, scale: 0.8 });
+  }, []);
+
+  useGSAP(() => {
+    if (!gridRef.current) return;
+    const skillCards = gridRef.current.querySelectorAll(".skill-card");
+
+    gsap.to(skillCards, {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      duration: 0.6,
+      stagger: 0.15,
+      ease: "power3.out",
+      scrollTrigger: {
+        trigger: gridRef.current,
+        start: "top 80%",
+        toggleActions: "play none none reverse",
+      },
+      immediateRender: true,
+    });
   }, [skills]);
 
   return (
@@ -37,7 +46,11 @@ const SkillsGrid: React.FC<SkillsGridProps> = ({ activeCategory, skills }) => {
       >
         <div className="relative grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
           {skills.map((skill, index) => (
-            <SkillCard key={`${activeCategory}-${skill}`} skill={skill} index={index} />
+            <SkillCard
+              key={`${activeCategory}-${skill}`}
+              skill={skill}
+              index={index}
+            />
           ))}
         </div>
       </div>

@@ -20,8 +20,8 @@ const DialogActions: React.FC<DialogActionsProps> = ({
         href="#projects"
         className="inline-flex justify-center items-center px-6 py-2.5
           rounded-lg bg-primary text-secondary font-medium
-          hover:bg-opacity-90 [transition:background-color_0.3s]
-          focus:outline-none focus:ring-2 focus:ring-primary/50"
+          hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/50
+          transition-colors duration-300"
         onClick={onClose}
       >
         View Projects
@@ -32,8 +32,8 @@ const DialogActions: React.FC<DialogActionsProps> = ({
         type="button"
         className="inline-flex justify-center items-center px-6 py-2.5
           rounded-lg border border-primary/20 text-gray-300 font-medium
-          hover:bg-primary/10 [transition:background-color_0.3s]
-          focus:outline-none focus:ring-2 focus:ring-primary/50"
+          hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary/50
+          transition-colors duration-300"
         onClick={onClose}
       >
         {isEmailCopied ? (

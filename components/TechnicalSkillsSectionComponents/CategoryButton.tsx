@@ -46,7 +46,7 @@ const CategoryButton: React.FC<CategoryButtonProps> = ({
         ? "0px 6px 12px rgba(0, 0, 0, 0.2)"
         : "0px 4px 10px rgba(0, 0, 0, 0.15)",
       duration: 0.3,
-      ease: "power3.out"
+      ease: "power3.out",
     });
   };
 
@@ -56,7 +56,7 @@ const CategoryButton: React.FC<CategoryButtonProps> = ({
       scale: 1,
       boxShadow: "0px 0px 0px rgba(0, 0, 0, 0)",
       duration: 0.3,
-      ease: "power3.out"
+      ease: "power3.out",
     });
   };
 
@@ -66,8 +66,7 @@ const CategoryButton: React.FC<CategoryButtonProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onClick={onClick}
-      className={`
-        relative px-6 py-3 rounded-lg font-medium
+      className={`relative px-6 py-3 rounded-lg font-medium
         flex items-center gap-2 min-w-[140px] justify-center
         ${
           isActive
@@ -77,8 +76,8 @@ const CategoryButton: React.FC<CategoryButtonProps> = ({
       `}
     >
       <span
-        className={`text-lg transition-transform duration-300
-        ${isActive ? "scale-110" : "scale-100"}`}
+        className={`text-lg ${isActive ? "scale-110" : "scale-100"}`}
+        style={{ transition: "transform 0.3s ease" }}
       >
         {skillSet.icon}
       </span>

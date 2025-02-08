@@ -25,8 +25,10 @@ const InfoItem: React.FC<InfoItemProps> = ({ type, title, value, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className={`flex items-center space-x-4 p-4 rounded-xl bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 ${
-        onClick ? "cursor-pointer hover:bg-gray-800/70 transition-colors" : ""
+      className={`info-item flex items-center space-x-4 p-4 rounded-xl bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 ${
+        onClick
+          ? "cursor-pointer hover:bg-gray-800/70 transition-colors duration-300"
+          : ""
       }`}
     >
       {getIcon(type)}

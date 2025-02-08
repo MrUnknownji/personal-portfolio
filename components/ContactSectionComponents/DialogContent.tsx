@@ -31,9 +31,7 @@ const DialogContent: React.FC<DialogContentProps> = ({ email, onCopy }) => {
           "-=0.2",
         );
 
-      return () => {
-        timeline.kill();
-      };
+      return () => timeline.kill();
     },
     { scope: contentRef },
   );
