@@ -1,134 +1,208 @@
-import { useRef, useState } from "react";
-import { gsap } from "gsap";
-import { AboutMeSkills } from "@/data/data";
+import React, { useRef, useState, useCallback } from "react";
 import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
+const SKILLS_DATA = {
+  "Frontend": [
+    { name: "React", level: 95 },
+    { name: "Next.js", level: 90 },
+    { name: "TypeScript", level: 85 },
+    { name: "Tailwind CSS", level: 90 },
+    { name: "GSAP", level: 80 }
+  ],
+  "Backend": [
+    { name: "Node.js", level: 85 },
+    { name: "Express", level: 80 },
+    { name: "PostgreSQL", level: 75 },
+    { name: "MongoDB", level: 80 },
+    { name: "GraphQL", level: 70 }
+  ],
+  "Tools & Others": [
+    { name: "Git", level: 90 },
+    { name: "Docker", level: 75 },
+    { name: "AWS", level: 70 },
+    { name: "CI/CD", level: 80 },
+    { name: "Testing", level: 85 }
+  ]
+} as const;
+
+const ANIMATION_CONFIG = {
+  CONTAINER: {
+    DURATION: 0.8,
+    EASE: "power3.out",
+    Y_OFFSET: 50,
+    OPACITY: 0
+  },
+  CATEGORIES: {
+    DURATION: 0.6,
+    STAGGER: 0.1,
+    Y_OFFSET: 20,
+    OPACITY: 0,
+    SCALE: 0.95
+  },
+  SKILLS: {
+    DURATION: 0.8,
+    STAGGER: 0.1,
+    X_OFFSET: -20,
+    OPACITY: 0,
+    BAR: {
+      DURATION: 1.2,
+      EASE: "power2.out",
+      SCALE_X: 0
+    }
+  },
+  HOVER: {
+    DURATION: 0.3,
+    SCALE: 1.02,
+    EASE: "power2.out"
+  }
+} as const;
 
 const SkillsSection = () => {
-  const [activeSkill, setActiveSkill] = useState(0);
+  const [activeCategory, setActiveCategory] = useState<keyof typeof SKILLS_DATA>("Frontend");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const categoriesRef = useRef<HTMLDivElement>(null);
   const skillsRef = useRef<HTMLDivElement>(null);
-  const skillContentRef = useRef<HTMLDivElement>(null);
-  const progressRef = useRef<HTMLDivElement>(null);
+  const skillItemsRef = useRef<HTMLDivElement[]>([]);
 
-  useGSAP(() => {
-    if (!skillsRef.current) return;
+  const animateSkills = useCallback(() => {
+    if (!skillsRef.current || !skillItemsRef.current.length) return;
+
     gsap.fromTo(
-      skillsRef.current,
-      { opacity: 0, y: 50 },
+      skillItemsRef.current,
       {
+        x: ANIMATION_CONFIG.SKILLS.X_OFFSET,
+        opacity: ANIMATION_CONFIG.SKILLS.OPACITY
+      },
+      {
+        x: 0,
         opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: skillsRef.current,
-          start: "top 80%",
-          end: "top 30%",
-          toggleActions: "play none none reverse",
-        },
+        duration: ANIMATION_CONFIG.SKILLS.DURATION,
+        stagger: ANIMATION_CONFIG.SKILLS.STAGGER,
+        ease: "power2.out",
+        clearProps: "transform"
       }
     );
-  }, []);
+
+    skillItemsRef.current.forEach((item, index) => {
+      const bar = item.querySelector(".skill-bar");
+      const level = SKILLS_DATA[activeCategory][index].level;
+
+      gsap.fromTo(
+        bar,
+        { scaleX: ANIMATION_CONFIG.SKILLS.BAR.SCALE_X },
+        {
+          scaleX: level / 100,
+          duration: ANIMATION_CONFIG.SKILLS.BAR.DURATION,
+          ease: ANIMATION_CONFIG.SKILLS.BAR.EASE
+        }
+      );
+    });
+  }, [activeCategory]);
 
   useGSAP(() => {
-    if (!progressRef.current || !skillContentRef.current) return;
+    if (!containerRef.current || !categoriesRef.current) return;
 
-    gsap.fromTo(
-      progressRef.current,
-      { width: "0%" },
-      {
-        width: "100%",
-        duration: 5,
-        ease: "none",
-      },
-    );
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: "top 80%",
+        end: "bottom 20%",
+        toggleActions: "play none none reverse"
+      }
+    });
 
-    gsap.fromTo(
-      skillContentRef.current,
+    tl.fromTo(
+      containerRef.current,
       {
-        opacity: 0,
-        scale: 0.95,
-        y: 10,
+        y: ANIMATION_CONFIG.CONTAINER.Y_OFFSET,
+        opacity: ANIMATION_CONFIG.CONTAINER.OPACITY
       },
       {
+        y: 0,
+        opacity: 1,
+        duration: ANIMATION_CONFIG.CONTAINER.DURATION,
+        ease: ANIMATION_CONFIG.CONTAINER.EASE
+      }
+    )
+    .fromTo(
+      categoriesRef.current.children,
+      {
+        y: ANIMATION_CONFIG.CATEGORIES.Y_OFFSET,
+        opacity: ANIMATION_CONFIG.CATEGORIES.OPACITY,
+        scale: ANIMATION_CONFIG.CATEGORIES.SCALE
+      },
+      {
+        y: 0,
         opacity: 1,
         scale: 1,
-        y: 0,
-        duration: 0.4,
-        ease: "power2.out",
-      },
-    );
-  }, [activeSkill]);
+        duration: ANIMATION_CONFIG.CATEGORIES.DURATION,
+        stagger: ANIMATION_CONFIG.CATEGORIES.STAGGER,
+        ease: "back.out(1.2)",
+        clearProps: "all"
+      }
+    )
+    .add(animateSkills);
+  }, [animateSkills]);
 
   useGSAP(() => {
-    const timer = setInterval(() => {
-      setActiveSkill((prev) => (prev + 1) % AboutMeSkills.length);
-    }, 5000);
-
-    return () => clearInterval(timer);
-  }, []);
+    animateSkills();
+  }, [activeCategory, animateSkills]);
 
   return (
-    <div
-      ref={skillsRef}
-      className="relative bg-secondary p-6 sm:p-8 rounded-lg
-        [@media(hover:hover)]:hover:scale-[1.02]
-        [transition:transform_0.3s_ease-out]
-        border border-primary/20"
-    >
-      <div className="relative">
-        <div className="flex justify-between items-center mb-4 sm:mb-6">
-          <h3 className="text-xl sm:text-2xl font-semibold text-primary tracking-wide">
-            Core Skills
-          </h3>
-          <span className="text-accent text-sm">
-            {activeSkill + 1}/{AboutMeSkills.length}
-          </span>
-        </div>
+    <div ref={containerRef} className="relative">
+      <h3 className="text-2xl md:text-3xl font-bold text-primary mb-8">Technical Skills</h3>
 
-        <div
-          ref={skillContentRef}
-          className="text-center py-6 sm:py-8 px-3 sm:px-4"
-        >
-          <span className="text-4xl sm:text-5xl mb-4 block [@media(hover:hover)]:hover:scale-110 transition-transform duration-300">
-            {AboutMeSkills[activeSkill].icon}
-          </span>
-          <h4 className="text-xl sm:text-2xl font-semibold text-primary mb-3">
-            {AboutMeSkills[activeSkill].name}
-          </h4>
-          <div className="text-gray-200 leading-relaxed h-[calc(1.5rem*2)] overflow-hidden">
-            <p className="inline-block">
-              {AboutMeSkills[activeSkill].description}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <div className="h-[2px] w-full bg-primary/20 rounded-full mt-4">
-            <div ref={progressRef} className="h-full bg-primary rounded-full" />
-          </div>
-
-          <div className="flex justify-center mt-4 gap-2">
-            {AboutMeSkills.map((_, index) => (
-              <button
-                key={index}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300
-                  ${
-                    index === activeSkill
-                      ? "bg-primary w-6"
-                      : "bg-primary/30 hover:bg-primary/50"
-                  }`}
-                onClick={() => setActiveSkill(index)}
-                aria-label={`Skill ${index + 1}`}
-              />
-            ))}
-          </div>
-        </div>
+      {/* Categories */}
+      <div
+        ref={categoriesRef}
+        className="flex flex-wrap gap-4 mb-8"
+      >
+        {Object.keys(SKILLS_DATA).map((category) => (
+          <button
+            key={category}
+            onClick={() => setActiveCategory(category as keyof typeof SKILLS_DATA)}
+            className={`px-4 py-2 rounded-lg transition-all duration-300 transform-gpu ${
+              activeCategory === category
+                ? "bg-primary text-gray-900 shadow-lg shadow-primary/20"
+                : "bg-secondary/40 text-gray-300 hover:bg-secondary/60"
+            }`}
+          >
+            {category}
+          </button>
+        ))}
       </div>
 
-      <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-primary rounded-tl-lg" />
-      <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-primary rounded-tr-lg" />
-      <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-primary rounded-bl-lg" />
-      <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-primary rounded-br-lg" />
+      {/* Skills */}
+      <div ref={skillsRef} className="space-y-6">
+        {SKILLS_DATA[activeCategory].map((skill, index) => (
+          <div
+            key={skill.name}
+            ref={el => {
+              if (el) skillItemsRef.current[index] = el;
+            }}
+            className="transform-gpu transition-all duration-300 hover:translate-x-1"
+          >
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-gray-200">{skill.name}</span>
+              <span className="text-primary">{skill.level}%</span>
+            </div>
+            <div className="h-2 bg-secondary/40 rounded-full overflow-hidden">
+              <div
+                className="skill-bar h-full bg-gradient-to-r from-primary to-accent rounded-full origin-left"
+                style={{ transform: `scaleX(${skill.level / 100})` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Background decorative elements */}
+      <div className="absolute -right-4 -bottom-4 w-64 h-64 bg-primary/5 rounded-full filter blur-3xl pointer-events-none" />
+      <div className="absolute -left-4 -top-4 w-64 h-64 bg-accent/5 rounded-full filter blur-3xl pointer-events-none" />
     </div>
   );
 };

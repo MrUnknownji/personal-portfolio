@@ -2,6 +2,25 @@ import { useRef, useState, useCallback, useMemo } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
+const ANIMATION_CONFIG = {
+  INITIAL: {
+    Y: -30,
+    OPACITY: 0
+  },
+  ENTER: {
+    DURATION: 0.6,
+    STAGGER: 0.05,
+    EASE: "back.out(1.7)"
+  },
+  EXIT: {
+    DURATION: 0.4,
+    STAGGER: 0.02,
+    Y: 20,
+    EASE: "power2.in"
+  },
+  DISPLAY_DURATION: 2000
+} as const;
+
 const TypedText = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
@@ -24,14 +43,15 @@ const TypedText = () => {
       if (!containerRef.current || isAnimating) return;
       setIsAnimating(true);
 
+      // Clear previous content
       containerRef.current.innerHTML = "";
 
+      // Create measurement container
       const measureDiv = document.createElement("div");
-      measureDiv.style.visibility = "hidden";
-      measureDiv.style.position = "absolute";
-      measureDiv.style.whiteSpace = "nowrap";
+      measureDiv.style.cssText = "visibility: hidden; position: absolute; white-space: nowrap;";
       containerRef.current.appendChild(measureDiv);
 
+      // Measure character positions
       const positions: { left: number }[] = [];
       text.split("").forEach((char) => {
         const measureSpan = document.createElement("span");
@@ -44,36 +64,45 @@ const TypedText = () => {
       });
       measureDiv.remove();
 
+      // Create and position characters
       const chars = text.split("").map((char, index) => {
         const span = document.createElement("span");
         span.textContent = char === " " ? "\u00A0" : char;
-        span.style.display = "inline-block";
-        span.style.position = "absolute";
-        span.style.left = `${positions[index].left}px`;
+        span.style.cssText = `
+          display: inline-block;
+          position: absolute;
+          left: ${positions[index].left}px;
+          transform-origin: center;
+          will-change: transform, opacity;
+        `;
         containerRef.current?.appendChild(span);
         return span;
       });
 
+      // Initial state
       gsap.set(chars, {
-        y: -30,
-        opacity: 0,
+        y: ANIMATION_CONFIG.INITIAL.Y,
+        opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
       });
 
+      // Enter animation
       await gsap.to(chars, {
         y: 0,
-        duration: 0.6,
-        stagger: 0.05,
-        ease: "back.out(1.7)",
+        duration: ANIMATION_CONFIG.ENTER.DURATION,
+        stagger: ANIMATION_CONFIG.ENTER.STAGGER,
+        ease: ANIMATION_CONFIG.ENTER.EASE,
         opacity: 1,
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Display duration
+      await new Promise((resolve) => setTimeout(resolve, ANIMATION_CONFIG.DISPLAY_DURATION));
 
+      // Exit animation
       await gsap.to(chars, {
-        y: 20,
-        duration: 0.4,
-        stagger: 0.02,
-        ease: "power2.in",
+        y: ANIMATION_CONFIG.EXIT.Y,
+        duration: ANIMATION_CONFIG.EXIT.DURATION,
+        stagger: ANIMATION_CONFIG.EXIT.STAGGER,
+        ease: ANIMATION_CONFIG.EXIT.EASE,
         opacity: 0,
       });
 
@@ -93,7 +122,7 @@ const TypedText = () => {
     <div className="min-h-[2rem] overflow-hidden">
       <div
         ref={containerRef}
-        className="text-accent text-xl relative"
+        className="text-accent text-xl relative transform-gpu"
         style={{
           position: "relative",
           minHeight: "2rem",

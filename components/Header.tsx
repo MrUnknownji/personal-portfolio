@@ -4,17 +4,48 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
-const HEADER_ANIMATION_DURATION: number = 0.6;
-const HEADER_OPACITY_HIDDEN: number = 0;
-const HEADER_INITIAL_X_LOGO: number = -20;
-const HEADER_INITIAL_X_CONTACT: number = 20;
-const HEADER_EASE: string = "power2.out";
-const HEADER_SCROLL_THRESHOLD: number = 10;
+const ANIMATION_CONFIG = {
+  HEADER: {
+    DURATION: 0.6,
+    EASE: "power2.out",
+    SCROLL: {
+      THRESHOLD: 10,
+      DURATION: 0.3,
+      EASE: "power2.inOut"
+    }
+  },
+  LOGO: {
+    INITIAL: {
+      OPACITY: 0,
+      X: -20
+    },
+    DURATION: 0.6,
+    EASE: "power2.out"
+  },
+  CONTACT: {
+    INITIAL: {
+      OPACITY: 0,
+      X: 20
+    },
+    DURATION: 0.6,
+    EASE: "power2.out",
+    HOVER: {
+      DURATION: 0.3,
+      SCALE: 1.02,
+      Y: -2
+    }
+  },
+  SHINE: {
+    DURATION: 1,
+    EASE: "none"
+  }
+} as const;
 
 const Header = () => {
   const headerRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const contactRef = useRef<HTMLButtonElement>(null);
+  const shineRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let prevScrollPos = window.scrollY;
@@ -25,7 +56,7 @@ const Header = () => {
       if (header) {
         header.style.transform = `translateY(${
           prevScrollPos > currentScrollPos ||
-          currentScrollPos < HEADER_SCROLL_THRESHOLD
+          currentScrollPos < ANIMATION_CONFIG.HEADER.SCROLL.THRESHOLD
             ? "0"
             : "-100%"
         })`;
@@ -34,18 +65,40 @@ const Header = () => {
     };
 
     const ctx = gsap.context(() => {
-      gsap.from(logoRef.current, {
-        opacity: HEADER_OPACITY_HIDDEN,
-        x: HEADER_INITIAL_X_LOGO,
-        duration: HEADER_ANIMATION_DURATION,
-        ease: HEADER_EASE,
-      });
+      const tl = gsap.timeline();
 
-      gsap.from(contactRef.current, {
-        opacity: HEADER_OPACITY_HIDDEN,
-        x: HEADER_INITIAL_X_CONTACT,
-        duration: HEADER_ANIMATION_DURATION,
-        ease: HEADER_EASE,
+      tl.fromTo(logoRef.current,
+        {
+          opacity: ANIMATION_CONFIG.LOGO.INITIAL.OPACITY,
+          x: ANIMATION_CONFIG.LOGO.INITIAL.X
+        },
+        {
+          opacity: 1,
+          x: 0,
+          duration: ANIMATION_CONFIG.LOGO.DURATION,
+          ease: ANIMATION_CONFIG.LOGO.EASE
+        }
+      ).fromTo(contactRef.current,
+        {
+          opacity: ANIMATION_CONFIG.CONTACT.INITIAL.OPACITY,
+          x: ANIMATION_CONFIG.CONTACT.INITIAL.X
+        },
+        {
+          opacity: 1,
+          x: 0,
+          duration: ANIMATION_CONFIG.CONTACT.DURATION,
+          ease: ANIMATION_CONFIG.CONTACT.EASE
+        },
+        "<"
+      );
+
+      // Shine animation
+      gsap.to(shineRef.current, {
+        x: "100%",
+        duration: ANIMATION_CONFIG.SHINE.DURATION,
+        ease: ANIMATION_CONFIG.SHINE.EASE,
+        repeat: -1,
+        repeatDelay: 2
       });
     });
 
@@ -59,19 +112,19 @@ const Header = () => {
   return (
     <header
       ref={headerRef}
-      className="fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out"
+      className="fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out backdrop-blur-sm bg-gray-950/80"
     >
       <div className="container mx-auto px-6 py-4">
         <nav className="relative flex items-center justify-between">
           <div ref={logoRef}>
-            <Link href="/" className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2 group">
               <Image
                 src="/images/logo.svg"
                 alt="Logo"
                 width={50}
                 height={50}
                 priority
-                className="rounded-xl"
+                className="rounded-xl transition-transform duration-300 group-hover:scale-105"
               />
             </Link>
           </div>
@@ -82,12 +135,14 @@ const Header = () => {
               border border-gray-700 shadow-lg transition-all duration-300
               hover:border-primary/50 hover:shadow-primary/20 hover:bg-gray-800"
           >
-            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent
-                translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"
-              />
-            </div>
+            <div
+              ref={shineRef} 
+              className="absolute inset-0 w-full h-full"
+              style={{
+                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)",
+                transform: "translateX(-100%)"
+              }}
+            />
             <span className="relative z-10">Contact Me</span>
           </button>
         </nav>

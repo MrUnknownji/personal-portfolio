@@ -1,43 +1,31 @@
 import React from "react";
-import { FiMail, FiPhone, FiMapPin, FiArrowRight } from "react-icons/fi";
+import Link from "next/link";
 
 interface InfoItemProps {
-  type: string;
-  title: string;
+  icon: React.ReactNode;
+  label: string;
   value: string;
-  onClick?: () => void;
+  link: string;
 }
 
-const getIcon = (type: string) => {
-  switch (type) {
-    case "email":
-      return <FiMail className="w-6 h-6 text-primary" />;
-    case "phone":
-      return <FiPhone className="w-6 h-6 text-primary" />;
-    case "location":
-      return <FiMapPin className="w-6 h-6 text-primary" />;
-    default:
-      return null;
-  }
-};
-
-const InfoItem: React.FC<InfoItemProps> = ({ type, title, value, onClick }) => {
+const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, link }) => {
   return (
-    <div
-      onClick={onClick}
-      className={`info-item flex items-center space-x-4 p-4 rounded-xl bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 ${
-        onClick
-          ? "cursor-pointer hover:bg-gray-800/70 transition-colors duration-300"
-          : ""
-      }`}
+    <Link
+      href={link}
+      className="group flex items-center gap-4 p-4 rounded-lg bg-gray-800/50 border border-gray-700/50 transition-all duration-300 hover:bg-gray-800/70 hover:border-primary/30 transform-gpu hover:translate-x-1"
     >
-      {getIcon(type)}
-      <div className="flex-1">
-        <h3 className="text-white font-medium">{title}</h3>
-        <p className="text-gray-400">{value}</p>
+      <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors duration-300">
+        {icon}
       </div>
-      {onClick && <FiArrowRight className="w-5 h-5 text-primary" />}
-    </div>
+      <div>
+        <div className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+          {label}
+        </div>
+        <div className="text-gray-200 group-hover:text-white transition-colors duration-300">
+          {value}
+        </div>
+      </div>
+    </Link>
   );
 };
 

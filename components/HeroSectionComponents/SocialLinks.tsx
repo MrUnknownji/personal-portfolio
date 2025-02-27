@@ -1,108 +1,173 @@
-import { useState, useRef } from "react";
-import SocialLinkButton from "./SocialLinkButton";
-import SocialInfoBox from "./SocialInfoBox";
-import { socialLinks } from "@/data/SocialLink";
+import React, { useState, useRef, useCallback } from "react";
+import { FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+
+interface SocialLink {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+  bgColor: string;
+  iconColor: string;
+  description: string;
+  stats: {
+    label: string;
+    value: string;
+  }[];
+}
+
+const SOCIAL_LINKS: SocialLink[] = [
+  {
+    icon: <FiGithub className="w-6 h-6" />,
+    label: "GitHub",
+    href: "https://github.com/yourusername",
+    bgColor: "hover:bg-[#2dba4e]/10",
+    iconColor: "text-gray-300 group-hover:text-[#2dba4e]",
+    description: "Check out my open source projects and contributions",
+    stats: [
+      { label: "Repositories", value: "50+" },
+      { label: "Stars", value: "100+" },
+      { label: "Contributions", value: "500+" }
+    ]
+  },
+  {
+    icon: <FiLinkedin className="w-6 h-6" />,
+    label: "LinkedIn",
+    href: "https://linkedin.com/in/yourusername",
+    bgColor: "hover:bg-[#0077b5]/10",
+    iconColor: "text-gray-300 group-hover:text-[#0077b5]",
+    description: "Connect with me professionally",
+    stats: [
+      { label: "Connections", value: "500+" },
+      { label: "Endorsements", value: "50+" },
+      { label: "Posts", value: "100+" }
+    ]
+  },
+  {
+    icon: <FiTwitter className="w-6 h-6" />,
+    label: "Twitter",
+    href: "https://twitter.com/yourusername",
+    bgColor: "hover:bg-[#1da1f2]/10",
+    iconColor: "text-gray-300 group-hover:text-[#1da1f2]",
+    description: "Follow me for tech insights and updates",
+    stats: [
+      { label: "Followers", value: "1000+" },
+      { label: "Following", value: "500+" },
+      { label: "Tweets", value: "2000+" }
+    ]
+  }
+];
 
 const SocialLinks = () => {
   const [activeLink, setActiveLink] = useState<number | null>(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const infoBoxRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<gsap.core.Tween | null>(null);
-  const [infoBoxHeight, setInfoBoxHeight] = useState(0);
-  const [infoBoxDimensions, setInfoBoxDimensions] = useState({
-    width: 0,
-    height: 0,
-  });
-  const [infoBoxOpacity, setInfoBoxOpacity] = useState(0);
 
-  const handleMouseEnter = (
-    e: React.MouseEvent<HTMLDivElement>,
-    index: number,
-  ) => {
-    const containerRect = containerRef.current?.getBoundingClientRect();
-    if (containerRect) {
-      setMousePosition({ x: e.clientX, y: e.clientY - containerRect.top });
-    }
-    if (infoBoxRef.current) {
-      const rect = infoBoxRef.current.getBoundingClientRect();
-      setInfoBoxDimensions({ width: rect.width, height: rect.height });
-    }
+  const handleMouseEnter = useCallback((index: number) => {
     setActiveLink(index);
-    setInfoBoxOpacity(1);
-    animationRef.current?.kill();
-    animationRef.current = gsap.fromTo(
-      infoBoxRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" },
-    );
-  };
+    
+    if (animationRef.current) {
+      animationRef.current.kill();
+    }
 
-  const handleMouseLeave = () => {
     if (infoBoxRef.current) {
-      animationRef.current?.kill();
-      animationRef.current = gsap.to(infoBoxRef.current, {
+      gsap.set(infoBoxRef.current, {
         opacity: 0,
-        y: 20,
+        y: 10,
+        scale: 0.95,
+      });
+
+      animationRef.current = gsap.to(infoBoxRef.current, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
         duration: 0.2,
-        ease: "power2.in",
-        onComplete: () => {
-          setInfoBoxOpacity(0);
-          setActiveLink(null);
-        },
+        ease: "back.out(1.7)",
       });
     }
-  };
+  }, []);
 
-  useGSAP(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (activeLink !== null && containerRef.current) {
-        const containerRect = containerRef.current.getBoundingClientRect();
-        setMousePosition({ x: e.clientX, y: e.clientY - containerRect.top });
-      }
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [activeLink]);
+  const handleMouseLeave = useCallback(() => {
+    if (animationRef.current) {
+      animationRef.current.kill();
+    }
 
-  const calculatedPosition = {
-    x: mousePosition.x - infoBoxDimensions.width / 4,
-    y: mousePosition.y + 20 + infoBoxHeight,
-  };
+    if (infoBoxRef.current) {
+      animationRef.current = gsap.to(infoBoxRef.current, {
+        opacity: 0,
+        y: 10,
+        scale: 0.95,
+        duration: 0.15,
+        ease: "power2.in",
+        onComplete: () => {
+          setActiveLink(null);
+        }
+      });
+    }
+  }, []);
 
   return (
-    <div className="relative" ref={containerRef}>
-      <div className="flex gap-6">
-        {socialLinks.map((link, index) => (
-          <div
-            key={index}
-            onMouseEnter={(e) => handleMouseEnter(e, index)}
+    <div className="relative inline-block">
+      <div className="flex items-center gap-4">
+        {SOCIAL_LINKS.map((link, index) => (
+          <a
+            key={link.label}
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`group relative p-3 rounded-xl bg-gray-800/50 border border-gray-700/50 
+              transition-all duration-300 hover:bg-gray-800/70 hover:border-gray-600/50 ${link.bgColor}`}
+            onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
           >
-            <SocialLinkButton {...link} />
-          </div>
+            <div className={link.iconColor}>
+              {link.icon}
+            </div>
+          </a>
         ))}
       </div>
-      <div
-        className="fixed inset-0 pointer-events-none"
-        style={{ zIndex: 9999 }}
-      >
-        <div ref={infoBoxRef} style={{ opacity: 0 }}>
-          {activeLink !== null && (
-            <SocialInfoBox
-              socialLink={socialLinks[activeLink]}
-              position={{
-                x: calculatedPosition.x,
-                y: calculatedPosition.y - infoBoxHeight * 2 - 40,
-              }}
-              opacity={infoBoxOpacity}
-              onHeightChange={setInfoBoxHeight}
-            />
-          )}
+
+      {activeLink !== null && (
+        <div
+          ref={infoBoxRef}
+          className="absolute z-50 w-64 p-4 rounded-xl bg-gray-800/95 backdrop-blur-sm
+            border border-gray-700/50 shadow-xl -translate-x-1/2 left-1/2 -top-[220px]"
+        >
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg bg-gray-700/50 ${SOCIAL_LINKS[activeLink].iconColor}`}>
+                {SOCIAL_LINKS[activeLink].icon}
+              </div>
+              <div>
+                <h3 className="font-semibold text-white">
+                  {SOCIAL_LINKS[activeLink].label}
+                </h3>
+                <p className="text-sm text-gray-400">
+                  {SOCIAL_LINKS[activeLink].description}
+                </p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-2">
+              {SOCIAL_LINKS[activeLink].stats.map((stat, index) => (
+                <div
+                  key={index}
+                  className="text-center p-2 rounded-lg bg-gray-700/30"
+                >
+                  <div className="text-sm font-medium text-white">
+                    {stat.value}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Arrow */}
+          <div className="absolute left-1/2 bottom-0 w-4 h-4 -mb-2 transform -translate-x-1/2 rotate-45 bg-gray-800/95 border-r border-b border-gray-700/50" />
         </div>
-      </div>
+      )}
     </div>
   );
 };
