@@ -131,7 +131,6 @@ const HeroSection = () => {
     >
       <div className="w-full max-w-7xl mx-auto mt-24 sm:mt-0">
         <div className="relative">
-          {/* Card border gradient */}
           <div className="absolute -inset-[1px] rounded-3xl overflow-hidden z-1">
             <div
               ref={borderRef}

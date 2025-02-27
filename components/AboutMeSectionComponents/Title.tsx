@@ -1,30 +1,15 @@
 import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const ANIMATION_CONFIG = {
-  TITLE: {
-    DURATION: 1,
-    EASE: "power3.out",
-    Y_OFFSET: 50,
-    OPACITY: 0,
-    SCALE: 0.9
-  },
-  SUBTITLE: {
-    DURATION: 0.8,
-    DELAY: 0.3,
-    EASE: "power2.out",
-    Y_OFFSET: 30,
-    OPACITY: 0
-  },
-  DIVIDER: {
-    DURATION: 1.2,
-    DELAY: 0.5,
-    EASE: "power2.inOut",
-    SCALE_X: 0
+  DURATION: 0.8,
+  STAGGER: 0.1,
+  EASE: "power3.out",
+  Y_OFFSET: 30,
+  SCALE: {
+    START: 0.9,
+    END: 1
   }
 } as const;
 
@@ -32,83 +17,68 @@ const Title = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const dividerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !titleRef.current || !subtitleRef.current) return;
 
-    const tl = gsap.timeline({
+    const words = titleRef.current.querySelectorAll("span");
+    const subtitleLines = subtitleRef.current.querySelectorAll("span");
+
+    gsap.set([words, subtitleLines], { 
+      opacity: 0,
+      y: ANIMATION_CONFIG.Y_OFFSET,
+      scale: ANIMATION_CONFIG.SCALE.START
+    });
+
+    gsap.to(words, {
+      opacity: 1,
+      y: 0,
+      scale: ANIMATION_CONFIG.SCALE.END,
+      duration: ANIMATION_CONFIG.DURATION,
+      stagger: ANIMATION_CONFIG.STAGGER,
+      ease: ANIMATION_CONFIG.EASE,
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top 80%",
         end: "bottom 20%",
-        toggleActions: "play none none reverse"
+        once: true
       }
     });
 
-    tl.fromTo(
-      titleRef.current,
-      {
-        y: ANIMATION_CONFIG.TITLE.Y_OFFSET,
-        opacity: ANIMATION_CONFIG.TITLE.OPACITY,
-        scale: ANIMATION_CONFIG.TITLE.SCALE
-      },
-      {
-        y: 0,
-        opacity: 1,
-        scale: 1,
-        duration: ANIMATION_CONFIG.TITLE.DURATION,
-        ease: ANIMATION_CONFIG.TITLE.EASE,
-        clearProps: "all"
+    gsap.to(subtitleLines, {
+      opacity: 1,
+      y: 0,
+      scale: ANIMATION_CONFIG.SCALE.END,
+      duration: ANIMATION_CONFIG.DURATION,
+      stagger: ANIMATION_CONFIG.STAGGER,
+      ease: ANIMATION_CONFIG.EASE,
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: "top 80%",
+        end: "bottom 20%",
+        once: true
       }
-    )
-    .fromTo(
-      subtitleRef.current,
-      {
-        y: ANIMATION_CONFIG.SUBTITLE.Y_OFFSET,
-        opacity: ANIMATION_CONFIG.SUBTITLE.OPACITY
-      },
-      {
-        y: 0,
-        opacity: 1,
-        duration: ANIMATION_CONFIG.SUBTITLE.DURATION,
-        ease: ANIMATION_CONFIG.SUBTITLE.EASE,
-        clearProps: "all"
-      },
-      ANIMATION_CONFIG.SUBTITLE.DELAY
-    )
-    .fromTo(
-      dividerRef.current,
-      { scaleX: ANIMATION_CONFIG.DIVIDER.SCALE_X },
-      {
-        scaleX: 1,
-        duration: ANIMATION_CONFIG.DIVIDER.DURATION,
-        ease: ANIMATION_CONFIG.DIVIDER.EASE,
-        clearProps: "transform"
-      },
-      ANIMATION_CONFIG.DIVIDER.DELAY
-    );
-  }, []);
+    });
+  }, { scope: containerRef });
 
   return (
-    <div ref={containerRef} className="text-center space-y-6">
-      <h2
+    <div ref={containerRef} className="text-center space-y-4">
+      <h2 
         ref={titleRef}
-        className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent"
+        className="text-3xl sm:text-4xl lg:text-5xl font-bold"
+        style={{ willChange: "transform" }}
       >
-        About Me
+        <span className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent px-1">About</span>
+        <span className="inline-block px-1">Me</span>
       </h2>
-      <p
+      <p 
         ref={subtitleRef}
-        className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed"
+        className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base lg:text-lg"
+        style={{ willChange: "transform" }}
       >
-        Passionate developer crafting digital experiences with creativity and precision.
-        Transforming ideas into elegant, user-centric solutions.
+        <span className="inline-block">Passionate about creating seamless user experiences</span>{" "}
+        <span className="inline-block">and bringing innovative ideas to life through code.</span>
       </p>
-      <div
-        ref={dividerRef}
-        className="h-1 w-32 mx-auto bg-gradient-to-r from-transparent via-primary to-transparent transform-gpu"
-      />
     </div>
   );
 };

@@ -1,208 +1,132 @@
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
-
-const SKILLS_DATA = {
-  "Frontend": [
-    { name: "React", level: 95 },
-    { name: "Next.js", level: 90 },
-    { name: "TypeScript", level: 85 },
-    { name: "Tailwind CSS", level: 90 },
-    { name: "GSAP", level: 80 }
-  ],
-  "Backend": [
-    { name: "Node.js", level: 85 },
-    { name: "Express", level: 80 },
-    { name: "PostgreSQL", level: 75 },
-    { name: "MongoDB", level: 80 },
-    { name: "GraphQL", level: 70 }
-  ],
-  "Tools & Others": [
-    { name: "Git", level: 90 },
-    { name: "Docker", level: 75 },
-    { name: "AWS", level: 70 },
-    { name: "CI/CD", level: 80 },
-    { name: "Testing", level: 85 }
-  ]
-} as const;
 
 const ANIMATION_CONFIG = {
   CONTAINER: {
     DURATION: 0.8,
-    EASE: "power3.out",
-    Y_OFFSET: 50,
-    OPACITY: 0
-  },
-  CATEGORIES: {
-    DURATION: 0.6,
-    STAGGER: 0.1,
-    Y_OFFSET: 20,
-    OPACITY: 0,
-    SCALE: 0.95
+    EASE: "power3.out"
   },
   SKILLS: {
-    DURATION: 0.8,
-    STAGGER: 0.1,
-    X_OFFSET: -20,
-    OPACITY: 0,
-    BAR: {
-      DURATION: 1.2,
-      EASE: "power2.out",
-      SCALE_X: 0
-    }
-  },
-  HOVER: {
-    DURATION: 0.3,
-    SCALE: 1.02,
-    EASE: "power2.out"
+    STAGGER: 0.05,
+    DURATION: 0.4,
+    SCALE: {
+      START: 0.8,
+      END: 1
+    },
+    EASE: "back.out(1.7)"
   }
 } as const;
 
+const skillsData = {
+  frontend: [
+    "React", "Next.js", "TypeScript", "Tailwind CSS", "GSAP", "Framer Motion"
+  ],
+  backend: [
+    "Node.js", "Express", "MongoDB", "PostgreSQL", "GraphQL", "REST APIs"
+  ],
+  tools: [
+    "Git", "Docker", "AWS", "Vercel", "Jest", "Cypress"
+  ],
+  other: [
+    "UI/UX Design", "Performance Optimization", "SEO", "Responsive Design", "Agile", "CI/CD"
+  ]
+} as const;
+
 const SkillsSection = () => {
-  const [activeCategory, setActiveCategory] = useState<keyof typeof SKILLS_DATA>("Frontend");
   const containerRef = useRef<HTMLDivElement>(null);
-  const categoriesRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const skillsRef = useRef<HTMLDivElement>(null);
-  const skillItemsRef = useRef<HTMLDivElement[]>([]);
-
-  const animateSkills = useCallback(() => {
-    if (!skillsRef.current || !skillItemsRef.current.length) return;
-
-    gsap.fromTo(
-      skillItemsRef.current,
-      {
-        x: ANIMATION_CONFIG.SKILLS.X_OFFSET,
-        opacity: ANIMATION_CONFIG.SKILLS.OPACITY
-      },
-      {
-        x: 0,
-        opacity: 1,
-        duration: ANIMATION_CONFIG.SKILLS.DURATION,
-        stagger: ANIMATION_CONFIG.SKILLS.STAGGER,
-        ease: "power2.out",
-        clearProps: "transform"
-      }
-    );
-
-    skillItemsRef.current.forEach((item, index) => {
-      const bar = item.querySelector(".skill-bar");
-      const level = SKILLS_DATA[activeCategory][index].level;
-
-      gsap.fromTo(
-        bar,
-        { scaleX: ANIMATION_CONFIG.SKILLS.BAR.SCALE_X },
-        {
-          scaleX: level / 100,
-          duration: ANIMATION_CONFIG.SKILLS.BAR.DURATION,
-          ease: ANIMATION_CONFIG.SKILLS.BAR.EASE
-        }
-      );
-    });
-  }, [activeCategory]);
 
   useGSAP(() => {
-    if (!containerRef.current || !categoriesRef.current) return;
+    if (!containerRef.current || !titleRef.current || !skillsRef.current) return;
+
+    const skillItems = skillsRef.current.querySelectorAll('.skill-item');
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top 80%",
         end: "bottom 20%",
-        toggleActions: "play none none reverse"
+        once: true
       }
     });
 
+    // Animate title
     tl.fromTo(
-      containerRef.current,
-      {
-        y: ANIMATION_CONFIG.CONTAINER.Y_OFFSET,
-        opacity: ANIMATION_CONFIG.CONTAINER.OPACITY
+      titleRef.current,
+      { 
+        opacity: 0,
+        y: 30 
       },
       {
-        y: 0,
         opacity: 1,
+        y: 0,
         duration: ANIMATION_CONFIG.CONTAINER.DURATION,
         ease: ANIMATION_CONFIG.CONTAINER.EASE
       }
-    )
-    .fromTo(
-      categoriesRef.current.children,
+    );
+
+    // Animate skill items with a staggered effect
+    tl.fromTo(
+      skillItems,
       {
-        y: ANIMATION_CONFIG.CATEGORIES.Y_OFFSET,
-        opacity: ANIMATION_CONFIG.CATEGORIES.OPACITY,
-        scale: ANIMATION_CONFIG.CATEGORIES.SCALE
+        opacity: 0,
+        scale: ANIMATION_CONFIG.SKILLS.SCALE.START,
       },
       {
-        y: 0,
         opacity: 1,
-        scale: 1,
-        duration: ANIMATION_CONFIG.CATEGORIES.DURATION,
-        stagger: ANIMATION_CONFIG.CATEGORIES.STAGGER,
-        ease: "back.out(1.2)",
-        clearProps: "all"
-      }
-    )
-    .add(animateSkills);
-  }, [animateSkills]);
+        scale: ANIMATION_CONFIG.SKILLS.SCALE.END,
+        duration: ANIMATION_CONFIG.SKILLS.DURATION,
+        stagger: ANIMATION_CONFIG.SKILLS.STAGGER,
+        ease: ANIMATION_CONFIG.SKILLS.EASE,
+        clearProps: "transform"
+      },
+      "-=0.4"
+    );
 
-  useGSAP(() => {
-    animateSkills();
-  }, [activeCategory, animateSkills]);
+  }, { scope: containerRef });
 
   return (
-    <div ref={containerRef} className="relative">
-      <h3 className="text-2xl md:text-3xl font-bold text-primary mb-8">Technical Skills</h3>
-
-      {/* Categories */}
-      <div
-        ref={categoriesRef}
-        className="flex flex-wrap gap-4 mb-8"
+    <div 
+      ref={containerRef} 
+      className="space-y-8"
+      style={{ willChange: "transform" }}
+    >
+      <h3 
+        ref={titleRef}
+        className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
       >
-        {Object.keys(SKILLS_DATA).map((category) => (
-          <button
-            key={category}
-            onClick={() => setActiveCategory(category as keyof typeof SKILLS_DATA)}
-            className={`px-4 py-2 rounded-lg transition-all duration-300 transform-gpu ${
-              activeCategory === category
-                ? "bg-primary text-gray-900 shadow-lg shadow-primary/20"
-                : "bg-secondary/40 text-gray-300 hover:bg-secondary/60"
-            }`}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
+        Skills & Technologies
+      </h3>
 
-      {/* Skills */}
-      <div ref={skillsRef} className="space-y-6">
-        {SKILLS_DATA[activeCategory].map((skill, index) => (
-          <div
-            key={skill.name}
-            ref={el => {
-              if (el) skillItemsRef.current[index] = el;
-            }}
-            className="transform-gpu transition-all duration-300 hover:translate-x-1"
+      <div 
+        ref={skillsRef}
+        className="grid gap-6 sm:grid-cols-2"
+      >
+        {Object.entries(skillsData).map(([category, skills]) => (
+          <div 
+            key={category}
+            className="p-4 rounded-xl bg-gray-900/30 border border-primary/10 space-y-3"
           >
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-gray-200">{skill.name}</span>
-              <span className="text-primary">{skill.level}%</span>
-            </div>
-            <div className="h-2 bg-secondary/40 rounded-full overflow-hidden">
-              <div
-                className="skill-bar h-full bg-gradient-to-r from-primary to-accent rounded-full origin-left"
-                style={{ transform: `scaleX(${skill.level / 100})` }}
-              />
+            <h4 className="text-lg font-medium capitalize text-gray-200">
+              {category}
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {skills.map((skill) => (
+                <span
+                  key={skill}
+                  className="skill-item px-3 py-1 rounded-lg bg-primary/10 text-primary text-sm
+                    hover:bg-primary/20 transition-colors duration-300"
+                  style={{ willChange: "transform, opacity" }}
+                >
+                  {skill}
+                </span>
+              ))}
             </div>
           </div>
         ))}
       </div>
-
-      {/* Background decorative elements */}
-      <div className="absolute -right-4 -bottom-4 w-64 h-64 bg-primary/5 rounded-full filter blur-3xl pointer-events-none" />
-      <div className="absolute -left-4 -top-4 w-64 h-64 bg-accent/5 rounded-full filter blur-3xl pointer-events-none" />
     </div>
   );
 };

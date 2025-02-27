@@ -20,6 +20,10 @@ const ANIMATION_CONFIG = {
     DURATION: {
       OPEN: 0.3,
       CLOSE: 0.2
+    },
+    BLUR: {
+      OPEN: "8px",
+      CLOSE: "0px"
     }
   },
   DIALOG: {
@@ -37,11 +41,11 @@ const ANIMATION_CONFIG = {
     }
   },
   EASE: {
-    OPEN: "expo.out",
-    CLOSE: "power3.in"
+    OPEN: "power3.out",
+    CLOSE: "power2.in"
   },
   COPY: {
-    DURATION: 3000
+    DURATION: 2000
   }
 } as const;
 
@@ -74,11 +78,13 @@ const ThankYouDialog = ({ isOpen, onClose, email }: ThankYouDialogProps) => {
       y: ANIMATION_CONFIG.DIALOG.Y.CLOSE,
       duration: ANIMATION_CONFIG.DIALOG.DURATION.CLOSE,
       ease: ANIMATION_CONFIG.EASE.CLOSE,
+      clearProps: "transform"
     })
     .to(overlayRef.current, {
       opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
+      backdropFilter: ANIMATION_CONFIG.OVERLAY.BLUR.CLOSE,
       duration: ANIMATION_CONFIG.OVERLAY.DURATION.CLOSE,
-      ease: ANIMATION_CONFIG.EASE.CLOSE,
+      ease: ANIMATION_CONFIG.EASE.CLOSE
     }, "<");
   }, [onClose]);
 
@@ -86,33 +92,34 @@ const ThankYouDialog = ({ isOpen, onClose, email }: ThankYouDialogProps) => {
     if (isOpen && overlayRef.current && dialogRef.current) {
       document.body.style.overflow = "hidden";
 
+      // Initial setup
+      gsap.set([overlayRef.current, dialogRef.current], {
+        opacity: 0
+      });
+      gsap.set(dialogRef.current, {
+        scale: ANIMATION_CONFIG.DIALOG.SCALE.CLOSE,
+        y: ANIMATION_CONFIG.DIALOG.Y.CLOSE
+      });
+      gsap.set(overlayRef.current, {
+        backdropFilter: ANIMATION_CONFIG.OVERLAY.BLUR.CLOSE
+      });
+
       const tl = gsap.timeline();
 
-      tl.fromTo(
-        overlayRef.current,
-        { opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE },
-        {
-          opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.OPEN,
-          duration: ANIMATION_CONFIG.OVERLAY.DURATION.OPEN,
-          ease: ANIMATION_CONFIG.EASE.OPEN,
-        }
-      )
-      .fromTo(
-        dialogRef.current,
-        {
-          opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
-          scale: ANIMATION_CONFIG.DIALOG.SCALE.CLOSE,
-          y: ANIMATION_CONFIG.DIALOG.Y.CLOSE,
-        },
-        {
-          opacity: 1,
-          scale: ANIMATION_CONFIG.DIALOG.SCALE.OPEN,
-          y: ANIMATION_CONFIG.DIALOG.Y.OPEN,
-          duration: ANIMATION_CONFIG.DIALOG.DURATION.OPEN,
-          ease: ANIMATION_CONFIG.EASE.OPEN,
-        },
-        "-=0.1"
-      );
+      tl.to(overlayRef.current, {
+        opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.OPEN,
+        backdropFilter: ANIMATION_CONFIG.OVERLAY.BLUR.OPEN,
+        duration: ANIMATION_CONFIG.OVERLAY.DURATION.OPEN,
+        ease: ANIMATION_CONFIG.EASE.OPEN
+      })
+      .to(dialogRef.current, {
+        opacity: 1,
+        scale: ANIMATION_CONFIG.DIALOG.SCALE.OPEN,
+        y: ANIMATION_CONFIG.DIALOG.Y.OPEN,
+        duration: ANIMATION_CONFIG.DIALOG.DURATION.OPEN,
+        ease: ANIMATION_CONFIG.EASE.OPEN,
+        clearProps: "transform"
+      }, "-=0.2");
     }
 
     return () => {
@@ -123,12 +130,16 @@ const ThankYouDialog = ({ isOpen, onClose, email }: ThankYouDialogProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-50 overflow-y-auto"
+      style={{ willChange: "transform" }}
+    >
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center">
         <div
           ref={overlayRef}
-          className="fixed inset-0 backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 transition-[opacity,backdrop-filter]"
           onClick={handleClose}
+          style={{ willChange: "backdrop-filter" }}
         >
           <div className="absolute inset-0 bg-black/75" />
         </div>
@@ -142,6 +153,7 @@ const ThankYouDialog = ({ isOpen, onClose, email }: ThankYouDialogProps) => {
           className="relative inline-block w-full sm:max-w-lg bg-gray-800/95 backdrop-blur-sm
             rounded-2xl overflow-hidden shadow-2xl border border-primary/20 text-left
             transform transition-all sm:align-middle"
+          style={{ willChange: "transform" }}
         >
           {/* Top gradient line */}
           <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r 
@@ -161,8 +173,13 @@ const ThankYouDialog = ({ isOpen, onClose, email }: ThankYouDialogProps) => {
             border-primary/30 rounded-br-xl" />
 
           {/* Glow effect */}
-          <div className="absolute -inset-px bg-primary/5 rounded-2xl 
-            animate-pulse pointer-events-none" />
+          <div 
+            className="absolute -inset-px bg-primary/5 rounded-2xl pointer-events-none"
+            style={{ 
+              animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+              willChange: "opacity" 
+            }} 
+          />
         </div>
       </div>
     </div>

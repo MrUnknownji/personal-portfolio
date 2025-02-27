@@ -6,8 +6,8 @@ import gsap from "gsap";
 
 const ANIMATION_CONFIG = {
   HEADER: {
-    DURATION: 0.6,
-    EASE: "power2.out",
+    DURATION: 0.3,
+    EASE: "power2.inOut",
     SCROLL: {
       THRESHOLD: 10,
       DURATION: 0.3,
@@ -15,29 +15,25 @@ const ANIMATION_CONFIG = {
     }
   },
   LOGO: {
-    INITIAL: {
-      OPACITY: 0,
-      X: -20
-    },
-    DURATION: 0.6,
-    EASE: "power2.out"
-  },
-  CONTACT: {
-    INITIAL: {
-      OPACITY: 0,
-      X: 20
-    },
     DURATION: 0.6,
     EASE: "power2.out",
-    HOVER: {
-      DURATION: 0.3,
-      SCALE: 1.02,
-      Y: -2
+    SCALE: {
+      START: 0.8,
+      END: 1
+    }
+  },
+  CONTACT: {
+    DURATION: 0.6,
+    EASE: "power2.out",
+    SCALE: {
+      START: 0.8,
+      END: 1
     }
   },
   SHINE: {
     DURATION: 1,
-    EASE: "none"
+    EASE: "none",
+    DELAY: 2
   }
 } as const;
 
@@ -54,52 +50,56 @@ const Header = () => {
     const handleScroll = () => {
       const currentScrollPos = window.scrollY;
       if (header) {
-        header.style.transform = `translateY(${
-          prevScrollPos > currentScrollPos ||
-          currentScrollPos < ANIMATION_CONFIG.HEADER.SCROLL.THRESHOLD
-            ? "0"
-            : "-100%"
-        })`;
+        gsap.to(header, {
+          yPercent: prevScrollPos > currentScrollPos || currentScrollPos < ANIMATION_CONFIG.HEADER.SCROLL.THRESHOLD ? 0 : -100,
+          duration: ANIMATION_CONFIG.HEADER.SCROLL.DURATION,
+          ease: ANIMATION_CONFIG.HEADER.SCROLL.EASE
+        });
       }
       prevScrollPos = currentScrollPos;
     };
 
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline();
-
-      tl.fromTo(logoRef.current,
+      // Initial animations
+      gsap.fromTo(logoRef.current,
         {
-          opacity: ANIMATION_CONFIG.LOGO.INITIAL.OPACITY,
-          x: ANIMATION_CONFIG.LOGO.INITIAL.X
+          opacity: 0,
+          scale: ANIMATION_CONFIG.LOGO.SCALE.START
         },
         {
           opacity: 1,
-          x: 0,
+          scale: ANIMATION_CONFIG.LOGO.SCALE.END,
           duration: ANIMATION_CONFIG.LOGO.DURATION,
-          ease: ANIMATION_CONFIG.LOGO.EASE
+          ease: ANIMATION_CONFIG.LOGO.EASE,
+          clearProps: "transform"
         }
-      ).fromTo(contactRef.current,
+      );
+
+      gsap.fromTo(contactRef.current,
         {
-          opacity: ANIMATION_CONFIG.CONTACT.INITIAL.OPACITY,
-          x: ANIMATION_CONFIG.CONTACT.INITIAL.X
+          opacity: 0,
+          scale: ANIMATION_CONFIG.CONTACT.SCALE.START
         },
         {
           opacity: 1,
-          x: 0,
+          scale: ANIMATION_CONFIG.CONTACT.SCALE.END,
           duration: ANIMATION_CONFIG.CONTACT.DURATION,
-          ease: ANIMATION_CONFIG.CONTACT.EASE
-        },
-        "<"
+          ease: ANIMATION_CONFIG.CONTACT.EASE,
+          clearProps: "transform"
+        }
       );
 
       // Shine animation
-      gsap.to(shineRef.current, {
-        x: "100%",
-        duration: ANIMATION_CONFIG.SHINE.DURATION,
-        ease: ANIMATION_CONFIG.SHINE.EASE,
-        repeat: -1,
-        repeatDelay: 2
-      });
+      gsap.fromTo(shineRef.current,
+        { x: "-100%" },
+        {
+          x: "100%",
+          duration: ANIMATION_CONFIG.SHINE.DURATION,
+          ease: ANIMATION_CONFIG.SHINE.EASE,
+          repeat: -1,
+          repeatDelay: ANIMATION_CONFIG.SHINE.DELAY
+        }
+      );
     });
 
     window.addEventListener("scroll", handleScroll);
@@ -109,14 +109,25 @@ const Header = () => {
     };
   }, []);
 
+  const handleButtonHover = (isEntering: boolean) => {
+    if (!contactRef.current) return;
+
+    gsap.to(contactRef.current, {
+      scale: isEntering ? 1.02 : 1,
+      duration: 0.2,
+      ease: "power2.out"
+    });
+  };
+
   return (
     <header
       ref={headerRef}
-      className="fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out backdrop-blur-sm bg-gray-950/80"
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm bg-gray-950/80"
+      style={{ willChange: "transform" }}
     >
       <div className="container mx-auto px-6 py-4">
         <nav className="relative flex items-center justify-between">
-          <div ref={logoRef}>
+          <div ref={logoRef} style={{ willChange: "transform" }}>
             <Link href="/" className="flex items-center space-x-2 group">
               <Image
                 src="/images/logo.svg"
@@ -134,13 +145,16 @@ const Header = () => {
             className="relative group overflow-hidden bg-gray-900 text-white font-semibold px-6 py-2.5 rounded-xl
               border border-gray-700 shadow-lg transition-all duration-300
               hover:border-primary/50 hover:shadow-primary/20 hover:bg-gray-800"
+            style={{ willChange: "transform" }}
+            onMouseEnter={() => handleButtonHover(true)}
+            onMouseLeave={() => handleButtonHover(false)}
           >
             <div
               ref={shineRef} 
-              className="absolute inset-0 w-full h-full"
+              className="absolute inset-0 w-full h-full pointer-events-none"
               style={{
                 background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)",
-                transform: "translateX(-100%)"
+                willChange: "transform"
               }}
             />
             <span className="relative z-10">Contact Me</span>

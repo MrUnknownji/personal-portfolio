@@ -19,29 +19,29 @@ const ANIMATION_CONFIG = {
     TOGGLE_ACTIONS: "play none none reverse"
   },
   DURATIONS: {
-    CONTAINER: 0.8,
-    GRID_ITEMS: 0.7,
-    SOCIAL_ICONS: 0.6,
-    QUICK_LINKS: 0.5,
-    CONTACT_ITEMS: 0.5,
-    FOOTER_BOTTOM: 0.6
+    CONTAINER: 0.6,
+    GRID_ITEMS: 0.5,
+    SOCIAL_ICONS: 0.4,
+    QUICK_LINKS: 0.4,
+    CONTACT_ITEMS: 0.4,
+    FOOTER_BOTTOM: 0.5
   },
   DELAYS: {
-    GRID_ITEMS: -0.6,
-    SOCIAL_ICONS: -0.5,
-    QUICK_LINKS: -0.4,
-    CONTACT_ITEMS: -0.4,
-    FOOTER_BOTTOM: -0.3
+    GRID_ITEMS: -0.4,
+    SOCIAL_ICONS: -0.3,
+    QUICK_LINKS: -0.2,
+    CONTACT_ITEMS: -0.2,
+    FOOTER_BOTTOM: -0.1
   },
   STAGGER: {
-    GRID_ITEMS: 0.2,
-    SOCIAL_ICONS: 0.15,
-    QUICK_LINKS: 0.1,
-    CONTACT_ITEMS: 0.1
+    GRID_ITEMS: 0.1,
+    SOCIAL_ICONS: 0.1,
+    QUICK_LINKS: 0.05,
+    CONTACT_ITEMS: 0.05
   },
   HOVER: {
-    DURATION: 0.3,
-    ROTATION_DURATION: 5,
+    DURATION: 0.2,
+    ROTATION_DURATION: 4,
     SCALE: 1.05,
     Y_OFFSET: -2
   }
@@ -109,6 +109,12 @@ const Footer = () => {
     const listItems = Array.from(contentRef.current.querySelectorAll(".quick-link"));
     const contactItems = Array.from(contentRef.current.querySelectorAll(".contact-item"));
 
+    // Initial setup
+    gsap.set([gridItems, socialAnchors, listItems, contactItems, footerBottom], {
+      opacity: 0,
+      y: 20
+    });
+
     timelineRef.current = gsap.timeline({
       scrollTrigger: {
         trigger: footerRef.current,
@@ -119,111 +125,45 @@ const Footer = () => {
     });
 
     timelineRef.current
-      .fromTo(
-        contentRef.current,
-        { 
-          y: 70, 
-          opacity: 0 
-        },
-        { 
-          y: 0, 
-          opacity: 1, 
-          duration: ANIMATION_CONFIG.DURATIONS.CONTAINER, 
-          ease: "power3.out",
-          clearProps: "transform"
-        }
-      )
-      .fromTo(
-        gridItems,
-        { 
-          y: 30, 
-          opacity: 0, 
-          rotationX: -15, 
-          scale: 0.9 
-        },
-        {
-          y: 0,
-          opacity: 1,
-          rotationX: 0,
-          scale: 1,
-          duration: ANIMATION_CONFIG.DURATIONS.GRID_ITEMS,
-          ease: "power3.out",
-          stagger: ANIMATION_CONFIG.STAGGER.GRID_ITEMS,
-          clearProps: "transform"
-        },
-        ANIMATION_CONFIG.DELAYS.GRID_ITEMS
-      )
-      .fromTo(
-        socialAnchors,
-        { 
-          y: 20, 
-          opacity: 0, 
-          scale: 0.7, 
-          rotationZ: -10 
-        },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          rotationZ: 0,
-          duration: ANIMATION_CONFIG.DURATIONS.SOCIAL_ICONS,
-          ease: "elastic.out(1, 0.5)",
-          stagger: ANIMATION_CONFIG.STAGGER.SOCIAL_ICONS,
-          clearProps: "transform"
-        },
-        ANIMATION_CONFIG.DELAYS.SOCIAL_ICONS
-      )
-      .fromTo(
-        listItems,
-        { 
-          y: 15, 
-          opacity: 0 
-        },
-        {
-          y: 0,
-          opacity: 1,
-          duration: ANIMATION_CONFIG.DURATIONS.QUICK_LINKS,
-          ease: "power2.out",
-          stagger: ANIMATION_CONFIG.STAGGER.QUICK_LINKS,
-          clearProps: "transform"
-        },
-        ANIMATION_CONFIG.DELAYS.QUICK_LINKS
-      )
-      .fromTo(
-        contactItems,
-        { 
-          y: 15, 
-          opacity: 0, 
-          scale: 0.95 
-        },
-        {
-          y: 0,
-          opacity: 1,
-          scale: 1,
-          duration: ANIMATION_CONFIG.DURATIONS.CONTACT_ITEMS,
-          ease: "power3.out",
-          stagger: ANIMATION_CONFIG.STAGGER.CONTACT_ITEMS,
-          clearProps: "transform"
-        },
-        ANIMATION_CONFIG.DELAYS.CONTACT_ITEMS
-      )
-      .fromTo(
-        footerBottom,
-        { 
-          y: 30, 
-          opacity: 0, 
-          scale: 0.95 
-        },
-        { 
-          y: 0, 
-          opacity: 1, 
-          scale: 1, 
-          duration: ANIMATION_CONFIG.DURATIONS.FOOTER_BOTTOM, 
-          ease: "power3.out",
-          clearProps: "transform"
-        },
-        ANIMATION_CONFIG.DELAYS.FOOTER_BOTTOM
-      );
+      .to(gridItems, {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.DURATIONS.GRID_ITEMS,
+        stagger: ANIMATION_CONFIG.STAGGER.GRID_ITEMS,
+        ease: "power2.out",
+        clearProps: "transform"
+      })
+      .to(socialAnchors, {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.DURATIONS.SOCIAL_ICONS,
+        stagger: ANIMATION_CONFIG.STAGGER.SOCIAL_ICONS,
+        ease: "power2.out",
+        clearProps: "transform"
+      }, ANIMATION_CONFIG.DELAYS.SOCIAL_ICONS)
+      .to(listItems, {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.DURATIONS.QUICK_LINKS,
+        stagger: ANIMATION_CONFIG.STAGGER.QUICK_LINKS,
+        ease: "power2.out",
+        clearProps: "transform"
+      }, ANIMATION_CONFIG.DELAYS.QUICK_LINKS)
+      .to(contactItems, {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.DURATIONS.CONTACT_ITEMS,
+        stagger: ANIMATION_CONFIG.STAGGER.CONTACT_ITEMS,
+        ease: "power2.out",
+        clearProps: "transform"
+      }, ANIMATION_CONFIG.DELAYS.CONTACT_ITEMS)
+      .to(footerBottom, {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.DURATIONS.FOOTER_BOTTOM,
+        ease: "power2.out",
+        clearProps: "transform"
+      }, ANIMATION_CONFIG.DELAYS.FOOTER_BOTTOM);
   }, []);
 
   const handleLinkHover = useCallback((index: string, isEntering: boolean) => {
@@ -294,15 +234,20 @@ const Footer = () => {
     <footer
       ref={footerRef}
       className="w-full bg-gray-900/50 backdrop-blur-sm border-t border-gray-800/50 py-12 px-8 relative overflow-hidden"
+      style={{ willChange: "transform" }}
     >
-      {/* Background patterns */}
+      {/* Background pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
       
-      {/* Background glow effects */}
-      <div className="absolute top-0 -left-4 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl opacity-20 animate-blob" />
-      <div className="absolute bottom-0 -right-4 w-96 h-96 bg-accent/20 rounded-full filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+      {/* Background blobs */}
+      <div className="absolute top-0 -left-4 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl opacity-20" />
+      <div className="absolute bottom-0 -right-4 w-96 h-96 bg-accent/20 rounded-full filter blur-3xl opacity-20" />
 
-      <div ref={contentRef} className="container mx-auto px-4 relative">
+      <div 
+        ref={contentRef} 
+        className="container mx-auto px-4 relative"
+        style={{ willChange: "transform" }}
+      >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 lg:gap-12">
           <div className="grid-item flex justify-center md:justify-start">
             <div>
