@@ -45,13 +45,11 @@ const AboutMe = () => {
     const contentElements = contentRef.current.children;
     const blobs = bgBlobsRef.current.children;
 
-    // Create ScrollTrigger for the section
     ScrollTrigger.create({
       trigger: sectionRef.current,
       start: ANIMATION_CONFIG.SECTION.TRIGGER_START,
       end: ANIMATION_CONFIG.SECTION.TRIGGER_END,
       onEnter: () => {
-        // Animate background elements
         gsap.fromTo(
           bgPatternRef.current,
           { opacity: 0 },
@@ -77,7 +75,6 @@ const AboutMe = () => {
           }
         );
 
-        // Animate content elements
         gsap.fromTo(
           contentElements,
           { 
@@ -105,17 +102,15 @@ const AboutMe = () => {
   return (
     <section
       ref={sectionRef}
-      className="py-20 sm:py-24 lg:py-32 about-me relative overflow-hidden"
+      className="py-20 sm:py-24 lg:py-32 about-me relative"
     >
-      {/* Background pattern */}
       <div 
         ref={bgPatternRef}
         className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-0"
         style={{ willChange: "opacity" }}
       />
 
-      {/* Background blobs */}
-      <div ref={bgBlobsRef} className="absolute inset-0 overflow-hidden">
+      <div ref={bgBlobsRef} className="absolute inset-0">
         <div 
           className="absolute top-0 -left-4 w-72 h-72 bg-primary/30 rounded-full filter blur-3xl opacity-0"
           style={{ willChange: "transform, opacity" }}

@@ -87,7 +87,7 @@ const ImageSection = () => {
       >
         <Image
           ref={imageRef}
-          src="/your-image.jpg"
+          src="/my-image.jpg"
           alt="Profile"
           fill
           sizes="(max-width: 768px) 100vw, 50vw"

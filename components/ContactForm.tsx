@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -29,6 +29,12 @@ const ANIMATION_CONFIG = {
       START: 0.2,
       END: 0.4
     }
+  },
+  HOVER: {
+    DURATION: 0.3,
+    EASE: "power2.out",
+    SCALE: 1.02,
+    GLOW_OPACITY: 0.3
   }
 } as const;
 
@@ -39,6 +45,40 @@ const ContactForm: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
 
+  const handleMouseEnter = useCallback(() => {
+    if (!containerRef.current || !glowRef.current) return;
+
+    gsap.to(containerRef.current, {
+      scale: ANIMATION_CONFIG.HOVER.SCALE,
+      duration: ANIMATION_CONFIG.HOVER.DURATION,
+      ease: ANIMATION_CONFIG.HOVER.EASE,
+      force3D: true
+    });
+
+    gsap.to(glowRef.current, {
+      opacity: ANIMATION_CONFIG.HOVER.GLOW_OPACITY,
+      duration: ANIMATION_CONFIG.HOVER.DURATION,
+      ease: ANIMATION_CONFIG.HOVER.EASE
+    });
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (!containerRef.current || !glowRef.current) return;
+
+    gsap.to(containerRef.current, {
+      scale: 1,
+      duration: ANIMATION_CONFIG.HOVER.DURATION,
+      ease: ANIMATION_CONFIG.HOVER.EASE,
+      force3D: true
+    });
+
+    gsap.to(glowRef.current, {
+      opacity: ANIMATION_CONFIG.GLOW.OPACITY.START,
+      duration: ANIMATION_CONFIG.HOVER.DURATION,
+      ease: ANIMATION_CONFIG.HOVER.EASE
+    });
+  }, []);
+
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current || !glowRef.current) return;
 
@@ -47,10 +87,11 @@ const ContactForm: React.FC = () => {
     const y = e.clientY - top;
 
     gsap.to(glowRef.current, {
-      x: x - width / 2,
-      y: y - height / 2,
+      xPercent: -50 + (x / width) * 100,
+      yPercent: -50 + (y / height) * 100,
       duration: ANIMATION_CONFIG.GLOW.DURATION,
-      ease: ANIMATION_CONFIG.GLOW.EASE
+      ease: ANIMATION_CONFIG.GLOW.EASE,
+      overwrite: true
     });
   }, []);
 
@@ -58,39 +99,40 @@ const ContactForm: React.FC = () => {
     if (!sectionRef.current || !titleRef.current || !containerRef.current) return;
 
     const titleElements = titleRef.current.children;
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: ANIMATION_CONFIG.SECTION.TRIGGER_START,
+          end: ANIMATION_CONFIG.SECTION.TRIGGER_END,
+          once: true
+        }
+      });
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: ANIMATION_CONFIG.SECTION.TRIGGER_START,
-        end: ANIMATION_CONFIG.SECTION.TRIGGER_END,
-        once: true
-      }
+      gsap.set([titleElements, containerRef.current], { 
+        opacity: 0,
+        y: ANIMATION_CONFIG.CONTENT.Y_OFFSET,
+        force3D: true
+      });
+
+      tl.to(titleElements, {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.CONTENT.DURATION,
+        stagger: ANIMATION_CONFIG.CONTENT.STAGGER,
+        ease: ANIMATION_CONFIG.CONTENT.EASE,
+        force3D: true
+      })
+      .to(containerRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.CONTENT.DURATION,
+        ease: ANIMATION_CONFIG.CONTENT.EASE,
+        force3D: true
+      }, "-=0.4");
     });
 
-    // Initial setup
-    gsap.set([titleElements, containerRef.current], { 
-      opacity: 0,
-      y: ANIMATION_CONFIG.CONTENT.Y_OFFSET
-    });
-
-    // Animation sequence
-    tl.to(titleElements, {
-      opacity: 1,
-      y: 0,
-      duration: ANIMATION_CONFIG.CONTENT.DURATION,
-      stagger: ANIMATION_CONFIG.CONTENT.STAGGER,
-      ease: ANIMATION_CONFIG.CONTENT.EASE,
-      clearProps: "transform"
-    })
-    .to(containerRef.current, {
-      opacity: 1,
-      y: 0,
-      duration: ANIMATION_CONFIG.CONTENT.DURATION,
-      ease: ANIMATION_CONFIG.CONTENT.EASE,
-      clearProps: "transform"
-    }, "-=0.4");
-
+    return () => ctx.revert();
   }, []);
 
   return (
@@ -129,9 +171,10 @@ const ContactForm: React.FC = () => {
 
         <div
           ref={containerRef}
-          className="relative bg-secondary/95 rounded-xl overflow-hidden transform-gpu"
+          className="relative bg-secondary/95 rounded-xl overflow-hidden"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           onMouseMove={handleMouseMove}
-          style={{ willChange: "transform" }}
         >
           {/* Container background effects */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
@@ -140,8 +183,7 @@ const ContactForm: React.FC = () => {
             className="absolute w-[40rem] h-[40rem] bg-primary/10 rounded-full filter blur-3xl pointer-events-none"
             style={{ 
               opacity: ANIMATION_CONFIG.GLOW.OPACITY.START,
-              willChange: "transform, opacity",
-              transform: "translate(-50%, -50%)"
+              transform: 'translate(-50%, -50%)'
             }}
           />
 
