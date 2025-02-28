@@ -36,7 +36,6 @@ export default function PageLoader() {
 
     timelineRef.current = gsap.timeline();
 
-    // Circle rotation animation
     if (timelineRef.current) {
       timelineRef.current.to(circleRef.current, {
         duration: ANIMATION_CONFIG.CIRCLE.ROTATION_DURATION,
@@ -46,7 +45,6 @@ export default function PageLoader() {
         transformOrigin: "center center"
       });
 
-      // Particles animation
       particlesRef.current.forEach((particle, i) => {
         const angle = (i / ANIMATION_CONFIG.PARTICLES.COUNT) * Math.PI * 2;
         const radius = ANIMATION_CONFIG.PARTICLES.RADIUS;
@@ -73,8 +71,7 @@ export default function PageLoader() {
           delay: i * ANIMATION_CONFIG.PARTICLES.DELAY_INCREMENT
         }, 0);
       });
-
-      // Text animation
+      
       timelineRef.current.to(textRef.current, {
         duration: ANIMATION_CONFIG.TEXT.DURATION,
         opacity: ANIMATION_CONFIG.TEXT.OPACITY,

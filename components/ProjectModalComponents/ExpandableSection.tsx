@@ -39,9 +39,9 @@ export const ExpandableSection = ({ title, content, isList = false }: Expandable
         .fromTo(
           contentRef.current.children,
           { opacity: 0, y: 20 },
-          { 
-            opacity: 1, 
-            y: 0, 
+          {
+            opacity: 1,
+            y: 0,
             duration: 0.3,
             stagger: 0.05,
             ease: "power2.out"
@@ -98,7 +98,10 @@ export const ExpandableSection = ({ title, content, isList = false }: Expandable
         onClick={toggleExpand}
         className="w-full px-4 py-5 flex items-center justify-between group"
       >
-        <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        <h3
+          onClick={handleOpenDialog}
+          className="text-lg font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent cursor-pointer"
+        >
           {title}
         </h3>
         <div

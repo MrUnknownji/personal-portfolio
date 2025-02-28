@@ -109,7 +109,6 @@ const Footer = () => {
     const listItems = Array.from(contentRef.current.querySelectorAll(".quick-link"));
     const contactItems = Array.from(contentRef.current.querySelectorAll(".contact-item"));
 
-    // Initial setup
     gsap.set([gridItems, socialAnchors, listItems, contactItems, footerBottom], {
       opacity: 0,
       y: 20
@@ -177,8 +176,7 @@ const Footer = () => {
 
   useGSAP(() => {
     setupAnimations();
-
-    // Setup social icon hover animations
+    
     socialIconsRef.current.forEach((icon, i) => {
       if (!icon) return;
 
@@ -236,10 +234,8 @@ const Footer = () => {
       className="w-full bg-gray-900/50 backdrop-blur-sm border-t border-gray-800/50 py-12 px-8 relative overflow-hidden"
       style={{ willChange: "transform" }}
     >
-      {/* Background pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
       
-      {/* Background blobs */}
       <div className="absolute top-0 -left-4 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl opacity-20" />
       <div className="absolute bottom-0 -right-4 w-96 h-96 bg-accent/20 rounded-full filter blur-3xl opacity-20" />
 

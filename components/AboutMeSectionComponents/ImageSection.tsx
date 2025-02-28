@@ -39,7 +39,6 @@ const ImageSection = () => {
       }
     });
 
-    // Initial setup
     gsap.set(imageWrapperRef.current, { clipPath: "inset(100% 0 0 0)" });
     gsap.set(imageRef.current, { 
       scale: ANIMATION_CONFIG.SCALE.START,
@@ -47,7 +46,6 @@ const ImageSection = () => {
     });
     gsap.set(borderRef.current, { autoAlpha: 0 });
 
-    // Animation sequence
     tl.to(imageWrapperRef.current, {
       clipPath: "inset(0% 0 0 0)",
       duration: ANIMATION_CONFIG.DURATION,
@@ -73,13 +71,11 @@ const ImageSection = () => {
       className="relative w-full aspect-square max-w-md mx-auto"
       style={{ willChange: "transform" }}
     >
-      {/* Border decoration */}
       <div 
         ref={borderRef}
         className="absolute -inset-4 border-2 border-primary/20 rounded-2xl -z-10"
       />
 
-      {/* Image wrapper with clip-path animation */}
       <div 
         ref={imageWrapperRef}
         className="w-full h-full rounded-xl overflow-hidden bg-gray-900/50"
@@ -96,8 +92,7 @@ const ImageSection = () => {
           priority
         />
       </div>
-
-      {/* Gradient overlay */}
+      
       <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 pointer-events-none" />
     </div>
   );

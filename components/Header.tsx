@@ -60,7 +60,6 @@ const Header = () => {
     };
 
     const ctx = gsap.context(() => {
-      // Initial animations
       gsap.fromTo(logoRef.current,
         {
           opacity: 0,
@@ -89,7 +88,6 @@ const Header = () => {
         }
       );
 
-      // Shine animation
       gsap.fromTo(shineRef.current,
         { x: "-100%" },
         {

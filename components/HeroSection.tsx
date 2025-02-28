@@ -79,7 +79,6 @@ const HeroSection = () => {
 
   useGSAP(() => {
     const ctx = gsap.context(() => {
-      // Initial card animation
       gsap.fromTo(cardRef.current,
         {
           scale: ANIMATION_CONFIG.HERO.INITIAL_SCALE,
@@ -96,7 +95,6 @@ const HeroSection = () => {
         }
       );
 
-      // Animated border gradient
       gsap.to(borderRef.current, {
         backgroundPosition: "200% 0",
         duration: ANIMATION_CONFIG.BORDER.DURATION,
@@ -104,7 +102,6 @@ const HeroSection = () => {
         repeat: -1,
       });
 
-      // Glow animation
       gsap.to(glowRef.current, {
         opacity: ANIMATION_CONFIG.GLOW.OPACITY_RANGE[1],
         duration: ANIMATION_CONFIG.GLOW.DURATION,
@@ -150,7 +147,6 @@ const HeroSection = () => {
             />
           </div>
 
-          {/* Main card */}
           <div
             ref={cardRef}
             className="relative rounded-3xl p-6 md:p-8 lg:p-12
@@ -158,13 +154,11 @@ const HeroSection = () => {
               shadow-xl shadow-gray-950/20 transform-gpu"
             onMouseMove={handleMouseMove}
           >
-            {/* Interactive glow effect */}
             <div
               ref={glowRef}
               className="absolute w-[40rem] h-[40rem] bg-primary/10 rounded-full filter blur-3xl pointer-events-none opacity-40 transform -translate-x-1/2 -translate-y-1/2"
             />
 
-            {/* Card content */}
             <div
               ref={contentRef}
               className="relative flex flex-col lg:flex-row gap-8 h-full justify-center items-center"
@@ -177,7 +171,6 @@ const HeroSection = () => {
               </div>
             </div>
 
-            {/* Decorative corners */}
             <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary/30 rounded-tl-xl" />
             <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary/30 rounded-tr-xl" />
             <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary/30 rounded-bl-xl" />

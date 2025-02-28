@@ -40,7 +40,6 @@ const HeroContent = () => {
     if (!containerRef.current) return;
 
     const ctx = gsap.context(() => {
-      // Initial animations
       gsap.from(".hire-badge", {
         y: ANIMATION_CONFIG.INITIAL.Y,
         opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
@@ -57,7 +56,6 @@ const HeroContent = () => {
         ease: ANIMATION_CONFIG.EASE
       });
 
-      // Skills section animation
       gsap.from(".skills-section", {
         y: ANIMATION_CONFIG.INITIAL.Y,
         opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
@@ -66,7 +64,6 @@ const HeroContent = () => {
         ease: ANIMATION_CONFIG.EASE
       });
 
-      // Staggered skill cards animation
       gsap.from(".skill-card", {
         y: ANIMATION_CONFIG.INITIAL.Y,
         opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
@@ -76,7 +73,6 @@ const HeroContent = () => {
         ease: ANIMATION_CONFIG.EASE
       });
 
-      // Actions section animation
       gsap.from(".actions-section", {
         y: ANIMATION_CONFIG.INITIAL.Y,
         opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
@@ -91,7 +87,6 @@ const HeroContent = () => {
 
   return (
     <div ref={containerRef} className="flex-1 space-y-8">
-      {/* Hero header section */}
       <div className="space-y-6">
         <div className="hire-badge">
           <HireBadge />
@@ -101,7 +96,6 @@ const HeroContent = () => {
         </div>
       </div>
 
-      {/* Skills section */}
       <div ref={skillsRef} className="skills-section space-y-4">
         <div className="space-y-2">
           <h3 className="text-white font-semibold text-xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
@@ -118,7 +112,6 @@ const HeroContent = () => {
         </div>
       </div>
 
-      {/* Actions section */}
       <div className="actions-section flex flex-col sm:flex-row gap-6 items-center">
         <ViewProjectsButton />
         <div className="relative">

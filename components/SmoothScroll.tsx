@@ -9,11 +9,11 @@ export default function SmoothScroll({
 }) {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 1.8, // Increase for slower scrolling
+      duration: 1.8,
       easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       gestureOrientation: "vertical",
-      lerp: 0.05, // Reduced lerp for even smoother interpolation
+      lerp: 0.05,
       wheelMultiplier: 1,
       touchMultiplier: 2,
       infinite: false,

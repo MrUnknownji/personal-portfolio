@@ -63,7 +63,6 @@ const JourneySection = () => {
       }
     });
 
-    // Animate title
     tl.fromTo(
       titleRef.current,
       { 
@@ -78,7 +77,6 @@ const JourneySection = () => {
       }
     );
 
-    // Animate timeline line
     tl.fromTo(
       lineRef.current,
       { scaleY: ANIMATION_CONFIG.LINE.SCALE_Y },
@@ -90,7 +88,6 @@ const JourneySection = () => {
       "-=0.4"
     );
 
-    // Animate journey items
     tl.fromTo(
       items,
       { 
@@ -124,7 +121,6 @@ const JourneySection = () => {
         My Journey
       </h3>
 
-      {/* Timeline line */}
       <div 
         ref={lineRef}
         className="absolute left-[7px] top-[5.5rem] bottom-4 w-[2px] bg-gradient-to-b from-primary/50 via-primary/30 to-transparent origin-top"
@@ -141,7 +137,6 @@ const JourneySection = () => {
             className="relative"
             style={{ willChange: "transform, opacity" }}
           >
-            {/* Timeline dot */}
             <div className="absolute -left-8 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background" />
             
             <div className="space-y-1 p-4 rounded-xl bg-gray-900/30 border border-primary/10 hover:border-primary/20 transition-colors duration-300">

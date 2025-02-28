@@ -72,7 +72,7 @@ const SocialLinks = () => {
     if (infoBoxRef.current) {
       gsap.set(infoBoxRef.current, {
         opacity: 0,
-        y: 10,
+        y: 10,  
         scale: 0.95,
       });
 
@@ -164,7 +164,6 @@ const SocialLinks = () => {
             </div>
           </div>
 
-          {/* Arrow */}
           <div className="absolute left-1/2 bottom-0 w-4 h-4 -mb-2 transform -translate-x-1/2 rotate-45 bg-gray-800/95 border-r border-b border-gray-700/50" />
         </div>
       )}

@@ -52,7 +52,6 @@ const SkillsSection = () => {
       }
     });
 
-    // Animate title
     tl.fromTo(
       titleRef.current,
       { 
@@ -67,7 +66,6 @@ const SkillsSection = () => {
       }
     );
 
-    // Animate skill items with a staggered effect
     tl.fromTo(
       skillItems,
       {

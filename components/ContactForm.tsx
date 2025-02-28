@@ -141,10 +141,8 @@ const ContactForm: React.FC = () => {
       id="contact"
       className="relative py-24"
     >
-      {/* Background pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
       
-      {/* Background blobs */}
       <div className="absolute top-0 -left-4 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl opacity-20" />
       <div className="absolute bottom-0 -right-4 w-96 h-96 bg-accent/20 rounded-full filter blur-3xl opacity-20" />
 
@@ -176,7 +174,6 @@ const ContactForm: React.FC = () => {
           onMouseLeave={handleMouseLeave}
           onMouseMove={handleMouseMove}
         >
-          {/* Container background effects */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
           <div
             ref={glowRef}
@@ -194,7 +191,6 @@ const ContactForm: React.FC = () => {
             </div>
           </div>
 
-          {/* Decorative corners */}
           <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary/30 rounded-tl-xl" />
           <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary/30 rounded-tr-xl" />
           <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary/30 rounded-bl-xl" />

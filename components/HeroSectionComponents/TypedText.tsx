@@ -43,15 +43,12 @@ const TypedText = () => {
       if (!containerRef.current || isAnimating) return;
       setIsAnimating(true);
 
-      // Clear previous content
       containerRef.current.innerHTML = "";
 
-      // Create measurement container
       const measureDiv = document.createElement("div");
       measureDiv.style.cssText = "visibility: hidden; position: absolute; white-space: nowrap;";
       containerRef.current.appendChild(measureDiv);
 
-      // Measure character positions
       const positions: { left: number }[] = [];
       text.split("").forEach((char) => {
         const measureSpan = document.createElement("span");
@@ -64,7 +61,6 @@ const TypedText = () => {
       });
       measureDiv.remove();
 
-      // Create and position characters
       const chars = text.split("").map((char, index) => {
         const span = document.createElement("span");
         span.textContent = char === " " ? "\u00A0" : char;
@@ -79,13 +75,11 @@ const TypedText = () => {
         return span;
       });
 
-      // Initial state
       gsap.set(chars, {
         y: ANIMATION_CONFIG.INITIAL.Y,
         opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
       });
 
-      // Enter animation
       await gsap.to(chars, {
         y: 0,
         duration: ANIMATION_CONFIG.ENTER.DURATION,
@@ -94,10 +88,8 @@ const TypedText = () => {
         opacity: 1,
       });
 
-      // Display duration
       await new Promise((resolve) => setTimeout(resolve, ANIMATION_CONFIG.DISPLAY_DURATION));
-
-      // Exit animation
+      
       await gsap.to(chars, {
         y: ANIMATION_CONFIG.EXIT.Y,
         duration: ANIMATION_CONFIG.EXIT.DURATION,

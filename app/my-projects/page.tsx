@@ -28,10 +28,9 @@ export default function MyProjects() {
   const projectsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // Filter projects based on category and search query
   const filteredProjects = projects.filter(project => {
     const matchesCategory = filter === "All" || project.category === filter;
-    const matchesSearch = searchQuery === "" || 
+    const matchesSearch = searchQuery === "" ||
       project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.shortDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.technologies.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -43,7 +42,6 @@ export default function MyProjects() {
     ...Array.from(new Set(projects.map((project) => project.category))),
   ];
 
-  // Initial load animation
   useGSAP(() => {
     const tl = gsap.timeline({
       onComplete: () => setIsLoading(false)
@@ -57,12 +55,12 @@ export default function MyProjects() {
     .fromTo(
       [filterRef.current, searchRef.current],
       { opacity: 0, y: 30 },
-      { 
-        opacity: 1, 
-        y: 0, 
-        duration: ANIMATION_CONFIG.DURATION, 
+      {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.DURATION,
         stagger: ANIMATION_CONFIG.STAGGER,
-        ease: ANIMATION_CONFIG.EASE 
+        ease: ANIMATION_CONFIG.EASE
       },
       "-=0.3"
     )
@@ -80,7 +78,6 @@ export default function MyProjects() {
     );
   }, []);
 
-  // Filter change animation
   const animateFilterChange = useCallback(() => {
     if (!projectsRef.current) return;
 
@@ -97,7 +94,6 @@ export default function MyProjects() {
     );
   }, []);
 
-  // Handle filter changes
   useEffect(() => {
     if (!isLoading) {
       animateFilterChange();
@@ -131,7 +127,6 @@ export default function MyProjects() {
         </h1>
 
         <div className="flex flex-col md:flex-row gap-6 mb-8 md:mb-12">
-          {/* Search Bar */}
           <div className="w-full md:w-64 relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
               <FiSearch className="text-gray-400 w-5 h-5" />
@@ -142,18 +137,17 @@ export default function MyProjects() {
               placeholder="Search projects..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-800/50 border border-gray-700/50 rounded-xl 
+              className="w-full pl-10 pr-4 py-2 bg-gray-800/50 border border-gray-700/50 rounded-xl
                 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50
                 transition-all duration-300"
             />
           </div>
 
-          {/* Category Filters */}
           <div ref={filterRef} className="flex flex-wrap gap-2 md:gap-4">
             {categories.map((category) => (
               <button
                 key={category}
-                className={`px-4 md:px-6 py-2 rounded-xl text-sm md:text-base font-medium 
+                className={`px-4 md:px-6 py-2 rounded-xl text-sm md:text-base font-medium
                   transition-all duration-300 ${
                     filter === category
                       ? "bg-primary text-secondary shadow-lg"

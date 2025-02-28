@@ -60,7 +60,7 @@ const DialogContent = ({ email, onCopy }: DialogContentProps) => {
     if (!iconWrapperRef.current || !contentRef.current || !buttonRef.current) return;
 
     const ctx = gsap.context(() => {
-      gsap.set([iconWrapperRef.current, contentRef.current.querySelectorAll(".animate-content"), buttonRef.current], {
+      gsap.set([iconWrapperRef.current, contentRef.current?.querySelectorAll(".animate-content"), buttonRef.current], {
         opacity: 0,
         force3D: true
       });
@@ -71,7 +71,7 @@ const DialogContent = ({ email, onCopy }: DialogContentProps) => {
         force3D: true
       });
       
-      gsap.set([contentRef.current.querySelectorAll(".animate-content"), buttonRef.current], {
+      gsap.set([contentRef.current?.querySelectorAll(".animate-content"), buttonRef.current], {
         y: ANIMATION_CONFIG.CONTENT.Y_OFFSET,
         force3D: true
       });
@@ -87,7 +87,7 @@ const DialogContent = ({ email, onCopy }: DialogContentProps) => {
           ease: ANIMATION_CONFIG.ICON.EASE,
           force3D: true
         })
-        .to(contentRef.current.querySelectorAll(".animate-content"), {
+        .to(contentRef.current?.querySelectorAll(".animate-content") || [], {
           opacity: 1,
           y: 0,
           duration: ANIMATION_CONFIG.CONTENT.DURATION,

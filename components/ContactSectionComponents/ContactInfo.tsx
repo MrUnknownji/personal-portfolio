@@ -195,7 +195,6 @@ const ContactInfo = () => {
         </div>
       </div>
 
-      {/* Background decorative elements */}
       <div className="absolute -left-4 -bottom-4 w-64 h-64 bg-primary/5 rounded-full filter blur-3xl pointer-events-none" />
       <div className="absolute -right-4 -top-4 w-64 h-64 bg-accent/5 rounded-full filter blur-3xl pointer-events-none" />
     </div>
