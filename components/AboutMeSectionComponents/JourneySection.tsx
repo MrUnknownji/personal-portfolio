@@ -131,7 +131,7 @@ const JourneySection = () => {
         ref={itemsRef}
         className="relative space-y-8 pl-8"
       >
-        {journeyData.map((item, index) => (
+        {journeyData.map((item) => (
           <div 
             key={item.year}
             className="relative"

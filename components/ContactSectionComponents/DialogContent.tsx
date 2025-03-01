@@ -170,7 +170,7 @@ const DialogContent = ({ email, onCopy }: DialogContentProps) => {
           Thank You for Reaching Out!
         </h3>
         <p className="text-gray-400 animate-content">
-          I'll get back to you as soon as possible. In the meantime, you can copy my email address below:
+          I&apos;ll get back to you as soon as possible. In the meantime, you can copy my email address below:
         </p>
       </div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import { Dialog } from "@/components/ui/Dialog";
 import gsap from "gsap";
-import { FiChevronRight, FiX, FiChevronDown } from "react-icons/fi";
+import { FiX, FiChevronDown } from "react-icons/fi";
 
 interface ExpandableSectionProps {
   title: string;
@@ -72,9 +72,6 @@ export const ExpandableSection = ({ title, content, isList = false }: Expandable
     setIsExpanded(!isExpanded);
   }, [isExpanded]);
 
-  const handleOpenDialog = useCallback(() => {
-    setIsDialogOpen(true);
-  }, []);
 
   const handleCloseDialog = useCallback(() => {
     if (dialogRef.current) {
@@ -99,7 +96,6 @@ export const ExpandableSection = ({ title, content, isList = false }: Expandable
         className="w-full px-4 py-5 flex items-center justify-between group"
       >
         <h3
-          onClick={handleOpenDialog}
           className="text-lg font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent cursor-pointer"
         >
           {title}
