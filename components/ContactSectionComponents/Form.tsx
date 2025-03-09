@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
@@ -19,21 +19,37 @@ const ANIMATION_CONFIG = {
     FOCUS: {
       DURATION: 0.3,
       SCALE: 1.02,
-      EASE: "power2.out"
+      EASE: "power2.out",
+      BORDER: {
+        NORMAL: "rgb(31, 41, 55)",
+        FOCUSED: "rgb(79, 209, 197)"
+      },
+      BG: {
+        NORMAL: "rgba(17, 24, 39, 0.5)",
+        FOCUSED: "rgba(17, 24, 39, 0.7)"
+      },
+      SHADOW: {
+        NORMAL: "none",
+        FOCUSED: "0 0 20px rgba(79, 209, 197, 0.1)"
+      }
     }
   },
   BUTTON: {
     HOVER: {
       DURATION: 0.3,
       SCALE: 1.05,
-      Y_OFFSET: -2
+      Y_OFFSET: -2,
+      EASE: "power2.out",
+      SHADOW: {
+        NORMAL: "none",
+        HOVER: "0 10px 15px -3px rgba(79, 209, 197, 0.2)"
+      }
     }
   }
 } as const;
 
 const INPUT_CLASSES = {
-  base: "w-full bg-gray-900/50 rounded-lg border border-gray-800 focus:border-primary text-gray-200 px-4 py-3 outline-none transition-all duration-300 placeholder:text-gray-500",
-  focused: "border-primary bg-gray-900/70 shadow-[0_0_20px_rgba(79,209,197,0.1)]",
+  base: "w-full bg-gray-900/50 rounded-lg border border-gray-800 text-gray-200 px-4 py-3 outline-none placeholder:text-gray-500",
   error: "border-red-500 bg-red-500/5",
   wrapper: "relative transform-gpu"
 } as const;
@@ -42,6 +58,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement>(null);
   const inputRefs = useRef<(HTMLInputElement | HTMLTextAreaElement)[]>([]);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
@@ -81,22 +98,70 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
   const handleFocus = useCallback((index: number) => {
     if (!inputRefs.current[index]) return;
-
-    gsap.to(inputRefs.current[index], {
+    
+    const input = inputRefs.current[index];
+    
+    gsap.to(input, {
       scale: ANIMATION_CONFIG.INPUT.FOCUS.SCALE,
+      borderColor: ANIMATION_CONFIG.INPUT.FOCUS.BORDER.FOCUSED,
+      backgroundColor: ANIMATION_CONFIG.INPUT.FOCUS.BG.FOCUSED,
+      boxShadow: ANIMATION_CONFIG.INPUT.FOCUS.SHADOW.FOCUSED,
       duration: ANIMATION_CONFIG.INPUT.FOCUS.DURATION,
-      ease: ANIMATION_CONFIG.INPUT.FOCUS.EASE
+      ease: ANIMATION_CONFIG.INPUT.FOCUS.EASE,
+      force3D: true
     });
   }, []);
 
   const handleBlur = useCallback((index: number) => {
     if (!inputRefs.current[index]) return;
-
-    gsap.to(inputRefs.current[index], {
+    
+    const input = inputRefs.current[index];
+    
+    gsap.to(input, {
       scale: 1,
+      borderColor: ANIMATION_CONFIG.INPUT.FOCUS.BORDER.NORMAL,
+      backgroundColor: ANIMATION_CONFIG.INPUT.FOCUS.BG.NORMAL,
+      boxShadow: ANIMATION_CONFIG.INPUT.FOCUS.SHADOW.NORMAL,
       duration: ANIMATION_CONFIG.INPUT.FOCUS.DURATION,
-      ease: ANIMATION_CONFIG.INPUT.FOCUS.EASE
+      ease: ANIMATION_CONFIG.INPUT.FOCUS.EASE,
+      force3D: true
     });
+  }, []);
+
+  useEffect(() => {
+    if (!buttonRef.current) return;
+    
+    const button = buttonRef.current;
+    
+    const handleMouseEnter = () => {
+      gsap.to(button, {
+        scale: ANIMATION_CONFIG.BUTTON.HOVER.SCALE,
+        y: ANIMATION_CONFIG.BUTTON.HOVER.Y_OFFSET,
+        boxShadow: ANIMATION_CONFIG.BUTTON.HOVER.SHADOW.HOVER,
+        duration: ANIMATION_CONFIG.BUTTON.HOVER.DURATION,
+        ease: ANIMATION_CONFIG.BUTTON.HOVER.EASE,
+        force3D: true
+      });
+    };
+    
+    const handleMouseLeave = () => {
+      gsap.to(button, {
+        scale: 1,
+        y: 0,
+        boxShadow: ANIMATION_CONFIG.BUTTON.HOVER.SHADOW.NORMAL,
+        duration: ANIMATION_CONFIG.BUTTON.HOVER.DURATION,
+        ease: ANIMATION_CONFIG.BUTTON.HOVER.EASE,
+        force3D: true
+      });
+    };
+    
+    button.addEventListener("mouseenter", handleMouseEnter);
+    button.addEventListener("mouseleave", handleMouseLeave);
+    
+    return () => {
+      button.removeEventListener("mouseenter", handleMouseEnter);
+      button.removeEventListener("mouseleave", handleMouseLeave);
+    };
   }, []);
 
   useGSAP(() => {
@@ -180,24 +245,9 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
       </div>
 
       <button
+        ref={buttonRef}
         type="submit"
-        className="w-full bg-gradient-to-r from-primary to-accent text-gray-900 font-semibold py-4 rounded-lg transform-gpu transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 focus:outline-none focus:ring-2 focus:ring-primary/50"
-        onMouseEnter={e => {
-          gsap.to(e.currentTarget, {
-            scale: ANIMATION_CONFIG.BUTTON.HOVER.SCALE,
-            y: ANIMATION_CONFIG.BUTTON.HOVER.Y_OFFSET,
-            duration: ANIMATION_CONFIG.BUTTON.HOVER.DURATION,
-            ease: "power2.out"
-          });
-        }}
-        onMouseLeave={e => {
-          gsap.to(e.currentTarget, {
-            scale: 1,
-            y: 0,
-            duration: ANIMATION_CONFIG.BUTTON.HOVER.DURATION,
-            ease: "power2.out"
-          });
-        }}
+        className="w-full bg-gradient-to-r from-primary to-accent text-gray-900 font-semibold py-4 rounded-lg transform-gpu focus:outline-none focus:ring-2 focus:ring-primary/50"
       >
         Send Message
       </button>

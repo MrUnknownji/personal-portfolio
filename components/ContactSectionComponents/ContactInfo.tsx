@@ -75,7 +75,15 @@ const ANIMATION_CONFIG = {
     DURATION: 0.3,
     SCALE: 1.1,
     Y_OFFSET: -2,
-    EASE: "power2.out"
+    EASE: "power2.out",
+    COLOR: {
+      NORMAL: "rgb(156, 163, 175)",
+      HOVER: "rgb(79, 209, 197)"
+    },
+    BG: {
+      NORMAL: "rgba(31, 41, 55, 0.5)",
+      HOVER: "rgba(31, 41, 55, 0.7)"
+    }
   }
 } as const;
 
@@ -133,6 +141,40 @@ const ContactInfo = () => {
         clearProps: "transform"
       }
     );
+    
+    // Set up hover animations for social links
+    socialItemsRef.current.forEach(item => {
+      item.addEventListener("mouseenter", () => {
+        gsap.to(item, {
+          scale: ANIMATION_CONFIG.HOVER.SCALE,
+          y: ANIMATION_CONFIG.HOVER.Y_OFFSET,
+          color: ANIMATION_CONFIG.HOVER.COLOR.HOVER,
+          backgroundColor: ANIMATION_CONFIG.HOVER.BG.HOVER,
+          duration: ANIMATION_CONFIG.HOVER.DURATION,
+          ease: ANIMATION_CONFIG.HOVER.EASE,
+          force3D: true
+        });
+      });
+      
+      item.addEventListener("mouseleave", () => {
+        gsap.to(item, {
+          scale: 1,
+          y: 0,
+          color: ANIMATION_CONFIG.HOVER.COLOR.NORMAL,
+          backgroundColor: ANIMATION_CONFIG.HOVER.BG.NORMAL,
+          duration: ANIMATION_CONFIG.HOVER.DURATION,
+          ease: ANIMATION_CONFIG.HOVER.EASE,
+          force3D: true
+        });
+      });
+    });
+    
+    return () => {
+      socialItemsRef.current.forEach(item => {
+        item.removeEventListener("mouseenter", () => {});
+        item.removeEventListener("mouseleave", () => {});
+      });
+    };
   }, []);
 
   return (
@@ -170,24 +212,8 @@ const ContactInfo = () => {
               href={social.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-12 h-12 flex items-center justify-center rounded-lg bg-gray-800/50 text-gray-400 hover:text-primary transition-colors duration-300 transform-gpu"
+              className="w-12 h-12 flex items-center justify-center rounded-lg bg-gray-800/50 text-gray-400 transform-gpu"
               aria-label={social.label}
-              onMouseEnter={e => {
-                gsap.to(e.currentTarget, {
-                  scale: ANIMATION_CONFIG.HOVER.SCALE,
-                  y: ANIMATION_CONFIG.HOVER.Y_OFFSET,
-                  duration: ANIMATION_CONFIG.HOVER.DURATION,
-                  ease: ANIMATION_CONFIG.HOVER.EASE
-                });
-              }}
-              onMouseLeave={e => {
-                gsap.to(e.currentTarget, {
-                  scale: 1,
-                  y: 0,
-                  duration: ANIMATION_CONFIG.HOVER.DURATION,
-                  ease: ANIMATION_CONFIG.HOVER.EASE
-                });
-              }}
             >
               {social.icon}
             </a>

@@ -121,9 +121,10 @@ const JourneySection = () => {
         My Journey
       </h3>
 
+      {/* Updated line positioning for better alignment */}
       <div 
         ref={lineRef}
-        className="absolute left-[7px] top-[5.5rem] bottom-4 w-[2px] bg-gradient-to-b from-primary/50 via-primary/30 to-transparent origin-top"
+        className="absolute left-[7px] top-[4.5rem] bottom-4 w-[2px] bg-gradient-to-b from-primary/50 via-primary/30 to-transparent origin-top"
         style={{ willChange: "transform" }}
       />
 
@@ -137,6 +138,7 @@ const JourneySection = () => {
             className="relative"
             style={{ willChange: "transform, opacity" }}
           >
+            {/* Adjusted circle position to align with the line */}
             <div className="absolute -left-8 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background" />
             
             <div className="space-y-1 p-4 rounded-xl bg-gray-900/30 border border-primary/10 hover:border-primary/20 transition-colors duration-300">

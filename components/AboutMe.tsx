@@ -37,13 +37,11 @@ const AboutMe = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const bgPatternRef = useRef<HTMLDivElement>(null);
-  const bgBlobsRef = useRef<HTMLDivElement>(null);
 
   const setupAnimations = useCallback(() => {
-    if (!sectionRef.current || !contentRef.current || !bgPatternRef.current || !bgBlobsRef.current) return;
+    if (!sectionRef.current || !contentRef.current || !bgPatternRef.current) return;
 
     const contentElements = contentRef.current.children;
-    const blobs = bgBlobsRef.current.children;
 
     ScrollTrigger.create({
       trigger: sectionRef.current,
@@ -56,21 +54,6 @@ const AboutMe = () => {
           { 
             opacity: ANIMATION_CONFIG.BACKGROUND.OPACITY.END, 
             duration: ANIMATION_CONFIG.BACKGROUND.DURATION,
-            ease: ANIMATION_CONFIG.BACKGROUND.EASE
-          }
-        );
-
-        gsap.fromTo(
-          blobs,
-          { 
-            opacity: 0,
-            scale: 0.8
-          },
-          {
-            opacity: ANIMATION_CONFIG.BACKGROUND.OPACITY.END,
-            scale: 1,
-            duration: ANIMATION_CONFIG.BACKGROUND.DURATION,
-            stagger: 0.2,
             ease: ANIMATION_CONFIG.BACKGROUND.EASE
           }
         );
@@ -110,17 +93,6 @@ const AboutMe = () => {
         style={{ willChange: "opacity" }}
       />
 
-      <div ref={bgBlobsRef} className="absolute inset-0">
-        <div 
-          className="absolute top-0 -left-4 w-72 h-72 bg-primary/30 rounded-full filter blur-3xl opacity-0"
-          style={{ willChange: "transform, opacity" }}
-        />
-        <div 
-          className="absolute bottom-0 -right-4 w-72 h-72 bg-accent/30 rounded-full filter blur-3xl opacity-0"
-          style={{ willChange: "transform, opacity" }}
-        />
-      </div>
-
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div 
           ref={contentRef} 
@@ -128,16 +100,20 @@ const AboutMe = () => {
           style={{ willChange: "transform" }}
         >
           <Title />
-          <div className="flex flex-col lg:flex-row items-start gap-8 lg:gap-12">
-            <div className="w-full lg:w-2/5">
-              <div className="lg:sticky lg:top-24 lg:pt-2">
-                <ImageSection />
-              </div>
+          
+          {/* First row: Image and Journey side by side on medium/large screens */}
+          <div className="flex flex-col md:flex-row items-start gap-8 md:gap-12">
+            <div className="w-full md:w-2/5">
+              <ImageSection />
             </div>
-            <div className="w-full lg:w-3/5 space-y-12 lg:space-y-16">
+            <div className="w-full md:w-3/5">
               <JourneySection />
-              <SkillsSection />
             </div>
+          </div>
+          
+          {/* Second row: Skills section takes full width */}
+          <div className="w-full">
+            <SkillsSection />
           </div>
         </div>
       </div>

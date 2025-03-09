@@ -13,55 +13,54 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
 
   useGSAP(() => {
     if (!cardRef.current || !iconRef.current) return;
-    gsap.from(cardRef.current, {
-      opacity: 0,
-      y: 20,
-      duration: 0.6,
-      ease: "power2.out",
+
+    const ctx = gsap.context(() => {
+      const hoverTl = gsap.timeline({ paused: true });
+      hoverTl
+        .to(iconRef.current, {
+          scale: 1.1,
+          duration: 0.3,
+          ease: "power2.out",
+          force3D: true
+        })
+        .to(cardRef.current!.querySelector('.card-gradient')!, {
+          opacity: 1,
+          duration: 0.3,
+          ease: "power2.out"
+        }, 0);
+
+      const handleMouseEnter = () => hoverTl.play();
+      const handleMouseLeave = () => hoverTl.reverse();
+
+      cardRef.current?.addEventListener("mouseenter", handleMouseEnter);
+      cardRef.current?.addEventListener("mouseleave", handleMouseLeave);
+
+      return () => {
+        cardRef.current?.removeEventListener("mouseenter", handleMouseEnter);
+        cardRef.current?.removeEventListener("mouseleave", handleMouseLeave);
+        hoverTl.kill();
+      };
     });
-    const hoverTl = gsap.timeline({ paused: true });
-    hoverTl.to(iconRef.current, { scale: 1.1, duration: 0.3, ease: "power2.out" });
 
-    const handleMouseEnter = () => {
-      hoverTl.play();
-    };
-    const handleMouseLeave = () => {
-      hoverTl.reverse();
-    };
-
-    cardRef.current.addEventListener("mouseenter", handleMouseEnter);
-    cardRef.current.addEventListener("mouseleave", handleMouseLeave);
-
-    return () => {
-      cardRef.current?.removeEventListener("mouseenter", handleMouseEnter);
-      cardRef.current?.removeEventListener("mouseleave", handleMouseLeave);
-    };
+    return () => ctx.revert();
   }, []);
 
   return (
     <div
       ref={cardRef}
-      className="relative bg-white/5 backdrop-blur-sm rounded-xl p-4
-        cursor-pointer group"
+      className="relative bg-white/5 rounded-xl p-4 cursor-pointer transform-gpu"
+      style={{ willChange: "transform" }}
     >
-      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <div
-          className="absolute inset-[-2px] rounded-xl border-[2px] border-transparent
-          before:absolute before:inset-0 before:rounded-xl before:border-[2px]
-          before:border-primary before:animate-border-rotate
-          after:absolute after:inset-0 after:rounded-xl after:border-[2px]
-          after:border-primary after:animate-border-rotate-reverse"
-        />
-      </div>
-
-      <div className="flex items-center gap-3">
+      <div className="card-gradient absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 rounded-xl opacity-0" />
+      <div className="relative flex items-center gap-3">
         <div
           ref={iconRef}
-          className="text-2xl transition-transform duration-300"
+          className="text-2xl transform-gpu"
+          style={{ willChange: "transform" }}
         >
           {icon}
         </div>
-        <div className="text-gray-200 text-sm font-medium group-hover:text-white transition-colors duration-300">
+        <div className="text-gray-200 text-sm font-medium">
           {text}
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi";
 import gsap from "gsap";
 
@@ -7,7 +7,9 @@ interface SocialLink {
   label: string;
   href: string;
   bgColor: string;
+  hoverBgColor: string;
   iconColor: string;
+  hoverIconColor: string;
   description: string;
   stats: {
     label: string;
@@ -15,13 +17,32 @@ interface SocialLink {
   }[];
 }
 
+const ANIMATION_CONFIG = {
+  LINK_HOVER: {
+    DURATION: 0.2,
+    EASE: "power2.out"
+  },
+  INFO_BOX: {
+    SHOW: {
+      DURATION: 0.2,
+      EASE: "back.out(1.7)"
+    },
+    HIDE: {
+      DURATION: 0.15,
+      EASE: "power2.in"
+    }
+  }
+} as const;
+
 const SOCIAL_LINKS: SocialLink[] = [
   {
     icon: <FiGithub className="w-6 h-6" />,
     label: "GitHub",
     href: "https://github.com/yourusername",
-    bgColor: "hover:bg-[#2dba4e]/10",
-    iconColor: "text-gray-300 group-hover:text-[#2dba4e]",
+    bgColor: "rgba(45, 186, 78, 0)",
+    hoverBgColor: "rgba(45, 186, 78, 0.1)",
+    iconColor: "rgb(209, 213, 219)",
+    hoverIconColor: "rgb(45, 186, 78)",
     description: "Check out my open source projects and contributions",
     stats: [
       { label: "Repositories", value: "50+" },
@@ -33,8 +54,10 @@ const SOCIAL_LINKS: SocialLink[] = [
     icon: <FiLinkedin className="w-6 h-6" />,
     label: "LinkedIn",
     href: "https://linkedin.com/in/yourusername",
-    bgColor: "hover:bg-[#0077b5]/10",
-    iconColor: "text-gray-300 group-hover:text-[#0077b5]",
+    bgColor: "rgba(0, 119, 181, 0)",
+    hoverBgColor: "rgba(0, 119, 181, 0.1)",
+    iconColor: "rgb(209, 213, 219)",
+    hoverIconColor: "rgb(0, 119, 181)",
     description: "Connect with me professionally",
     stats: [
       { label: "Connections", value: "500+" },
@@ -46,8 +69,10 @@ const SOCIAL_LINKS: SocialLink[] = [
     icon: <FiTwitter className="w-6 h-6" />,
     label: "Twitter",
     href: "https://twitter.com/yourusername",
-    bgColor: "hover:bg-[#1da1f2]/10",
-    iconColor: "text-gray-300 group-hover:text-[#1da1f2]",
+    bgColor: "rgba(29, 161, 242, 0)",
+    hoverBgColor: "rgba(29, 161, 242, 0.1)",
+    iconColor: "rgb(209, 213, 219)",
+    hoverIconColor: "rgb(29, 161, 242)",
     description: "Follow me for tech insights and updates",
     stats: [
       { label: "Followers", value: "1000+" },
@@ -61,6 +86,56 @@ const SocialLinks = () => {
   const [activeLink, setActiveLink] = useState<number | null>(null);
   const infoBoxRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<gsap.core.Tween | null>(null);
+  const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const iconRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Setup hover animations for social links
+  useEffect(() => {
+    linkRefs.current.forEach((link, index) => {
+      if (!link || !iconRefs.current[index]) return;
+      
+      const icon = iconRefs.current[index];
+      const socialLink = SOCIAL_LINKS[index];
+      
+      link.addEventListener('mouseenter', () => {
+        gsap.to(link, {
+          backgroundColor: socialLink.hoverBgColor,
+          borderColor: 'rgba(75, 85, 99, 0.5)',
+          duration: ANIMATION_CONFIG.LINK_HOVER.DURATION,
+          ease: ANIMATION_CONFIG.LINK_HOVER.EASE
+        });
+        
+        gsap.to(icon, {
+          color: socialLink.hoverIconColor,
+          duration: ANIMATION_CONFIG.LINK_HOVER.DURATION,
+          ease: ANIMATION_CONFIG.LINK_HOVER.EASE
+        });
+      });
+      
+      link.addEventListener('mouseleave', () => {
+        gsap.to(link, {
+          backgroundColor: 'rgba(31, 41, 55, 0.5)',
+          borderColor: 'rgba(55, 65, 81, 0.5)',
+          duration: ANIMATION_CONFIG.LINK_HOVER.DURATION,
+          ease: ANIMATION_CONFIG.LINK_HOVER.EASE
+        });
+        
+        gsap.to(icon, {
+          color: socialLink.iconColor,
+          duration: ANIMATION_CONFIG.LINK_HOVER.DURATION,
+          ease: ANIMATION_CONFIG.LINK_HOVER.EASE
+        });
+      });
+    });
+    
+    return () => {
+      linkRefs.current.forEach((link) => {
+        if (!link) return;
+        link.removeEventListener('mouseenter', () => {});
+        link.removeEventListener('mouseleave', () => {});
+      });
+    };
+  }, []);
 
   const handleMouseEnter = useCallback((index: number) => {
     setActiveLink(index);
@@ -80,8 +155,8 @@ const SocialLinks = () => {
         opacity: 1,
         y: 0,
         scale: 1,
-        duration: 0.2,
-        ease: "back.out(1.7)",
+        duration: ANIMATION_CONFIG.INFO_BOX.SHOW.DURATION,
+        ease: ANIMATION_CONFIG.INFO_BOX.SHOW.EASE,
       });
     }
   }, []);
@@ -96,8 +171,8 @@ const SocialLinks = () => {
         opacity: 0,
         y: 10,
         scale: 0.95,
-        duration: 0.15,
-        ease: "power2.in",
+        duration: ANIMATION_CONFIG.INFO_BOX.HIDE.DURATION,
+        ease: ANIMATION_CONFIG.INFO_BOX.HIDE.EASE,
         onComplete: () => {
           setActiveLink(null);
         }
@@ -111,15 +186,24 @@ const SocialLinks = () => {
         {SOCIAL_LINKS.map((link, index) => (
           <a
             key={link.label}
+            ref={(el: HTMLAnchorElement | null) => {
+              linkRefs.current[index] = el;
+            }}
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
-            className={`group relative p-3 rounded-xl bg-gray-800/50 border border-gray-700/50 
-              transition-all duration-300 hover:bg-gray-800/70 hover:border-gray-600/50 ${link.bgColor}`}
+            className="group relative p-3 rounded-xl bg-gray-800/50 border border-gray-700/50"
+            style={{ willChange: "background-color, border-color" }}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
           >
-            <div className={link.iconColor}>
+            <div 
+              ref={(el: HTMLDivElement | null): void => {
+                iconRefs.current[index] = el;
+              }}
+              className="text-gray-300"
+              style={{ willChange: "color" }}
+            >
               {link.icon}
             </div>
           </a>
@@ -130,11 +214,18 @@ const SocialLinks = () => {
         <div
           ref={infoBoxRef}
           className="absolute z-50 w-64 p-4 rounded-xl bg-gray-800/95 backdrop-blur-sm
-            border border-gray-700/50 shadow-xl -translate-x-1/2 left-1/2 -top-[220px]"
+            border border-gray-700/50 shadow-xl left-1/2 -top-[220px]"
+          style={{ 
+            willChange: "transform, opacity",
+            transform: "translateX(-50%)"
+          }}
         >
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg bg-gray-700/50 ${SOCIAL_LINKS[activeLink].iconColor}`}>
+              <div 
+                className="p-2 rounded-lg bg-gray-700/50"
+                style={{ color: SOCIAL_LINKS[activeLink].hoverIconColor }}
+              >
                 {SOCIAL_LINKS[activeLink].icon}
               </div>
               <div>
@@ -164,7 +255,12 @@ const SocialLinks = () => {
             </div>
           </div>
 
-          <div className="absolute left-1/2 bottom-0 w-4 h-4 -mb-2 transform -translate-x-1/2 rotate-45 bg-gray-800/95 border-r border-b border-gray-700/50" />
+          <div 
+            className="absolute left-1/2 bottom-0 w-4 h-4 -mb-2 bg-gray-800/95 border-r border-b border-gray-700/50"
+            style={{ 
+              transform: "translateX(-50%) rotate(45deg)"
+            }}
+          />
         </div>
       )}
     </div>

@@ -102,7 +102,6 @@ export const ExpandableSection = ({ title, content, isList = false }: Expandable
         </h3>
         <div
           ref={chevronRef}
-          className="transform transition-transform duration-300"
         >
           <FiChevronDown className="w-5 h-5 text-primary group-hover:text-accent transition-colors" />
         </div>
@@ -113,7 +112,7 @@ export const ExpandableSection = ({ title, content, isList = false }: Expandable
         className="px-4 pb-4 space-y-2"
       >
         {isList ? (
-          <ul className="space-y-2 list-none">
+          <ul className="space-y-2 list-none opacity-0">
             {(content as string[]).map((item, index) => (
               <li
                 key={index}
@@ -125,7 +124,7 @@ export const ExpandableSection = ({ title, content, isList = false }: Expandable
             ))}
           </ul>
         ) : (
-          <p className="text-gray-300 whitespace-pre-wrap">
+          <p className="text-gray-300 whitespace-pre-wrap opacity-0">
             {content as string}
           </p>
         )}

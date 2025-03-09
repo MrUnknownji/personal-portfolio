@@ -92,6 +92,8 @@ const Footer = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const socialIconsRef = useRef<(HTMLAnchorElement | null)[]>([]);
+  const quickLinksRef = useRef<(HTMLAnchorElement | null)[]>([]);
+  const contactItemsRef = useRef<(HTMLLIElement | null)[]>([]);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   const currentYear: number = new Date().getFullYear();
 
@@ -177,6 +179,7 @@ const Footer = () => {
   useGSAP(() => {
     setupAnimations();
 
+    // Social icons animation setup
     socialIconsRef.current.forEach((icon) => {
       if (!icon) return;
 
@@ -221,23 +224,98 @@ const Footer = () => {
       return () => ctx.revert();
     });
 
+    // Quick links animation setup
+    quickLinksRef.current.forEach((link, index) => {
+      if (!link) return;
+      
+      const ctx = gsap.context(() => {
+        link.addEventListener("mouseenter", () => {
+          gsap.to(link, {
+            color: "#00ff9f",
+            x: 3,
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: "power2.out"
+          });
+          handleLinkHover(index.toString(), true);
+        });
+
+        link.addEventListener("mouseleave", () => {
+          gsap.to(link, {
+            color: "rgb(156 163 175)",
+            x: 0,
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: "power2.out"
+          });
+          handleLinkHover(index.toString(), false);
+        });
+      }, link);
+
+      return () => ctx.revert();
+    });
+
+    // Contact items animation setup
+    contactItemsRef.current.forEach((item) => {
+      if (!item) return;
+      
+      const icon = item.querySelector(".contact-icon-container");
+      const text = item.querySelector(".contact-text");
+      
+      const ctx = gsap.context(() => {
+        item.addEventListener("mouseenter", () => {
+          gsap.to(item, {
+            color: "#ffffff",
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: "power2.out"
+          });
+          gsap.to(icon, {
+            backgroundColor: "rgba(0, 255, 159, 0.2)",
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: "power2.out"
+          });
+          gsap.to(text, {
+            x: 4,
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: "power2.out"
+          });
+        });
+
+        item.addEventListener("mouseleave", () => {
+          gsap.to(item, {
+            color: "rgb(156 163 175)",
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: "power2.out"
+          });
+          gsap.to(icon, {
+            backgroundColor: "rgba(31, 41, 55, 0.5)",
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: "power2.out"
+          });
+          gsap.to(text, {
+            x: 0,
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: "power2.out"
+          });
+        });
+      }, item);
+
+      return () => ctx.revert();
+    });
+
     return () => {
       if (timelineRef.current) {
         timelineRef.current.kill();
       }
     };
-  }, [setupAnimations]);
+  }, [setupAnimations, handleLinkHover]);
 
   return (
     <footer
       ref={footerRef}
-      className="w-full bg-gray-900/50 backdrop-blur-sm border-t border-gray-800/50 py-12 px-8 relative overflow-hidden"
+      className="w-full bg-gray-900/50 border-t border-gray-800/50 py-12 px-8 relative overflow-hidden"
       style={{ willChange: "transform" }}
     >
+      {/* Replace blur with gradient background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
-
-      <div className="absolute top-0 -left-4 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl opacity-20" />
-      <div className="absolute bottom-0 -right-4 w-96 h-96 bg-accent/20 rounded-full filter blur-3xl opacity-20" />
 
       <div
         ref={contentRef}
@@ -262,7 +340,7 @@ const Footer = () => {
                         socialIconsRef.current[index] = el;
                       }
                     }}
-                    className="social-icon relative w-12 h-12 flex items-center justify-center rounded-full bg-gray-800/50 text-gray-400 hover:text-primary transition-colors duration-300 transform-gpu"
+                    className="social-icon relative w-12 h-12 flex items-center justify-center rounded-full bg-gray-800/50 text-gray-400 transform-gpu"
                     aria-label={link.label}
                   >
                     {link.icon}
@@ -281,9 +359,12 @@ const Footer = () => {
                 <li key={link.text}>
                   <Link
                     href={link.href}
-                    className={`quick-link quick-link-${index} relative inline-block text-gray-400 hover:text-white transition-colors duration-300 ${hoveredLink === index.toString() ? 'text-primary' : ''}`}
-                    onMouseEnter={() => handleLinkHover(index.toString(), true)}
-                    onMouseLeave={() => handleLinkHover(index.toString(), false)}
+                    ref={(el: HTMLAnchorElement | null) => {
+                      if (el) {
+                        quickLinksRef.current[index] = el;
+                      }
+                    }}
+                    className={`quick-link quick-link-${index} relative inline-block text-gray-400 transform-gpu ${hoveredLink === index.toString() ? 'text-primary' : ''}`}
                   >
                     {link.text}
                     <div className="underline absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transform-gpu" />
@@ -301,12 +382,17 @@ const Footer = () => {
               {CONTACT_INFO.map((info, index) => (
                 <li
                   key={index}
-                  className="contact-item flex items-center gap-3 text-gray-400 hover:text-white transition-colors duration-300 group"
+                  ref={(el: HTMLLIElement | null) => {
+                    if (el) {
+                      contactItemsRef.current[index] = el;
+                    }
+                  }}
+                  className="contact-item flex items-center gap-3 text-gray-400 transform-gpu"
                 >
-                  <span className="flex-shrink-0 p-2 rounded-lg bg-gray-800/50 group-hover:bg-primary/20 transition-colors duration-300">
+                  <span className="contact-icon-container flex-shrink-0 p-2 rounded-lg bg-gray-800/50">
                     {info.icon}
                   </span>
-                  <span className="group-hover:translate-x-1 transition-transform duration-300">
+                  <span className="contact-text transform-gpu">
                     {info.text}
                   </span>
                 </li>

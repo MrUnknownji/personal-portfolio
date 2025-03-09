@@ -147,57 +147,69 @@ const ThankYouDialog = ({ isOpen, onClose, email }: ThankYouDialogProps) => {
   }, [isOpen]);
 
   const setupButtonHover = useCallback((button: HTMLButtonElement) => {
-    const ctx = gsap.context(() => {
-      button.addEventListener("mouseenter", () => {
-        gsap.to(button, {
-          scale: 1,
-          opacity: ANIMATION_CONFIG.BUTTON.OPACITY.HOVER,
-          duration: ANIMATION_CONFIG.BUTTON.DURATION,
-          ease: ANIMATION_CONFIG.BUTTON.EASE,
-          force3D: true
-        });
+    if (!button) return () => {};
+    
+    const handleMouseEnter = () => {
+      gsap.to(button, {
+        scale: 1,
+        opacity: ANIMATION_CONFIG.BUTTON.OPACITY.HOVER,
+        duration: ANIMATION_CONFIG.BUTTON.DURATION,
+        ease: ANIMATION_CONFIG.BUTTON.EASE,
+        force3D: true
       });
+    };
 
-      button.addEventListener("mouseleave", () => {
-        gsap.to(button, {
-          scale: 1,
-          opacity: 1,
-          duration: ANIMATION_CONFIG.BUTTON.DURATION,
-          ease: ANIMATION_CONFIG.BUTTON.EASE,
-          force3D: true
-        });
+    const handleMouseLeave = () => {
+      gsap.to(button, {
+        scale: 1,
+        opacity: 1,
+        duration: ANIMATION_CONFIG.BUTTON.DURATION,
+        ease: ANIMATION_CONFIG.BUTTON.EASE,
+        force3D: true
       });
+    };
 
-      button.addEventListener("mousedown", () => {
-        gsap.to(button, {
-          scale: ANIMATION_CONFIG.BUTTON.SCALE,
-          opacity: ANIMATION_CONFIG.BUTTON.OPACITY.ACTIVE,
-          duration: ANIMATION_CONFIG.BUTTON.DURATION,
-          ease: ANIMATION_CONFIG.BUTTON.EASE,
-          force3D: true
-        });
+    const handleMouseDown = () => {
+      gsap.to(button, {
+        scale: ANIMATION_CONFIG.BUTTON.SCALE,
+        opacity: ANIMATION_CONFIG.BUTTON.OPACITY.ACTIVE,
+        duration: ANIMATION_CONFIG.BUTTON.DURATION,
+        ease: ANIMATION_CONFIG.BUTTON.EASE,
+        force3D: true
       });
+    };
 
-      button.addEventListener("mouseup", () => {
-        gsap.to(button, {
-          scale: 1,
-          opacity: ANIMATION_CONFIG.BUTTON.OPACITY.HOVER,
-          duration: ANIMATION_CONFIG.BUTTON.DURATION,
-          ease: ANIMATION_CONFIG.BUTTON.EASE,
-          force3D: true
-        });
+    const handleMouseUp = () => {
+      gsap.to(button, {
+        scale: 1,
+        opacity: ANIMATION_CONFIG.BUTTON.OPACITY.HOVER,
+        duration: ANIMATION_CONFIG.BUTTON.DURATION,
+        ease: ANIMATION_CONFIG.BUTTON.EASE,
+        force3D: true
       });
-    });
+    };
+    
+    button.addEventListener("mouseenter", handleMouseEnter);
+    button.addEventListener("mouseleave", handleMouseLeave);
+    button.addEventListener("mousedown", handleMouseDown);
+    button.addEventListener("mouseup", handleMouseUp);
 
-    return () => ctx.revert();
+    return () => {
+      button.removeEventListener("mouseenter", handleMouseEnter);
+      button.removeEventListener("mouseleave", handleMouseLeave);
+      button.removeEventListener("mousedown", handleMouseDown);
+      button.removeEventListener("mouseup", handleMouseUp);
+    };
   }, []);
 
   useEffect(() => {
+    if (!isOpen) return;
+    
     const buttons = document.querySelectorAll('button');
     const cleanups = Array.from(buttons).map(button => setupButtonHover(button as HTMLButtonElement));
 
     return () => cleanups.forEach(cleanup => cleanup());
-  }, [setupButtonHover]);
+  }, [setupButtonHover, isOpen]);
 
   if (!isOpen) return null;
 
@@ -220,7 +232,7 @@ const ThankYouDialog = ({ isOpen, onClose, email }: ThankYouDialogProps) => {
           ref={dialogRef}
           className="relative inline-block w-full sm:max-w-lg bg-gray-800/95 backdrop-blur-sm
             rounded-2xl overflow-hidden shadow-2xl border border-primary/20 text-left
-            sm:align-middle"
+            sm:align-middle transform-gpu"
         >
           <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r 
             from-transparent via-primary to-transparent opacity-50" />

@@ -39,10 +39,16 @@ const HeroSection = () => {
   const cardRef = useRef<HTMLDivElement>(null);
   const borderRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
-  const scrollTriggerRef = useRef<ScrollTrigger>(null);
+  const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
+  const mouseMoveThrottleRef = useRef<number | null>(null);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (!cardRef.current || !glowRef.current) return;
+    if (!cardRef.current || !glowRef.current || mouseMoveThrottleRef.current) return;
+
+    // Throttle mouse move events for better performance
+    mouseMoveThrottleRef.current = window.setTimeout(() => {
+      mouseMoveThrottleRef.current = null;
+    }, 16); // ~60fps
 
     const { left, top, width, height } = cardRef.current.getBoundingClientRect();
     const x = e.clientX - left;
@@ -52,7 +58,9 @@ const HeroSection = () => {
       x: x - width / 2,
       y: y - height / 2,
       duration: 0.5,
-      ease: "power2.out"
+      ease: "power2.out",
+      force3D: true,
+      overwrite: true
     });
   }, []);
 
@@ -71,6 +79,7 @@ const HeroSection = () => {
           gsap.set(contentRef.current, {
             y: self.progress * ANIMATION_CONFIG.HERO.SCROLL_DISTANCE,
             opacity: 1 - self.progress * ANIMATION_CONFIG.HERO.OPACITY_FACTOR,
+            force3D: true
           });
         }
       },
@@ -91,7 +100,8 @@ const HeroSection = () => {
           y: 0,
           duration: ANIMATION_CONFIG.HERO.DURATION,
           ease: ANIMATION_CONFIG.HERO.EASE,
-          clearProps: "scale"
+          clearProps: "scale",
+          force3D: true
         }
       );
 
@@ -100,6 +110,7 @@ const HeroSection = () => {
         duration: ANIMATION_CONFIG.BORDER.DURATION,
         ease: "none",
         repeat: -1,
+        force3D: true
       });
 
       gsap.to(glowRef.current, {
@@ -107,7 +118,8 @@ const HeroSection = () => {
         duration: ANIMATION_CONFIG.GLOW.DURATION,
         ease: ANIMATION_CONFIG.GLOW.EASE,
         yoyo: true,
-        repeat: -1
+        repeat: -1,
+        force3D: true
       });
 
       setupScrollAnimation();
@@ -117,6 +129,9 @@ const HeroSection = () => {
       ctx.revert();
       if (scrollTriggerRef.current) {
         scrollTriggerRef.current.kill();
+      }
+      if (mouseMoveThrottleRef.current) {
+        clearTimeout(mouseMoveThrottleRef.current);
       }
     };
   }, [setupScrollAnimation]);
@@ -150,18 +165,21 @@ const HeroSection = () => {
           <div
             ref={cardRef}
             className="relative rounded-3xl p-6 md:p-8 lg:p-12
-              bg-gray-900/95 backdrop-blur-sm border border-gray-800/50 z-10
+              bg-gray-900/95 border border-gray-800/50 z-10
               shadow-xl shadow-gray-950/20 transform-gpu"
             onMouseMove={handleMouseMove}
+            style={{ willChange: "transform" }}
           >
             <div
               ref={glowRef}
-              className="absolute w-[40rem] h-[40rem] bg-primary/10 rounded-full filter blur-3xl pointer-events-none opacity-40 transform -translate-x-1/2 -translate-y-1/2"
+              className="absolute w-[30rem] h-[30rem] bg-gradient-radial from-primary/10 to-transparent rounded-full pointer-events-none opacity-40 transform -translate-x-1/2 -translate-y-1/2"
+              style={{ willChange: "transform" }}
             />
 
             <div
               ref={contentRef}
               className="relative flex flex-col lg:flex-row gap-8 h-full justify-center items-center"
+              style={{ willChange: "transform, opacity" }}
             >
               <div className="z-10 w-full h-full">
                 <HeroContent />

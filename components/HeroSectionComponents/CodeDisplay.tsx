@@ -9,40 +9,43 @@ const CodeDisplay = () => {
   useGSAP(() => {
     if (!containerRef.current || !codeBlockRef.current) return;
 
-    gsap.fromTo(
-      containerRef.current,
-      { opacity: 0 },
-      { opacity: 1, duration: 1, delay: 0.5 },
-    );
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        containerRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 1, delay: 0.5, force3D: true },
+      );
 
-    gsap.to(codeBlockRef.current, {
-      rotateY: "+=3",
-      duration: 3,
-      ease: "sine.inOut",
-      repeat: -1,
-      yoyo: true,
+      gsap.to(codeBlockRef.current, {
+        rotateY: "+=3",
+        duration: 3,
+        ease: "sine.inOut",
+        repeat: -1,
+        yoyo: true,
+        force3D: true
+      });
     });
+
+    return () => ctx.revert();
   }, []);
 
   return (
     <div
       ref={containerRef}
       className="flex-1 w-full max-w-4xl mx-auto opacity-0"
+      style={{ willChange: "opacity" }}
     >
       <div className="relative p-4 h-full">
         <div className="relative h-[400px] perspective-1000">
           <div
             ref={codeBlockRef}
-            className="w-full h-full transform-gpu group"
+            className="w-full h-full transform-gpu"
             style={{
               transformStyle: "preserve-3d",
               transform: "rotateY(5deg) scale(0.98)",
+              willChange: "transform"
             }}
           >
-            <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-              <div className="absolute inset-[-2px] rounded-2xl border-[2px] border-transparent before:absolute before:inset-0 before:rounded-2xl before:border-[2px] before:border-primary before:animate-border-rotate after:absolute after:inset-0 after:rounded-2xl after:border-[2px] after:border-primary after:animate-border-rotate-reverse" />
-            </div>
-
             <div className="absolute inset-0 bg-gradient-to-r from-gray-800/90 to-gray-900/90 rounded-2xl shadow-2xl overflow-hidden border border-gray-700/50">
               <div className="h-8 bg-gray-800/90 flex items-center px-4">
                 <div className="flex space-x-2">

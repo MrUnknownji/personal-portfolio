@@ -71,7 +71,7 @@ const SocialInfoBox = ({
             className="pointer-events-auto block"
           >
             <div
-              className="flex items-center justify-between p-3 rounded-lg transition-all duration-300 hover:opacity-90"
+              className="flex items-center justify-between p-3 rounded-lg"
               style={{
                 backgroundColor: `${socialLink.color}20`,
                 borderLeft: `3px solid ${socialLink.color}`,

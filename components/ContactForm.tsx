@@ -22,19 +22,9 @@ const ANIMATION_CONFIG = {
     Y_OFFSET: 50,
     EASE: "power2.out"
   },
-  GLOW: {
-    DURATION: 0.5,
-    EASE: "power2.out",
-    OPACITY: {
-      START: 0.2,
-      END: 0.4
-    }
-  },
-  HOVER: {
-    DURATION: 0.3,
-    EASE: "power2.out",
-    SCALE: 1.02,
-    GLOW_OPACITY: 0.3
+  BORDER: {
+    DURATION: 0.4,
+    EASE: "power2.out"
   }
 } as const;
 
@@ -43,55 +33,33 @@ const ContactForm: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
+  const borderRefs = useRef<(HTMLDivElement | null)[]>([null, null, null, null]);
 
   const handleMouseEnter = useCallback(() => {
-    if (!containerRef.current || !glowRef.current) return;
+    if (!containerRef.current) return;
 
-    gsap.to(containerRef.current, {
-      scale: ANIMATION_CONFIG.HOVER.SCALE,
-      duration: ANIMATION_CONFIG.HOVER.DURATION,
-      ease: ANIMATION_CONFIG.HOVER.EASE,
-      force3D: true
-    });
-
-    gsap.to(glowRef.current, {
-      opacity: ANIMATION_CONFIG.HOVER.GLOW_OPACITY,
-      duration: ANIMATION_CONFIG.HOVER.DURATION,
-      ease: ANIMATION_CONFIG.HOVER.EASE
+    borderRefs.current.forEach(border => {
+      if (border) {
+        gsap.to(border, {
+          borderColor: "rgba(79, 209, 197, 0.5)",
+          duration: ANIMATION_CONFIG.BORDER.DURATION,
+          ease: ANIMATION_CONFIG.BORDER.EASE
+        });
+      }
     });
   }, []);
 
   const handleMouseLeave = useCallback(() => {
-    if (!containerRef.current || !glowRef.current) return;
+    if (!containerRef.current) return;
 
-    gsap.to(containerRef.current, {
-      scale: 1,
-      duration: ANIMATION_CONFIG.HOVER.DURATION,
-      ease: ANIMATION_CONFIG.HOVER.EASE,
-      force3D: true
-    });
-
-    gsap.to(glowRef.current, {
-      opacity: ANIMATION_CONFIG.GLOW.OPACITY.START,
-      duration: ANIMATION_CONFIG.HOVER.DURATION,
-      ease: ANIMATION_CONFIG.HOVER.EASE
-    });
-  }, []);
-
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current || !glowRef.current) return;
-
-    const { left, top, width, height } = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - left;
-    const y = e.clientY - top;
-
-    gsap.to(glowRef.current, {
-      xPercent: -50 + (x / width) * 100,
-      yPercent: -50 + (y / height) * 100,
-      duration: ANIMATION_CONFIG.GLOW.DURATION,
-      ease: ANIMATION_CONFIG.GLOW.EASE,
-      overwrite: true
+    borderRefs.current.forEach(border => {
+      if (border) {
+        gsap.to(border, {
+          borderColor: "rgba(79, 209, 197, 0.3)",
+          duration: ANIMATION_CONFIG.BORDER.DURATION,
+          ease: ANIMATION_CONFIG.BORDER.EASE
+        });
+      }
     });
   }, []);
 
@@ -142,9 +110,6 @@ const ContactForm: React.FC = () => {
       className="relative py-24"
     >
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
-      
-      <div className="absolute top-0 -left-4 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl opacity-20" />
-      <div className="absolute bottom-0 -right-4 w-96 h-96 bg-accent/20 rounded-full filter blur-3xl opacity-20" />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div ref={titleRef} className="text-center space-y-4 mb-16">
@@ -169,20 +134,11 @@ const ContactForm: React.FC = () => {
 
         <div
           ref={containerRef}
-          className="relative bg-secondary/95 rounded-xl overflow-hidden"
+          className="relative bg-secondary/95 rounded-xl overflow-hidden transform-gpu"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          onMouseMove={handleMouseMove}
         >
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-          <div
-            ref={glowRef}
-            className="absolute w-[40rem] h-[40rem] bg-primary/10 rounded-full filter blur-3xl pointer-events-none"
-            style={{ 
-              opacity: ANIMATION_CONFIG.GLOW.OPACITY.START,
-              transform: 'translate(-50%, -50%)'
-            }}
-          />
 
           <div className="relative p-8 md:p-12">
             <div className="grid md:grid-cols-2 gap-12">
@@ -191,10 +147,22 @@ const ContactForm: React.FC = () => {
             </div>
           </div>
 
-          <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary/30 rounded-tl-xl" />
-          <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary/30 rounded-tr-xl" />
-          <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary/30 rounded-bl-xl" />
-          <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-primary/30 rounded-br-xl" />
+          <div 
+            ref={(el: HTMLDivElement | null) => { borderRefs.current[0] = el }}
+            className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary/30 rounded-tl-xl" 
+          />
+          <div 
+            ref={(el: HTMLDivElement | null): void => { borderRefs.current[1] = el }}
+            className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary/30 rounded-tr-xl" 
+          />
+          <div 
+            ref={(el: HTMLDivElement | null): void => { borderRefs.current[2] = el }}
+            className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary/30 rounded-bl-xl" 
+          />
+          <div 
+            ref={(el: HTMLDivElement | null): void => { borderRefs.current[3] = el }}
+            className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-primary/30 rounded-br-xl" 
+          />
         </div>
       </div>
 
