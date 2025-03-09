@@ -88,16 +88,23 @@ const SocialLinks = () => {
   const animationRef = useRef<gsap.core.Tween | null>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const iconRefs = useRef<(HTMLDivElement | null)[]>([]);
-
   // Setup hover animations for social links
   useEffect(() => {
-    linkRefs.current.forEach((link, index) => {
-      if (!link || !iconRefs.current[index]) return;
+    // Store references to event handlers for proper cleanup
+    const enterHandlers: (() => void)[] = [];
+    const leaveHandlers: (() => void)[] = [];
+    
+    // Store current refs to use in cleanup
+    const currentLinkRefs = linkRefs.current;
+    const currentIconRefs = iconRefs.current;
+    
+    currentLinkRefs.forEach((link, index) => {
+      if (!link || !currentIconRefs[index]) return;
       
-      const icon = iconRefs.current[index];
+      const icon = currentIconRefs[index];
       const socialLink = SOCIAL_LINKS[index];
       
-      link.addEventListener('mouseenter', () => {
+      const handleMouseEnter = () => {
         gsap.to(link, {
           backgroundColor: socialLink.hoverBgColor,
           borderColor: 'rgba(75, 85, 99, 0.5)',
@@ -110,9 +117,9 @@ const SocialLinks = () => {
           duration: ANIMATION_CONFIG.LINK_HOVER.DURATION,
           ease: ANIMATION_CONFIG.LINK_HOVER.EASE
         });
-      });
+      };
       
-      link.addEventListener('mouseleave', () => {
+      const handleMouseLeave = () => {
         gsap.to(link, {
           backgroundColor: 'rgba(31, 41, 55, 0.5)',
           borderColor: 'rgba(55, 65, 81, 0.5)',
@@ -125,18 +132,29 @@ const SocialLinks = () => {
           duration: ANIMATION_CONFIG.LINK_HOVER.DURATION,
           ease: ANIMATION_CONFIG.LINK_HOVER.EASE
         });
-      });
+      };
+      
+      // Store handlers for cleanup
+      enterHandlers.push(handleMouseEnter);
+      leaveHandlers.push(handleMouseLeave);
+      
+      // Add event listeners
+      link.addEventListener('mouseenter', handleMouseEnter);
+      link.addEventListener('mouseleave', handleMouseLeave);
     });
     
+    // Cleanup function
     return () => {
-      linkRefs.current.forEach((link) => {
+      currentLinkRefs.forEach((link, index) => {
         if (!link) return;
-        link.removeEventListener('mouseenter', () => {});
-        link.removeEventListener('mouseleave', () => {});
+        
+        // Remove event listeners with the same handler references
+        link.removeEventListener('mouseenter', enterHandlers[index]);
+        link.removeEventListener('mouseleave', leaveHandlers[index]);
       });
     };
   }, []);
-
+  // Rest of the component remains the same
   const handleMouseEnter = useCallback((index: number) => {
     setActiveLink(index);
     

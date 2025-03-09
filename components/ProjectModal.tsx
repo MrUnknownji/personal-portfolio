@@ -64,15 +64,23 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
 
   // Setup hover animations
   useEffect(() => {
+    // Store current refs to use in cleanup
+    const currentCloseButtonRef = closeButtonRef.current;
+    const currentImageWrapperRef = imageWrapperRef.current;
+    const currentDemoButtonRef = demoButtonRef.current;
+    const currentGithubButtonRef = githubButtonRef.current;
+    const currentDemoArrowRef = demoArrowRef.current;
+    const currentGithubArrowRef = githubArrowRef.current;
+
     // Store event handlers to properly remove them later
     const closeButtonEnter = () => {
-      gsap.to(closeButtonRef.current, {
+      gsap.to(currentCloseButtonRef, {
         color: "white",
         backgroundColor: "rgba(55, 65, 81, 0.5)",
         duration: ANIMATION_CONFIG.HOVER.DURATION,
         ease: ANIMATION_CONFIG.HOVER.EASE,
       });
-      const closeButtonChild = closeButtonRef.current?.firstElementChild;
+      const closeButtonChild = currentCloseButtonRef?.firstElementChild;
       if (closeButtonChild) {
         gsap.to(closeButtonChild, {
           rotation: 90,
@@ -83,13 +91,13 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     };
 
     const closeButtonLeave = () => {
-      gsap.to(closeButtonRef.current, {
+      gsap.to(currentCloseButtonRef, {
         color: "rgb(156, 163, 175)",
         backgroundColor: "transparent",
         duration: ANIMATION_CONFIG.HOVER.DURATION,
         ease: ANIMATION_CONFIG.HOVER.EASE,
       });
-      const closeButtonChild = closeButtonRef.current?.firstElementChild;
+      const closeButtonChild = currentCloseButtonRef?.firstElementChild;
       if (closeButtonChild) {
         gsap.to(closeButtonChild, {
           rotation: 0,
@@ -100,7 +108,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     };
 
     const imageWrapperEnter = () => {
-      const img = imageWrapperRef.current?.querySelector("img");
+      const img = currentImageWrapperRef?.querySelector("img");
       if (img)
         gsap.to(img, {
           scale: 1.1,
@@ -115,7 +123,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     };
 
     const imageWrapperLeave = () => {
-      const img = imageWrapperRef.current?.querySelector("img");
+      const img = currentImageWrapperRef?.querySelector("img");
       if (img)
         gsap.to(img, {
           scale: 1,
@@ -131,20 +139,20 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
 
     // Setup button hover animations
     const setupButtonAnimation = (
-      buttonRef: React.RefObject<HTMLAnchorElement>,
-      arrowRef: React.RefObject<SVGElement>
+      buttonElement: HTMLAnchorElement | null,
+      arrowElement: SVGElement | null
     ) => {
-      if (!buttonRef.current || !arrowRef.current) return;
+      if (!buttonElement || !arrowElement) return null;
 
       const buttonEnter = () => {
-        gsap.to(buttonRef.current, {
-          backgroundColor: buttonRef.current.classList.contains("bg-primary")
+        gsap.to(buttonElement, {
+          backgroundColor: buttonElement.classList.contains("bg-primary")
             ? "rgba(0, 255, 159, 0.9)"
             : "rgba(55, 65, 81, 0.5)",
           duration: ANIMATION_CONFIG.HOVER.DURATION,
           ease: ANIMATION_CONFIG.HOVER.EASE,
         });
-        gsap.to(arrowRef.current, {
+        gsap.to(arrowElement, {
           x: 4,
           duration: ANIMATION_CONFIG.HOVER.DURATION,
           ease: ANIMATION_CONFIG.HOVER.EASE,
@@ -152,62 +160,58 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       };
 
       const buttonLeave = () => {
-        gsap.to(buttonRef.current, {
-          backgroundColor: buttonRef.current.classList.contains("bg-primary")
+        gsap.to(buttonElement, {
+          backgroundColor: buttonElement.classList.contains("bg-primary")
             ? "rgb(0, 255, 159)"
             : "rgba(55, 65, 81, 0.5)",
           duration: ANIMATION_CONFIG.HOVER.DURATION,
           ease: ANIMATION_CONFIG.HOVER.EASE,
         });
-        gsap.to(arrowRef.current, {
+        gsap.to(arrowElement, {
           x: 0,
           duration: ANIMATION_CONFIG.HOVER.DURATION,
           ease: ANIMATION_CONFIG.HOVER.EASE,
         });
       };
 
-      buttonRef.current.addEventListener("mouseenter", buttonEnter);
-      buttonRef.current.addEventListener("mouseleave", buttonLeave);
+      buttonElement.addEventListener("mouseenter", buttonEnter);
+      buttonElement.addEventListener("mouseleave", buttonLeave);
 
       return { buttonEnter, buttonLeave };
     };
 
     // Add event listeners
-    closeButtonRef.current?.addEventListener("mouseenter", closeButtonEnter);
-    closeButtonRef.current?.addEventListener("mouseleave", closeButtonLeave);
-    imageWrapperRef.current?.addEventListener("mouseenter", imageWrapperEnter);
-    imageWrapperRef.current?.addEventListener("mouseleave", imageWrapperLeave);
+    currentCloseButtonRef?.addEventListener("mouseenter", closeButtonEnter);
+    currentCloseButtonRef?.addEventListener("mouseleave", closeButtonLeave);
+    currentImageWrapperRef?.addEventListener("mouseenter", imageWrapperEnter);
+    currentImageWrapperRef?.addEventListener("mouseleave", imageWrapperLeave);
 
     // Setup button animations and store handlers
-    const demoButtonHandlers = demoButtonRef.current && demoArrowRef.current
-      ? setupButtonAnimation(
-          { current: demoButtonRef.current } as React.RefObject<HTMLAnchorElement>,
-          { current: demoArrowRef.current } as React.RefObject<SVGElement>
-        )
-      : null;
+    const demoButtonHandlers = setupButtonAnimation(
+      currentDemoButtonRef,
+      currentDemoArrowRef
+    );
 
-    const githubButtonHandlers = githubButtonRef.current && githubArrowRef.current
-      ? setupButtonAnimation(
-          { current: githubButtonRef.current } as React.RefObject<HTMLAnchorElement>,
-          { current: githubArrowRef.current } as React.RefObject<SVGElement>
-        )
-      : null;
+    const githubButtonHandlers = setupButtonAnimation(
+      currentGithubButtonRef,
+      currentGithubArrowRef
+    );
 
     // Cleanup
     return () => {
-      closeButtonRef.current?.removeEventListener("mouseenter", closeButtonEnter);
-      closeButtonRef.current?.removeEventListener("mouseleave", closeButtonLeave);
-      imageWrapperRef.current?.removeEventListener("mouseenter", imageWrapperEnter);
-      imageWrapperRef.current?.removeEventListener("mouseleave", imageWrapperLeave);
+      currentCloseButtonRef?.removeEventListener("mouseenter", closeButtonEnter);
+      currentCloseButtonRef?.removeEventListener("mouseleave", closeButtonLeave);
+      currentImageWrapperRef?.removeEventListener("mouseenter", imageWrapperEnter);
+      currentImageWrapperRef?.removeEventListener("mouseleave", imageWrapperLeave);
       
-      if (demoButtonRef.current && demoButtonHandlers) {
-        demoButtonRef.current.removeEventListener("mouseenter", demoButtonHandlers.buttonEnter);
-        demoButtonRef.current.removeEventListener("mouseleave", demoButtonHandlers.buttonLeave);
+      if (currentDemoButtonRef && demoButtonHandlers) {
+        currentDemoButtonRef.removeEventListener("mouseenter", demoButtonHandlers.buttonEnter);
+        currentDemoButtonRef.removeEventListener("mouseleave", demoButtonHandlers.buttonLeave);
       }
       
-      if (githubButtonRef.current && githubButtonHandlers) {
-        githubButtonRef.current.removeEventListener("mouseenter", githubButtonHandlers.buttonEnter);
-        githubButtonRef.current.removeEventListener("mouseleave", githubButtonHandlers.buttonLeave);
+      if (currentGithubButtonRef && githubButtonHandlers) {
+        currentGithubButtonRef.removeEventListener("mouseenter", githubButtonHandlers.buttonEnter);
+        currentGithubButtonRef.removeEventListener("mouseleave", githubButtonHandlers.buttonLeave);
       }
     };
   }, []);

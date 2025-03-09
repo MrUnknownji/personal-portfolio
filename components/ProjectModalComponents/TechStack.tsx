@@ -51,11 +51,10 @@ export const TechStack = ({ technologies }: TechStackProps) => {
     );
 
     // Setup hover animations for each tech item
-    techItemsRef.current.forEach((item, index) => {
+    techItemsRef.current.forEach((item) => {
       if (!item) return;
       
       const border = item;
-      const background = item;
       const shine = item.querySelector('.shine-effect');
       
       const ctx = gsap.context(() => {
