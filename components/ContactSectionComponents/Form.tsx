@@ -13,13 +13,12 @@ const ANIMATION_CONFIG = {
     STAGGER: 0.1,
     Y_OFFSET: 20,
     OPACITY: 0,
-    EASE: "power2.out"
+    EASE: "linear"
   },
   INPUT: {
     FOCUS: {
       DURATION: 0.3,
-      SCALE: 1.02,
-      EASE: "power2.out",
+      EASE: "linear",
       BORDER: {
         NORMAL: "rgb(31, 41, 55)",
         FOCUSED: "rgb(79, 209, 197)"
@@ -37,12 +36,15 @@ const ANIMATION_CONFIG = {
   BUTTON: {
     HOVER: {
       DURATION: 0.3,
-      SCALE: 1.05,
-      Y_OFFSET: -2,
-      EASE: "power2.out",
+      Y_OFFSET: -4,
+      EASE: "linear",
       SHADOW: {
         NORMAL: "none",
         HOVER: "0 10px 15px -3px rgba(79, 209, 197, 0.2)"
+      },
+      BORDER_GLOW: {
+        NORMAL: "0 0 0 0 rgba(79, 209, 197, 0)",
+        HOVER: "0 0 10px 2px rgba(79, 209, 197, 0.3)"
       }
     }
   }
@@ -51,7 +53,7 @@ const ANIMATION_CONFIG = {
 const INPUT_CLASSES = {
   base: "w-full bg-gray-900/50 rounded-lg border border-gray-800 text-gray-200 px-4 py-3 outline-none placeholder:text-gray-500",
   error: "border-red-500 bg-red-500/5",
-  wrapper: "relative transform-gpu"
+  wrapper: "relative"
 } as const;
 
 const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
@@ -102,13 +104,11 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     const input = inputRefs.current[index];
     
     gsap.to(input, {
-      scale: ANIMATION_CONFIG.INPUT.FOCUS.SCALE,
       borderColor: ANIMATION_CONFIG.INPUT.FOCUS.BORDER.FOCUSED,
       backgroundColor: ANIMATION_CONFIG.INPUT.FOCUS.BG.FOCUSED,
       boxShadow: ANIMATION_CONFIG.INPUT.FOCUS.SHADOW.FOCUSED,
       duration: ANIMATION_CONFIG.INPUT.FOCUS.DURATION,
-      ease: ANIMATION_CONFIG.INPUT.FOCUS.EASE,
-      force3D: true
+      ease: ANIMATION_CONFIG.INPUT.FOCUS.EASE
     });
   }, []);
 
@@ -118,13 +118,11 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     const input = inputRefs.current[index];
     
     gsap.to(input, {
-      scale: 1,
       borderColor: ANIMATION_CONFIG.INPUT.FOCUS.BORDER.NORMAL,
       backgroundColor: ANIMATION_CONFIG.INPUT.FOCUS.BG.NORMAL,
       boxShadow: ANIMATION_CONFIG.INPUT.FOCUS.SHADOW.NORMAL,
       duration: ANIMATION_CONFIG.INPUT.FOCUS.DURATION,
-      ease: ANIMATION_CONFIG.INPUT.FOCUS.EASE,
-      force3D: true
+      ease: ANIMATION_CONFIG.INPUT.FOCUS.EASE
     });
   }, []);
 
@@ -135,23 +133,21 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     
     const handleMouseEnter = () => {
       gsap.to(button, {
-        scale: ANIMATION_CONFIG.BUTTON.HOVER.SCALE,
         y: ANIMATION_CONFIG.BUTTON.HOVER.Y_OFFSET,
         boxShadow: ANIMATION_CONFIG.BUTTON.HOVER.SHADOW.HOVER,
+        filter: `drop-shadow(${ANIMATION_CONFIG.BUTTON.HOVER.BORDER_GLOW.HOVER})`,
         duration: ANIMATION_CONFIG.BUTTON.HOVER.DURATION,
-        ease: ANIMATION_CONFIG.BUTTON.HOVER.EASE,
-        force3D: true
+        ease: ANIMATION_CONFIG.BUTTON.HOVER.EASE
       });
     };
     
     const handleMouseLeave = () => {
       gsap.to(button, {
-        scale: 1,
         y: 0,
         boxShadow: ANIMATION_CONFIG.BUTTON.HOVER.SHADOW.NORMAL,
+        filter: `drop-shadow(${ANIMATION_CONFIG.BUTTON.HOVER.BORDER_GLOW.NORMAL})`,
         duration: ANIMATION_CONFIG.BUTTON.HOVER.DURATION,
-        ease: ANIMATION_CONFIG.BUTTON.HOVER.EASE,
-        force3D: true
+        ease: ANIMATION_CONFIG.BUTTON.HOVER.EASE
       });
     };
     
@@ -168,22 +164,30 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     if (!formRef.current) return;
 
     const formElements = formRef.current.querySelectorAll("input, textarea, button");
+    
+    gsap.set(formElements, {
+      y: ANIMATION_CONFIG.FORM_ITEMS.Y_OFFSET,
+      opacity: ANIMATION_CONFIG.FORM_ITEMS.OPACITY
+    });
 
-    gsap.fromTo(
-      formElements,
-      {
-        y: ANIMATION_CONFIG.FORM_ITEMS.Y_OFFSET,
-        opacity: ANIMATION_CONFIG.FORM_ITEMS.OPACITY
-      },
-      {
-        y: 0,
-        opacity: 1,
-        duration: ANIMATION_CONFIG.FORM_ITEMS.DURATION,
-        stagger: ANIMATION_CONFIG.FORM_ITEMS.STAGGER,
-        ease: ANIMATION_CONFIG.FORM_ITEMS.EASE,
-        clearProps: "transform"
-      }
-    );
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          gsap.to(formElements, {
+            y: 0,
+            opacity: 1,
+            duration: ANIMATION_CONFIG.FORM_ITEMS.DURATION,
+            stagger: ANIMATION_CONFIG.FORM_ITEMS.STAGGER,
+            ease: ANIMATION_CONFIG.FORM_ITEMS.EASE
+          });
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.2 });
+
+    observer.observe(formRef.current);
+
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -247,7 +251,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
       <button
         ref={buttonRef}
         type="submit"
-        className="w-full bg-gradient-to-r from-primary to-accent text-gray-900 font-semibold py-4 rounded-lg transform-gpu focus:outline-none focus:ring-2 focus:ring-primary/50"
+        className="w-full bg-gradient-to-r from-primary to-accent text-gray-900 font-semibold py-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
       >
         Send Message
       </button>

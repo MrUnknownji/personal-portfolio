@@ -403,7 +403,7 @@ const Footer = () => {
 
         <div className="footer-bottom mt-12 pt-8 border-t border-gray-800/30 text-center text-gray-400">
           <p>
-            © {currentYear} Your Name. All rights reserved.
+            © {currentYear} Sandeep Kumar. All rights reserved.
           </p>
         </div>
       </div>

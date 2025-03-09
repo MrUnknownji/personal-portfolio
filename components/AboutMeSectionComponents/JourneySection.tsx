@@ -1,6 +1,9 @@
 import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const ANIMATION_CONFIG = {
   CONTAINER: {
@@ -17,6 +20,11 @@ const ANIMATION_CONFIG = {
     DURATION: 1.2,
     EASE: "power2.inOut",
     SCALE_Y: 0
+  },
+  HOVER: {
+    SCALE: 1.02,
+    DURATION: 0.3,
+    EASE: "power2.out"
   }
 } as const;
 
@@ -48,18 +56,21 @@ const JourneySection = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const itemsRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useGSAP(() => {
     if (!containerRef.current || !titleRef.current || !itemsRef.current || !lineRef.current) return;
 
-    const items = itemsRef.current.children;
+    const items = Array.from(itemsRef.current.children);
 
+    // Main animation timeline with reverse capability
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top 80%",
         end: "bottom 20%",
-        once: true
+        toggleActions: "play pause reverse reset", // This enables reverse animation
+        markers: false
       }
     });
 
@@ -88,23 +99,89 @@ const JourneySection = () => {
       "-=0.4"
     );
 
-    tl.fromTo(
-      items,
-      { 
-        opacity: 0,
-        x: -20,
-        y: ANIMATION_CONFIG.ITEMS.Y_OFFSET 
-      },
-      {
-        opacity: 1,
-        x: 0,
-        y: 0,
-        duration: ANIMATION_CONFIG.ITEMS.DURATION,
-        stagger: ANIMATION_CONFIG.ITEMS.STAGGER,
-        ease: ANIMATION_CONFIG.ITEMS.EASE
-      },
-      "-=0.8"
-    );
+    // Create individual animations for each journey item
+    items.forEach((item, index) => {
+      // Staggered entrance animation
+      tl.fromTo(
+        item,
+        { 
+          opacity: 0,
+          x: -20,
+          y: ANIMATION_CONFIG.ITEMS.Y_OFFSET 
+        },
+        {
+          opacity: 1,
+          x: 0,
+          y: 0,
+          duration: ANIMATION_CONFIG.ITEMS.DURATION,
+          ease: ANIMATION_CONFIG.ITEMS.EASE
+        },
+        `-=${index === 0 ? 0.8 : 0.4}`
+      );
+      
+      // Create hover animations for each item
+      if (itemRefs.current[index]) {
+        const itemEl = itemRefs.current[index];
+        const hoverTl = gsap.timeline({ paused: true });
+        
+        hoverTl.to(itemEl, {
+          scale: ANIMATION_CONFIG.HOVER.SCALE,
+          x: 5,
+          boxShadow: "0 10px 25px -5px rgba(0, 255, 159, 0.1)",
+          borderColor: "rgba(0, 255, 159, 0.3)",
+          duration: ANIMATION_CONFIG.HOVER.DURATION,
+          ease: ANIMATION_CONFIG.HOVER.EASE
+        });
+        
+        if (itemEl) {
+          itemEl.addEventListener("mouseenter", () => hoverTl.play());
+          itemEl.addEventListener("mouseleave", () => hoverTl.reverse());
+        }
+      }
+    });
+
+    // Add scroll-triggered parallax effect for the line
+    ScrollTrigger.create({
+      trigger: containerRef.current,
+      start: "top bottom",
+      end: "bottom top",
+      scrub: 0.5,
+      onUpdate: (self) => {
+        // Pulsating effect for the line based on scroll position
+        gsap.to(lineRef.current, {
+          opacity: 0.5 + (Math.sin(self.progress * Math.PI) * 0.5),
+          duration: 0.1,
+          ease: "none",
+          overwrite: "auto"
+        });
+      }
+    });
+
+    // Add scroll-triggered sequential reveal for journey items
+    items.forEach((item) => {
+      ScrollTrigger.create({
+        trigger: item,
+        start: "top 85%",
+        end: "bottom 15%",
+        toggleActions: "play pause reverse reset",
+        onEnter: () => {
+          gsap.to(item.querySelector('.journey-circle'), {
+            backgroundColor: "rgba(0, 255, 159, 0.8)",
+            scale: 1.2,
+            duration: 0.4,
+            ease: "back.out(1.7)"
+          });
+        },
+        onLeaveBack: () => {
+          gsap.to(item.querySelector('.journey-circle'), {
+            backgroundColor: "transparent",
+            scale: 1,
+            duration: 0.3,
+            ease: "power2.in"
+          });
+        }
+      });
+    });
 
   }, { scope: containerRef });
 
@@ -125,23 +202,24 @@ const JourneySection = () => {
       <div 
         ref={lineRef}
         className="absolute left-[7px] top-[4.5rem] bottom-4 w-[2px] bg-gradient-to-b from-primary/50 via-primary/30 to-transparent origin-top"
-        style={{ willChange: "transform" }}
+        style={{ willChange: "transform, opacity" }}
       />
 
       <div 
         ref={itemsRef}
         className="relative space-y-8 pl-8"
       >
-        {journeyData.map((item) => (
+        {journeyData.map((item, index) => (
           <div 
             key={item.year}
-            className="relative"
+            ref={(el: HTMLDivElement | null) => { itemRefs.current[index] = el; }}
+            className="relative cursor-pointer"
             style={{ willChange: "transform, opacity" }}
           >
             {/* Adjusted circle position to align with the line */}
-            <div className="absolute -left-8 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-primary bg-background" />
+            <div className="journey-circle absolute -left-8 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-primary bg-transparent" />
             
-            <div className="space-y-1 p-4 rounded-xl bg-gray-900/30 border border-primary/10 hover:border-primary/20 transition-colors duration-300">
+            <div className="space-y-1 p-4 rounded-xl bg-gray-900/30 border border-primary/10">
               <div className="flex items-center gap-3 mb-1">
                 <span className="px-2 py-0.5 text-sm rounded bg-primary/10 text-primary font-medium">
                   {item.year}

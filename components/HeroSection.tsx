@@ -45,10 +45,9 @@ const HeroSection = () => {
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (!cardRef.current || !glowRef.current || mouseMoveThrottleRef.current) return;
 
-    // Throttle mouse move events for better performance
     mouseMoveThrottleRef.current = window.setTimeout(() => {
       mouseMoveThrottleRef.current = null;
-    }, 16); // ~60fps
+    }, 16);
 
     const { left, top, width, height } = cardRef.current.getBoundingClientRect();
     const x = e.clientX - left;
@@ -139,9 +138,9 @@ const HeroSection = () => {
   return (
     <div
       ref={sectionRef}
-      className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative mt-24 sm:mt-6"
+      className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative py-24"
     >
-      <div className="w-full max-w-7xl mx-auto mt-24 sm:mt-0">
+      <div className="w-full max-w-7xl mx-auto">
         <div className="relative">
           <div className="absolute -inset-[1px] rounded-3xl overflow-hidden z-1">
             <div

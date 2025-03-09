@@ -6,13 +6,14 @@ import { useGSAP } from "@gsap/react";
 import ContactInfo from "./ContactSectionComponents/ContactInfo";
 import Form from "./ContactSectionComponents/Form";
 import ThankYouDialog from "./ThankYouDialog";
+import Title from "./ui/Title";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const ANIMATION_CONFIG = {
   SECTION: {
     DURATION: 0.8,
-    EASE: "power3.out",
+    EASE: "linear",
     TRIGGER_START: "top 80%",
     TRIGGER_END: "bottom 20%"
   },
@@ -20,18 +21,17 @@ const ANIMATION_CONFIG = {
     DURATION: 0.8,
     STAGGER: 0.15,
     Y_OFFSET: 50,
-    EASE: "power2.out"
+    EASE: "linear"
   },
   BORDER: {
     DURATION: 0.4,
-    EASE: "power2.out"
+    EASE: "linear"
   }
 } as const;
 
 const ContactForm: React.FC = () => {
   const [isThankYouOpen, setIsThankYouOpen] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
-  const titleRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const borderRefs = useRef<(HTMLDivElement | null)[]>([null, null, null, null]);
 
@@ -64,40 +64,32 @@ const ContactForm: React.FC = () => {
   }, []);
 
   useGSAP(() => {
-    if (!sectionRef.current || !titleRef.current || !containerRef.current) return;
+    if (!sectionRef.current || !containerRef.current) return;
 
-    const titleElements = titleRef.current.children;
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: ANIMATION_CONFIG.SECTION.TRIGGER_START,
           end: ANIMATION_CONFIG.SECTION.TRIGGER_END,
-          once: true
+          once: true,
+          markers: false
         }
       });
 
-      gsap.set([titleElements, containerRef.current], { 
+      gsap.set(containerRef.current, { 
         opacity: 0,
         y: ANIMATION_CONFIG.CONTENT.Y_OFFSET,
         force3D: true
       });
 
-      tl.to(titleElements, {
-        opacity: 1,
-        y: 0,
-        duration: ANIMATION_CONFIG.CONTENT.DURATION,
-        stagger: ANIMATION_CONFIG.CONTENT.STAGGER,
-        ease: ANIMATION_CONFIG.CONTENT.EASE,
-        force3D: true
-      })
-      .to(containerRef.current, {
+      tl.to(containerRef.current, {
         opacity: 1,
         y: 0,
         duration: ANIMATION_CONFIG.CONTENT.DURATION,
         ease: ANIMATION_CONFIG.CONTENT.EASE,
         force3D: true
-      }, "-=0.4");
+      }, "+=0.4");
     });
 
     return () => ctx.revert();
@@ -107,30 +99,17 @@ const ContactForm: React.FC = () => {
     <section
       ref={sectionRef}
       id="contact"
-      className="relative py-24"
+      className="relative py-20"
     >
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div ref={titleRef} className="text-center space-y-4 mb-16">
-          <h2 
-            className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent"
-            style={{ willChange: "transform" }}
-          >
-            Get in Touch
-          </h2>
-          <p 
-            className="text-gray-400 text-lg max-w-2xl mx-auto"
-            style={{ willChange: "transform" }}
-          >
-            {`Let's collaborate and bring your ideas to life. Feel free to reach
-            out for any inquiries or opportunities.`}
-          </p>
-          <div 
-            className="h-1 w-24 mx-auto bg-gradient-to-r from-transparent via-primary to-transparent"
-            style={{ willChange: "transform" }}
-          />
-        </div>
+        <Title 
+          title="Get in Touch"
+          subtitle={`Let's collaborate and bring your ideas to life. Feel free to reach out for any inquiries or opportunities.`}
+          showGlowBar={true}
+          className="mb-16"
+        />
 
         <div
           ref={containerRef}

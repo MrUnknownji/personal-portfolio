@@ -13,6 +13,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Sandeep's Portfolio",
   description: "How Bad Possibly It Could Be",
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/favicon.svg',
+    shortcut: '/favicon.svg'
+  }
 };
 
 export default function RootLayout({
@@ -22,6 +27,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.svg" />
+      </head>
       <body className="overflow-x-hidden w-screen" suppressHydrationWarning>
         <div className="fixed inset-0 z-0 overflow-visible">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-gray-950 to-black"></div>
