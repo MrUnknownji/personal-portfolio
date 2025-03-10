@@ -15,21 +15,23 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
   const createTransitionTimeline = () => {
     if (timeline.current) timeline.current.kill();
-    
+
     timeline.current = gsap.timeline({
       onComplete: () => {
         setIsTransitioning(false);
         ScrollTrigger.refresh();
       },
-      defaults: { ease: "power4.inOut" }
+      defaults: { ease: "power4.inOut" },
     });
 
     return timeline.current
-      .fromTo(".transition-overlay",
+      .fromTo(
+        ".transition-overlay",
         { yPercent: 100, display: "block" },
         { yPercent: 0, duration: 0.6 }
       )
-      .fromTo(".page-content",
+      .fromTo(
+        ".page-content",
         { opacity: 0, y: 30 },
         { opacity: 1, y: 0, duration: 0.5, clearProps: "all" },
         ">-0.2"
@@ -71,7 +73,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
   return (
     <>
       <div className="page-content relative z-10">{children}</div>
-      <div 
+      <div
         className="transition-overlay fixed inset-0 bg-gray-950 z-50 transform translate-y-full pointer-events-none"
         style={{ display: isTransitioning ? "block" : "none" }}
       />

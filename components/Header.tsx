@@ -68,7 +68,7 @@ const Header = () => {
       const shouldShow = prevScrollPos > currentScrollPos || 
                          currentScrollPos < ANIMATION_CONFIG.HEADER.SCROLL.THRESHOLD;
       
-      // Toggle class instead of using GSAP
+      // Toggle class 
       if (shouldShow) {
         header.classList.remove(ANIMATION_CONFIG.HEADER.SCROLL.CLASS_HIDDEN);
       } else {
@@ -79,7 +79,6 @@ const Header = () => {
     };
 
     const ctx = gsap.context(() => {
-      // Keep GSAP for initial animations
       gsap.fromTo(logoRef.current,
         {
           opacity: 0,

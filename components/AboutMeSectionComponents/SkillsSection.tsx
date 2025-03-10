@@ -59,13 +59,13 @@ const SkillsSection = () => {
     const skillItems = skillsRef.current.querySelectorAll('.skill-item');
     const categories = Array.from(skillsRef.current.children);
 
-    // Main animation timeline with reverse capability
+    // Main animation timeline
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top 80%",
         end: "bottom 20%",
-        toggleActions: "play pause reverse reset", // This enables reverse animation
+        toggleActions: "play none none reverse",
         markers: false
       }
     });
@@ -84,7 +84,7 @@ const SkillsSection = () => {
       }
     );
 
-    // Animate each category with staggered entrance
+    // Staggered entrance
     categories.forEach((category, index) => {
       tl.fromTo(
         category,
@@ -102,7 +102,6 @@ const SkillsSection = () => {
       );
     });
 
-    // Add a slight delay before animating the skill items
     tl.fromTo(
       skillItems,
       {
@@ -120,7 +119,7 @@ const SkillsSection = () => {
       "-=0.2"
     );
 
-    // Add hover animations for skill items
+    // Hover animations for skill items
     skillItems.forEach((item) => {
       const hoverTl = gsap.timeline({ paused: true });
       
@@ -136,13 +135,13 @@ const SkillsSection = () => {
       item.addEventListener("mouseleave", () => hoverTl.reverse());
     });
 
-    // Add scroll-triggered animations for categories
+    // Scroll-triggered animations for categories
     categories.forEach((category) => {
       ScrollTrigger.create({
         trigger: category,
         start: "top 85%",
         end: "bottom 15%",
-        toggleActions: "play pause reverse reset",
+        toggleActions: "play none none reverse",
         onEnter: () => {
           gsap.to(category, {
             backgroundColor: "rgba(0, 255, 159, 0.05)",
@@ -162,14 +161,11 @@ const SkillsSection = () => {
       });
     });
 
-    // Add a floating animation effect based on scroll position
     ScrollTrigger.create({
       trigger: containerRef.current,
       start: "top bottom",
       end: "bottom top",
-      scrub: 0.5,
-      onUpdate: (self) => {
-        // Apply a subtle floating effect to categories
+        onUpdate: (self) => {
         categories.forEach((category, index) => {
           const offset = (index % 2 === 0) ? 10 : -10;
           gsap.to(category, {

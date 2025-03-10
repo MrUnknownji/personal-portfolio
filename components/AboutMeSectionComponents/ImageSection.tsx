@@ -57,7 +57,7 @@ const ImageSection = () => {
         trigger: containerRef.current,
         start: "top 80%",
         end: "bottom 20%",
-        toggleActions: "play pause reverse reset", // This enables reverse animation
+        toggleActions: "play none none reverse",
         markers: false
       }
     });
@@ -110,7 +110,7 @@ const ImageSection = () => {
       onUpdate: (self) => {
         // Subtle rotation based on scroll position
         gsap.to(containerRef.current, {
-          rotateY: (self.progress - 0.5) * 5, // -2.5 to 2.5 degrees
+          rotateY: (self.progress - 0.5) * 5, 
           duration: 0.1,
           ease: "none",
           overwrite: "auto"
@@ -118,7 +118,7 @@ const ImageSection = () => {
         
         // Subtle scale effect
         gsap.to(imageRef.current, {
-          scale: 1 + (self.progress * 0.05), // 1 to 1.05
+          scale: 1 + (self.progress * 0.05),
           duration: 0.1,
           ease: "none",
           overwrite: "auto"
@@ -148,7 +148,7 @@ const ImageSection = () => {
     >
       <div 
         ref={borderRef}
-        className="absolute -inset-4 border-2 border-primary/20 rounded-2xl -z-10 transition-colors duration-300"
+        className="absolute -inset-4 border-2 border-primary/20 rounded-2xl -z-10"
       />
 
       <div 

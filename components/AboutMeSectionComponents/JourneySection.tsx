@@ -63,13 +63,13 @@ const JourneySection = () => {
 
     const items = Array.from(itemsRef.current.children);
 
-    // Main animation timeline with reverse capability
+    // Main animation timeline
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top 80%",
         end: "bottom 20%",
-        toggleActions: "play pause reverse reset", // This enables reverse animation
+        toggleActions: "play none none reverse",
         markers: false
       }
     });
@@ -99,7 +99,6 @@ const JourneySection = () => {
       "-=0.4"
     );
 
-    // Create individual animations for each journey item
     items.forEach((item, index) => {
       // Staggered entrance animation
       tl.fromTo(
@@ -119,7 +118,7 @@ const JourneySection = () => {
         `-=${index === 0 ? 0.8 : 0.4}`
       );
       
-      // Create hover animations for each item
+      // Hover animations for each item
       if (itemRefs.current[index]) {
         const itemEl = itemRefs.current[index];
         const hoverTl = gsap.timeline({ paused: true });
@@ -140,12 +139,11 @@ const JourneySection = () => {
       }
     });
 
-    // Add scroll-triggered parallax effect for the line
+    // Scroll-triggered parallax effect for the line
     ScrollTrigger.create({
       trigger: containerRef.current,
       start: "top bottom",
       end: "bottom top",
-      scrub: 0.5,
       onUpdate: (self) => {
         // Pulsating effect for the line based on scroll position
         gsap.to(lineRef.current, {
@@ -157,7 +155,6 @@ const JourneySection = () => {
       }
     });
 
-    // Add scroll-triggered sequential reveal for journey items
     items.forEach((item) => {
       ScrollTrigger.create({
         trigger: item,
@@ -198,7 +195,6 @@ const JourneySection = () => {
         My Journey
       </h3>
 
-      {/* Updated line positioning for better alignment */}
       <div 
         ref={lineRef}
         className="absolute left-[7px] top-[4.5rem] bottom-4 w-[2px] bg-gradient-to-b from-primary/50 via-primary/30 to-transparent origin-top"
@@ -216,7 +212,6 @@ const JourneySection = () => {
             className="relative cursor-pointer"
             style={{ willChange: "transform, opacity" }}
           >
-            {/* Adjusted circle position to align with the line */}
             <div className="journey-circle absolute -left-8 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-primary bg-transparent" />
             
             <div className="space-y-1 p-4 rounded-xl bg-gray-900/30 border border-primary/10">

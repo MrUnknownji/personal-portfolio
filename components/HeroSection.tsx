@@ -6,31 +6,30 @@ import HeroContent from "./HeroSectionComponents/HeroContent";
 import CodeDisplay from "./HeroSectionComponents/CodeDisplay";
 import { useGSAP } from "@gsap/react";
 
+// Hero Section Animation Config
 const ANIMATION_CONFIG = {
+  CARD:{
+    OPACITY_FACTOR: 0.5,
+    EASE:"power3.out",
+  },
   HERO: {
     INITIAL_SCALE: 0.95,
     DURATION: 1,
-    SCROLL_DISTANCE: -50,
-    OPACITY_FACTOR: 0.5,
-    EASE: "power3.out"
+    SCROLL_DISTANCE: -100,
+    EASE: "power3.out",
   },
   BORDER: {
     DURATION: 3,
     GRADIENT_POSITIONS: {
       START: "0%",
       PEAK: "50%",
-      END: "100%"
-    }
-  },
-  GLOW: {
-    DURATION: 1.5,
-    EASE: "power2.inOut",
-    OPACITY_RANGE: [0.4, 0.6]
+      END: "100%",
+    },
   },
   PATTERN: {
     SIZE: "4rem",
-    OPACITY: 0.05
-  }
+    OPACITY: 0.05,
+  },
 } as const;
 
 const HeroSection = () => {
@@ -38,31 +37,9 @@ const HeroSection = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const borderRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
   const scrollTriggerRef = useRef<ScrollTrigger | null>(null);
-  const mouseMoveThrottleRef = useRef<number | null>(null);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (!cardRef.current || !glowRef.current || mouseMoveThrottleRef.current) return;
-
-    mouseMoveThrottleRef.current = window.setTimeout(() => {
-      mouseMoveThrottleRef.current = null;
-    }, 16);
-
-    const { left, top, width, height } = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - left;
-    const y = e.clientY - top;
-
-    gsap.to(glowRef.current, {
-      x: x - width / 2,
-      y: y - height / 2,
-      duration: 0.5,
-      ease: "power2.out",
-      force3D: true,
-      overwrite: true
-    });
-  }, []);
-
+  // Setup Scroll based animation
   const setupScrollAnimation = useCallback(() => {
     if (scrollTriggerRef.current) {
       scrollTriggerRef.current.kill();
@@ -71,27 +48,34 @@ const HeroSection = () => {
     scrollTriggerRef.current = ScrollTrigger.create({
       trigger: sectionRef.current,
       start: "top top",
-      end: "bottom top",
+      end: "bottom 40%",
       scrub: 0.8,
       onUpdate: (self) => {
+        if (cardRef.current) {
+          gsap.set(cardRef.current, {
+            opacity: 1 - self.progress * ANIMATION_CONFIG.CARD.OPACITY_FACTOR,
+            ease: ANIMATION_CONFIG.CARD.EASE,
+          });
+        }
         if (contentRef.current) {
           gsap.set(contentRef.current, {
             y: self.progress * ANIMATION_CONFIG.HERO.SCROLL_DISTANCE,
-            opacity: 1 - self.progress * ANIMATION_CONFIG.HERO.OPACITY_FACTOR,
-            force3D: true
+            force3D: true,
           });
         }
       },
     });
   }, []);
 
+  // Setup initial animation
   useGSAP(() => {
     const ctx = gsap.context(() => {
-      gsap.fromTo(cardRef.current,
+      gsap.fromTo(
+        cardRef.current,
         {
           scale: ANIMATION_CONFIG.HERO.INITIAL_SCALE,
           opacity: 0,
-          y: 30
+          y: 30,
         },
         {
           scale: 1,
@@ -100,7 +84,7 @@ const HeroSection = () => {
           duration: ANIMATION_CONFIG.HERO.DURATION,
           ease: ANIMATION_CONFIG.HERO.EASE,
           clearProps: "scale",
-          force3D: true
+          force3D: true,
         }
       );
 
@@ -109,16 +93,7 @@ const HeroSection = () => {
         duration: ANIMATION_CONFIG.BORDER.DURATION,
         ease: "none",
         repeat: -1,
-        force3D: true
-      });
-
-      gsap.to(glowRef.current, {
-        opacity: ANIMATION_CONFIG.GLOW.OPACITY_RANGE[1],
-        duration: ANIMATION_CONFIG.GLOW.DURATION,
-        ease: ANIMATION_CONFIG.GLOW.EASE,
-        yoyo: true,
-        repeat: -1,
-        force3D: true
+        force3D: true,
       });
 
       setupScrollAnimation();
@@ -129,9 +104,6 @@ const HeroSection = () => {
       if (scrollTriggerRef.current) {
         scrollTriggerRef.current.kill();
       }
-      if (mouseMoveThrottleRef.current) {
-        clearTimeout(mouseMoveThrottleRef.current);
-      }
     };
   }, [setupScrollAnimation]);
 
@@ -140,8 +112,8 @@ const HeroSection = () => {
       ref={sectionRef}
       className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative py-24"
     >
-      <div className="w-full max-w-7xl mx-auto">
-        <div className="relative">
+      <div className="w-full max-w-7xl mx-auto relative">
+          {/* Gradient border container */}
           <div className="absolute -inset-[1px] rounded-3xl overflow-hidden z-1">
             <div
               ref={borderRef}
@@ -161,20 +133,16 @@ const HeroSection = () => {
             />
           </div>
 
+          {/* Main card */}
           <div
             ref={cardRef}
             className="relative rounded-3xl p-6 md:p-8 lg:p-12
               bg-gray-900/95 border border-gray-800/50 z-10
               shadow-xl shadow-gray-950/20 transform-gpu"
-            onMouseMove={handleMouseMove}
             style={{ willChange: "transform" }}
           >
-            <div
-              ref={glowRef}
-              className="absolute w-[30rem] h-[30rem] bg-gradient-radial from-primary/10 to-transparent rounded-full pointer-events-none opacity-40 transform -translate-x-1/2 -translate-y-1/2"
-              style={{ willChange: "transform" }}
-            />
 
+            {/* Content container */}
             <div
               ref={contentRef}
               className="relative flex flex-col lg:flex-row gap-8 h-full justify-center items-center"
@@ -187,14 +155,14 @@ const HeroSection = () => {
                 <CodeDisplay />
               </div>
             </div>
-
+              
+            {/* Corner decorations */}
             <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary/30 rounded-tl-xl" />
             <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary/30 rounded-tr-xl" />
             <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary/30 rounded-bl-xl" />
             <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-primary/30 rounded-br-xl" />
           </div>
         </div>
-      </div>
     </div>
   );
 };
