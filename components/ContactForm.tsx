@@ -142,6 +142,7 @@ const ContactForm: React.FC = () => {
       <ThankYouDialog
         isOpen={isThankYouOpen}
         onClose={() => setIsThankYouOpen(false)}
+        email="sandeepkhati788@gmail.com"
       />
     </section>
   );

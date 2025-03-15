@@ -3,7 +3,8 @@ import { FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi";
 import gsap from "gsap";
 import { SocialLink } from "../../types/social";
 import { fetchSocialStats } from "../../utils/social";
-import Image from 'next/image';
+// import Image from 'next/image';
+import SocialInfoBox from "./SocialInfoBox";
 
 const ANIMATION_CONFIG = {
   LINK_HOVER: {
@@ -26,10 +27,29 @@ const SocialLinks = () => {
   const [activeLink, setActiveLink] = useState<number | null>(null);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const infoBoxRef = useRef<HTMLDivElement>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [infoBoxOpacity, setInfoBoxOpacity] = useState(0);
   const animationRef = useRef<gsap.core.Tween | null>(null);
+  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const iconRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Track mouse position
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      // Use page coordinates which include scroll position
+      setMousePosition({
+        x: e.pageX,
+        y: e.pageY
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
 
   useEffect(() => {
     const initializeSocialLinks = async () => {
@@ -173,27 +193,20 @@ const SocialLinks = () => {
   }, [socialLinks]);
 
   const handleMouseEnter = useCallback((index: number) => {
+    // Clear any pending hide timeout
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    
     setActiveLink(index);
     
     if (animationRef.current) {
       animationRef.current.kill();
     }
 
-    if (infoBoxRef.current) {
-      gsap.set(infoBoxRef.current, {
-        opacity: 0,
-        y: 10,  
-        scale: 0.95,
-      });
-
-      animationRef.current = gsap.to(infoBoxRef.current, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: ANIMATION_CONFIG.INFO_BOX.SHOW.DURATION,
-        ease: ANIMATION_CONFIG.INFO_BOX.SHOW.EASE,
-      });
-    }
+    // Immediately show the info box
+    setInfoBoxOpacity(1);
   }, []);
 
   const handleMouseLeave = useCallback(() => {
@@ -201,22 +214,32 @@ const SocialLinks = () => {
       animationRef.current.kill();
     }
 
-    if (infoBoxRef.current) {
-      animationRef.current = gsap.to(infoBoxRef.current, {
-        opacity: 0,
-        y: 10,
-        scale: 0.95,
-        duration: ANIMATION_CONFIG.INFO_BOX.HIDE.DURATION,
-        ease: ANIMATION_CONFIG.INFO_BOX.HIDE.EASE,
-        onComplete: () => {
-          setActiveLink(null);
-        }
-      });
+    // Start fading out
+    setInfoBoxOpacity(0);
+    
+    // Clear any existing timeout
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
     }
+    
+    // Set a new timeout to hide the component after animation completes
+    hideTimeoutRef.current = setTimeout(() => {
+      setActiveLink(null);
+      hideTimeoutRef.current = null;
+    }, ANIMATION_CONFIG.INFO_BOX.HIDE.DURATION * 1000);
+  }, []);
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
   }, []);
 
   return (
-    <div className="relative inline-block">
+    <div className="relative inline-block" ref={containerRef}>
       <div className="flex items-center gap-4">
         {isLoading ? (
           // Loading skeleton
@@ -259,72 +282,12 @@ const SocialLinks = () => {
       </div>
 
       {activeLink !== null && socialLinks.length > 0 && (
-        <div
-          ref={infoBoxRef}
-          className="absolute z-50 w-72 p-4 rounded-xl bg-gray-800/95 backdrop-blur-sm
-            border border-gray-700/50 shadow-xl left-1/2 -top-[220px]"
-          style={{ 
-            willChange: "transform, opacity",
-            transform: "translateX(-50%)"
-          }}
-        >
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              {socialLinks[activeLink].profileImage ? (
-                <Image 
-                  src={socialLinks[activeLink].profileImage} 
-                  alt={socialLinks[activeLink].label}
-                  width={48}
-                  height={48}
-                  className="rounded-lg object-cover"
-                />
-              ) : (
-                <div 
-                  className="p-2 rounded-lg bg-gray-700/50 w-12 h-12 flex items-center justify-center"
-                  style={{ color: socialLinks[activeLink].hoverIconColor }}
-                >
-                  {socialLinks[activeLink].icon}
-                </div>
-              )}
-              <div>
-                <h3 className="font-semibold text-white">
-                  {socialLinks[activeLink].username}
-                </h3>
-                <p className="text-sm text-gray-400">
-                  {socialLinks[activeLink].label}
-                </p>
-              </div>
-            </div>
-            
-            <p className="text-sm text-gray-300 border-l-2 pl-3 py-1" 
-               style={{ borderColor: socialLinks[activeLink].color || socialLinks[activeLink].hoverIconColor }}>
-              {socialLinks[activeLink].description}
-            </p>
-            
-            <div className="grid grid-cols-3 gap-2">
-              {socialLinks[activeLink].stats.map((stat, index) => (
-                <div
-                  key={index}
-                  className="text-center p-2 rounded-lg bg-gray-700/30"
-                >
-                  <div className="text-sm font-medium text-white">
-                    {stat.value}
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div 
-            className="absolute left-1/2 bottom-0 w-4 h-4 -mb-2 bg-gray-800/95 border-r border-b border-gray-700/50"
-            style={{ 
-              transform: "translateX(-50%) rotate(45deg)"
-            }}
-          />
-        </div>
+        <SocialInfoBox
+          socialLink={socialLinks[activeLink]}
+          position={mousePosition}
+          opacity={infoBoxOpacity}
+          onHeightChange={() => {}}
+        />
       )}
     </div>
   );

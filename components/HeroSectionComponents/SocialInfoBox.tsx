@@ -1,7 +1,7 @@
 import Image from "next/image";
-import { FiArrowUpRight } from "react-icons/fi";
 import { SocialLink } from "../../types/social";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface SocialInfoBoxProps {
   socialLink: SocialLink;
@@ -17,6 +17,13 @@ const SocialInfoBox = ({
   onHeightChange,
 }: SocialInfoBoxProps) => {
   const boxRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  // Handle client-side rendering for portal
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
   useEffect(() => {
     if (boxRef.current) {
@@ -25,68 +32,94 @@ const SocialInfoBox = ({
     }
   }, [onHeightChange]);
 
-  return (
+  // Offset from cursor
+  const offsetY = 20;
+
+  const content = (
     <div
       ref={boxRef}
-      className="fixed pointer-events-none transform"
+      className="fixed pointer-events-none z-50"
       style={{
         left: `${position.x}px`,
-        top: `${position.y}px`,
+        top: `${position.y - offsetY}px`,
         opacity: opacity,
+        transform: 'translate(-50%, -100%)',
+        transition: 'opacity 0.15s ease-out',
+        willChange: 'opacity, transform',
       }}
     >
       <div
-        className="w-72 bg-gray-900/95 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl"
-        style={{
-          border: `1px solid ${socialLink.color}40`,
-          boxShadow: `0 4px 20px rgba(0, 0, 0, 0.3), 0 0 20px ${socialLink.color}20`,
+        className="w-72 p-4 rounded-xl bg-gray-800/95 backdrop-blur-sm
+          border border-gray-700/50 shadow-xl"
+        style={{ 
+          willChange: "transform, opacity"
         }}
       >
-        <div className="p-4 space-y-4">
-          <div className="flex items-center gap-4">
-            <div
-              className="relative w-14 h-14 rounded-full overflow-hidden border-2"
-              style={{ borderColor: `${socialLink.color}40` }}
-            >
-              <Image
-                src={socialLink.profileImage || '/images/placeholder-profile.jpg'}
-                alt={`${socialLink.label} Profile`}
-                fill
-                className="object-cover"
-                priority
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            {socialLink.profileImage ? (
+              <Image 
+                src={socialLink.profileImage} 
+                alt={socialLink.label}
+                width={48}
+                height={48}
+                className="rounded-lg object-cover"
               />
-            </div>
+            ) : (
+              <div 
+                className="p-2 rounded-lg bg-gray-700/50 w-12 h-12 flex items-center justify-center"
+                style={{ color: socialLink.hoverIconColor }}
+              >
+                {socialLink.icon}
+              </div>
+            )}
             <div>
-              <h3 className="text-white font-medium text-lg">
-                {socialLink.label}
+              <h3 className="font-semibold text-white">
+                {socialLink.username}
               </h3>
-              <p className="text-gray-400 text-sm">{socialLink.username}</p>
+              <p className="text-sm text-gray-400">
+                {socialLink.label}
+              </p>
             </div>
           </div>
-
-          <a
-            href={socialLink.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="pointer-events-auto block"
-          >
-            <div
-              className="flex items-center justify-between p-3 rounded-lg"
-              style={{
-                backgroundColor: `${socialLink.color}20`,
-                borderLeft: `3px solid ${socialLink.color}`,
-              }}
-            >
-              <span className="text-sm text-white font-medium">
-                View Profile
-              </span>
-              <FiArrowUpRight size={20} style={{ color: socialLink.color }} />
-            </div>
-          </a>
+          
+          <p className="text-sm text-gray-300 border-l-2 pl-3 py-1" 
+             style={{ borderColor: socialLink.color || socialLink.hoverIconColor }}>
+            {socialLink.description}
+          </p>
+          
+          <div className="grid grid-cols-3 gap-2">
+            {socialLink.stats.map((stat, index) => (
+              <div
+                key={index}
+                className="text-center p-2 rounded-lg bg-gray-700/30"
+              >
+                <div className="text-sm font-medium text-white">
+                  {stat.value}
+                </div>
+                <div className="text-xs text-gray-400">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
+
+        <div 
+          className="absolute left-1/2 bottom-0 w-4 h-4 -mb-2 bg-gray-800/95 border-r border-b border-gray-700/50"
+          style={{ 
+            transform: "translateX(-50%) rotate(45deg)",
+            bottom: "-8px"
+          }}
+        />
       </div>
     </div>
   );
+
+  // Use portal to render at document root
+  return mounted && typeof document !== 'undefined' 
+    ? createPortal(content, document.body) 
+    : null;
 };
 
 export default SocialInfoBox;

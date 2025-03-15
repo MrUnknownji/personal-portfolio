@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   FiMail,
   FiPhone,
@@ -84,77 +85,108 @@ const ANIMATION_CONFIG = {
       NORMAL: "rgba(31, 41, 55, 0.5)",
       HOVER: "rgba(31, 41, 55, 0.7)"
     }
+  },
+  SCROLL_TRIGGER: {
+    START: "top 80%",
+    END: "bottom 20%",
+    TOGGLE_ACTIONS: "play none none reverse"
+  },
+  FLOATING: {
+    DURATION: 2,
+    Y_OFFSET: 5,
+    EASE: "sine.inOut"
   }
 } as const;
 
 const ContactInfo = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const itemsRef = useRef<HTMLDivElement[]>([]);
   const socialRef = useRef<HTMLDivElement>(null);
+  const socialTitleRef = useRef<HTMLHeadingElement>(null);
   const socialItemsRef = useRef<HTMLAnchorElement[]>([]);
 
   useGSAP(() => {
-    if (!containerRef.current || !socialRef.current) return;
+    if (!containerRef.current || !socialRef.current || !contentRef.current || !titleRef.current || !socialTitleRef.current) return;
 
-    const tl = gsap.timeline();
+    // Set initial states
+    gsap.set(titleRef.current, {
+      opacity: ANIMATION_CONFIG.CONTAINER.OPACITY,
+      y: ANIMATION_CONFIG.CONTAINER.Y_OFFSET
+    });
+    
+    gsap.set(itemsRef.current, {
+      y: ANIMATION_CONFIG.ITEMS.Y_OFFSET,
+      opacity: ANIMATION_CONFIG.ITEMS.OPACITY
+    });
+    
+    gsap.set(socialTitleRef.current, {
+      opacity: ANIMATION_CONFIG.ITEMS.OPACITY,
+      y: ANIMATION_CONFIG.ITEMS.Y_OFFSET
+    });
+    
+    gsap.set(socialItemsRef.current, {
+      scale: ANIMATION_CONFIG.SOCIAL.SCALE,
+      opacity: ANIMATION_CONFIG.SOCIAL.OPACITY
+    });
 
-    // Self-contained animation timeline
-    tl.fromTo(
-      containerRef.current.querySelector('h3'),
-      {
-        opacity: 0,
-        y: ANIMATION_CONFIG.CONTAINER.Y_OFFSET
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: ANIMATION_CONFIG.CONTAINER.DURATION,
-        ease: ANIMATION_CONFIG.CONTAINER.EASE
+    // Create the main timeline with ScrollTrigger
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
+        end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
+        toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
+        markers: false
       }
-    )
-    .fromTo(
-      itemsRef.current,
-      {
-        y: ANIMATION_CONFIG.ITEMS.Y_OFFSET,
-        opacity: ANIMATION_CONFIG.ITEMS.OPACITY
-      },
-      {
-        y: 0,
-        opacity: 1,
-        duration: ANIMATION_CONFIG.ITEMS.DURATION,
-        stagger: ANIMATION_CONFIG.ITEMS.STAGGER,
-        ease: ANIMATION_CONFIG.ITEMS.EASE,
-        clearProps: "transform"
-      }
-    )
-    .fromTo(
-      socialRef.current.querySelector('h4'),
-      {
-        opacity: 0,
-        y: ANIMATION_CONFIG.ITEMS.Y_OFFSET
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: ANIMATION_CONFIG.ITEMS.DURATION,
-        ease: ANIMATION_CONFIG.ITEMS.EASE
-      }
-    )
-    .fromTo(
-      socialItemsRef.current,
-      {
-        scale: ANIMATION_CONFIG.SOCIAL.SCALE,
-        opacity: ANIMATION_CONFIG.SOCIAL.OPACITY
-      },
-      {
-        scale: 1,
-        opacity: 1,
-        duration: ANIMATION_CONFIG.SOCIAL.DURATION,
-        stagger: ANIMATION_CONFIG.SOCIAL.STAGGER,
-        ease: ANIMATION_CONFIG.SOCIAL.EASE,
-        clearProps: "transform"
-      }
-    );
+    });
+
+    // Animate title
+    tl.to(titleRef.current, {
+      opacity: 1,
+      y: 0,
+      duration: ANIMATION_CONFIG.CONTAINER.DURATION,
+      ease: ANIMATION_CONFIG.CONTAINER.EASE
+    });
+    
+    // Animate contact info items with stagger
+    tl.to(itemsRef.current, {
+      y: 0,
+      opacity: 1,
+      duration: ANIMATION_CONFIG.ITEMS.DURATION,
+      stagger: ANIMATION_CONFIG.ITEMS.STAGGER,
+      ease: ANIMATION_CONFIG.ITEMS.EASE,
+      clearProps: "transform"
+    }, "-=0.4");
+    
+    // Animate social section title
+    tl.to(socialTitleRef.current, {
+      opacity: 1,
+      y: 0,
+      duration: ANIMATION_CONFIG.ITEMS.DURATION,
+      ease: ANIMATION_CONFIG.ITEMS.EASE
+    }, "-=0.3");
+    
+    // Animate social icons with stagger
+    tl.to(socialItemsRef.current, {
+      scale: 1,
+      opacity: 1,
+      duration: ANIMATION_CONFIG.SOCIAL.DURATION,
+      stagger: ANIMATION_CONFIG.SOCIAL.STAGGER,
+      ease: ANIMATION_CONFIG.SOCIAL.EASE,
+      clearProps: "transform"
+    }, "-=0.2");
+    
+    // Add subtle floating animation to contact info items
+    tl.to(itemsRef.current, {
+      y: (i) => Math.sin(i * Math.PI) * ANIMATION_CONFIG.FLOATING.Y_OFFSET,
+      duration: ANIMATION_CONFIG.FLOATING.DURATION,
+      ease: ANIMATION_CONFIG.FLOATING.EASE,
+      repeat: -1,
+      yoyo: true,
+      stagger: 0.2
+    }, "-=0.5");
     
     // Set up hover animations for social links
     socialItemsRef.current.forEach(item => {
@@ -184,59 +216,71 @@ const ContactInfo = () => {
     });
     
     return () => {
+      // Clean up event listeners and ScrollTrigger instances
       socialItemsRef.current.forEach(item => {
         item.removeEventListener("mouseenter", () => {});
         item.removeEventListener("mouseleave", () => {});
       });
+      
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
 
   return (
-    <div ref={containerRef} className="space-y-8">
-      <div>
-        <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-6">
-          Contact Information
-        </h3>
-        <div className="space-y-6">
-          {CONTACT_INFO.map((info, index) => (
-            <div
-              key={info.label}
-              ref={el => {
-                if (el) itemsRef.current[index] = el;
-              }}
-              className="transform-gpu"
-            >
-              <InfoItem {...info} />
-            </div>
-          ))}
+    <div ref={containerRef} className="w-full relative">
+      <div ref={contentRef} className="space-y-8">
+        <div>
+          <h3 
+            ref={titleRef} 
+            className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-6"
+          >
+            Contact Information
+          </h3>
+          <div className="space-y-6">
+            {CONTACT_INFO.map((info, index) => (
+              <div
+                key={info.label}
+                ref={el => {
+                  if (el) itemsRef.current[index] = el;
+                }}
+                className="transform-gpu"
+              >
+                <InfoItem {...info} />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div ref={socialRef}>
-        <h4 className="text-lg font-semibold text-gray-200 mb-4">
-          Connect With Me
-        </h4>
-        <div className="flex gap-4">
-          {SOCIAL_LINKS.map((social, index) => (
-            <a
-              key={social.label}
-              ref={el => {
-                if (el) socialItemsRef.current[index] = el;
-              }}
-              href={social.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-12 h-12 flex items-center justify-center rounded-lg bg-gray-800/50 text-gray-400 transform-gpu"
-              aria-label={social.label}
-            >
-              {social.icon}
-            </a>
-          ))}
+        <div ref={socialRef}>
+          <h4 
+            ref={socialTitleRef}
+            className="text-lg font-semibold text-gray-200 mb-4"
+          >
+            Connect With Me
+          </h4>
+          <div className="flex gap-4">
+            {SOCIAL_LINKS.map((social, index) => (
+              <a
+                key={social.label}
+                ref={el => {
+                  if (el) socialItemsRef.current[index] = el;
+                }}
+                href={social.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-12 h-12 flex items-center justify-center rounded-lg bg-gray-800/50 text-gray-400 transform-gpu"
+                aria-label={social.label}
+                style={{ willChange: "transform, opacity, background-color, color" }}
+              >
+                {social.icon}
+              </a>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="absolute -left-4 -bottom-4 w-64 h-64 bg-primary/5 rounded-full filter blur-3xl pointer-events-none" />
-      <div className="absolute -right-4 -top-4 w-64 h-64 bg-accent/5 rounded-full filter blur-3xl pointer-events-none" />
+        <div className="absolute -left-4 -bottom-4 w-64 h-64 bg-primary/5 rounded-full filter blur-3xl pointer-events-none" />
+        <div className="absolute -right-4 -top-4 w-64 h-64 bg-accent/5 rounded-full filter blur-3xl pointer-events-none" />
+      </div>
     </div>
   );
 };

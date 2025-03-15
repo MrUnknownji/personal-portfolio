@@ -8,9 +8,10 @@ import {
   FiPhone,
   FiMapPin,
 } from "react-icons/fi";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { usePathname, useRouter } from "next/navigation";
 
 const ANIMATION_CONFIG = {
   SCROLL_TRIGGER: {
@@ -66,10 +67,10 @@ const SOCIAL_LINKS = [
 ];
 
 const QUICK_LINKS = [
-  { href: "/", text: "Home" },
-  { href: "#about", text: "About" },
-  { href: "/my-projects", text: "Projects" },
-  { href: "#contact", text: "Contact" },
+  { href: "/", id: "", text: "Home" },
+  { href: "/#about", id: "about", text: "About" },
+  { href: "/my-projects", id: "", text: "Projects" },
+  { href: "/#contact", id: "contact", text: "Contact" },
 ];
 
 const CONTACT_INFO = [
@@ -96,6 +97,69 @@ const Footer = () => {
   const contactItemsRef = useRef<(HTMLLIElement | null)[]>([]);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   const currentYear: number = new Date().getFullYear();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // Function to handle smooth scrolling to elements
+  const scrollToElement = useCallback((elementId: string) => {
+    // If no element ID, scroll to top
+    if (!elementId) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      return;
+    }
+
+    // Find the element and scroll to it
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }, []);
+
+  // Handle quick link clicks
+  const handleQuickLinkClick = useCallback((e: React.MouseEvent, link: typeof QUICK_LINKS[0]) => {
+    e.preventDefault();
+    
+    // Check if we're already on the target page
+    const isHome = pathname === '/';
+    const isProjectsPage = pathname === '/my-projects';
+    
+    // Case 1: Home link
+    if (link.text === "Home") {
+      if (isHome) {
+        // Already on home page, scroll to top
+        scrollToElement("");
+      } else {
+        // Navigate to home page
+        router.push("/");
+      }
+    }
+    // Case 2: Projects link
+    else if (link.text === "Projects") {
+      if (isProjectsPage) {
+        // Already on projects page, scroll to top
+        scrollToElement("");
+      } else {
+        // Navigate to projects page
+        router.push("/my-projects");
+      }
+    }
+    // Case 3: About or Contact links (sections on home page)
+    else if (link.id) {
+      if (isHome) {
+        // Already on home page, scroll to section
+        scrollToElement(link.id);
+      } else {
+        // Navigate to home page with hash
+        router.push(`/#${link.id}`);
+      }
+    }
+  }, [pathname, router, scrollToElement]);
 
   const setupAnimations = useCallback(() => {
     if (!contentRef.current || !footerRef.current) return;
@@ -357,8 +421,9 @@ const Footer = () => {
             <ul className="space-y-3">
               {QUICK_LINKS.map((link, index) => (
                 <li key={link.text}>
-                  <Link
+                  <a
                     href={link.href}
+                    onClick={(e) => handleQuickLinkClick(e, link)}
                     ref={(el: HTMLAnchorElement | null) => {
                       if (el) {
                         quickLinksRef.current[index] = el;
@@ -368,7 +433,7 @@ const Footer = () => {
                   >
                     {link.text}
                     <div className="underline absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transform-gpu" />
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>

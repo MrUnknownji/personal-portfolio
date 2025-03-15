@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import gsap from "gsap";
+import { usePathname, useRouter } from "next/navigation";
 
 const ANIMATION_CONFIG = {
   HEADER: {
@@ -55,6 +56,44 @@ const Header = () => {
   const buttonBorderRef = useRef<HTMLDivElement>(null);
   const buttonShadowRef = useRef<HTMLDivElement>(null);
   const buttonBgRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // Function to handle smooth scrolling to elements
+  const scrollToElement = useCallback((elementId: string) => {
+    // If no element ID, scroll to top
+    if (!elementId) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      return;
+    }
+
+    // Find the element and scroll to it
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }, []);
+
+  // Handle contact button click
+  const handleContactClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    
+    const isHome = pathname === '/';
+    
+    if (isHome) {
+      // Already on home page, scroll to contact section
+      scrollToElement("contact");
+    } else {
+      // Navigate to home page with contact hash
+      router.push("/#contact");
+    }
+  }, [pathname, router, scrollToElement]);
 
   useEffect(() => {
     let prevScrollPos = window.scrollY;
@@ -227,9 +266,7 @@ const Header = () => {
               style={{ willChange: "transform" }}
               onMouseEnter={() => handleButtonHover(true)}
               onMouseLeave={() => handleButtonHover(false)}
-              onClick={() => {
-                window.location.href = "#contact";
-              }}
+              onClick={handleContactClick}
             >
               <div
                 ref={shineRef} 

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -52,6 +52,7 @@ const SkillsSection = () => {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const skillsRef = useRef<HTMLDivElement>(null);
   const categoryRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [initialAnimationComplete, setInitialAnimationComplete] = useState(false);
 
   useGSAP(() => {
     if (!containerRef.current || !titleRef.current || !skillsRef.current) return;
@@ -67,7 +68,9 @@ const SkillsSection = () => {
         end: "bottom 20%",
         toggleActions: "play none none reverse",
         markers: false
-      }
+      },
+      onComplete: () => setInitialAnimationComplete(true),
+      onReverseComplete: () => setInitialAnimationComplete(false)
     });
 
     // Title animation
@@ -115,8 +118,7 @@ const SkillsSection = () => {
         scale: ANIMATION_CONFIG.SKILLS.SCALE.END,
         duration: ANIMATION_CONFIG.SKILLS.DURATION,
         stagger: ANIMATION_CONFIG.SKILLS.STAGGER,
-        ease: ANIMATION_CONFIG.SKILLS.EASE,
-        clearProps: "transform"
+        ease: ANIMATION_CONFIG.SKILLS.EASE
       },
       "-=0.2"
     );
@@ -139,22 +141,6 @@ const SkillsSection = () => {
       );
     });
 
-    // Hover animations for skill items
-    skillItems.forEach((item) => {
-      const hoverTl = gsap.timeline({ paused: true });
-      
-      hoverTl.to(item, {
-        scale: ANIMATION_CONFIG.HOVER.SCALE,
-        backgroundColor: "rgba(0, 255, 159, 0.2)",
-        color: "#ffffff",
-        duration: ANIMATION_CONFIG.HOVER.DURATION,
-        ease: ANIMATION_CONFIG.HOVER.EASE
-      });
-      
-      item.addEventListener("mouseenter", () => hoverTl.play());
-      item.addEventListener("mouseleave", () => hoverTl.reverse());
-    });
-
     // Floating animation for categories
     gsap.timeline({
       scrollTrigger: {
@@ -169,6 +155,47 @@ const SkillsSection = () => {
     });
 
   }, { scope: containerRef });
+
+  // Set up hover animations separately, only after initial animations are complete
+  useEffect(() => {
+    if (!initialAnimationComplete || !skillsRef.current) return;
+    
+    const skillItems = skillsRef.current.querySelectorAll('.skill-item');
+    const hoverAnimations = new Map();
+
+    // Create hover animations
+    skillItems.forEach((item) => {
+      const hoverTl = gsap.timeline({ paused: true });
+      
+      hoverTl.to(item, {
+        scale: ANIMATION_CONFIG.HOVER.SCALE,
+        backgroundColor: "rgba(0, 255, 159, 0.2)",
+        color: "#ffffff",
+        duration: ANIMATION_CONFIG.HOVER.DURATION,
+        ease: ANIMATION_CONFIG.HOVER.EASE
+      });
+      
+      hoverAnimations.set(item, hoverTl);
+      
+      const handleMouseEnter = () => hoverAnimations.get(item).play();
+      const handleMouseLeave = () => hoverAnimations.get(item).reverse();
+      
+      item.addEventListener("mouseenter", handleMouseEnter);
+      item.addEventListener("mouseleave", handleMouseLeave);
+    });
+
+    // Cleanup function
+    return () => {
+      skillItems.forEach((item) => {
+        const hoverTl = hoverAnimations.get(item);
+        if (hoverTl) {
+          hoverTl.kill();
+        }
+        item.removeEventListener("mouseenter", () => {});
+        item.removeEventListener("mouseleave", () => {});
+      });
+    };
+  }, [initialAnimationComplete]);
 
   return (
     <div 

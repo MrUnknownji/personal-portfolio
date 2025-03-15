@@ -22,9 +22,9 @@ const ANIMATION_CONFIG = {
     SCALE_Y: 0
   },
   HOVER: {
-    SCALE: 1.02,
     DURATION: 0.3,
-    EASE: "power2.out"
+    EASE: "power2.out",
+    GLOW: "0 4px 15px rgba(0, 255, 159, 0.15)"
   }
 } as const;
 
@@ -57,6 +57,7 @@ const JourneySection = () => {
   const itemsRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const scrollAnimationsComplete = useRef<boolean>(false);
 
   useGSAP(() => {
     if (!containerRef.current || !titleRef.current || !itemsRef.current || !lineRef.current) return;
@@ -80,6 +81,12 @@ const JourneySection = () => {
             overwrite: "auto"
           });
         }
+      },
+      onComplete: () => {
+        scrollAnimationsComplete.current = true;
+      },
+      onReverseComplete: () => {
+        scrollAnimationsComplete.current = false;
       }
     });
 
@@ -125,7 +132,8 @@ const JourneySection = () => {
           x: 0,
           y: 0,
           duration: ANIMATION_CONFIG.ITEMS.DURATION,
-          ease: ANIMATION_CONFIG.ITEMS.EASE
+          ease: ANIMATION_CONFIG.ITEMS.EASE,
+          clearProps: "transform" // Clear transform properties after animation completes
         },
         `-=${index === 0 ? 0.8 : 0.4}`
       );
@@ -145,26 +153,58 @@ const JourneySection = () => {
         },
         "-=0.3"
       );
+    });
+
+    // Setup hover animations separately from scroll animations
+    itemRefs.current.forEach((itemEl, index) => {
+      if (!itemEl) return;
       
-      // Hover animations for each item
-      if (itemRefs.current[index]) {
-        const itemEl = itemRefs.current[index];
-        const hoverTl = gsap.timeline({ paused: true });
+      // Create separate elements for hover effects to avoid conflicts
+      const contentEl = itemEl.querySelector('.journey-content');
+      const yearEl = itemEl.querySelector('.journey-year');
+      
+      // Setup hover animations that don't conflict with scroll animations
+      itemEl.addEventListener("mouseenter", () => {
+        if (!contentEl) return;
         
-        hoverTl.to(itemEl, {
-          scale: ANIMATION_CONFIG.HOVER.SCALE,
-          x: 5,
-          boxShadow: "0 10px 25px -5px rgba(0, 255, 159, 0.1)",
+        gsap.to(contentEl, {
           borderColor: "rgba(0, 255, 159, 0.3)",
+          boxShadow: ANIMATION_CONFIG.HOVER.GLOW,
           duration: ANIMATION_CONFIG.HOVER.DURATION,
-          ease: ANIMATION_CONFIG.HOVER.EASE
+          ease: ANIMATION_CONFIG.HOVER.EASE,
+          overwrite: "auto"
         });
         
-        if (itemEl) {
-          itemEl.addEventListener("mouseenter", () => hoverTl.play());
-          itemEl.addEventListener("mouseleave", () => hoverTl.reverse());
+        if (yearEl) {
+          gsap.to(yearEl, {
+            backgroundColor: "rgba(0, 255, 159, 0.2)",
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+            overwrite: "auto"
+          });
         }
-      }
+      });
+      
+      itemEl.addEventListener("mouseleave", () => {
+        if (!contentEl) return;
+        
+        gsap.to(contentEl, {
+          borderColor: "rgba(0, 255, 159, 0.1)",
+          boxShadow: "none",
+          duration: ANIMATION_CONFIG.HOVER.DURATION,
+          ease: ANIMATION_CONFIG.HOVER.EASE,
+          overwrite: "auto"
+        });
+        
+        if (yearEl) {
+          gsap.to(yearEl, {
+            backgroundColor: "rgba(0, 255, 159, 0.1)",
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+            overwrite: "auto"
+          });
+        }
+      });
     });
 
   }, { scope: containerRef });
@@ -197,13 +237,13 @@ const JourneySection = () => {
             key={item.year}
             ref={(el: HTMLDivElement | null) => { itemRefs.current[index] = el; }}
             className="relative cursor-pointer"
-            style={{ willChange: "transform, opacity" }}
+            style={{ willChange: "opacity" }}
           >
             <div className="journey-circle absolute -left-8 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-primary bg-transparent" />
             
-            <div className="space-y-1 p-4 rounded-xl bg-gray-900/30 border border-primary/10">
+            <div className="journey-content space-y-1 p-4 rounded-xl bg-gray-900/30 border border-primary/10">
               <div className="flex items-center gap-3 mb-1">
-                <span className="px-2 py-0.5 text-sm rounded bg-primary/10 text-primary font-medium">
+                <span className="journey-year px-2 py-0.5 text-sm rounded bg-primary/10 text-primary font-medium">
                   {item.year}
                 </span>
                 <h4 className="font-medium text-lg text-gray-200">
