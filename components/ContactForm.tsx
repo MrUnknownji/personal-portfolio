@@ -66,33 +66,27 @@ const ContactForm: React.FC = () => {
   useGSAP(() => {
     if (!sectionRef.current || !containerRef.current) return;
 
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: ANIMATION_CONFIG.SECTION.TRIGGER_START,
-          end: ANIMATION_CONFIG.SECTION.TRIGGER_END,
-          once: true,
-          markers: false
-        }
-      });
-
-      gsap.set(containerRef.current, { 
-        opacity: 0,
-        y: ANIMATION_CONFIG.CONTENT.Y_OFFSET,
-        force3D: true
-      });
-
-      tl.to(containerRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: ANIMATION_CONFIG.CONTENT.DURATION,
-        ease: ANIMATION_CONFIG.CONTENT.EASE,
-        force3D: true
-      }, "+=0.4");
+    gsap.set(containerRef.current, { 
+      opacity: 0,
+      y: ANIMATION_CONFIG.CONTENT.Y_OFFSET,
+      force3D: true
     });
 
-    return () => ctx.revert();
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: ANIMATION_CONFIG.SECTION.TRIGGER_START,
+        end: ANIMATION_CONFIG.SECTION.TRIGGER_END,
+        toggleActions: "play none none reverse",
+        markers: false
+      }
+    }).to(containerRef.current, {
+      opacity: 1,
+      y: 0,
+      duration: ANIMATION_CONFIG.CONTENT.DURATION,
+      ease: ANIMATION_CONFIG.CONTENT.EASE,
+      force3D: true
+    }, "+=0.4");
   }, []);
 
   return (

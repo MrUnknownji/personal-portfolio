@@ -64,16 +64,13 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
   const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!inputRefs.current[0]?.value) {
-      newErrors.name = "Name is required";
+      newErrors.category = "Category is required";
     }
 
     if (!inputRefs.current[1]?.value) {
-      newErrors.email = "Email is required";
-    } else if (!emailRegex.test(inputRefs.current[1]?.value)) {
-      newErrors.email = "Invalid email format";
+      newErrors.subject = "Subject is required";
     }
 
     if (!inputRefs.current[2]?.value) {
@@ -89,6 +86,13 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     if (!validateForm()) return;
 
     try {
+      const category = inputRefs.current[0]?.value || '';
+      const subject = inputRefs.current[1]?.value || '';
+      const message = inputRefs.current[2]?.value || '';
+
+      const mailtoLink = `mailto:sandeepkhati788@gmail.com?subject=${encodeURIComponent(`[${category}] ${subject}`)}&body=${encodeURIComponent(message)}`;
+      window.open(mailtoLink, '_blank');
+
       await new Promise(resolve => setTimeout(resolve, 1000));
       onSubmitSuccess();
       if (formRef.current) formRef.current.reset();
@@ -165,29 +169,22 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
     const formElements = formRef.current.querySelectorAll("input, textarea, button");
     
-    gsap.set(formElements, {
-      y: ANIMATION_CONFIG.FORM_ITEMS.Y_OFFSET,
-      opacity: ANIMATION_CONFIG.FORM_ITEMS.OPACITY
-    });
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          gsap.to(formElements, {
-            y: 0,
-            opacity: 1,
-            duration: ANIMATION_CONFIG.FORM_ITEMS.DURATION,
-            stagger: ANIMATION_CONFIG.FORM_ITEMS.STAGGER,
-            ease: ANIMATION_CONFIG.FORM_ITEMS.EASE
-          });
-          observer.disconnect();
-        }
-      });
-    }, { threshold: 0.2 });
-
-    observer.observe(formRef.current);
-
-    return () => observer.disconnect();
+    const tl = gsap.timeline();
+    
+    tl.fromTo(
+      formElements,
+      {
+        y: ANIMATION_CONFIG.FORM_ITEMS.Y_OFFSET,
+        opacity: ANIMATION_CONFIG.FORM_ITEMS.OPACITY
+      },
+      {
+        y: 0,
+        opacity: 1,
+        duration: ANIMATION_CONFIG.FORM_ITEMS.DURATION,
+        stagger: ANIMATION_CONFIG.FORM_ITEMS.STAGGER,
+        ease: ANIMATION_CONFIG.FORM_ITEMS.EASE
+      }
+    );
   }, []);
 
   return (
@@ -198,14 +195,14 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
             if (el) inputRefs.current[0] = el;
           }}
           type="text"
-          placeholder="Your Name"
-          className={`${INPUT_CLASSES.base} ${errors.name ? INPUT_CLASSES.error : ""}`}
+          placeholder="Category"
+          className={`${INPUT_CLASSES.base} ${errors.category ? INPUT_CLASSES.error : ""}`}
           onFocus={() => handleFocus(0)}
           onBlur={() => handleBlur(0)}
         />
-        {errors.name && (
+        {errors.category && (
           <span className="absolute -bottom-5 left-0 text-sm text-red-500">
-            {errors.name}
+            {errors.category}
           </span>
         )}
       </div>
@@ -215,15 +212,15 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           ref={el => {
             if (el) inputRefs.current[1] = el;
           }}
-          type="email"
-          placeholder="Your Email"
-          className={`${INPUT_CLASSES.base} ${errors.email ? INPUT_CLASSES.error : ""}`}
+          type="text"
+          placeholder="Subject"
+          className={`${INPUT_CLASSES.base} ${errors.subject ? INPUT_CLASSES.error : ""}`}
           onFocus={() => handleFocus(1)}
           onBlur={() => handleBlur(1)}
         />
-        {errors.email && (
+        {errors.subject && (
           <span className="absolute -bottom-5 left-0 text-sm text-red-500">
-            {errors.email}
+            {errors.subject}
           </span>
         )}
       </div>

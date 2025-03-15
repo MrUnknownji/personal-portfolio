@@ -15,19 +15,19 @@ const CONTACT_INFO = [
   {
     icon: <FiMail className="w-5 h-5" />,
     label: "Email",
-    value: "contact@example.com",
-    link: "mailto:contact@example.com"
+    value: "sandeepkhati788@gmail.com",
+    link: "mailto:sandeepkhati788@gmail.com"
   },
   {
     icon: <FiPhone className="w-5 h-5" />,
     label: "Phone",
-    value: "+1 (234) 567-8900",
-    link: "tel:+12345678900"
+    value: "+91 1234567890",
+    link: "tel:+911234567890"
   },
   {
     icon: <FiMapPin className="w-5 h-5" />,
     label: "Location",
-    value: "New York, NY",
+    value: "Punjab, India",
     link: "https://maps.google.com"
   }
 ] as const;
@@ -36,17 +36,17 @@ const SOCIAL_LINKS = [
   {
     icon: <FiGithub className="w-6 h-6" />,
     label: "GitHub",
-    link: "https://github.com/yourusername"
+    link: "https://github.com/MrUnknownji"
   },
   {
     icon: <FiLinkedin className="w-6 h-6" />,
     label: "LinkedIn",
-    link: "https://linkedin.com/in/yourusername"
+    link: "https://linkedin.com/in/sandeep-kumar-sk1707"
   },
   {
     icon: <FiTwitter className="w-6 h-6" />,
     label: "Twitter",
-    link: "https://twitter.com/yourusername"
+    link: "https://twitter.com/MrUnknownG786"
   }
 ] as const;
 
@@ -98,15 +98,16 @@ const ContactInfo = () => {
 
     const tl = gsap.timeline();
 
+    // Self-contained animation timeline
     tl.fromTo(
-      containerRef.current,
+      containerRef.current.querySelector('h3'),
       {
-        y: ANIMATION_CONFIG.CONTAINER.Y_OFFSET,
-        opacity: ANIMATION_CONFIG.CONTAINER.OPACITY
+        opacity: 0,
+        y: ANIMATION_CONFIG.CONTAINER.Y_OFFSET
       },
       {
-        y: 0,
         opacity: 1,
+        y: 0,
         duration: ANIMATION_CONFIG.CONTAINER.DURATION,
         ease: ANIMATION_CONFIG.CONTAINER.EASE
       }
@@ -124,6 +125,19 @@ const ContactInfo = () => {
         stagger: ANIMATION_CONFIG.ITEMS.STAGGER,
         ease: ANIMATION_CONFIG.ITEMS.EASE,
         clearProps: "transform"
+      }
+    )
+    .fromTo(
+      socialRef.current.querySelector('h4'),
+      {
+        opacity: 0,
+        y: ANIMATION_CONFIG.ITEMS.Y_OFFSET
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.ITEMS.DURATION,
+        ease: ANIMATION_CONFIG.ITEMS.EASE
       }
     )
     .fromTo(

@@ -7,7 +7,7 @@ import Title from "./ui/Title";
 
 const AboutMe = () => {
   return (
-    <section className="py-8 sm:py-12 lg:py-20 about-me relative mx-auto max-w-7xl space-y-12 lg:space-y-16">
+    <section id="about" className="py-8 sm:py-12 lg:py-20 about-me relative mx-auto max-w-7xl space-y-12 lg:space-y-16">
       <Title
         title="About Me"
         subtitle={

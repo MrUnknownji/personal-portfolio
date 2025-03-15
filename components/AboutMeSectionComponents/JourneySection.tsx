@@ -35,19 +35,19 @@ const journeyData = [
     description: "Began learning web development with a focus on modern JavaScript and React."
   },
   {
-    year: "2021",
-    title: "First Professional Project",
-    description: "Successfully delivered my first commercial web application using Next.js and TypeScript."
-  },
-  {
-    year: "2022",
-    title: "Expanded Skill Set",
-    description: "Mastered full-stack development with Node.js, Express, and MongoDB."
-  },
-  {
     year: "2023",
-    title: "Senior Developer",
-    description: "Led multiple successful projects and mentored junior developers."
+    title: "Completed Graduation",
+    description: "Successfully completed my graduation in BSc with Computer Science."
+  },
+  {
+    year: "2024",
+    title: "Joined TCS",
+    description: "Started working as a Analyst in TCS."
+  },
+  {
+    year: "2025",
+    title: "Working and Learning",
+    description: "Working as a Analyst in TCS and learning new technologies."
   }
 ];
 
@@ -62,18 +62,28 @@ const JourneySection = () => {
     if (!containerRef.current || !titleRef.current || !itemsRef.current || !lineRef.current) return;
 
     const items = Array.from(itemsRef.current.children);
+    const circles = Array.from(document.querySelectorAll('.journey-circle'));
 
-    // Main animation timeline
+    // Main animation timeline with single trigger
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top 80%",
         end: "bottom 20%",
         toggleActions: "play none none reverse",
-        markers: false
+        markers: false,
+        onUpdate: (self) => {
+          gsap.to(lineRef.current, {
+            opacity: 0.5 + (Math.sin(self.progress * Math.PI) * 0.5),
+            duration: 0.1,
+            ease: "none",
+            overwrite: "auto"
+          });
+        }
       }
     });
 
+    // Title animation
     tl.fromTo(
       titleRef.current,
       { 
@@ -88,6 +98,7 @@ const JourneySection = () => {
       }
     );
 
+    // Line animation
     tl.fromTo(
       lineRef.current,
       { scaleY: ANIMATION_CONFIG.LINE.SCALE_Y },
@@ -99,6 +110,7 @@ const JourneySection = () => {
       "-=0.4"
     );
 
+    // Journey items animations
     items.forEach((item, index) => {
       // Staggered entrance animation
       tl.fromTo(
@@ -116,6 +128,22 @@ const JourneySection = () => {
           ease: ANIMATION_CONFIG.ITEMS.EASE
         },
         `-=${index === 0 ? 0.8 : 0.4}`
+      );
+      
+      // Circle animation
+      tl.fromTo(
+        circles[index],
+        {
+          backgroundColor: "transparent",
+          scale: 1
+        },
+        {
+          backgroundColor: "rgba(0, 255, 159, 0.8)",
+          scale: 1.2,
+          duration: 0.4,
+          ease: "back.out(1.7)"
+        },
+        "-=0.3"
       );
       
       // Hover animations for each item
@@ -137,47 +165,6 @@ const JourneySection = () => {
           itemEl.addEventListener("mouseleave", () => hoverTl.reverse());
         }
       }
-    });
-
-    // Scroll-triggered parallax effect for the line
-    ScrollTrigger.create({
-      trigger: containerRef.current,
-      start: "top bottom",
-      end: "bottom top",
-      onUpdate: (self) => {
-        // Pulsating effect for the line based on scroll position
-        gsap.to(lineRef.current, {
-          opacity: 0.5 + (Math.sin(self.progress * Math.PI) * 0.5),
-          duration: 0.1,
-          ease: "none",
-          overwrite: "auto"
-        });
-      }
-    });
-
-    items.forEach((item) => {
-      ScrollTrigger.create({
-        trigger: item,
-        start: "top 85%",
-        end: "bottom 15%",
-        toggleActions: "play pause reverse reset",
-        onEnter: () => {
-          gsap.to(item.querySelector('.journey-circle'), {
-            backgroundColor: "rgba(0, 255, 159, 0.8)",
-            scale: 1.2,
-            duration: 0.4,
-            ease: "back.out(1.7)"
-          });
-        },
-        onLeaveBack: () => {
-          gsap.to(item.querySelector('.journey-circle'), {
-            backgroundColor: "transparent",
-            scale: 1,
-            duration: 0.3,
-            ease: "power2.in"
-          });
-        }
-      });
     });
 
   }, { scope: containerRef });

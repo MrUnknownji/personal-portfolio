@@ -1,21 +1,8 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import { FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi";
 import gsap from "gsap";
-
-interface SocialLink {
-  icon: React.ReactNode;
-  label: string;
-  href: string;
-  bgColor: string;
-  hoverBgColor: string;
-  iconColor: string;
-  hoverIconColor: string;
-  description: string;
-  stats: {
-    label: string;
-    value: string;
-  }[];
-}
+import { SocialLink } from "../../types/social";
+import { fetchSocialStats } from "../../utils/social";
 
 const ANIMATION_CONFIG = {
   LINK_HOVER: {
@@ -34,60 +21,89 @@ const ANIMATION_CONFIG = {
   }
 } as const;
 
-const SOCIAL_LINKS: SocialLink[] = [
-  {
-    icon: <FiGithub className="w-6 h-6" />,
-    label: "GitHub",
-    href: "https://github.com/yourusername",
-    bgColor: "rgba(45, 186, 78, 0)",
-    hoverBgColor: "rgba(45, 186, 78, 0.1)",
-    iconColor: "rgb(209, 213, 219)",
-    hoverIconColor: "rgb(45, 186, 78)",
-    description: "Check out my open source projects and contributions",
-    stats: [
-      { label: "Repositories", value: "50+" },
-      { label: "Stars", value: "100+" },
-      { label: "Contributions", value: "500+" }
-    ]
-  },
-  {
-    icon: <FiLinkedin className="w-6 h-6" />,
-    label: "LinkedIn",
-    href: "https://linkedin.com/in/yourusername",
-    bgColor: "rgba(0, 119, 181, 0)",
-    hoverBgColor: "rgba(0, 119, 181, 0.1)",
-    iconColor: "rgb(209, 213, 219)",
-    hoverIconColor: "rgb(0, 119, 181)",
-    description: "Connect with me professionally",
-    stats: [
-      { label: "Connections", value: "500+" },
-      { label: "Endorsements", value: "50+" },
-      { label: "Posts", value: "100+" }
-    ]
-  },
-  {
-    icon: <FiTwitter className="w-6 h-6" />,
-    label: "Twitter",
-    href: "https://twitter.com/yourusername",
-    bgColor: "rgba(29, 161, 242, 0)",
-    hoverBgColor: "rgba(29, 161, 242, 0.1)",
-    iconColor: "rgb(209, 213, 219)",
-    hoverIconColor: "rgb(29, 161, 242)",
-    description: "Follow me for tech insights and updates",
-    stats: [
-      { label: "Followers", value: "1000+" },
-      { label: "Following", value: "500+" },
-      { label: "Tweets", value: "2000+" }
-    ]
-  }
-];
-
 const SocialLinks = () => {
   const [activeLink, setActiveLink] = useState<number | null>(null);
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const infoBoxRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<gsap.core.Tween | null>(null);
   const linkRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const iconRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const initializeSocialLinks = async () => {
+      setIsLoading(true);
+      try {
+        const stats = await fetchSocialStats();
+        
+        const links: SocialLink[] = [
+          {
+            icon: <FiGithub className="w-6 h-6" />,
+            label: "GitHub",
+            href: "https://github.com/MrUnknownji",
+            bgColor: "rgba(45, 186, 78, 0)",
+            hoverBgColor: "rgba(45, 186, 78, 0.1)",
+            iconColor: "rgb(209, 213, 219)",
+            hoverIconColor: "rgb(45, 186, 78)",
+            color: "rgb(45, 186, 78)",
+            description: "Check out my open source projects and contributions",
+            stats: [
+              { label: "Repositories", value: stats.github?.public_repos?.toString() || "20+" },
+              { label: "Followers", value: stats.github?.followers?.toString() || "100+" },
+              { label: "Following", value: stats.github?.following?.toString() || "50+" }
+            ],
+            profileImage: stats.github?.profileImage || "/images/github-profile.jpg",
+            username: stats.github?.username || "MrUnknownji"
+          },
+          {
+            icon: <FiLinkedin className="w-6 h-6" />,
+            label: "LinkedIn",
+            href: "https://linkedin.com/in/sandeep-kumar-sk1707",
+            bgColor: "rgba(0, 119, 181, 0)",
+            hoverBgColor: "rgba(0, 119, 181, 0.1)",
+            iconColor: "rgb(209, 213, 219)",
+            hoverIconColor: "rgb(0, 119, 181)",
+            color: "rgb(0, 119, 181)",
+            description: stats.linkedin?.headline || "Connect with me professionally",
+            stats: [
+              { label: "Connections", value: stats.linkedin?.connections || "500+" },
+              { label: "Endorsements", value: stats.linkedin?.endorsements?.toString() || "50+" },
+              { label: "Posts", value: stats.linkedin?.posts?.toString() || "25+" }
+            ],
+            profileImage: stats.linkedin?.profileImage || "/images/linkedin-profile.jpg",
+            username: stats.linkedin?.name || "sandeep-kumar-sk1707"
+          },
+          {
+            icon: <FiTwitter className="w-6 h-6" />,
+            label: "Twitter",
+            href: "https://twitter.com/MrUnknownG786",
+            bgColor: "rgba(29, 161, 242, 0)",
+            hoverBgColor: "rgba(29, 161, 242, 0.1)",
+            iconColor: "rgb(209, 213, 219)",
+            hoverIconColor: "rgb(29, 161, 242)",
+            color: "rgb(29, 161, 242)",
+            description: stats.twitter?.description || "Follow me for tech insights and updates",
+            stats: [
+              { label: "Followers", value: stats.twitter?.followers?.toString() || "250+" },
+              { label: "Following", value: stats.twitter?.following?.toString() || "300+" },
+              { label: "Tweets", value: stats.twitter?.tweets?.toString() || "500+" }
+            ],
+            profileImage: stats.twitter?.profileImage || "/images/twitter-profile.jpg",
+            username: stats.twitter?.name || "MrUnknownG786"
+          }
+        ];
+        
+        setSocialLinks(links);
+      } catch (error) {
+        console.error("Error loading social links:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeSocialLinks();
+  }, []);
+
   // Setup hover animations for social links
   useEffect(() => {
     // Store references to event handlers for proper cleanup
@@ -102,7 +118,7 @@ const SocialLinks = () => {
       if (!link || !currentIconRefs[index]) return;
       
       const icon = currentIconRefs[index];
-      const socialLink = SOCIAL_LINKS[index];
+      const socialLink = socialLinks[index];
       
       const handleMouseEnter = () => {
         gsap.to(link, {
@@ -153,8 +169,8 @@ const SocialLinks = () => {
         link.removeEventListener('mouseleave', leaveHandlers[index]);
       });
     };
-  }, []);
-  // Rest of the component remains the same
+  }, [socialLinks]);
+
   const handleMouseEnter = useCallback((index: number) => {
     setActiveLink(index);
     
@@ -201,37 +217,50 @@ const SocialLinks = () => {
   return (
     <div className="relative inline-block">
       <div className="flex items-center gap-4">
-        {SOCIAL_LINKS.map((link, index) => (
-          <a
-            key={link.label}
-            ref={(el: HTMLAnchorElement | null) => {
-              linkRefs.current[index] = el;
-            }}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative p-3 rounded-xl bg-gray-800/50 border border-gray-700/50"
-            style={{ willChange: "background-color, border-color" }}
-            onMouseEnter={() => handleMouseEnter(index)}
-            onMouseLeave={handleMouseLeave}
-          >
-            <div 
-              ref={(el: HTMLDivElement | null): void => {
-                iconRefs.current[index] = el;
+        {isLoading ? (
+          // Loading skeleton
+          <>
+            {[1, 2, 3].map((_, index) => (
+              <div 
+                key={index}
+                className="w-12 h-12 rounded-xl bg-gray-800/50 border border-gray-700/50 animate-pulse"
+              />
+            ))}
+          </>
+        ) : (
+          // Actual social links
+          socialLinks.map((link, index) => (
+            <a
+              key={link.label}
+              ref={(el: HTMLAnchorElement | null) => {
+                linkRefs.current[index] = el;
               }}
-              className="text-gray-300"
-              style={{ willChange: "color" }}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative p-3 rounded-xl bg-gray-800/50 border border-gray-700/50"
+              style={{ willChange: "background-color, border-color" }}
+              onMouseEnter={() => handleMouseEnter(index)}
+              onMouseLeave={handleMouseLeave}
             >
-              {link.icon}
-            </div>
-          </a>
-        ))}
+              <div 
+                ref={(el: HTMLDivElement | null): void => {
+                  iconRefs.current[index] = el;
+                }}
+                className="text-gray-300"
+                style={{ willChange: "color" }}
+              >
+                {link.icon}
+              </div>
+            </a>
+          ))
+        )}
       </div>
 
-      {activeLink !== null && (
+      {activeLink !== null && socialLinks.length > 0 && (
         <div
           ref={infoBoxRef}
-          className="absolute z-50 w-64 p-4 rounded-xl bg-gray-800/95 backdrop-blur-sm
+          className="absolute z-50 w-72 p-4 rounded-xl bg-gray-800/95 backdrop-blur-sm
             border border-gray-700/50 shadow-xl left-1/2 -top-[220px]"
           style={{ 
             willChange: "transform, opacity",
@@ -240,24 +269,37 @@ const SocialLinks = () => {
         >
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div 
-                className="p-2 rounded-lg bg-gray-700/50"
-                style={{ color: SOCIAL_LINKS[activeLink].hoverIconColor }}
-              >
-                {SOCIAL_LINKS[activeLink].icon}
-              </div>
+              {socialLinks[activeLink].profileImage ? (
+                <img 
+                  src={socialLinks[activeLink].profileImage} 
+                  alt={socialLinks[activeLink].label}
+                  className="w-12 h-12 rounded-lg object-cover"
+                />
+              ) : (
+                <div 
+                  className="p-2 rounded-lg bg-gray-700/50 w-12 h-12 flex items-center justify-center"
+                  style={{ color: socialLinks[activeLink].hoverIconColor }}
+                >
+                  {socialLinks[activeLink].icon}
+                </div>
+              )}
               <div>
                 <h3 className="font-semibold text-white">
-                  {SOCIAL_LINKS[activeLink].label}
+                  {socialLinks[activeLink].username}
                 </h3>
                 <p className="text-sm text-gray-400">
-                  {SOCIAL_LINKS[activeLink].description}
+                  {socialLinks[activeLink].label}
                 </p>
               </div>
             </div>
             
+            <p className="text-sm text-gray-300 border-l-2 pl-3 py-1" 
+               style={{ borderColor: socialLinks[activeLink].color || socialLinks[activeLink].hoverIconColor }}>
+              {socialLinks[activeLink].description}
+            </p>
+            
             <div className="grid grid-cols-3 gap-2">
-              {SOCIAL_LINKS[activeLink].stats.map((stat, index) => (
+              {socialLinks[activeLink].stats.map((stat, index) => (
                 <div
                   key={index}
                   className="text-center p-2 rounded-lg bg-gray-700/30"

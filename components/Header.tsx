@@ -227,6 +227,9 @@ const Header = () => {
               style={{ willChange: "transform" }}
               onMouseEnter={() => handleButtonHover(true)}
               onMouseLeave={() => handleButtonHover(false)}
+              onClick={() => {
+                window.location.href = "#contact";
+              }}
             >
               <div
                 ref={shineRef} 

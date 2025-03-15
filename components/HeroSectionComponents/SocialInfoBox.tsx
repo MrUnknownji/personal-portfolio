@@ -49,7 +49,7 @@ const SocialInfoBox = ({
               style={{ borderColor: `${socialLink.color}40` }}
             >
               <Image
-                src={socialLink.profileImage}
+                src={socialLink.profileImage || '/images/placeholder-profile.jpg'}
                 alt={`${socialLink.label} Profile`}
                 fill
                 className="object-cover"

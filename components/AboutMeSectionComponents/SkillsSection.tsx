@@ -37,13 +37,13 @@ const skillsData = {
     "React", "Next.js", "TypeScript", "Tailwind CSS", "GSAP", "Framer Motion"
   ],
   backend: [
-    "Node.js", "Express", "MongoDB", "PostgreSQL", "GraphQL", "REST APIs"
+    "Node.js", "Express", "MongoDB", "REST APIs"
   ],
   tools: [
-    "Git", "Docker", "AWS", "Vercel", "Jest", "Cypress"
+    "Git", "Docker", "AWS", "Vercel", "Postman", "Swagger"
   ],
   other: [
-    "UI/UX Design", "Performance Optimization", "SEO", "Responsive Design", "Agile", "CI/CD"
+    "UI/UX Design", "Performance Optimization", "SEO", "Responsive Design", "React Native", "App Development"
   ]
 } as const;
 
@@ -59,8 +59,8 @@ const SkillsSection = () => {
     const skillItems = skillsRef.current.querySelectorAll('.skill-item');
     const categories = Array.from(skillsRef.current.children);
 
-    // Main animation timeline
-    const tl = gsap.timeline({
+    // Main animation timeline with single trigger
+    const mainTl = gsap.timeline({
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top 80%",
@@ -70,7 +70,8 @@ const SkillsSection = () => {
       }
     });
 
-    tl.fromTo(
+    // Title animation
+    mainTl.fromTo(
       titleRef.current,
       { 
         opacity: 0,
@@ -84,9 +85,9 @@ const SkillsSection = () => {
       }
     );
 
-    // Staggered entrance
+    // Staggered entrance for categories
     categories.forEach((category, index) => {
-      tl.fromTo(
+      mainTl.fromTo(
         category,
         {
           opacity: 0,
@@ -102,7 +103,8 @@ const SkillsSection = () => {
       );
     });
 
-    tl.fromTo(
+    // Skills animation
+    mainTl.fromTo(
       skillItems,
       {
         opacity: 0,
@@ -118,6 +120,24 @@ const SkillsSection = () => {
       },
       "-=0.2"
     );
+
+    // Category highlight animations (added to main timeline)
+    categories.forEach((category, index) => {
+      mainTl.fromTo(
+        category,
+        {
+          backgroundColor: "rgba(17, 17, 17, 0.3)",
+          borderColor: "rgba(0, 255, 159, 0.1)"
+        },
+        {
+          backgroundColor: "rgba(0, 255, 159, 0.05)",
+          borderColor: "rgba(0, 255, 159, 0.3)",
+          duration: 0.4,
+          ease: "power2.out"
+        },
+        `-=${0.2 * (categories.length - index)}`
+      );
+    });
 
     // Hover animations for skill items
     skillItems.forEach((item) => {
@@ -135,47 +155,17 @@ const SkillsSection = () => {
       item.addEventListener("mouseleave", () => hoverTl.reverse());
     });
 
-    // Scroll-triggered animations for categories
-    categories.forEach((category) => {
-      ScrollTrigger.create({
-        trigger: category,
-        start: "top 85%",
-        end: "bottom 15%",
-        toggleActions: "play none none reverse",
-        onEnter: () => {
-          gsap.to(category, {
-            backgroundColor: "rgba(0, 255, 159, 0.05)",
-            borderColor: "rgba(0, 255, 159, 0.3)",
-            duration: 0.4,
-            ease: "power2.out"
-          });
-        },
-        onLeaveBack: () => {
-          gsap.to(category, {
-            backgroundColor: "rgba(17, 17, 17, 0.3)",
-            borderColor: "rgba(0, 255, 159, 0.1)",
-            duration: 0.3,
-            ease: "power2.in"
-          });
-        }
-      });
-    });
-
-    ScrollTrigger.create({
-      trigger: containerRef.current,
-      start: "top bottom",
-      end: "bottom top",
-        onUpdate: (self) => {
-        categories.forEach((category, index) => {
-          const offset = (index % 2 === 0) ? 10 : -10;
-          gsap.to(category, {
-            y: Math.sin(self.progress * Math.PI) * offset,
-            duration: 0.1,
-            ease: "none",
-            overwrite: "auto"
-          });
-        });
+    // Floating animation for categories
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 0.5
       }
+    }).to(categories, {
+      y: (i) => Math.sin(i * Math.PI) * (i % 2 === 0 ? 10 : -10),
+      ease: "none"
     });
 
   }, { scope: containerRef });

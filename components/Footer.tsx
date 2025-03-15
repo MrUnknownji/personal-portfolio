@@ -49,17 +49,17 @@ const ANIMATION_CONFIG = {
 
 const SOCIAL_LINKS = [
   {
-    href: "https://github.com/yourusername",
+    href: "https://github.com/MrUnknownji",
     icon: <FiGithub className="w-6 h-6" />,
     label: "GitHub",
   },
   {
-    href: "https://linkedin.com/in/yourusername",
+    href: "https://linkedin.com/in/sandeep-kumar-sk1707",
     icon: <FiLinkedin className="w-6 h-6" />,
     label: "LinkedIn",
   },
   {
-    href: "https://twitter.com/yourusername",
+    href: "https://twitter.com/MrUnknownG786",
     icon: <FiTwitter className="w-6 h-6" />,
     label: "Twitter",
   },
@@ -68,22 +68,22 @@ const SOCIAL_LINKS = [
 const QUICK_LINKS = [
   { href: "/", text: "Home" },
   { href: "#about", text: "About" },
-  { href: "#projects", text: "Projects" },
+  { href: "/my-projects", text: "Projects" },
   { href: "#contact", text: "Contact" },
 ];
 
 const CONTACT_INFO = [
   {
     icon: <FiMail className="w-5 h-5 text-primary" />,
-    text: "example@email.com",
+    text: "sandeepkhati788@gmail.com",
   },
   {
     icon: <FiPhone className="w-5 h-5 text-primary" />,
-    text: "+1 234 567 890",
+    text: "+91 9876543210",
   },
   {
     icon: <FiMapPin className="w-5 h-5 text-primary" />,
-    text: "New York, NY",
+    text: "Punjab, India",
   },
 ];
 
