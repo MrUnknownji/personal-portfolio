@@ -8,7 +8,7 @@ import {
   FiPhone,
   FiMapPin,
 } from "react-icons/fi";
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { usePathname, useRouter } from "next/navigation";

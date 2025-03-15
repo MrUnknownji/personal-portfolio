@@ -156,7 +156,7 @@ const JourneySection = () => {
     });
 
     // Setup hover animations separately from scroll animations
-    itemRefs.current.forEach((itemEl, index) => {
+    itemRefs.current.forEach((itemEl) => {
       if (!itemEl) return;
       
       // Create separate elements for hover effects to avoid conflicts

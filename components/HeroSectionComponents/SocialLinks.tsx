@@ -73,7 +73,7 @@ const SocialLinks = () => {
               { label: "Followers", value: stats.github?.followers?.toString() || "100+" },
               { label: "Following", value: stats.github?.following?.toString() || "50+" }
             ],
-            profileImage: stats.github?.profileImage || "https://placehold.co/600x400?text=Sandeep+Kumar",
+            profileImage: stats.github?.profileImage || "https://placehold.co/600x600?text=Sandeep+Kumar",
             username: stats.github?.username || "MrUnknownji"
           },
           {
@@ -91,7 +91,7 @@ const SocialLinks = () => {
               { label: "Endorsements", value: stats.linkedin?.endorsements?.toString() || "50+" },
               { label: "Posts", value: stats.linkedin?.posts?.toString() || "25+" }
             ],
-            profileImage: stats.linkedin?.profileImage || "https://placehold.co/600x400?text=Sandeep+Kumar",
+            profileImage: stats.linkedin?.profileImage || "https://placehold.co/600x600?text=Sandeep+Kumar",
             username: stats.linkedin?.name || "sandeep-kumar-sk1707"
           },
           {
@@ -109,7 +109,7 @@ const SocialLinks = () => {
               { label: "Following", value: stats.twitter?.following?.toString() || "300+" },
               { label: "Tweets", value: stats.twitter?.tweets?.toString() || "500+" }
             ],
-            profileImage: stats.twitter?.profileImage || "https://placehold.co/600x400?text=Sandeep+Kumar",
+            profileImage: stats.twitter?.profileImage || "https://placehold.co/600x600?text=Sandeep+Kumar",
             username: stats.twitter?.name || "MrUnknownG786"
           }
         ];

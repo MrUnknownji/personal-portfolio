@@ -19,7 +19,7 @@ export const socialLinks: SocialLink[] = [
       { label: "Following", value: "50+" }
     ],
     username: "MrUnknownji",
-    profileImage: "https://placehold.co/600x400?text=Sandeep+Kumar",
+    profileImage: "https://placehold.co/600x600?text=Sandeep+Kumar",
   },
   {
     icon: React.createElement(FiLinkedin, { className: "w-6 h-6" }),
@@ -37,7 +37,7 @@ export const socialLinks: SocialLink[] = [
       { label: "Posts", value: "25+" }
     ],
     username: "sandeep-kumar-sk1707",
-    profileImage: "https://placehold.co/600x400?text=Sandeep+Kumar",
+    profileImage: "https://placehold.co/600x600?text=Sandeep+Kumar",
   },
   {
     icon: React.createElement(FiTwitter, { className: "w-6 h-6" }),
@@ -55,6 +55,6 @@ export const socialLinks: SocialLink[] = [
       { label: "Tweets", value: "500+" }
     ],
     username: "@MrUnknownG786",
-    profileImage: "https://placehold.co/600x400?text=Sandeep+Kumar",
+    profileImage: "https://placehold.co/600x600?text=Sandeep+Kumar",
   },
 ];

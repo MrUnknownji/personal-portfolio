@@ -5,7 +5,7 @@ export const FALLBACK_DATA: SocialStats = {
   github: {
     username: 'MrUnknownji',
     name: 'Sandeep Kumar',
-    profileImage: 'https://placehold.co/600x400?text=Sandeep+Kumar',
+    profileImage: 'https://placehold.co/600x600?text=Sandeep+Kumar',
     public_repos: 20,
     followers: 100,
     following: 50,
@@ -13,7 +13,7 @@ export const FALLBACK_DATA: SocialStats = {
   linkedin: {
     username: 'sandeep-kumar-sk1707',
     name: 'Sandeep Kumar',
-    profileImage: 'https://placehold.co/600x400?text=Sandeep+Kumar',
+    profileImage: 'https://placehold.co/600x600?text=Sandeep+Kumar',
     connections: '500+',
     endorsements: 0,
     posts: 1,
@@ -22,7 +22,7 @@ export const FALLBACK_DATA: SocialStats = {
   twitter: {
     username: 'MrUnknownG786',
     name: 'Sandeep Kumar',
-    profileImage: 'https://placehold.co/600x400?text=Sandeep+Kumar',
+    profileImage: 'https://placehold.co/600x600?text=Sandeep+Kumar',
     followers: 25,
     following: 30,
     tweets: 50,

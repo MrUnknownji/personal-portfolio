@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, useRef, useCallback } from "react";
+import React, { memo, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { Project } from "@/types/Project";
 import gsap from "gsap";
@@ -42,38 +42,122 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onClick }) 
   const contentRef = useRef<HTMLDivElement>(null);
   const techTagsRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
+  const isAnimatingRef = useRef(false);
 
+  // Cleanup function to ensure all animations are properly killed
+  useEffect(() => {
+    // Capture ref values inside the effect to avoid React Hook warnings
+    const timeline = timelineRef.current;
+    const card = cardRef.current;
+    const image = imageRef.current;
+    const overlay = overlayRef.current;
+    const techTags = techTagsRef.current;
+    
+    return () => {
+      if (timeline) {
+        timeline.kill();
+      }
+      
+      // Reset all animated elements
+      if (card) {
+        gsap.set(card, { clearProps: "all" });
+      }
+      if (image) {
+        gsap.set(image, { clearProps: "all" });
+      }
+      if (overlay) {
+        gsap.set(overlay, { clearProps: "all" });
+      }
+      if (techTags && techTags.children.length > 0) {
+        gsap.set(Array.from(techTags.children), { clearProps: "all" });
+      }
+    };
+  }, []);
+
+  // Create a single reusable timeline for hover animations
   const setupHoverAnimation = useCallback((isEntering: boolean) => {
-    if (timelineRef.current) {
-      timelineRef.current.kill();
+    // Don't create a new timeline if one is already running
+    if (isAnimatingRef.current) {
+      if (timelineRef.current) {
+        // Just reverse the current timeline if needed
+        if (isEntering) {
+          timelineRef.current.play();
+        } else {
+          timelineRef.current.reverse();
+        }
+        return;
+      }
     }
 
+    isAnimatingRef.current = true;
+
+    // Kill any existing timeline to prevent conflicts
+    if (timelineRef.current) {
+      timelineRef.current.kill();
+      timelineRef.current = null;
+    }
+
+    // Create a new timeline
     timelineRef.current = gsap.timeline({
       defaults: {
         duration: ANIMATION_CONFIG.HOVER.CARD.DURATION,
         ease: ANIMATION_CONFIG.HOVER.CARD.EASE,
-        overwrite: true
-      }
+        overwrite: "auto"
+      },
+      onComplete: () => {
+        isAnimatingRef.current = false;
+        if (!isEntering) {
+          // Clear transforms when animation completes and we're not hovering
+          if (cardRef.current) gsap.set(cardRef.current, { clearProps: "all" });
+          if (imageRef.current) gsap.set(imageRef.current, { clearProps: "all" });
+          if (overlayRef.current) gsap.set(overlayRef.current, { opacity: 0 });
+          
+          // Clear tech tags animations if they exist
+          if (techTagsRef.current && techTagsRef.current.children.length > 0) {
+            gsap.set(Array.from(techTagsRef.current.children), { clearProps: "all" });
+          }
+        }
+      },
+      onReverseComplete: () => {
+        isAnimatingRef.current = false;
+        // Clear transforms when reverse animation completes
+        if (cardRef.current) gsap.set(cardRef.current, { clearProps: "all" });
+        if (imageRef.current) gsap.set(imageRef.current, { clearProps: "all" });
+        if (overlayRef.current) gsap.set(overlayRef.current, { opacity: 0 });
+        
+        // Clear tech tags animations if they exist
+        if (techTagsRef.current && techTagsRef.current.children.length > 0) {
+          gsap.set(Array.from(techTagsRef.current.children), { clearProps: "all" });
+        }
+      },
+      paused: true
     });
 
-    if (isEntering) {
-      timelineRef.current
-        .to(cardRef.current, {
-          scale: ANIMATION_CONFIG.HOVER.CARD.SCALE,
-          y: -5,
-          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)"
-        })
-        .to(imageRef.current, {
-          scale: ANIMATION_CONFIG.HOVER.IMAGE.SCALE,
-          duration: ANIMATION_CONFIG.HOVER.IMAGE.DURATION,
-          ease: ANIMATION_CONFIG.HOVER.IMAGE.EASE
-        }, "<")
-        .to(overlayRef.current, {
-          opacity: ANIMATION_CONFIG.HOVER.OVERLAY.OPACITY,
-          duration: ANIMATION_CONFIG.HOVER.OVERLAY.DURATION,
-          ease: ANIMATION_CONFIG.HOVER.OVERLAY.EASE
-        }, "<")
-        .fromTo(techTagsRef.current?.children || [], 
+    // Build the timeline
+    timelineRef.current
+      .to(cardRef.current, {
+        scale: isEntering ? ANIMATION_CONFIG.HOVER.CARD.SCALE : 1,
+        y: isEntering ? -5 : 0,
+        boxShadow: isEntering 
+          ? "0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1)"
+          : "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)"
+      })
+      .to(imageRef.current, {
+        scale: isEntering ? ANIMATION_CONFIG.HOVER.IMAGE.SCALE : 1,
+        duration: ANIMATION_CONFIG.HOVER.IMAGE.DURATION,
+        ease: ANIMATION_CONFIG.HOVER.IMAGE.EASE
+      }, "<")
+      .to(overlayRef.current, {
+        opacity: isEntering ? ANIMATION_CONFIG.HOVER.OVERLAY.OPACITY : 0,
+        duration: ANIMATION_CONFIG.HOVER.OVERLAY.DURATION,
+        ease: ANIMATION_CONFIG.HOVER.OVERLAY.EASE
+      }, "<");
+
+    // Only animate tech tags if they exist
+    if (techTagsRef.current?.children.length) {
+      if (isEntering) {
+        timelineRef.current.fromTo(
+          Array.from(techTagsRef.current.children), 
           { y: 5, opacity: 0 },
           { 
             y: 0, 
@@ -83,31 +167,23 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onClick }) 
           },
           "<+=0.1"
         );
-    } else {
-      timelineRef.current
-        .to(cardRef.current, {
-          scale: 1,
-          y: 0,
-          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)"
-        })
-        .to(imageRef.current, {
-          scale: 1,
-          duration: ANIMATION_CONFIG.HOVER.IMAGE.DURATION,
-          ease: "power2.inOut"
-        }, "<")
-        .to(overlayRef.current, {
-          opacity: 0,
-          duration: ANIMATION_CONFIG.HOVER.OVERLAY.DURATION,
-          ease: "power2.inOut"
-        }, "<")
-        .to(techTagsRef.current?.children || [], {
-          y: 0,
-          opacity: 1,
-          stagger: 0,
-          duration: 0.2
-        }, "<");
+      } else {
+        timelineRef.current.to(
+          Array.from(techTagsRef.current.children),
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0,
+            duration: 0.2
+          }, 
+          "<"
+        );
+      }
     }
-  }, [cardRef, imageRef, overlayRef, techTagsRef]);
+
+    // Play the timeline immediately
+    timelineRef.current.play();
+  }, []);
 
   const handleMouseEnter = useCallback(() => {
     setupHoverAnimation(true);
@@ -118,14 +194,13 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({ project, onClick }) 
   }, [setupHoverAnimation]);
 
   useGSAP(() => {
-    gsap.set([cardRef.current, imageRef.current], { scale: 1, transformOrigin: "center" });
+    // Set initial states
+    gsap.set([cardRef.current, imageRef.current], { 
+      scale: 1, 
+      transformOrigin: "center",
+      clearProps: "transform" // Clear any leftover transforms
+    });
     gsap.set(overlayRef.current, { opacity: 0 });
-    
-    return () => {
-      if (timelineRef.current) {
-        timelineRef.current.kill();
-      }
-    };
   }, { scope: cardRef });
 
   return (

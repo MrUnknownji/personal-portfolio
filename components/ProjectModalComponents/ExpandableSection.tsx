@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import { Dialog } from "@/components/ui/Dialog";
 import gsap from "gsap";
 import { FiX, FiChevronDown } from "react-icons/fi";
@@ -9,69 +9,160 @@ interface ExpandableSectionProps {
   isList?: boolean;
 }
 
+const ANIMATION_CONFIG = {
+  EXPAND: {
+    DURATION: 0.4,
+    EASE: "power2.out"
+  },
+  COLLAPSE: {
+    DURATION: 0.3,
+    EASE: "power2.inOut"
+  },
+  CONTENT: {
+    STAGGER: 0.05,
+    DURATION: 0.3,
+    EASE: "power2.out"
+  },
+  CHEVRON: {
+    DURATION: 0.3,
+    EASE: "power2.out"
+  }
+} as const;
+
 export const ExpandableSection = ({ title, content, isList = false }: ExpandableSectionProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  
   const dialogRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const chevronRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
+
+  // Cleanup function to prevent memory leaks
+  useEffect(() => {
+    // Capture ref values inside the effect to avoid React Hook warnings
+    const contentElement = contentRef.current;
+    const containerElement = containerRef.current;
+    const chevronElement = chevronRef.current;
+    const timeline = timelineRef.current;
+    
+    // Set initial state
+    if (contentElement && contentElement.children.length > 0) {
+      gsap.set(Array.from(contentElement.children), { opacity: 0 });
+    }
+    
+    return () => {
+      // Kill any existing timeline
+      if (timeline) {
+        timeline.kill();
+      }
+      
+      // Reset all animated elements
+      if (containerElement) {
+        gsap.set(containerElement, { clearProps: "all" });
+      }
+      if (chevronElement) {
+        gsap.set(chevronElement, { clearProps: "all" });
+      }
+      if (contentElement && contentElement.children.length > 0) {
+        gsap.set(Array.from(contentElement.children), { clearProps: "all" });
+      }
+    };
+  }, []);
 
   const toggleExpand = useCallback(() => {
-    if (!contentRef.current || !containerRef.current || !chevronRef.current) return;
+    if (!contentRef.current || !containerRef.current || !chevronRef.current || isAnimating) return;
 
-    const timeline = gsap.timeline();
+    setIsAnimating(true);
+    
+    // Kill any existing timeline to prevent conflicts
+    if (timelineRef.current) {
+      timelineRef.current.kill();
+      timelineRef.current = null;
+    }
+
+    timelineRef.current = gsap.timeline({
+      onComplete: () => {
+        setIsAnimating(false);
+        
+        // If we're collapsing, clear transforms
+        if (isExpanded && contentRef.current && contentRef.current.children.length > 0) {
+          gsap.set(Array.from(contentRef.current.children), { clearProps: "all", opacity: 0 });
+        }
+        
+        // Clear the timeline reference after completion
+        timelineRef.current = null;
+      },
+      defaults: {
+        overwrite: "auto"
+      }
+    });
+
     const contentHeight = contentRef.current.scrollHeight;
     const containerHeight = containerRef.current.clientHeight;
 
     if (!isExpanded) {
-      timeline
+      // Expanding
+      timelineRef.current
         .to(containerRef.current, {
           height: containerHeight + contentHeight + "px",
-          duration: 0.4,
-          ease: "power2.out"
+          duration: ANIMATION_CONFIG.EXPAND.DURATION,
+          ease: ANIMATION_CONFIG.EXPAND.EASE
         })
         .to(chevronRef.current, {
           rotation: 180,
-          duration: 0.3,
-          ease: "power2.out"
-        }, "<")
-        .fromTo(
-          contentRef.current.children,
+          duration: ANIMATION_CONFIG.CHEVRON.DURATION,
+          ease: ANIMATION_CONFIG.CHEVRON.EASE
+        }, "<");
+      
+      // Only animate children if they exist
+      if (contentRef.current.children.length > 0) {
+        timelineRef.current.fromTo(
+          Array.from(contentRef.current.children),
           { opacity: 0, y: 20 },
           {
             opacity: 1,
             y: 0,
-            duration: 0.3,
-            stagger: 0.05,
-            ease: "power2.out"
+            duration: ANIMATION_CONFIG.CONTENT.DURATION,
+            stagger: ANIMATION_CONFIG.CONTENT.STAGGER,
+            ease: ANIMATION_CONFIG.CONTENT.EASE,
+            clearProps: "transform"
           },
           "-=0.2"
         );
+      }
     } else {
-      timeline
+      // Collapsing
+      if (contentRef.current.children.length > 0) {
+        timelineRef.current.to(
+          Array.from(contentRef.current.children),
+          {
+            opacity: 0,
+            y: 10,
+            duration: ANIMATION_CONFIG.CONTENT.DURATION / 1.5,
+            stagger: ANIMATION_CONFIG.CONTENT.STAGGER / 2,
+            ease: "power2.in"
+          }
+        );
+      }
+      
+      timelineRef.current
         .to(containerRef.current, {
           height: "80px",
-          duration: 0.3,
-          ease: "power2.inOut"
-        })
+          duration: ANIMATION_CONFIG.COLLAPSE.DURATION,
+          ease: ANIMATION_CONFIG.COLLAPSE.EASE
+        }, "-=0.1")
         .to(chevronRef.current, {
           rotation: 0,
-          duration: 0.3,
-          ease: "power2.inOut"
-        }, "<")
-        .to(contentRef.current.children, {
-          opacity: 0,
-          y: 10,
-          duration: 0.2,
-          stagger: 0.02,
-          ease: "power2.in"
+          duration: ANIMATION_CONFIG.CHEVRON.DURATION,
+          ease: ANIMATION_CONFIG.CHEVRON.EASE
         }, "<");
     }
 
     setIsExpanded(!isExpanded);
-  }, [isExpanded]);
-
+  }, [isExpanded, isAnimating]);
 
   const handleCloseDialog = useCallback(() => {
     if (dialogRef.current) {
@@ -80,7 +171,12 @@ export const ExpandableSection = ({ title, content, isList = false }: Expandable
         scale: 0.95,
         duration: 0.2,
         ease: "power2.in",
-        onComplete: () => setIsDialogOpen(false),
+        onComplete: () => {
+          setIsDialogOpen(false);
+          // Clear transforms after animation
+          gsap.set(dialogRef.current, { clearProps: "all" });
+        },
+        overwrite: "auto"
       });
     }
   }, []);
@@ -94,6 +190,7 @@ export const ExpandableSection = ({ title, content, isList = false }: Expandable
       <button
         onClick={toggleExpand}
         className="w-full px-4 py-5 flex items-center justify-between group"
+        disabled={isAnimating}
       >
         <h3
           className="text-lg font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent cursor-pointer"
@@ -102,6 +199,7 @@ export const ExpandableSection = ({ title, content, isList = false }: Expandable
         </h3>
         <div
           ref={chevronRef}
+          style={{ willChange: "transform" }}
         >
           <FiChevronDown className="w-5 h-5 text-primary group-hover:text-accent transition-colors" />
         </div>
@@ -141,6 +239,7 @@ export const ExpandableSection = ({ title, content, isList = false }: Expandable
               ref={dialogRef}
               className="bg-gray-800 rounded-2xl p-6 w-full max-w-xl relative z-50"
               onClick={(e) => e.stopPropagation()}
+              style={{ willChange: "transform, opacity" }}
             >
               <h2 className="text-2xl font-bold text-white mb-4">{title}</h2>
               <div className="max-h-[60vh] overflow-y-auto">

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback } from "react";
 import { FiExternalLink, FiGithub, FiX, FiChevronRight } from "react-icons/fi";
 import { Dialog, DialogTitle } from "@/components/ui/Dialog";
 import { Project } from "@/types/Project";
@@ -59,184 +59,189 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   const imageOverlayRef = useRef<HTMLDivElement>(null);
   const demoButtonRef = useRef<HTMLAnchorElement>(null);
   const githubButtonRef = useRef<HTMLAnchorElement>(null);
-  const demoArrowRef = useRef<SVGElement | null>(null);
-  const githubArrowRef = useRef<SVGElement | null>(null);
+  
+  // Use a single context for all animations to prevent conflicts
+  const animationContextRef = useRef<gsap.Context | null>(null);
 
-  // Setup hover animations
-  useEffect(() => {
-    // Store current refs to use in cleanup
-    const currentCloseButtonRef = closeButtonRef.current;
-    const currentImageWrapperRef = imageWrapperRef.current;
-    const currentDemoButtonRef = demoButtonRef.current;
-    const currentGithubButtonRef = githubButtonRef.current;
-    const currentDemoArrowRef = demoArrowRef.current;
-    const currentGithubArrowRef = githubArrowRef.current;
-
-    // Store event handlers to properly remove them later
-    const closeButtonEnter = () => {
-      gsap.to(currentCloseButtonRef, {
-        color: "white",
-        backgroundColor: "rgba(55, 65, 81, 0.5)",
-        duration: ANIMATION_CONFIG.HOVER.DURATION,
-        ease: ANIMATION_CONFIG.HOVER.EASE,
-      });
-      const closeButtonChild = currentCloseButtonRef?.firstElementChild;
-      if (closeButtonChild) {
-        gsap.to(closeButtonChild, {
-          rotation: 90,
-          duration: ANIMATION_CONFIG.HOVER.DURATION,
-          ease: ANIMATION_CONFIG.HOVER.EASE,
+  // Setup hover animations using a single context
+  useGSAP(() => {
+    if (!isOpen) return;
+    
+    // Create a single animation context for all hover animations
+    animationContextRef.current = gsap.context(() => {
+      // Close button hover
+      if (closeButtonRef.current) {
+        const closeButton = closeButtonRef.current;
+        const closeButtonIcon = closeButton.querySelector('svg');
+        
+        closeButton.addEventListener("mouseenter", () => {
+          gsap.to(closeButton, {
+            color: "white",
+            backgroundColor: "rgba(55, 65, 81, 0.5)",
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+            overwrite: "auto"
+          });
+          
+          if (closeButtonIcon) {
+            gsap.to(closeButtonIcon, {
+              rotation: 90,
+              duration: ANIMATION_CONFIG.HOVER.DURATION,
+              ease: ANIMATION_CONFIG.HOVER.EASE,
+              overwrite: "auto"
+            });
+          }
+        });
+        
+        closeButton.addEventListener("mouseleave", () => {
+          gsap.to(closeButton, {
+            color: "rgb(156, 163, 175)",
+            backgroundColor: "transparent",
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+            overwrite: "auto"
+          });
+          
+          if (closeButtonIcon) {
+            gsap.to(closeButtonIcon, {
+              rotation: 0,
+              duration: ANIMATION_CONFIG.HOVER.DURATION,
+              ease: ANIMATION_CONFIG.HOVER.EASE,
+              overwrite: "auto"
+            });
+          }
         });
       }
-    };
-
-    const closeButtonLeave = () => {
-      gsap.to(currentCloseButtonRef, {
-        color: "rgb(156, 163, 175)",
-        backgroundColor: "transparent",
-        duration: ANIMATION_CONFIG.HOVER.DURATION,
-        ease: ANIMATION_CONFIG.HOVER.EASE,
-      });
-      const closeButtonChild = currentCloseButtonRef?.firstElementChild;
-      if (closeButtonChild) {
-        gsap.to(closeButtonChild, {
-          rotation: 0,
-          duration: ANIMATION_CONFIG.HOVER.DURATION,
-          ease: ANIMATION_CONFIG.HOVER.EASE,
+      
+      // Image hover
+      if (imageWrapperRef.current && imageOverlayRef.current) {
+        const imageWrapper = imageWrapperRef.current;
+        const img = imageWrapper.querySelector('img');
+        const overlay = imageOverlayRef.current;
+        
+        imageWrapper.addEventListener("mouseenter", () => {
+          if (img) {
+            gsap.to(img, {
+              scale: 1.1,
+              duration: ANIMATION_CONFIG.IMAGE.DURATION,
+              ease: ANIMATION_CONFIG.IMAGE.EASE,
+              overwrite: "auto"
+            });
+          }
+          
+          gsap.to(overlay, {
+            opacity: 1,
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+            overwrite: "auto"
+          });
+        });
+        
+        imageWrapper.addEventListener("mouseleave", () => {
+          if (img) {
+            gsap.to(img, {
+              scale: 1,
+              duration: ANIMATION_CONFIG.IMAGE.DURATION,
+              ease: ANIMATION_CONFIG.IMAGE.EASE,
+              overwrite: "auto"
+            });
+          }
+          
+          gsap.to(overlay, {
+            opacity: 0,
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+            overwrite: "auto"
+          });
         });
       }
-    };
-
-    const imageWrapperEnter = () => {
-      const img = currentImageWrapperRef?.querySelector("img");
-      if (img)
-        gsap.to(img, {
-          scale: 1.1,
-          duration: ANIMATION_CONFIG.IMAGE.DURATION,
-          ease: ANIMATION_CONFIG.IMAGE.EASE,
+      
+      // Setup button hover animations
+      const setupButtonHover = (button: HTMLElement, isDemo: boolean = false) => {
+        if (!button) return;
+        
+        const arrowIcon = button.querySelector('svg:last-child');
+        
+        button.addEventListener("mouseenter", () => {
+          gsap.to(button, {
+            backgroundColor: isDemo 
+              ? "rgba(0, 255, 159, 0.9)" 
+              : "rgba(55, 65, 81, 0.5)",
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+            overwrite: "auto"
+          });
+          
+          if (arrowIcon) {
+            gsap.to(arrowIcon, {
+              x: 4,
+              duration: ANIMATION_CONFIG.HOVER.DURATION,
+              ease: ANIMATION_CONFIG.HOVER.EASE,
+              overwrite: "auto"
+            });
+          }
         });
-      gsap.to(imageOverlayRef.current, {
-        opacity: 1,
-        duration: ANIMATION_CONFIG.HOVER.DURATION,
-        ease: ANIMATION_CONFIG.HOVER.EASE,
-      });
-    };
-
-    const imageWrapperLeave = () => {
-      const img = currentImageWrapperRef?.querySelector("img");
-      if (img)
-        gsap.to(img, {
-          scale: 1,
-          duration: ANIMATION_CONFIG.IMAGE.DURATION,
-          ease: ANIMATION_CONFIG.IMAGE.EASE,
-        });
-      gsap.to(imageOverlayRef.current, {
-        opacity: 0,
-        duration: ANIMATION_CONFIG.HOVER.DURATION,
-        ease: ANIMATION_CONFIG.HOVER.EASE,
-      });
-    };
-
-    // Setup button hover animations
-    const setupButtonAnimation = (
-      buttonElement: HTMLAnchorElement | null,
-      arrowElement: SVGElement | null
-    ) => {
-      if (!buttonElement || !arrowElement) return null;
-
-      const buttonEnter = () => {
-        gsap.to(buttonElement, {
-          backgroundColor: buttonElement.classList.contains("bg-primary")
-            ? "rgba(0, 255, 159, 0.9)"
-            : "rgba(55, 65, 81, 0.5)",
-          duration: ANIMATION_CONFIG.HOVER.DURATION,
-          ease: ANIMATION_CONFIG.HOVER.EASE,
-        });
-        gsap.to(arrowElement, {
-          x: 4,
-          duration: ANIMATION_CONFIG.HOVER.DURATION,
-          ease: ANIMATION_CONFIG.HOVER.EASE,
+        
+        button.addEventListener("mouseleave", () => {
+          gsap.to(button, {
+            backgroundColor: isDemo 
+              ? "rgb(0, 255, 159)" 
+              : "rgba(55, 65, 81, 0.5)",
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+            overwrite: "auto"
+          });
+          
+          if (arrowIcon) {
+            gsap.to(arrowIcon, {
+              x: 0,
+              duration: ANIMATION_CONFIG.HOVER.DURATION,
+              ease: ANIMATION_CONFIG.HOVER.EASE,
+              overwrite: "auto"
+            });
+          }
         });
       };
-
-      const buttonLeave = () => {
-        gsap.to(buttonElement, {
-          backgroundColor: buttonElement.classList.contains("bg-primary")
-            ? "rgb(0, 255, 159)"
-            : "rgba(55, 65, 81, 0.5)",
-          duration: ANIMATION_CONFIG.HOVER.DURATION,
-          ease: ANIMATION_CONFIG.HOVER.EASE,
-        });
-        gsap.to(arrowElement, {
-          x: 0,
-          duration: ANIMATION_CONFIG.HOVER.DURATION,
-          ease: ANIMATION_CONFIG.HOVER.EASE,
-        });
-      };
-
-      buttonElement.addEventListener("mouseenter", buttonEnter);
-      buttonElement.addEventListener("mouseleave", buttonLeave);
-
-      return { buttonEnter, buttonLeave };
-    };
-
-    // Add event listeners
-    currentCloseButtonRef?.addEventListener("mouseenter", closeButtonEnter);
-    currentCloseButtonRef?.addEventListener("mouseleave", closeButtonLeave);
-    currentImageWrapperRef?.addEventListener("mouseenter", imageWrapperEnter);
-    currentImageWrapperRef?.addEventListener("mouseleave", imageWrapperLeave);
-
-    // Setup button animations and store handlers
-    const demoButtonHandlers = setupButtonAnimation(
-      currentDemoButtonRef,
-      currentDemoArrowRef
-    );
-
-    const githubButtonHandlers = setupButtonAnimation(
-      currentGithubButtonRef,
-      currentGithubArrowRef
-    );
-
-    // Cleanup
+      
+      // Apply hover animations to buttons
+      if (demoButtonRef.current) {
+        setupButtonHover(demoButtonRef.current, true);
+      }
+      
+      if (githubButtonRef.current) {
+        setupButtonHover(githubButtonRef.current);
+      }
+    });
+    
+    // Cleanup function
     return () => {
-      currentCloseButtonRef?.removeEventListener("mouseenter", closeButtonEnter);
-      currentCloseButtonRef?.removeEventListener("mouseleave", closeButtonLeave);
-      currentImageWrapperRef?.removeEventListener("mouseenter", imageWrapperEnter);
-      currentImageWrapperRef?.removeEventListener("mouseleave", imageWrapperLeave);
-      
-      if (currentDemoButtonRef && demoButtonHandlers) {
-        currentDemoButtonRef.removeEventListener("mouseenter", demoButtonHandlers.buttonEnter);
-        currentDemoButtonRef.removeEventListener("mouseleave", demoButtonHandlers.buttonLeave);
-      }
-      
-      if (currentGithubButtonRef && githubButtonHandlers) {
-        currentGithubButtonRef.removeEventListener("mouseenter", githubButtonHandlers.buttonEnter);
-        currentGithubButtonRef.removeEventListener("mouseleave", githubButtonHandlers.buttonLeave);
+      if (animationContextRef.current) {
+        animationContextRef.current.revert(); // This removes all animations and event listeners
+        animationContextRef.current = null;
       }
     };
-  }, []);
+  }, [isOpen]); // Only re-run when isOpen changes
 
   const handleCloseAnimation = useCallback(() => {
     if (!overlayRef.current || !contentRef.current) return;
 
     const tl = gsap.timeline({
       onComplete: onClose,
+      defaults: {
+        ease: ANIMATION_CONFIG.EASE.CLOSE,
+        overwrite: "auto"
+      }
     });
 
     tl.to(overlayRef.current, {
       opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
       duration: ANIMATION_CONFIG.OVERLAY.DURATION.CLOSE,
-      ease: ANIMATION_CONFIG.EASE.CLOSE,
-    }).to(
-      contentRef.current,
-      {
-        opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
-        scale: ANIMATION_CONFIG.CONTENT.SCALE.CLOSE,
-        duration: ANIMATION_CONFIG.CONTENT.DURATION.CLOSE,
-        ease: ANIMATION_CONFIG.EASE.CLOSE,
-      },
-      "<"
-    );
+    })
+    .to(contentRef.current, {
+      opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
+      scale: ANIMATION_CONFIG.CONTENT.SCALE.CLOSE,
+      duration: ANIMATION_CONFIG.CONTENT.DURATION.CLOSE,
+    }, "<");
   }, [onClose]);
 
   useGSAP(() => {
@@ -254,40 +259,40 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         y: 20,
       });
 
-      const tl = gsap.timeline();
-
-      tl.to(
-        overlayRef.current,
-        {
-          opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.OPEN,
-          duration: ANIMATION_CONFIG.OVERLAY.DURATION.OPEN,
+      const tl = gsap.timeline({
+        defaults: {
           ease: ANIMATION_CONFIG.EASE.OPEN,
+          overwrite: "auto"
         }
-      )
-        .to(
-          contentRef.current,
-          {
-            opacity: 1,
-            scale: ANIMATION_CONFIG.CONTENT.SCALE.OPEN,
-            duration: ANIMATION_CONFIG.CONTENT.DURATION.OPEN,
-            ease: ANIMATION_CONFIG.EASE.OPEN,
-            clearProps: "transform", // Clear transform after animation to prevent weird behavior
-          },
-          "<"
-        )
-        .to(
-          [imageRef.current, detailsRef.current],
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-            stagger: 0.1,
-            ease: "power2.out",
-            clearProps: "transform", // Clear transform after animation
-          },
-          "-=0.2"
-        );
+      });
+
+      tl.to(overlayRef.current, {
+        opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.OPEN,
+        duration: ANIMATION_CONFIG.OVERLAY.DURATION.OPEN,
+      })
+      .to(contentRef.current, {
+        opacity: 1,
+        scale: ANIMATION_CONFIG.CONTENT.SCALE.OPEN,
+        duration: ANIMATION_CONFIG.CONTENT.DURATION.OPEN,
+        clearProps: "transform", // Clear transform after animation to prevent weird behavior
+      }, "<")
+      .to([imageRef.current, detailsRef.current], {
+        opacity: 1,
+        y: 0,
+        duration: 0.4,
+        stagger: 0.1,
+        ease: "power2.out",
+        clearProps: "transform", // Clear transform after animation
+      }, "-=0.2");
     }
+    
+    return () => {
+      // Clean up any lingering animations when component unmounts
+      if (animationContextRef.current) {
+        animationContextRef.current.revert();
+        animationContextRef.current = null;
+      }
+    };
   }, [isOpen]);
 
   return (
@@ -309,8 +314,9 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
               ref={closeButtonRef}
               onClick={handleCloseAnimation}
               className="absolute top-4 right-4 p-2 text-gray-400 rounded-lg z-10"
+              style={{ willChange: "color, background-color" }}
             >
-              <FiX className="w-5 h-5" />
+              <FiX className="w-5 h-5" style={{ willChange: "transform" }} />
             </button>
 
             <div className="flex flex-col md:flex-row gap-6 h-full">
@@ -377,17 +383,10 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                         >
                           <FiExternalLink className="w-5 h-5" />
                           <span className="font-medium">Live Demo</span>
-                          <span 
-                            className="inline-block" 
-                            ref={(el) => {
-                              if (el) demoArrowRef.current = el.firstChild as SVGElement;
-                            }}
-                          >
-                            <FiChevronRight
-                              className="w-5 h-5"
-                              style={{ willChange: "transform" }}
-                            />
-                          </span>
+                          <FiChevronRight
+                            className="w-5 h-5"
+                            style={{ willChange: "transform" }}
+                          />
                         </a>
                       )}
                       {project.githubLink && (
@@ -402,17 +401,10 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                         >
                           <FiGithub className="w-5 h-5" />
                           <span className="font-medium">View Code</span>
-                          <span 
-                            className="inline-block" 
-                            ref={(el) => {
-                              if (el) githubArrowRef.current = el.firstChild as SVGElement;
-                            }}
-                          >
-                            <FiChevronRight
-                              className="w-5 h-5"
-                              style={{ willChange: "transform" }}
-                            />
-                          </span>
+                          <FiChevronRight
+                            className="w-5 h-5"
+                            style={{ willChange: "transform" }}
+                          />
                         </a>
                       )}
                     </div>

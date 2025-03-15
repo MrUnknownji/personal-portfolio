@@ -30,52 +30,60 @@ const ANIMATION_CONFIG = {
 export const TechStack = ({ technologies }: TechStackProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const techItemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const animationContextRef = useRef<gsap.Context | null>(null);
 
   useGSAP(() => {
-    // Initial animation for tech items
-    gsap.fromTo(
-      containerRef.current?.children || [],
-      { 
-        opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
-        scale: ANIMATION_CONFIG.INITIAL.SCALE,
-        y: ANIMATION_CONFIG.INITIAL.Y
-      },
-      {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        duration: ANIMATION_CONFIG.ANIMATION.DURATION,
-        stagger: ANIMATION_CONFIG.ANIMATION.STAGGER,
-        ease: ANIMATION_CONFIG.ANIMATION.EASE,
-      }
-    );
+    // Create a single animation context for all animations
+    animationContextRef.current = gsap.context(() => {
+      // Initial animation for tech items
+      gsap.fromTo(
+        containerRef.current?.children || [],
+        { 
+          opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
+          scale: ANIMATION_CONFIG.INITIAL.SCALE,
+          y: ANIMATION_CONFIG.INITIAL.Y
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: ANIMATION_CONFIG.ANIMATION.DURATION,
+          stagger: ANIMATION_CONFIG.ANIMATION.STAGGER,
+          ease: ANIMATION_CONFIG.ANIMATION.EASE,
+          overwrite: "auto",
+          clearProps: "transform"
+        }
+      );
 
-    // Setup hover animations for each tech item
-    techItemsRef.current.forEach((item) => {
-      if (!item) return;
-      
-      const border = item;
-      const shine = item.querySelector('.shine-effect');
-      
-      const ctx = gsap.context(() => {
+      // Setup hover animations for each tech item
+      techItemsRef.current.forEach((item) => {
+        if (!item) return;
+        
+        const border = item;
+        const shine = item.querySelector('.shine-effect');
+        
         // Create hover animation
         item.addEventListener('mouseenter', () => {
           gsap.to(border, {
             borderColor: 'rgba(0, 255, 159, 0.4)',
             backgroundColor: 'rgba(55, 65, 81, 0.7)',
             duration: ANIMATION_CONFIG.HOVER.DURATION,
-            ease: ANIMATION_CONFIG.HOVER.EASE
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+            overwrite: "auto"
           });
           
           // Animate the shine effect
-          gsap.fromTo(shine, 
-            { x: '-100%' },
-            { 
-              x: '100%', 
-              duration: ANIMATION_CONFIG.SHINE.DURATION, 
-              ease: ANIMATION_CONFIG.SHINE.EASE 
-            }
-          );
+          if (shine) {
+            gsap.fromTo(shine, 
+              { x: '-100%' },
+              { 
+                x: '100%', 
+                duration: ANIMATION_CONFIG.SHINE.DURATION, 
+                ease: ANIMATION_CONFIG.SHINE.EASE,
+                overwrite: "auto"
+              }
+            );
+          }
         });
         
         item.addEventListener('mouseleave', () => {
@@ -83,14 +91,20 @@ export const TechStack = ({ technologies }: TechStackProps) => {
             borderColor: 'rgba(0, 255, 159, 0.2)',
             backgroundColor: 'rgba(55, 65, 81, 0.5)',
             duration: ANIMATION_CONFIG.HOVER.DURATION,
-            ease: ANIMATION_CONFIG.HOVER.EASE
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+            overwrite: "auto"
           });
         });
-      }, item);
-      
-      return () => ctx.revert();
-    });
+      });
+    }, containerRef);
     
+    // Cleanup function
+    return () => {
+      if (animationContextRef.current) {
+        animationContextRef.current.revert(); // This removes all animations and event listeners
+        animationContextRef.current = null;
+      }
+    };
   }, { scope: containerRef });
 
   return (
