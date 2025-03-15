@@ -3,6 +3,7 @@ import { FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi";
 import gsap from "gsap";
 import { SocialLink } from "../../types/social";
 import { fetchSocialStats } from "../../utils/social";
+import Image from 'next/image';
 
 const ANIMATION_CONFIG = {
   LINK_HOVER: {
@@ -270,10 +271,12 @@ const SocialLinks = () => {
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               {socialLinks[activeLink].profileImage ? (
-                <img 
+                <Image 
                   src={socialLinks[activeLink].profileImage} 
                   alt={socialLinks[activeLink].label}
-                  className="w-12 h-12 rounded-lg object-cover"
+                  width={48}
+                  height={48}
+                  className="rounded-lg object-cover"
                 />
               ) : (
                 <div 

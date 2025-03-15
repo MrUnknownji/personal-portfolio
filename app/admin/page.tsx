@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import LinkedInAuth from '../../components/LinkedInAuth';
+import Link from 'next/link';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -111,12 +112,12 @@ export default function AdminPage() {
       </div>
       
       <div className="mt-6">
-        <a 
+        <Link 
           href="/"
           className="text-blue-600 hover:text-blue-800 transition-colors"
         >
           ← Back to Home
-        </a>
+        </Link>
       </div>
     </div>
   );

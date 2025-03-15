@@ -11,8 +11,8 @@ export default function LinkedInVerificationPage() {
         
         <div className="mb-8">
           <p className="mb-4">
-            This page is used to verify your LinkedIn application. If you're seeing this page, it means
-            your LinkedIn application's redirect URL is correctly configured.
+            This page is used to verify your LinkedIn application. If you&apos;re seeing this page, it means
+            your LinkedIn application&apos;s redirect URL is correctly configured.
           </p>
           
           <div className="p-4 bg-green-100 text-green-800 rounded-md">
