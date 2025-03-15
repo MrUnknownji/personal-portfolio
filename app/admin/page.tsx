@@ -57,7 +57,7 @@ export default function AdminPage() {
                 <p className="font-medium">LinkedIn API Limitations</p>
                 <p className="mt-1">
                   Due to LinkedIn API restrictions, only your profile picture and name can be fetched automatically.
-                  Other metrics like connections, endorsements, and posts will use the fallback data you've provided.
+                  Other metrics like connections, endorsements, and posts will use the fallback data you&apos;ve provided.
                 </p>
                 <p className="mt-2">
                   LinkedIn has significantly restricted their API access over the years and no longer provides
@@ -84,7 +84,7 @@ export default function AdminPage() {
                 <p className="font-medium">LinkedIn API Limitations</p>
                 <p>
                   Due to LinkedIn API restrictions, only your profile picture and name can be fetched automatically.
-                  Other metrics like connections, endorsements, and posts will use the fallback data you've provided.
+                  Other metrics like connections, endorsements, and posts will use the fallback data you&apos;ve provided.
                 </p>
               </div>
               <LinkedInAuth />
@@ -97,9 +97,9 @@ export default function AdminPage() {
                 <ol className="list-decimal pl-6 mt-2 space-y-1">
                   <li>Go to the <a href="https://www.linkedin.com/developers/apps" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">LinkedIn Developer Console</a></li>
                   <li>Select your application</li>
-                  <li>Go to the "Auth" tab and add <code className="bg-blue-100 px-1 py-0.5 rounded">http://localhost:3000/api/auth/linkedin/callback</code> as a redirect URL</li>
+                  <li>Go to the &quot;Auth&quot; tab and add <code className="bg-blue-100 px-1 py-0.5 rounded">http://localhost:3000/api/auth/linkedin/callback</code> as a redirect URL</li>
                   <li>Complete the verification process</li>
-                  <li>Go to the "Products" tab and request access to "Sign In with LinkedIn"</li>
+                  <li>Go to the &quot;Products&quot; tab and request access to &quot;Sign In with LinkedIn&quot;</li>
                   <li>Wait for LinkedIn to approve your application</li>
                 </ol>
                 <p className="mt-2">

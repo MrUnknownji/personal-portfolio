@@ -20,7 +20,7 @@
     "lenis": "^1.1.19",
     "locomotive-scroll": "^4.1.4",
     "lucide-react": "^0.474.0",
-    "next": "15.2.1",
+    "next": "15.2.2",
     "next-auth": "^4.24.11",
     "postcss": "^8.5.3",
     "puppeteer": "^24.4.0",

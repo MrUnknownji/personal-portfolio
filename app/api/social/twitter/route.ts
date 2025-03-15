@@ -20,8 +20,8 @@ export async function GET(request: Request) {
     try {
       const { searchParams } = new URL(request.url);
       username = searchParams.get('username') || username;
-    } catch (_) {
-      // Ignore URL parsing errors
+    } catch (e) {
+      console.log(e);
     }
     
     // Fetch fallback data with the username
