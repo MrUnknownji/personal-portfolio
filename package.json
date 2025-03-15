@@ -19,6 +19,7 @@
     "gsap": "^3.12.5",
     "lenis": "^1.1.19",
     "locomotive-scroll": "^4.1.4",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.474.0",
     "next": "15.2.2",
     "next-auth": "^4.24.11",
@@ -35,6 +36,7 @@
     "typed.js": "^2.1.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.16",
     "@types/node": "^20.17.12",
     "@types/react": "19.0.4",
     "@types/react-dom": "19.0.2",

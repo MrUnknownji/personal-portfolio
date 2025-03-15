@@ -1,25 +1,31 @@
-import { useRef } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import { gsap } from "gsap";
 import SplitType from "split-type";
 import { useGSAP } from "@gsap/react";
+import { throttle } from "lodash";
 
 export const Description = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
+  const splitInstanceRef = useRef<SplitType | null>(null);
+  const isAnimatingRef = useRef(false);
 
   useGSAP(() => {
     if (!descriptionRef.current) return;
-    const descriptionSplit = new SplitType(descriptionRef.current, {
+    
+    splitInstanceRef.current = new SplitType(descriptionRef.current, {
       types: "chars",
     });
-    if (!descriptionSplit.chars) return;
+    
+    const chars = splitInstanceRef.current.chars;
+    if (!chars) return;
 
     const tl = gsap.timeline({
       defaults: { ease: "power4.out", duration: 1 },
     });
 
     tl.from(
-      descriptionSplit.chars,
+      chars,
       {
         y: 20,
         opacity: 0,
@@ -28,20 +34,32 @@ export const Description = () => {
       "-=0.5",
     );
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
+    return () => {
+      if (splitInstanceRef.current) {
+        splitInstanceRef.current.revert();
+      }
+    };
+  }, []);
+
+  const handleMouseMove = useCallback(() => {
+    return throttle((e: MouseEvent) => {
+      if (isAnimatingRef.current || !containerRef.current || !splitInstanceRef.current?.chars) return;
+      
+      isAnimatingRef.current = true;
+      const chars = splitInstanceRef.current.chars;
       const rect = containerRef.current.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-
-      descriptionSplit.chars?.forEach((char) => {
+      
+      // Process each character individually
+      chars.forEach((char: HTMLElement) => {
         if (!char) return;
         const charRect = char.getBoundingClientRect();
         const charCenterX = charRect.left + charRect.width / 2 - rect.left;
         const charCenterY = charRect.top + charRect.height / 2 - rect.top;
 
         const distance = Math.sqrt(
-          Math.pow(mouseX - charCenterX, 2) + Math.pow(mouseY - charCenterY, 2),
+          Math.pow(mouseX - charCenterX, 2) + Math.pow(mouseY - charCenterY, 2)
         );
 
         const maxDistance = 100;
@@ -65,35 +83,43 @@ export const Description = () => {
           });
         }
       });
-    };
-
-    const handleMouseLeave = () => {
-      descriptionSplit.chars?.forEach((char) => {
-        if (!char) return;
-        gsap.to(char, {
-          color: "#9CA3AF",
-          scale: 1,
-          opacity: 1,
-          duration: 0.3,
-          ease: "power2.out",
-        });
-      });
-    };
-
-    containerRef.current?.addEventListener(
-      "mousemove",
-      handleMouseMove as EventListener,
-    );
-    containerRef.current?.addEventListener("mouseleave", handleMouseLeave);
-
-    return () => {
-      containerRef.current?.removeEventListener(
-        "mousemove",
-        handleMouseMove as EventListener,
-      );
-      containerRef.current?.removeEventListener("mouseleave", handleMouseLeave);
-    };
+      
+      // Set a timeout to allow new animations after current ones complete
+      setTimeout(() => {
+        isAnimatingRef.current = false;
+      }, 100);
+    }, 16);
   }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (!splitInstanceRef.current?.chars) return;
+    
+    gsap.to(splitInstanceRef.current.chars, {
+      color: "#9CA3AF",
+      scale: 1,
+      opacity: 1,
+      duration: 0.3,
+      ease: "power2.out",
+    });
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    // Create the throttled handler
+    const throttledMouseMove = handleMouseMove();
+    
+    const mouseMoveHandler = throttledMouseMove as unknown as EventListener;
+    container.addEventListener("mousemove", mouseMoveHandler);
+    container.addEventListener("mouseleave", handleMouseLeave);
+    
+    return () => {
+      container.removeEventListener("mousemove", mouseMoveHandler);
+      container.removeEventListener("mouseleave", handleMouseLeave);
+      throttledMouseMove.cancel();
+    };
+  }, [handleMouseMove, handleMouseLeave]);
 
   return (
     <div ref={containerRef} className="overflow-hidden cursor-pointer">

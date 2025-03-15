@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { gsap } from "gsap";
 import TypedText from "./TypedText";
 import SkillCard from "./SkillCard";
@@ -35,54 +35,103 @@ const ANIMATION_CONFIG = {
 const HeroContent = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const skillsRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<gsap.core.Timeline | null>(null);
+
+  // Use a cleanup effect to kill animations when component unmounts
+  useEffect(() => {
+    return () => {
+      if (timelineRef.current) {
+        timelineRef.current.kill();
+      }
+    };
+  }, []);
 
   useGSAP(() => {
     if (!containerRef.current) return;
 
-    const ctx = gsap.context(() => {
-      gsap.from(".hire-badge", {
-        y: ANIMATION_CONFIG.INITIAL.Y,
-        opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
+    // Create a single timeline for all animations
+    // This is more efficient than multiple separate animations
+    const tl = gsap.timeline({
+      defaults: { 
+        ease: ANIMATION_CONFIG.EASE,
+        force3D: true // Force GPU acceleration
+      }
+    });
+    
+    // Store the timeline for cleanup
+    timelineRef.current = tl;
+
+    // Group elements for better performance
+    const badgeElements = containerRef.current.querySelectorAll('.hire-badge');
+    const textElements = containerRef.current.querySelectorAll('.hero-text');
+    const skillsElements = containerRef.current.querySelectorAll('.skills-section');
+    const skillCards = containerRef.current.querySelectorAll('.skill-card');
+    const actionElements = containerRef.current.querySelectorAll('.actions-section');
+
+    // Build the timeline sequentially
+    tl.fromTo(
+      badgeElements,
+      { y: ANIMATION_CONFIG.INITIAL.Y, opacity: ANIMATION_CONFIG.INITIAL.OPACITY },
+      { 
+        y: 0, 
+        opacity: 1, 
         duration: ANIMATION_CONFIG.DURATIONS.BADGE,
-        delay: ANIMATION_CONFIG.DELAYS.BADGE,
-        ease: ANIMATION_CONFIG.EASE
-      });
-
-      gsap.from(".hero-text", {
-        y: ANIMATION_CONFIG.INITIAL.Y,
-        opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
+        clearProps: "transform" // Clean up transform property after animation completes
+      },
+      ANIMATION_CONFIG.DELAYS.BADGE
+    )
+    .fromTo(
+      textElements,
+      { y: ANIMATION_CONFIG.INITIAL.Y, opacity: ANIMATION_CONFIG.INITIAL.OPACITY },
+      { 
+        y: 0, 
+        opacity: 1, 
         duration: ANIMATION_CONFIG.DURATIONS.TEXT,
-        delay: ANIMATION_CONFIG.DELAYS.TEXT,
-        ease: ANIMATION_CONFIG.EASE
-      });
-
-      gsap.from(".skills-section", {
-        y: ANIMATION_CONFIG.INITIAL.Y,
-        opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
+        clearProps: "transform"
+      },
+      ANIMATION_CONFIG.DELAYS.TEXT
+    )
+    .fromTo(
+      skillsElements,
+      { y: ANIMATION_CONFIG.INITIAL.Y, opacity: ANIMATION_CONFIG.INITIAL.OPACITY },
+      { 
+        y: 0, 
+        opacity: 1, 
         duration: ANIMATION_CONFIG.DURATIONS.SKILLS,
-        delay: ANIMATION_CONFIG.DELAYS.SKILLS,
-        ease: ANIMATION_CONFIG.EASE
-      });
-
-      gsap.from(".skill-card", {
-        y: ANIMATION_CONFIG.INITIAL.Y,
-        opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
+        clearProps: "transform"
+      },
+      ANIMATION_CONFIG.DELAYS.SKILLS
+    )
+    .fromTo(
+      skillCards,
+      { y: ANIMATION_CONFIG.INITIAL.Y, opacity: ANIMATION_CONFIG.INITIAL.OPACITY },
+      { 
+        y: 0, 
+        opacity: 1, 
         duration: ANIMATION_CONFIG.DURATIONS.SKILLS,
         stagger: ANIMATION_CONFIG.STAGGER.SKILLS,
-        delay: ANIMATION_CONFIG.DELAYS.SKILLS,
-        ease: ANIMATION_CONFIG.EASE
-      });
-
-      gsap.from(".actions-section", {
-        y: ANIMATION_CONFIG.INITIAL.Y,
-        opacity: ANIMATION_CONFIG.INITIAL.OPACITY,
+        clearProps: "transform"
+      },
+      ANIMATION_CONFIG.DELAYS.SKILLS
+    )
+    .fromTo(
+      actionElements,
+      { y: ANIMATION_CONFIG.INITIAL.Y, opacity: ANIMATION_CONFIG.INITIAL.OPACITY },
+      { 
+        y: 0, 
+        opacity: 1, 
         duration: ANIMATION_CONFIG.DURATIONS.ACTIONS,
-        delay: ANIMATION_CONFIG.DELAYS.ACTIONS,
-        ease: ANIMATION_CONFIG.EASE
-      });
-    }, containerRef);
+        clearProps: "transform"
+      },
+      ANIMATION_CONFIG.DELAYS.ACTIONS
+    );
 
-    return () => ctx.revert();
+    // Return cleanup function
+    return () => {
+      if (tl) {
+        tl.kill();
+      }
+    };
   }, []);
 
   return (
