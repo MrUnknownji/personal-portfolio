@@ -6,254 +6,329 @@ import DialogActions from "./ContactSectionComponents/DialogActions";
 import { useGSAP } from "@gsap/react";
 
 interface ThankYouDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  email?: string;
+	isOpen: boolean;
+	onClose: () => void;
+	email?: string;
 }
 
 const ANIMATION_CONFIG = {
-  OVERLAY: {
-    OPACITY: {
-      OPEN: 0.75,
-      CLOSE: 0
-    },
-    DURATION: {
-      OPEN: 0.4,
-      CLOSE: 0.3
-    },
-    BLUR: {
-      OPEN: "8px",
-      CLOSE: "0px"
-    }
-  },
-  DIALOG: {
-    SCALE: {
-      OPEN: 1,
-      CLOSE: 0.95
-    },
-    Y: {
-      OPEN: 0,
-      CLOSE: 20
-    },
-    DURATION: {
-      OPEN: 0.5,
-      CLOSE: 0.3
-    }
-  },
-  EASE: {
-    OPEN: "power3.out",
-    CLOSE: "power2.inOut"
-  },
-  COPY: {
-    DURATION: 2000
-  },
-  BUTTON: {
-    DURATION: 0.2,
-    EASE: "power2.out",
-    SCALE: 0.95,
-    OPACITY: {
-      HOVER: 0.9,
-      ACTIVE: 0.8
-    }
-  }
+	OVERLAY: {
+		OPACITY: {
+			OPEN: 0.75,
+			CLOSE: 0,
+		},
+		DURATION: {
+			OPEN: 0.4,
+			CLOSE: 0.3,
+		},
+		BLUR: {
+			OPEN: "8px",
+			CLOSE: "0px",
+		},
+	},
+	DIALOG: {
+		SCALE: {
+			OPEN: 1,
+			CLOSE: 0.95,
+		},
+		Y: {
+			OPEN: 0,
+			CLOSE: 20,
+		},
+		DURATION: {
+			OPEN: 0.5,
+			CLOSE: 0.3,
+		},
+	},
+	EASE: {
+		OPEN: "power3.out",
+		CLOSE: "power2.inOut",
+	},
+	COPY: {
+		DURATION: 2000,
+	},
+	BUTTON: {
+		DURATION: 0.2,
+		EASE: "power2.out",
+		SCALE: 0.95,
+		OPACITY: {
+			HOVER: 0.9,
+			ACTIVE: 0.8,
+		},
+	},
 } as const;
 
 const ThankYouDialog = ({ isOpen, onClose, email }: ThankYouDialogProps) => {
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const [isEmailCopied, setIsEmailCopied] = useState(false);
+	const overlayRef = useRef<HTMLDivElement>(null);
+	const dialogRef = useRef<HTMLDivElement>(null);
+	const [isEmailCopied, setIsEmailCopied] = useState(false);
 
-  const handleCopyEmail = useCallback(() => {
-    if (email) {
-      navigator.clipboard.writeText(email);
-      setIsEmailCopied(true);
+	const handleCopyEmail = useCallback(() => {
+		if (email) {
+			// For mobile devices, use a different approach
+			if (navigator.userAgent.match(/iphone|ipod|ipad|android/i)) {
+				// Create a temporary input element
+				const tempInput = document.createElement("input");
+				tempInput.value = email;
+				document.body.appendChild(tempInput);
 
-      gsap.delayedCall(ANIMATION_CONFIG.COPY.DURATION / 1000, () => {
-        setIsEmailCopied(false);
-      });
-    }
-  }, [email]);
+				// Select the text
+				tempInput.select();
+				tempInput.setSelectionRange(0, 99999); // For mobile devices
 
-  const handleClose = useCallback(() => {
-    if (!overlayRef.current || !dialogRef.current) return;
+				// Execute copy command
+				try {
+					document.execCommand("copy");
+					setIsEmailCopied(true);
+					gsap.delayedCall(ANIMATION_CONFIG.COPY.DURATION / 1000, () => {
+						setIsEmailCopied(false);
+					});
+				} catch (err) {
+					console.error("Failed to copy text: ", err);
+					// Fallback for newer browsers
+					if (navigator.clipboard) {
+						navigator.clipboard.writeText(email).then(() => {
+							setIsEmailCopied(true);
+							gsap.delayedCall(ANIMATION_CONFIG.COPY.DURATION / 1000, () => {
+								setIsEmailCopied(false);
+							});
+						});
+					}
+				}
 
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        onComplete: onClose
-      });
+				// Remove the temporary element
+				document.body.removeChild(tempInput);
+			} else {
+				// For desktop, use the standard clipboard API
+				navigator.clipboard.writeText(email);
+				setIsEmailCopied(true);
 
-      tl.to(dialogRef.current, {
-        opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
-        scale: ANIMATION_CONFIG.DIALOG.SCALE.CLOSE,
-        y: ANIMATION_CONFIG.DIALOG.Y.CLOSE,
-        duration: ANIMATION_CONFIG.DIALOG.DURATION.CLOSE,
-        ease: ANIMATION_CONFIG.EASE.CLOSE,
-        force3D: true
-      })
-      .to(overlayRef.current, {
-        opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
-        backdropFilter: ANIMATION_CONFIG.OVERLAY.BLUR.CLOSE,
-        duration: ANIMATION_CONFIG.OVERLAY.DURATION.CLOSE,
-        ease: ANIMATION_CONFIG.EASE.CLOSE
-      }, "<");
-    });
+				gsap.delayedCall(ANIMATION_CONFIG.COPY.DURATION / 1000, () => {
+					setIsEmailCopied(false);
+				});
+			}
+		}
+	}, [email]);
 
-    return () => ctx.revert();
-  }, [onClose]);
+	const handleClose = useCallback(() => {
+		if (!overlayRef.current || !dialogRef.current) return;
 
-  useGSAP(() => {
-    if (isOpen && overlayRef.current && dialogRef.current) {
-      document.body.style.overflow = "hidden";
+		const ctx = gsap.context(() => {
+			const tl = gsap.timeline({
+				onComplete: () => {
+					const scrollY = document.body.style.top;
+					document.body.style.overflow = "";
+					document.body.style.touchAction = "";
+					document.body.style.position = "";
+					document.body.style.width = "";
+					document.body.style.top = "";
+					window.scrollTo(0, parseInt(scrollY || "0") * -1);
+					onClose();
+				},
+			});
 
-      const ctx = gsap.context(() => {
-        gsap.set([overlayRef.current, dialogRef.current], {
-          opacity: 0,
-          force3D: true
-        });
-        
-        gsap.set(dialogRef.current, {
-          scale: ANIMATION_CONFIG.DIALOG.SCALE.CLOSE,
-          y: ANIMATION_CONFIG.DIALOG.Y.CLOSE,
-          force3D: true
-        });
-        
-        gsap.set(overlayRef.current, {
-          backdropFilter: ANIMATION_CONFIG.OVERLAY.BLUR.CLOSE
-        });
+			tl.to(dialogRef.current, {
+				opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
+				scale: ANIMATION_CONFIG.DIALOG.SCALE.CLOSE,
+				y: ANIMATION_CONFIG.DIALOG.Y.CLOSE,
+				duration: ANIMATION_CONFIG.DIALOG.DURATION.CLOSE,
+				ease: ANIMATION_CONFIG.EASE.CLOSE,
+				force3D: true,
+			}).to(
+				overlayRef.current,
+				{
+					opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
+					backdropFilter: ANIMATION_CONFIG.OVERLAY.BLUR.CLOSE,
+					duration: ANIMATION_CONFIG.OVERLAY.DURATION.CLOSE,
+					ease: ANIMATION_CONFIG.EASE.CLOSE,
+				},
+				"<"
+			);
+		});
 
-        const tl = gsap.timeline();
+		return () => ctx.revert();
+	}, [onClose]);
 
-        tl.to(overlayRef.current, {
-          opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.OPEN,
-          backdropFilter: ANIMATION_CONFIG.OVERLAY.BLUR.OPEN,
-          duration: ANIMATION_CONFIG.OVERLAY.DURATION.OPEN,
-          ease: ANIMATION_CONFIG.EASE.OPEN
-        })
-        .to(dialogRef.current, {
-          opacity: 1,
-          scale: ANIMATION_CONFIG.DIALOG.SCALE.OPEN,
-          y: ANIMATION_CONFIG.DIALOG.Y.OPEN,
-          duration: ANIMATION_CONFIG.DIALOG.DURATION.OPEN,
-          ease: ANIMATION_CONFIG.EASE.OPEN,
-          force3D: true
-        }, "-=0.2");
-      });
+	useGSAP(() => {
+		if (isOpen && overlayRef.current && dialogRef.current) {
+			document.body.style.overflow = "hidden";
+			document.body.style.touchAction = "none";
+			document.body.style.position = "fixed";
+			document.body.style.width = "100%";
+			document.body.style.top = `-${window.scrollY}px`;
 
-      return () => {
-        ctx.revert();
-        document.body.style.overflow = "unset";
-      };
-    }
-  }, [isOpen]);
+			const ctx = gsap.context(() => {
+				gsap.set([overlayRef.current, dialogRef.current], {
+					opacity: 0,
+					force3D: true,
+				});
 
-  const setupButtonHover = useCallback((button: HTMLButtonElement) => {
-    if (!button) return () => {};
-    
-    const handleMouseEnter = () => {
-      gsap.to(button, {
-        scale: 1,
-        opacity: ANIMATION_CONFIG.BUTTON.OPACITY.HOVER,
-        duration: ANIMATION_CONFIG.BUTTON.DURATION,
-        ease: ANIMATION_CONFIG.BUTTON.EASE,
-        force3D: true
-      });
-    };
+				gsap.set(dialogRef.current, {
+					scale: ANIMATION_CONFIG.DIALOG.SCALE.CLOSE,
+					y: ANIMATION_CONFIG.DIALOG.Y.CLOSE,
+					force3D: true,
+					willChange: "transform, opacity",
+				});
 
-    const handleMouseLeave = () => {
-      gsap.to(button, {
-        scale: 1,
-        opacity: 1,
-        duration: ANIMATION_CONFIG.BUTTON.DURATION,
-        ease: ANIMATION_CONFIG.BUTTON.EASE,
-        force3D: true
-      });
-    };
+				gsap.set(overlayRef.current, {
+					backdropFilter: ANIMATION_CONFIG.OVERLAY.BLUR.CLOSE,
+					willChange: "opacity, backdrop-filter",
+				});
 
-    const handleMouseDown = () => {
-      gsap.to(button, {
-        scale: ANIMATION_CONFIG.BUTTON.SCALE,
-        opacity: ANIMATION_CONFIG.BUTTON.OPACITY.ACTIVE,
-        duration: ANIMATION_CONFIG.BUTTON.DURATION,
-        ease: ANIMATION_CONFIG.BUTTON.EASE,
-        force3D: true
-      });
-    };
+				const tl = gsap.timeline();
 
-    const handleMouseUp = () => {
-      gsap.to(button, {
-        scale: 1,
-        opacity: ANIMATION_CONFIG.BUTTON.OPACITY.HOVER,
-        duration: ANIMATION_CONFIG.BUTTON.DURATION,
-        ease: ANIMATION_CONFIG.BUTTON.EASE,
-        force3D: true
-      });
-    };
-    
-    button.addEventListener("mouseenter", handleMouseEnter);
-    button.addEventListener("mouseleave", handleMouseLeave);
-    button.addEventListener("mousedown", handleMouseDown);
-    button.addEventListener("mouseup", handleMouseUp);
+				tl.to(overlayRef.current, {
+					opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.OPEN,
+					backdropFilter: ANIMATION_CONFIG.OVERLAY.BLUR.OPEN,
+					duration: ANIMATION_CONFIG.OVERLAY.DURATION.OPEN,
+					ease: ANIMATION_CONFIG.EASE.OPEN,
+				}).to(
+					dialogRef.current,
+					{
+						opacity: 1,
+						scale: ANIMATION_CONFIG.DIALOG.SCALE.OPEN,
+						y: ANIMATION_CONFIG.DIALOG.Y.OPEN,
+						duration: ANIMATION_CONFIG.DIALOG.DURATION.OPEN,
+						ease: ANIMATION_CONFIG.EASE.OPEN,
+						force3D: true,
+					},
+					"-=0.2"
+				);
+			});
 
-    return () => {
-      button.removeEventListener("mouseenter", handleMouseEnter);
-      button.removeEventListener("mouseleave", handleMouseLeave);
-      button.removeEventListener("mousedown", handleMouseDown);
-      button.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, []);
+			return () => {
+				ctx.revert();
+				const scrollY = document.body.style.top;
+				document.body.style.overflow = "";
+				document.body.style.touchAction = "";
+				document.body.style.position = "";
+				document.body.style.width = "";
+				document.body.style.top = "";
+				window.scrollTo(0, parseInt(scrollY || "0") * -1);
+			};
+		}
+	}, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    
-    const buttons = document.querySelectorAll('button');
-    const cleanups = Array.from(buttons).map(button => setupButtonHover(button as HTMLButtonElement));
+	const setupButtonHover = useCallback((button: HTMLButtonElement) => {
+		if (!button) return () => {};
 
-    return () => cleanups.forEach(cleanup => cleanup());
-  }, [setupButtonHover, isOpen]);
+		const handleMouseEnter = () => {
+			gsap.to(button, {
+				scale: 1,
+				opacity: ANIMATION_CONFIG.BUTTON.OPACITY.HOVER,
+				duration: ANIMATION_CONFIG.BUTTON.DURATION,
+				ease: ANIMATION_CONFIG.BUTTON.EASE,
+				force3D: true,
+				willChange: "transform, opacity",
+			});
+		};
 
-  if (!isOpen) return null;
+		const handleMouseLeave = () => {
+			gsap.to(button, {
+				scale: 1,
+				opacity: 1,
+				duration: ANIMATION_CONFIG.BUTTON.DURATION,
+				ease: ANIMATION_CONFIG.BUTTON.EASE,
+				force3D: true,
+				willChange: "auto",
+			});
+		};
 
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center">
-        <div
-          ref={overlayRef}
-          className="fixed inset-0"
-          onClick={handleClose}
-        >
-          <div className="absolute inset-0 bg-black/75" />
-        </div>
+		const handleMouseDown = () => {
+			gsap.to(button, {
+				scale: ANIMATION_CONFIG.BUTTON.SCALE,
+				opacity: ANIMATION_CONFIG.BUTTON.OPACITY.ACTIVE,
+				duration: ANIMATION_CONFIG.BUTTON.DURATION,
+				ease: ANIMATION_CONFIG.BUTTON.EASE,
+				force3D: true,
+				willChange: "transform, opacity",
+			});
+		};
 
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen">
-          &#8203;
-        </span>
+		const handleMouseUp = () => {
+			gsap.to(button, {
+				scale: 1,
+				opacity: ANIMATION_CONFIG.BUTTON.OPACITY.HOVER,
+				duration: ANIMATION_CONFIG.BUTTON.DURATION,
+				ease: ANIMATION_CONFIG.BUTTON.EASE,
+				force3D: true,
+				willChange: "transform, opacity",
+			});
+		};
 
-        <div
-          ref={dialogRef}
-          className="relative inline-block w-full sm:max-w-lg bg-gray-800/95 backdrop-blur-sm
+		button.addEventListener("mouseenter", handleMouseEnter);
+		button.addEventListener("mouseleave", handleMouseLeave);
+		button.addEventListener("mousedown", handleMouseDown);
+		button.addEventListener("mouseup", handleMouseUp);
+
+		return () => {
+			button.removeEventListener("mouseenter", handleMouseEnter);
+			button.removeEventListener("mouseleave", handleMouseLeave);
+			button.removeEventListener("mousedown", handleMouseDown);
+			button.removeEventListener("mouseup", handleMouseUp);
+		};
+	}, []);
+
+	useEffect(() => {
+		if (!isOpen) return;
+
+		const buttons = document.querySelectorAll("button");
+		const cleanups = Array.from(buttons).map((button) =>
+			setupButtonHover(button as HTMLButtonElement)
+		);
+
+		return () => cleanups.forEach((cleanup) => cleanup());
+	}, [setupButtonHover, isOpen]);
+
+	if (!isOpen) return null;
+
+	return (
+		<div className="fixed inset-0 z-50 overflow-hidden">
+			<div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center">
+				<div ref={overlayRef} className="fixed inset-0" onClick={handleClose}>
+					<div className="absolute inset-0 bg-black/75" />
+				</div>
+
+				<span className="hidden sm:inline-block sm:align-middle sm:h-screen">
+					&#8203;
+				</span>
+
+				<div
+					ref={dialogRef}
+					className="relative inline-block w-full sm:max-w-lg bg-gray-800/95 backdrop-blur-sm
             rounded-2xl overflow-hidden shadow-2xl border border-primary/20 text-left
-            sm:align-middle transform-gpu"
-        >
-          <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r 
-            from-transparent via-primary to-transparent opacity-50" />
+            sm:align-middle transform-gpu will-change-transform"
+				>
+					<div
+						className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r 
+            from-transparent via-primary to-transparent opacity-50"
+					/>
 
-          <DialogContent email={email ?? ""} onCopy={handleCopyEmail} />
-          <DialogActions onClose={handleClose} isEmailCopied={isEmailCopied} />
+					<DialogContent email={email ?? ""} onCopy={handleCopyEmail} />
+					<DialogActions onClose={handleClose} isEmailCopied={isEmailCopied} />
 
-          <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 
-            border-primary/30 rounded-tl-xl" />
-          <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 
-            border-primary/30 rounded-tr-xl" />
-          <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 
-            border-primary/30 rounded-bl-xl" />
-          <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 
-            border-primary/30 rounded-br-xl" />
+					<div
+						className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 
+            border-primary/30 rounded-tl-xl"
+					/>
+					<div
+						className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 
+            border-primary/30 rounded-tr-xl"
+					/>
+					<div
+						className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 
+            border-primary/30 rounded-bl-xl"
+					/>
+					<div
+						className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 
+            border-primary/30 rounded-br-xl"
+					/>
 
-          <div className="absolute -inset-px bg-primary/5 rounded-2xl pointer-events-none" />
-        </div>
-      </div>
-    </div>
-  );
+					<div className="absolute -inset-px bg-primary/5 rounded-2xl pointer-events-none" />
+				</div>
+			</div>
+		</div>
+	);
 };
 
 export default ThankYouDialog;

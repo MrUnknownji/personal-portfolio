@@ -2,106 +2,117 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colors */
-  --color-primary: #00ff9f;
-  --color-secondary: #1E1E1E;
-  --color-accent: #00D1FF;
-  --color-dark: #141414;
-  --color-light: #F1F1F1;
-  --color-neutral: #333333;
-  --color-muted: #666666;
-  
-  /* HSL Colors */
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(240 10% 3.9%);
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(240 10% 3.9%);
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(240 10% 3.9%);
-  --color-destructive: hsl(0 84.2% 60.2%);
-  --color-destructive-foreground: hsl(0 0% 98%);
-  --color-border: hsl(240 5.9% 90%);
-  --color-input: hsl(240 5.9% 90%);
-  --color-ring: hsl(240 10% 3.9%);
-  --color-chart-1: hsl(12 76% 61%);
-  --color-chart-2: hsl(173 58% 39%);
-  --color-chart-3: hsl(197 37% 24%);
-  --color-chart-4: hsl(43 74% 66%);
-  --color-chart-5: hsl(27 87% 67%);
-  
-  /* Font Family */
-  --font-sans: "Poppins", sans-serif;
-  --font-outfit: "Outfit", sans-serif;
-  
-  /* Border Radius */
-  --rounded-lg: 0.5rem;
-  --rounded-md: calc(0.5rem - 2px);
-  --rounded-sm: calc(0.5rem - 4px);
+	/* Colors */
+	--color-primary: #00ff9f;
+	--color-secondary: #1e1e1e;
+	--color-accent: #00d1ff;
+	--color-dark: #141414;
+	--color-light: #f1f1f1;
+	--color-neutral: #333333;
+	--color-muted: #666666;
+
+	/* HSL Colors */
+	--color-background: hsl(0 0% 100%);
+	--color-foreground: hsl(240 10% 3.9%);
+	--color-card: hsl(0 0% 100%);
+	--color-card-foreground: hsl(240 10% 3.9%);
+	--color-popover: hsl(0 0% 100%);
+	--color-popover-foreground: hsl(240 10% 3.9%);
+	--color-destructive: hsl(0 84.2% 60.2%);
+	--color-destructive-foreground: hsl(0 0% 98%);
+	--color-border: hsl(240 5.9% 90%);
+	--color-input: hsl(240 5.9% 90%);
+	--color-ring: hsl(240 10% 3.9%);
+	--color-chart-1: hsl(12 76% 61%);
+	--color-chart-2: hsl(173 58% 39%);
+	--color-chart-3: hsl(197 37% 24%);
+	--color-chart-4: hsl(43 74% 66%);
+	--color-chart-5: hsl(27 87% 67%);
+
+	/* Font Family */
+	--font-sans: "Poppins", sans-serif;
+	--font-outfit: "Outfit", sans-serif;
+
+	/* Border Radius */
+	--rounded-lg: 0.5rem;
+	--rounded-md: calc(0.5rem - 2px);
+	--rounded-sm: calc(0.5rem - 4px);
 }
 
 @variant dark {
-  @theme {
-    --color-background: hsl(240 10% 3.9%);
-    --color-foreground: hsl(0 0% 98%);
-    --color-card: hsl(240 10% 3.9%);
-    --color-card-foreground: hsl(0 0% 98%);
-    --color-popover: hsl(240 10% 3.9%);
-    --color-popover-foreground: hsl(0 0% 98%);
-    --color-destructive: hsl(0 62.8% 30.6%);
-    --color-destructive-foreground: hsl(0 0% 98%);
-    --color-border: hsl(240 3.7% 15.9%);
-    --color-input: hsl(240 3.7% 15.9%);
-    --color-ring: hsl(240 4.9% 83.9%);
-    --color-chart-1: hsl(220 70% 50%);
-    --color-chart-2: hsl(160 60% 45%);
-    --color-chart-3: hsl(30 80% 55%);
-    --color-chart-4: hsl(280 65% 60%);
-    --color-chart-5: hsl(340 75% 55%);
-  }
+	@theme {
+		--color-background: hsl(240 10% 3.9%);
+		--color-foreground: hsl(0 0% 98%);
+		--color-card: hsl(240 10% 3.9%);
+		--color-card-foreground: hsl(0 0% 98%);
+		--color-popover: hsl(240 10% 3.9%);
+		--color-popover-foreground: hsl(0 0% 98%);
+		--color-destructive: hsl(0 62.8% 30.6%);
+		--color-destructive-foreground: hsl(0 0% 98%);
+		--color-border: hsl(240 3.7% 15.9%);
+		--color-input: hsl(240 3.7% 15.9%);
+		--color-ring: hsl(240 4.9% 83.9%);
+		--color-chart-1: hsl(220 70% 50%);
+		--color-chart-2: hsl(160 60% 45%);
+		--color-chart-3: hsl(30 80% 55%);
+		--color-chart-4: hsl(280 65% 60%);
+		--color-chart-5: hsl(340 75% 55%);
+	}
 }
 
 :root {
-  --scrollbar-thumb: #909090;
-  --scrollbar-track: #f1f1f1;
+	--scrollbar-thumb: #909090;
+	--scrollbar-track: #f1f1f1;
 }
 
 html {
-  width: 100vw;
-  overflow-x: hidden;
-  background-color: rgb(3, 7, 18);
-  font-family: "Outfit", serif;
-  font-optical-sizing: auto;
+	width: 100vw;
+	overflow-x: hidden;
+	background-color: rgb(3, 7, 18);
+	font-family: "Outfit", serif;
+	font-optical-sizing: auto;
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
+	width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
+	background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border-radius: 4px;
+	background: var(--scrollbar-thumb);
+	border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+	background: #555;
+}
+
+/* Selection styles */
+::selection {
+	background-color: var(--color-primary);
+	color: var(--color-dark);
+}
+
+::-moz-selection {
+	background-color: var(--color-primary);
+	color: var(--color-dark);
 }
 
 @utility perspective-1000 {
-  perspective: 1000px;
+	perspective: 1000px;
 }
 
 @utility animation-delay-2000 {
-  animation-delay: 2s;
+	animation-delay: 2s;
 }
 
 @utility animation-delay-4000 {
-  animation-delay: 4s;
+	animation-delay: 4s;
 }
 
 .header-hidden {
-  transform: translateY(-100%);
+	transform: translateY(-100%);
 }
