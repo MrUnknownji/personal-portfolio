@@ -1,53 +1,74 @@
 "use client";
-import { useEffect } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import Lenis from "lenis";
+import { LenisContext } from "@/contexts/LenisContext";
 
-// Define props interface to allow customization of scroll behavior
 interface SmoothScrollProps {
-	children: React.ReactNode;
-	// Smoothness controls
-	duration?: number; // Duration of the scroll animation (higher = smoother but slower)
-	lerp?: number; // Linear interpolation factor (lower = smoother but more delayed)
-	wheelMultiplier?: number; // How much wheel events affect scrolling (lower = smoother)
-	touchMultiplier?: number; // How much touch events affect scrolling
-	easing?: (t: number) => number; // Easing function for the scroll animation
-	infinite?: boolean; // Whether scrolling should loop
+  children: React.ReactNode;
+  duration?: number;
+  lerp?: number;
+  wheelMultiplier?: number;
+  touchMultiplier?: number;
+  easing?: (t: number) => number;
+  infinite?: boolean;
 }
 
+const defaultEasing = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t));
+
 export default function SmoothScroll({
-	children,
-	// Default values for smooth scrolling
-	duration = 1, // Default: 1.8 (increase for smoother, decrease for more responsive)
-	lerp = 0.1, // Default: 0.1 (lower = smoother but more delayed, 0.05-0.15 is a good range)
-	wheelMultiplier = 1, // Default: 1 (lower = smoother wheel scrolling)
-	touchMultiplier = 2, // Default: 2 (lower = smoother touch scrolling)
-	easing = (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)), // Default easing function
-	infinite = false, // Default: false
+  children,
+  duration = 1,
+  lerp = 0.1,
+  wheelMultiplier = 1,
+  touchMultiplier = 2,
+  easing = defaultEasing,
+  infinite = false,
 }: SmoothScrollProps) {
-	useEffect(() => {
-		// Create a new Lenis instance with the provided parameters
-		const lenis = new Lenis({
-			duration, // Controls animation duration
-			easing, // Controls the acceleration curve
-			orientation: "vertical",
-			gestureOrientation: "vertical",
-			lerp, // Controls smoothness (lower = smoother but more delayed)
-			wheelMultiplier, // Controls wheel sensitivity
-			touchMultiplier, // Controls touch sensitivity
-			infinite, // Controls whether scrolling should loop
-		});
+  const [lenisInstance, setLenisInstance] = useState<Lenis | null>(null);
+  const lenisRef = useRef<Lenis | null>(null);
+  const reqIdRef = useRef<number | null>(null);
 
-		function raf(time: number) {
-			lenis.raf(time);
-			requestAnimationFrame(raf);
-		}
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration,
+      easing,
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      lerp,
+      wheelMultiplier,
+      touchMultiplier,
+      infinite,
+    });
 
-		requestAnimationFrame(raf);
+    lenisRef.current = lenis;
+    setLenisInstance(lenis);
 
-		return () => {
-			lenis.destroy();
-		};
-	}, [duration, easing, lerp, wheelMultiplier, touchMultiplier, infinite]);
+    const animate = (time: number) => {
+      lenis.raf(time);
+      reqIdRef.current = requestAnimationFrame(animate);
+    };
 
-	return <>{children}</>;
+    reqIdRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (reqIdRef.current) {
+        cancelAnimationFrame(reqIdRef.current);
+        reqIdRef.current = null;
+      }
+      lenis.destroy();
+      lenisRef.current = null;
+      setLenisInstance(null);
+    };
+  }, [duration, easing, lerp, wheelMultiplier, touchMultiplier, infinite]);
+
+  const contextValue = useMemo(
+    () => ({ lenis: lenisInstance }),
+    [lenisInstance],
+  );
+
+  return (
+    <LenisContext.Provider value={contextValue}>
+      {children}
+    </LenisContext.Provider>
+  );
 }
