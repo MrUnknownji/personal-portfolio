@@ -19,10 +19,9 @@ export default function Template({ children }: { children: React.ReactNode }) {
   useGSAP(
     () => {
       if (!overlayRef.current || !contentRef.current || !counterRef.current) {
-        gsap.set(contentRef.current || ".page-content", { opacity: 1 });
-        gsap.set(overlayRef.current || ".transition-overlay", {
-          display: "none",
-        });
+        console.warn("Transition refs not found, skipping animation.");
+        gsap.set(contentRef.current, { opacity: 1 });
+        gsap.set(overlayRef.current, { display: "none" });
         return;
       }
 
@@ -38,7 +37,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
       const tl = gsap.timeline({
         onStart: () => {
           lenis?.stop();
-          bodyStyle.cursor = "not-allowed";
+          bodyStyle.cursor = "wait"; // 'wait' might be more appropriate than 'not-allowed'
           overlayRef.current?.classList.remove("pointer-events-none");
         },
         onComplete: () => {
@@ -99,6 +98,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
           {
             opacity: 0,
             duration: overlayFadeOutDuration * 0.5,
+            clearProps: "opacity",
           },
           `-=${overlayFadeOutDuration * 0.3}`,
         );

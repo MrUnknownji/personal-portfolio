@@ -3,256 +3,209 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
 const ANIMATION_CONFIG = {
-	INITIAL: {
-		Y: -30,
-		OPACITY: 0,
-	},
-	ENTER: {
-		DURATION: 1,
-		STAGGER: 0.05,
-		EASE: "back.out(1.7)",
-	},
-	EXIT: {
-		DURATION: 1,
-		STAGGER: 0.03,
-		Y: 20,
-		EASE: "power2.in",
-	},
-	DISPLAY_DURATION: 4000,
-	OVERLAP_FACTOR: 0.5,
+  INITIAL: { Y: -30, OPACITY: 0 },
+  ENTER: { DURATION: 1, STAGGER: 0.05, EASE: "back.out(1.7)" },
+  EXIT: { DURATION: 1, STAGGER: 0.03, Y: 20, EASE: "power2.in" },
+  DISPLAY_DURATION: 4000,
+  OVERLAP_FACTOR: 0.5,
 } as const;
 
 const TypedText = () => {
-	const containerRef = useRef<HTMLDivElement>(null);
-	const [currentTextIndex, setCurrentTextIndex] = useState(0);
-	const [isAnimating, setIsAnimating] = useState(false);
-	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const animationRef = useRef<gsap.core.Timeline | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const animationRef = useRef<gsap.core.Timeline | null>(null);
 
-	const TEXTS = useMemo(
-		() => [
-			"Building robust backend systems",
-			"Crafting intuitive front-end interfaces",
-			"Optimizing database performance",
-			"Implementing secure authentication",
-			"Developing RESTful APIs",
-			"Creating responsive web designs",
-		],
-		[]
-	);
+  const TEXTS = useMemo(
+    () => [
+      "Building robust backend systems",
+      "Crafting intuitive front-end interfaces",
+      "Optimizing database performance",
+      "Implementing secure authentication",
+      "Developing RESTful APIs",
+      "Creating responsive web designs",
+    ],
+    [],
+  );
 
-	// Clean up function for DOM and animations
-	const cleanupCurrentAnimation = useCallback(() => {
-		// Clear any existing timeout
-		if (timeoutRef.current) {
-			clearTimeout(timeoutRef.current);
-			timeoutRef.current = null;
-		}
+  const cleanupAnimation = useCallback(() => {
+    if (animationRef.current) {
+      animationRef.current.kill();
+      animationRef.current = null;
+    }
+  }, []);
 
-		// Kill any ongoing animations
-		if (animationRef.current) {
-			animationRef.current.kill();
-			animationRef.current = null;
-		}
-	}, []);
+  const createChars = useCallback((text: string, container: HTMLElement) => {
+    const fragment = document.createDocumentFragment();
+    const measureDiv = document.createElement("div");
+    measureDiv.style.cssText =
+      "visibility: hidden; position: absolute; white-space: nowrap;";
+    container.appendChild(measureDiv);
 
-	const createChars = useCallback(
-		(text: string, container: HTMLElement, isNextText = false) => {
-			// Create container for better performance
-			const fragment = document.createDocumentFragment();
+    const positions: { left: number }[] = [];
+    text.split("").forEach((char) => {
+      const measureSpan = document.createElement("span");
+      measureSpan.textContent = char === " " ? "\u00A0" : char;
+      measureSpan.style.display = "inline-block";
+      measureDiv.appendChild(measureSpan);
+      positions.push({ left: measureSpan.offsetLeft });
+    });
+    measureDiv.remove();
 
-			// Create a temporary div for measuring
-			const measureDiv = document.createElement("div");
-			measureDiv.style.cssText =
-				"visibility: hidden; position: absolute; white-space: nowrap;";
-			container.appendChild(measureDiv);
+    const wrapper = document.createElement("div");
+    wrapper.className = "text-wrapper";
+    wrapper.style.cssText =
+      "position: absolute; top: 0; left: 0; width: 100%; height: 100%;";
 
-			const positions: { left: number }[] = [];
-			text.split("").forEach((char) => {
-				const measureSpan = document.createElement("span");
-				measureSpan.textContent = char === " " ? "\u00A0" : char;
-				measureSpan.style.display = "inline-block";
-				measureDiv.appendChild(measureSpan);
-				positions.push({
-					left: measureSpan.offsetLeft,
-				});
-			});
-			measureDiv.remove();
-
-			// Create a wrapper to help with identification of text sets
-			const wrapper = document.createElement("div");
-			wrapper.className = isNextText ? "next-text" : "current-text";
-			wrapper.style.cssText =
-				"position: absolute; top: 0; left: 0; width: 100%; height: 100%;";
-
-			// Create all character spans
-			const chars: HTMLElement[] = [];
-			text.split("").forEach((char, index) => {
-				const span = document.createElement("span");
-				span.textContent = char === " " ? "\u00A0" : char;
-				span.className = "typed-char";
-				span.style.cssText = `
+    const chars: HTMLElement[] = [];
+    text.split("").forEach((char, index) => {
+      const span = document.createElement("span");
+      span.textContent = char === " " ? "\u00A0" : char;
+      span.className = "typed-char";
+      span.style.cssText = `
         display: inline-block;
         position: absolute;
         left: ${positions[index].left}px;
         transform-origin: center;
         will-change: transform, opacity;
       `;
-				wrapper.appendChild(span);
-				chars.push(span);
-			});
+      wrapper.appendChild(span);
+      chars.push(span);
+    });
 
-			fragment.appendChild(wrapper);
-			container.appendChild(fragment);
+    fragment.appendChild(wrapper);
+    container.appendChild(fragment);
 
-			return { chars, wrapper };
-		},
-		[]
-	);
+    return { chars, wrapper };
+  }, []);
 
-	const animateText = useCallback(
-		(text: string) => {
-			if (!containerRef.current || isAnimating) return;
-			setIsAnimating(true);
+  useGSAP(
+    () => {
+      const container = containerRef.current;
+      if (!container) return;
 
-			// Clean up previous animations but don't clear DOM yet
-			cleanupCurrentAnimation();
+      cleanupAnimation();
 
-			// Create a master timeline
-			const masterTimeline = gsap.timeline({
-				defaults: { overwrite: true },
-				onComplete: () => {
-					// Clear container when all animations are done
-					if (containerRef.current) {
-						containerRef.current.innerHTML = "";
-					}
+      const currentText = TEXTS[currentTextIndex];
+      const nextTextIndex = (currentTextIndex + 1) % TEXTS.length;
+      const nextText = TEXTS[nextTextIndex];
 
-					// Set up next phase
-					setIsAnimating(false);
-					setCurrentTextIndex((prev) => (prev + 1) % TEXTS.length);
-				},
-			});
+      let currentWrapper: HTMLDivElement | null =
+        container.querySelector(".text-wrapper");
+      let currentChars: HTMLElement[] = currentWrapper
+        ? (Array.from(
+            currentWrapper.querySelectorAll(".typed-char"),
+          ) as HTMLElement[])
+        : [];
 
-			// Store timeline for cleanup
-			animationRef.current = masterTimeline;
+      const masterTimeline = gsap.timeline({
+        defaults: { overwrite: true },
+        onComplete: () => {
+          if (containerRef.current) {
+            const wrappers =
+              containerRef.current.querySelectorAll(".text-wrapper");
+            if (wrappers.length > 1) {
+              wrappers[0].remove();
+            }
+          }
+          setCurrentTextIndex(nextTextIndex);
+        },
+      });
+      animationRef.current = masterTimeline;
 
-			// Find current text wrapper if it exists
-			const currentTextWrapper =
-				containerRef.current.querySelector(".current-text");
+      if (currentChars.length > 0 && currentWrapper) {
+        // === Transitioning ===
+        const { chars: nextChars, wrapper: nextWrapper } = createChars(
+          nextText,
+          container,
+        );
 
-			if (currentTextWrapper) {
-				// Get current chars as actual HTMLElements
-				const currentChars = Array.from(
-					currentTextWrapper.querySelectorAll(".typed-char")
-				) as HTMLElement[];
+        gsap.set(nextChars, {
+          y: ANIMATION_CONFIG.INITIAL.Y,
+          opacity: 0,
+        });
 
-				// Create the next text while current is still visible
-				const nextTextIndex = (currentTextIndex + 1) % TEXTS.length;
-				const nextText = TEXTS[nextTextIndex];
-				const { chars: nextChars } = createChars(
-					nextText,
-					containerRef.current,
-					true
-				);
+        masterTimeline.addLabel(
+          "startExit",
+          `+=${ANIMATION_CONFIG.DISPLAY_DURATION / 1000}`,
+        );
 
-				// Initially hide the next text
-				gsap.set(nextChars, {
-					y: ANIMATION_CONFIG.INITIAL.Y,
-					opacity: 0,
-				});
+        masterTimeline.to(
+          currentChars,
+          {
+            y: ANIMATION_CONFIG.EXIT.Y,
+            opacity: 0,
+            duration: ANIMATION_CONFIG.EXIT.DURATION,
+            stagger: ANIMATION_CONFIG.EXIT.STAGGER,
+            ease: ANIMATION_CONFIG.EXIT.EASE,
+          },
+          "startExit",
+        );
 
-				// Add display duration in the timeline - how long to show the completed text
-				masterTimeline.to(
-					{},
-					{ duration: ANIMATION_CONFIG.DISPLAY_DURATION / 1000 }
-				);
+        masterTimeline.to(
+          nextChars,
+          {
+            y: 0,
+            opacity: 1,
+            duration: ANIMATION_CONFIG.ENTER.DURATION,
+            stagger: ANIMATION_CONFIG.ENTER.STAGGER,
+            ease: ANIMATION_CONFIG.ENTER.EASE,
+          },
+          `startExit+=${ANIMATION_CONFIG.EXIT.DURATION * (1 - ANIMATION_CONFIG.OVERLAP_FACTOR)}`,
+        );
+      } else {
+        // === First run ===
+        const { chars, wrapper } = createChars(currentText, container);
+        currentWrapper = wrapper;
+        currentChars = chars;
 
-				// Exit animation for current text - character by character
-				masterTimeline.to(currentChars, {
-					y: ANIMATION_CONFIG.EXIT.Y,
-					opacity: 0,
-					duration: ANIMATION_CONFIG.EXIT.DURATION,
-					stagger: ANIMATION_CONFIG.EXIT.STAGGER,
-					ease: ANIMATION_CONFIG.EXIT.EASE,
-				});
+        gsap.set(chars, {
+          y: ANIMATION_CONFIG.INITIAL.Y,
+          opacity: 0,
+        });
 
-				// Entrance animation for next text with overlap
-				masterTimeline.to(
-					nextChars,
-					{
-						y: 0,
-						opacity: 1,
-						duration: ANIMATION_CONFIG.ENTER.DURATION,
-						stagger: ANIMATION_CONFIG.ENTER.STAGGER,
-						ease: ANIMATION_CONFIG.ENTER.EASE,
-					},
-					`-=${
-						ANIMATION_CONFIG.EXIT.DURATION * ANIMATION_CONFIG.OVERLAP_FACTOR
-					}`
-				);
-			} else {
-				// First run - no existing text
-				const { chars } = createChars(text, containerRef.current);
+        masterTimeline.to(chars, {
+          y: 0,
+          opacity: 1,
+          duration: ANIMATION_CONFIG.ENTER.DURATION,
+          stagger: ANIMATION_CONFIG.ENTER.STAGGER,
+          ease: ANIMATION_CONFIG.ENTER.EASE,
+        });
 
-				// Initial state
-				gsap.set(chars, {
-					y: ANIMATION_CONFIG.INITIAL.Y,
-					opacity: 0,
-				});
+        masterTimeline.to(
+          {},
+          { duration: ANIMATION_CONFIG.DISPLAY_DURATION / 1000 },
+        );
+      }
+    },
+    { dependencies: [currentTextIndex, TEXTS, createChars, cleanupAnimation] },
+  );
 
-				// Enter animation for first text
-				masterTimeline.to(chars, {
-					y: 0,
-					opacity: 1,
-					duration: ANIMATION_CONFIG.ENTER.DURATION,
-					stagger: ANIMATION_CONFIG.ENTER.STAGGER,
-					ease: ANIMATION_CONFIG.ENTER.EASE,
-				});
+  useEffect(() => {
+    const currentContainer = containerRef.current;
+    const currentCleanup = cleanupAnimation;
+    return () => {
+      currentCleanup();
+      if (currentContainer) {
+        currentContainer.innerHTML = "";
+      }
+    };
+  }, [cleanupAnimation]);
 
-				// Add display duration in the timeline
-				masterTimeline.to(
-					{},
-					{ duration: ANIMATION_CONFIG.DISPLAY_DURATION / 1000 }
-				);
-			}
-		},
-		[isAnimating, currentTextIndex, TEXTS, cleanupCurrentAnimation, createChars]
-	);
-
-	// Start animation when needed
-	useGSAP(() => {
-		if (!isAnimating) {
-			animateText(TEXTS[currentTextIndex]);
-		}
-	}, [currentTextIndex, isAnimating, animateText, TEXTS]);
-
-	// Clean up on unmount
-	useEffect(() => {
-		// Capture the current ref value to use in cleanup
-		const currentContainer = containerRef.current;
-
-		return () => {
-			cleanupCurrentAnimation();
-			if (currentContainer) {
-				currentContainer.innerHTML = "";
-			}
-		};
-	}, [cleanupCurrentAnimation]);
-
-	return (
-		<div className="min-h-[2rem] overflow-hidden">
-			<div
-				ref={containerRef}
-				className="text-accent text-xl relative transform-gpu"
-				style={{
-					position: "relative",
-					minHeight: "2rem",
-					whiteSpace: "nowrap",
-				}}
-				aria-label={TEXTS[currentTextIndex]}
-			/>
-		</div>
-	);
+  return (
+    <div className="min-h-[2rem] overflow-hidden">
+      <div
+        ref={containerRef}
+        className="text-primary text-xl relative transform-gpu"
+        style={{
+          position: "relative",
+          minHeight: "2rem",
+          whiteSpace: "nowrap",
+        }}
+        aria-live="polite"
+        aria-label={TEXTS[currentTextIndex]}
+      />
+    </div>
+  );
 };
 
 export default TypedText;

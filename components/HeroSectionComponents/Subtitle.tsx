@@ -1,138 +1,88 @@
-import { useRef, useCallback, useEffect } from "react";
+import { useRef } from "react";
 import { gsap } from "gsap";
 import SplitType from "split-type";
 import { useGSAP } from "@gsap/react";
-import { throttle } from "lodash";
 
 export const Subtitle = () => {
-	const containerRef = useRef<HTMLDivElement>(null);
-	const subtitleRef = useRef<HTMLHeadingElement>(null);
-	const splitInstanceRef = useRef<SplitType | null>(null);
-	const isAnimatingRef = useRef(false);
+  const subtitleRef = useRef<HTMLHeadingElement>(null);
+  const splitInstanceRef = useRef<SplitType | null>(null);
 
-	useGSAP(() => {
-		if (!subtitleRef.current) return;
+  useGSAP(() => {
+    if (!subtitleRef.current) return;
 
-		// Create split instance once and store it
-		splitInstanceRef.current = new SplitType(subtitleRef.current, {
-			types: "chars",
-		});
+    splitInstanceRef.current = new SplitType(subtitleRef.current, {
+      types: "chars",
+    });
 
-		if (!splitInstanceRef.current.chars) return;
+    const chars = splitInstanceRef.current.chars;
+    if (!chars?.length) return;
 
-		// Initial animation
-		const tl = gsap.timeline({
-			defaults: { ease: "power4.out", duration: 1 },
-		});
+    gsap.from(chars, {
+      y: 50,
+      opacity: 0,
+      stagger: 0.02,
+      duration: 0.8, // Adjusted duration
+      ease: "power3.out",
+      delay: 0.1, // Add slight delay
+    });
 
-		tl.from(
-			splitInstanceRef.current.chars,
-			{
-				y: 50,
-				opacity: 0,
-				stagger: 0.02,
-			},
-			"-=0.5"
-		);
+    const handleMouseMove = (event: MouseEvent) => {
+      const subtitleElement = subtitleRef.current;
+      if (!subtitleElement || !splitInstanceRef.current?.chars) return;
 
-		// Clean up function
-		return () => {
-			if (splitInstanceRef.current) {
-				splitInstanceRef.current.revert();
-			}
-		};
-	}, []);
+      const rect = subtitleElement.getBoundingClientRect();
+      const mouseX = event.clientX - rect.left;
+      const maxDistance = 150; // Increased interaction radius
 
-	// Create throttled function
-	const handleMouseMove = useCallback(() => {
-		return throttle((e: MouseEvent) => {
-			if (
-				isAnimatingRef.current ||
-				!containerRef.current ||
-				!splitInstanceRef.current?.chars
-			)
-				return;
+      splitInstanceRef.current.chars.forEach((char) => {
+        if (!char) return;
+        const charRect = char.getBoundingClientRect();
+        const charCenter = charRect.left + charRect.width / 2 - rect.left;
+        const distance = Math.abs(mouseX - charCenter);
 
-			// Prevent multiple animations from running simultaneously
-			isAnimatingRef.current = true;
+        const intensity = Math.max(0, 1 - distance / maxDistance);
 
-			const chars = splitInstanceRef.current.chars;
-			const rect = containerRef.current.getBoundingClientRect();
-			const mouseX = e.clientX - rect.left;
+        gsap.to(char, {
+          y: -15 * intensity,
+          scale: 1 + 0.2 * intensity,
+          duration: 0.3,
+          ease: "power2.out",
+          overwrite: "auto",
+        });
+      });
+    };
 
-			chars.forEach((char: HTMLElement) => {
-				if (!char) return;
-				const charRect = char.getBoundingClientRect();
-				const charCenter = charRect.left + charRect.width / 2 - rect.left;
-				const distance = Math.abs(mouseX - charCenter);
-				const maxDistance = 100;
-				const intensity = 1 - Math.min(distance / maxDistance, 1);
+    const handleMouseLeave = () => {
+      if (!splitInstanceRef.current?.chars) return;
+      gsap.to(splitInstanceRef.current.chars, {
+        y: 0,
+        scale: 1,
+        duration: 0.4,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    };
 
-				if (intensity > 0) {
-					gsap.to(char, {
-						y: -15 * intensity,
-						scale: 1 + 0.2 * intensity,
-						duration: 0.3,
-						ease: "power2.out",
-					});
-				} else {
-					gsap.to(char, {
-						y: 0,
-						scale: 1,
-						duration: 0.3,
-						ease: "power2.out",
-					});
-				}
-			});
+    const currentSubtitleRef = subtitleRef.current;
+    currentSubtitleRef.addEventListener("mousemove", handleMouseMove);
+    currentSubtitleRef.addEventListener("mouseleave", handleMouseLeave);
 
-			// Reset animation flag after a short delay
-			setTimeout(() => {
-				isAnimatingRef.current = false;
-			}, 100);
-		}, 16); // ~60fps throttle rate
-	}, []);
+    return () => {
+      currentSubtitleRef.removeEventListener("mousemove", handleMouseMove);
+      currentSubtitleRef.removeEventListener("mouseleave", handleMouseLeave);
+      splitInstanceRef.current?.revert();
+      gsap.killTweensOf(chars); // Ensure all tweens are killed
+    };
+  }, []);
 
-	// Mouse leave handler to reset all characters
-	const handleMouseLeave = useCallback(() => {
-		if (!splitInstanceRef.current?.chars) return;
-
-		gsap.to(splitInstanceRef.current.chars, {
-			y: 0,
-			scale: 1,
-			duration: 0.3,
-			ease: "power2.out",
-		});
-	}, []);
-
-	// Set up and clean up event listeners
-	useEffect(() => {
-		const container = containerRef.current;
-		if (!container) return;
-
-		// Create the throttled handler
-		const throttledMouseMove = handleMouseMove();
-
-		// Cast the throttled function to the right type
-		const mouseMoveHandler = throttledMouseMove as unknown as EventListener;
-		container.addEventListener("mousemove", mouseMoveHandler);
-		container.addEventListener("mouseleave", handleMouseLeave);
-
-		return () => {
-			container.removeEventListener("mousemove", mouseMoveHandler);
-			container.removeEventListener("mouseleave", handleMouseLeave);
-			// Cancel any pending throttled calls using proper typing
-			throttledMouseMove.cancel();
-		};
-	}, [handleMouseMove, handleMouseLeave]);
-
-	return (
-		<div ref={containerRef} className="subtitle-container">
-			<h2
-				ref={subtitleRef}
-				className="hero-subtitle text-2xl md:text-3xl font-semibold text-[#4FD1C5]"
-			>
-				Full Stack Developer
-			</h2>
-		</div>
-	);
+  return (
+    <div className="subtitle-container">
+      <h2
+        ref={subtitleRef}
+        className="hero-subtitle text-2xl md:text-3xl font-semibold text-[#4FD1C5] cursor-default"
+      >
+        Full Stack Developer
+      </h2>
+    </div>
+  );
 };
