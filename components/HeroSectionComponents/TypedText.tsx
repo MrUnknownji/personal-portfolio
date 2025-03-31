@@ -114,10 +114,7 @@ const TypedText = () => {
 
       if (currentChars.length > 0 && currentWrapper) {
         // === Transitioning ===
-        const { chars: nextChars, wrapper: nextWrapper } = createChars(
-          nextText,
-          container,
-        );
+        const { chars: nextChars } = createChars(nextText, container);
 
         gsap.set(nextChars, {
           y: ANIMATION_CONFIG.INITIAL.Y,
