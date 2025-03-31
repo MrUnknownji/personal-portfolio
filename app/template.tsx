@@ -4,7 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { TextPlugin } from "gsap/TextPlugin";
-import { useLenis } from "@/contexts/LenisContext";
+import { useLenis } from "lenis/react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, TextPlugin);
@@ -14,7 +14,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
-  const { lenis } = useLenis();
+  const lenis = useLenis();
 
   useGSAP(
     () => {
@@ -103,6 +103,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
           `-=${overlayFadeOutDuration * 0.3}`,
         );
     },
+
     { dependencies: [children, lenis] },
   );
 
