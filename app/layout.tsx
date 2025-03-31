@@ -5,7 +5,6 @@ import Footer from "@/components/Footer";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import SmoothScrollLenisGSAP from "@/components/SmoothScrollLenisGSAP";
-import { LenisProps } from "lenis/react";
 import { LenisOptions } from "lenis";
 
 gsap.registerPlugin(ScrollTrigger);
