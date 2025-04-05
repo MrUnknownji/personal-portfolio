@@ -6,268 +6,193 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const ANIMATION_CONFIG = {
-	CONTAINER: {
-		DURATION: 0.8,
-		EASE: "power3.out",
-	},
-	ITEMS: {
-		STAGGER: 0.15,
-		DURATION: 0.6,
-		Y_OFFSET: 30,
-		EASE: "power2.out",
-	},
-	LINE: {
-		DURATION: 1.2,
-		EASE: "power2.inOut",
-		SCALE_Y: 0,
-	},
-	HOVER: {
-		DURATION: 0.3,
-		EASE: "power2.out",
-		GLOW: "0 4px 15px rgba(0, 255, 159, 0.15)",
-	},
+  CONTAINER: {
+    DURATION: 0.8,
+    EASE: "power3.out",
+  },
+  ITEMS: {
+    STAGGER: 0.15,
+    DURATION: 0.6,
+    Y_OFFSET: 30,
+    EASE: "power2.out",
+  },
+  LINE: {
+    DURATION: 1.2,
+    EASE: "power2.inOut",
+    SCALE_Y: 0,
+  },
 } as const;
 
 const journeyData = [
-	{
-		year: "2020",
-		title: "Started Programming Journey",
-		description:
-			"Began learning web development with a focus on modern JavaScript and React.",
-	},
-	{
-		year: "2023",
-		title: "Completed Graduation",
-		description:
-			"Successfully completed my graduation in BSc with Computer Science.",
-	},
-	{
-		year: "2024",
-		title: "Joined TCS",
-		description: "Started working as a Analyst in TCS.",
-	},
-	{
-		year: "2025",
-		title: "Working and Learning",
-		description: "Working as a Analyst in TCS and learning new technologies.",
-	},
+  {
+    year: "2020",
+    title: "Started Programming Journey",
+    description:
+      "Began learning web development with a focus on modern JavaScript and React.",
+  },
+  {
+    year: "2023",
+    title: "Completed Graduation",
+    description:
+      "Successfully completed my graduation in BSc with Computer Science.",
+  },
+  {
+    year: "2024",
+    title: "Joined TCS",
+    description: "Started working as an Analyst in TCS.",
+  },
+  {
+    year: "2025",
+    title: "Working and Learning",
+    description: "Working as an Analyst in TCS and learning new technologies.",
+  },
 ];
 
 const JourneySection = () => {
-	const containerRef = useRef<HTMLDivElement>(null);
-	const titleRef = useRef<HTMLHeadingElement>(null);
-	const itemsRef = useRef<HTMLDivElement>(null);
-	const lineRef = useRef<HTMLDivElement>(null);
-	const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-	const scrollAnimationsComplete = useRef<boolean>(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const itemsContainerRef = useRef<HTMLDivElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
 
-	useGSAP(
-		() => {
-			if (
-				!containerRef.current ||
-				!titleRef.current ||
-				!itemsRef.current ||
-				!lineRef.current
-			)
-				return;
+  useGSAP(
+    () => {
+      if (
+        !containerRef.current ||
+        !titleRef.current ||
+        !itemsContainerRef.current ||
+        !lineRef.current
+      )
+        return;
 
-			const items = Array.from(itemsRef.current.children);
-			const circles = Array.from(document.querySelectorAll(".journey-circle"));
+      const items = Array.from(itemsContainerRef.current.children);
+      const circles = Array.from(
+        containerRef.current.querySelectorAll(".journey-circle"),
+      );
 
-			// Main animation timeline with single trigger
-			const tl = gsap.timeline({
-				scrollTrigger: {
-					trigger: containerRef.current,
-					start: "top 80%",
-					end: "bottom 20%",
-					toggleActions: "play none none reverse",
-					markers: false,
-					onUpdate: (self) => {
-						gsap.to(lineRef.current, {
-							opacity: 0.5 + Math.sin(self.progress * Math.PI) * 0.5,
-							duration: 0.1,
-							ease: "none",
-							overwrite: "auto",
-						});
-					},
-				},
-				onComplete: () => {
-					scrollAnimationsComplete.current = true;
-				},
-				onReverseComplete: () => {
-					scrollAnimationsComplete.current = false;
-				},
-			});
+      gsap.set(titleRef.current, {
+        opacity: 0,
+        y: ANIMATION_CONFIG.ITEMS.Y_OFFSET,
+      });
+      gsap.set(itemsContainerRef.current.children, { opacity: 0, x: -20 });
+      gsap.set(lineRef.current, { scaleY: 0, opacity: 0 });
+      gsap.set(circles, {
+        scale: 0,
+        backgroundColor: "var(--color-secondary)",
+      });
 
-			// Title animation
-			tl.fromTo(
-				titleRef.current,
-				{
-					opacity: 0,
-					y: ANIMATION_CONFIG.ITEMS.Y_OFFSET,
-				},
-				{
-					opacity: 1,
-					y: 0,
-					duration: ANIMATION_CONFIG.CONTAINER.DURATION,
-					ease: ANIMATION_CONFIG.CONTAINER.EASE,
-				}
-			);
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse",
+          markers: false,
+        },
+      });
 
-			// Line animation
-			tl.fromTo(
-				lineRef.current,
-				{ scaleY: ANIMATION_CONFIG.LINE.SCALE_Y },
-				{
-					scaleY: 1,
-					duration: ANIMATION_CONFIG.LINE.DURATION,
-					ease: ANIMATION_CONFIG.LINE.EASE,
-				},
-				"-=0.4"
-			);
+      tl.to(titleRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.CONTAINER.DURATION,
+        ease: ANIMATION_CONFIG.CONTAINER.EASE,
+      });
 
-			// Journey items animations
-			items.forEach((item, index) => {
-				// Staggered entrance animation
-				tl.fromTo(
-					item,
-					{
-						opacity: 0,
-						x: -20,
-						y: ANIMATION_CONFIG.ITEMS.Y_OFFSET,
-					},
-					{
-						opacity: 1,
-						x: 0,
-						y: 0,
-						duration: ANIMATION_CONFIG.ITEMS.DURATION,
-						ease: ANIMATION_CONFIG.ITEMS.EASE,
-						clearProps: "transform", // Clear transform properties after animation completes
-					},
-					`-=${index === 0 ? 0.8 : 0.4}`
-				);
+      tl.to(
+        lineRef.current,
+        {
+          scaleY: 1,
+          opacity: 1,
+          duration: ANIMATION_CONFIG.LINE.DURATION,
+          ease: ANIMATION_CONFIG.LINE.EASE,
+        },
+        "-=0.4",
+      );
 
-				// Circle animation
-				tl.fromTo(
-					circles[index],
-					{
-						backgroundColor: "transparent",
-						scale: 1,
-					},
-					{
-						backgroundColor: "rgba(0, 255, 159, 0.8)",
-						scale: 1.2,
-						duration: 0.4,
-						ease: "back.out(1.7)",
-					},
-					"-=0.3"
-				);
-			});
+      items.forEach((item, index) => {
+        tl.to(
+          item,
+          {
+            opacity: 1,
+            x: 0,
+            duration: ANIMATION_CONFIG.ITEMS.DURATION,
+            ease: ANIMATION_CONFIG.ITEMS.EASE,
+            clearProps: "transform",
+          },
+          `-=${ANIMATION_CONFIG.LINE.DURATION - 0.4 - index * ANIMATION_CONFIG.ITEMS.STAGGER}`,
+        );
 
-			// Setup hover animations separately from scroll animations
-			itemRefs.current.forEach((itemEl) => {
-				if (!itemEl) return;
+        if (circles[index]) {
+          tl.to(
+            circles[index],
+            {
+              scale: 1,
+              backgroundColor: "var(--color-primary)",
+              duration: 0.5,
+              ease: "back.out(1.7)",
+            },
+            "-=0.3",
+          );
+        }
+      });
+      return () => {
+        gsap.killTweensOf([titleRef.current, lineRef.current, items, circles]);
+        if (tl.scrollTrigger) {
+          tl.scrollTrigger.kill();
+        }
+      };
+    },
+    { scope: containerRef },
+  );
 
-				// Create separate elements for hover effects to avoid conflicts
-				const contentEl = itemEl.querySelector(".journey-content");
-				const yearEl = itemEl.querySelector(".journey-year");
+  return (
+    <div ref={containerRef} className="relative">
+      <h3
+        ref={titleRef}
+        className="text-3xl sm:text-4xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-10 text-left"
+      >
+        My Journey
+      </h3>
 
-				// Setup hover animations that don't conflict with scroll animations
-				itemEl.addEventListener("mouseenter", () => {
-					if (!contentEl) return;
+      <div className="relative pl-8 pr-4">
+        <div
+          ref={lineRef}
+          className="absolute left-4 top-2 bottom-2 w-[2px] bg-gradient-to-b from-primary/60 via-primary/40 to-primary/10 origin-top"
+          style={{ willChange: "transform, opacity" }}
+        />
 
-					gsap.to(contentEl, {
-						borderColor: "rgba(0, 255, 159, 0.3)",
-						boxShadow: ANIMATION_CONFIG.HOVER.GLOW,
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: ANIMATION_CONFIG.HOVER.EASE,
-						overwrite: "auto",
-					});
-
-					if (yearEl) {
-						gsap.to(yearEl, {
-							backgroundColor: "rgba(0, 255, 159, 0.2)",
-							duration: ANIMATION_CONFIG.HOVER.DURATION,
-							ease: ANIMATION_CONFIG.HOVER.EASE,
-							overwrite: "auto",
-						});
-					}
-				});
-
-				itemEl.addEventListener("mouseleave", () => {
-					if (!contentEl) return;
-
-					gsap.to(contentEl, {
-						borderColor: "rgba(0, 255, 159, 0.1)",
-						boxShadow: "none",
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: ANIMATION_CONFIG.HOVER.EASE,
-						overwrite: "auto",
-					});
-
-					if (yearEl) {
-						gsap.to(yearEl, {
-							backgroundColor: "rgba(0, 255, 159, 0.1)",
-							duration: ANIMATION_CONFIG.HOVER.DURATION,
-							ease: ANIMATION_CONFIG.HOVER.EASE,
-							overwrite: "auto",
-						});
-					}
-				});
-			});
-		},
-		{ scope: containerRef }
-	);
-
-	return (
-		<div
-			ref={containerRef}
-			className="relative space-y-8"
-			style={{ willChange: "transform" }}
-		>
-			<h3
-				ref={titleRef}
-				className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
-			>
-				My Journey
-			</h3>
-
-			<div
-				ref={lineRef}
-				className="absolute left-[7px] top-[4.5rem] bottom-4 w-[2px] bg-gradient-to-b from-primary/50 via-primary/30 to-transparent origin-top"
-				style={{ willChange: "transform, opacity" }}
-			/>
-
-			<div ref={itemsRef} className="relative space-y-8 pl-8">
-				{journeyData.map((item, index) => (
-					<div
-						key={item.year}
-						ref={(el: HTMLDivElement | null) => {
-							itemRefs.current[index] = el;
-						}}
-						className="relative cursor-pointer"
-						style={{ willChange: "opacity" }}
-					>
-						<div className="journey-circle absolute -left-8 top-1.5 w-3.5 h-3.5 rounded-full border-2 border-primary bg-transparent" />
-
-						<div className="journey-content space-y-1 p-4 rounded-xl bg-gray-900/30 border border-primary/10">
-							<div className="flex items-center gap-3 mb-1">
-								<span className="journey-year px-2 py-0.5 text-sm rounded bg-primary/10 text-primary font-medium">
-									{item.year}
-								</span>
-								<h4 className="font-medium text-lg text-gray-200">
-									{item.title}
-								</h4>
-							</div>
-							<p className="text-gray-400 text-sm sm:text-base pl-1">
-								{item.description}
-							</p>
-						</div>
-					</div>
-				))}
-			</div>
-		</div>
-	);
+        <div ref={itemsContainerRef} className="relative flex flex-col gap-y-8">
+          {journeyData.map((item) => (
+            <div
+              key={item.year}
+              className="relative group"
+              style={{ willChange: "opacity, transform" }}
+            >
+              <div
+                className="journey-circle absolute top-3 w-3.5 h-3.5 rounded-full border-2 border-primary bg-secondary"
+                style={{
+                  left: "-1.375rem",
+                  willChange: "background-color, transform",
+                }}
+              />
+              <div className="journey-content bg-frosted-dark rounded-lg p-5 transition-colors duration-300 ease-in-out group-hover:bg-zinc-900/75 group-hover:border-zinc-600/50">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                  <span className="journey-year inline-block px-2.5 py-1 text-xs rounded-full bg-primary/15 text-primary font-semibold tracking-wide transition-colors duration-300 group-hover:bg-primary/25">
+                    {item.year}
+                  </span>
+                  <h4 className="font-medium text-lg text-light/95">
+                    {item.title}
+                  </h4>
+                </div>
+                <p className="text-muted text-sm sm:text-base leading-relaxed">
+                  {item.description}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default JourneySection;

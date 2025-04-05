@@ -7,204 +7,113 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 
 const ANIMATION_CONFIG = {
-	DURATION: 1,
-	EASE: "power3.out",
-	SCALE: {
-		START: 1.1,
-		END: 1,
-	},
-	OPACITY: {
-		START: 0,
-		END: 1,
-	},
-	BORDER: {
-		DURATION: 1.2,
-		EASE: "power2.inOut",
-		DELAY: 0.3,
-	},
-	HOVER: {
-		SCALE: 1.03,
-		DURATION: 0.4,
-		EASE: "power2.out",
-	},
+  REVEAL_DURATION: 0.8,
+  REVEAL_EASE: "power3.inOut",
+  IMAGE_SCALE_START: 1.1,
+  IMAGE_DURATION: 1.2,
+  IMAGE_EASE: "power3.out",
+  BORDER_DURATION: 1.0,
+  BORDER_EASE: "power2.inOut",
+  BORDER_DELAY: 0.3,
 } as const;
 
 const ImageSection = () => {
-	const containerRef = useRef<HTMLDivElement>(null);
-	const imageWrapperRef = useRef<HTMLDivElement>(null);
-	const imageRef = useRef<HTMLImageElement>(null);
-	const borderRef = useRef<HTMLDivElement>(null);
-	const overlayRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const borderRef = useRef<HTMLDivElement>(null);
 
-	useGSAP(
-		() => {
-			if (
-				!containerRef.current ||
-				!imageWrapperRef.current ||
-				!imageRef.current ||
-				!borderRef.current
-			)
-				return;
+  useGSAP(
+    () => {
+      if (
+        !containerRef.current ||
+        !wrapperRef.current ||
+        !imageRef.current ||
+        !borderRef.current
+      )
+        return;
 
-			// Initial setup
-			gsap.set(imageWrapperRef.current, { clipPath: "inset(100% 0 0 0)" });
-			gsap.set(imageRef.current, {
-				scale: ANIMATION_CONFIG.SCALE.START,
-				opacity: ANIMATION_CONFIG.OPACITY.START,
-			});
-			gsap.set(borderRef.current, { autoAlpha: 0 });
+      gsap.set(wrapperRef.current, { clipPath: "inset(100% 0% 0% 0%)" });
+      gsap.set(imageRef.current, {
+        scale: ANIMATION_CONFIG.IMAGE_SCALE_START,
+        opacity: 0,
+      });
+      gsap.set(borderRef.current, { opacity: 0 });
 
-			if (overlayRef.current) {
-				gsap.set(overlayRef.current, { opacity: 0 });
-			}
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 80%",
+          end: "bottom 20%",
+          toggleActions: "play none none reverse",
+          markers: false,
+        },
+      });
 
-			// Main animation timeline with reverse capability
-			const tl = gsap.timeline({
-				scrollTrigger: {
-					trigger: containerRef.current,
-					start: "top 80%",
-					end: "bottom 20%",
-					toggleActions: "play none none reverse",
-					markers: false,
-				},
-			});
+      tl.to(wrapperRef.current, {
+        clipPath: "inset(0% 0% 0% 0%)",
+        duration: ANIMATION_CONFIG.REVEAL_DURATION,
+        ease: ANIMATION_CONFIG.REVEAL_EASE,
+      })
+        .to(
+          imageRef.current,
+          {
+            scale: 1,
+            opacity: 1,
+            duration: ANIMATION_CONFIG.IMAGE_DURATION,
+            ease: ANIMATION_CONFIG.IMAGE_EASE,
+          },
+          "<",
+        )
+        .to(
+          borderRef.current,
+          {
+            opacity: 1,
+            duration: ANIMATION_CONFIG.BORDER_DURATION,
+            ease: ANIMATION_CONFIG.BORDER_EASE,
+          },
+          ANIMATION_CONFIG.BORDER_DELAY,
+        );
 
-			tl.to(imageWrapperRef.current, {
-				clipPath: "inset(0% 0 0 0)",
-				duration: ANIMATION_CONFIG.DURATION,
-				ease: ANIMATION_CONFIG.EASE,
-			})
-				.to(
-					imageRef.current,
-					{
-						scale: ANIMATION_CONFIG.SCALE.END,
-						opacity: ANIMATION_CONFIG.OPACITY.END,
-						duration: ANIMATION_CONFIG.DURATION,
-						ease: ANIMATION_CONFIG.EASE,
-					},
-					"<"
-				)
-				.to(
-					borderRef.current,
-					{
-						autoAlpha: 1,
-						duration: ANIMATION_CONFIG.BORDER.DURATION,
-						ease: ANIMATION_CONFIG.BORDER.EASE,
-					},
-					ANIMATION_CONFIG.BORDER.DELAY
-				);
+      return () => {
+        gsap.killTweensOf([
+          wrapperRef.current,
+          imageRef.current,
+          borderRef.current,
+        ]);
+        if (tl.scrollTrigger) {
+          tl.scrollTrigger.kill();
+        }
+      };
+    },
+    { scope: containerRef },
+  );
 
-			if (overlayRef.current) {
-				tl.to(
-					overlayRef.current,
-					{
-						opacity: 1,
-						duration: ANIMATION_CONFIG.DURATION,
-						ease: ANIMATION_CONFIG.EASE,
-					},
-					"<+=0.2"
-				);
-			}
-
-			// Add hover animations
-			const hoverTl = gsap.timeline({ paused: true });
-
-			hoverTl
-				.to(imageRef.current, {
-					scale: ANIMATION_CONFIG.HOVER.SCALE,
-					duration: ANIMATION_CONFIG.HOVER.DURATION,
-					ease: ANIMATION_CONFIG.HOVER.EASE,
-				})
-				.to(
-					borderRef.current,
-					{
-						borderColor: "rgba(0, 255, 159, 0.4)",
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: ANIMATION_CONFIG.HOVER.EASE,
-					},
-					0
-				);
-
-			// Add scroll-triggered parallax effect
-			ScrollTrigger.create({
-				trigger: containerRef.current,
-				start: "top bottom",
-				end: "bottom top",
-				scrub: 0.5,
-				onUpdate: (self) => {
-					// Subtle rotation based on scroll position
-					gsap.to(containerRef.current, {
-						rotateY: (self.progress - 0.5) * 5,
-						duration: 0.1,
-						ease: "none",
-						overwrite: "auto",
-					});
-
-					// Subtle scale effect
-					gsap.to(imageRef.current, {
-						scale: 1 + self.progress * 0.05,
-						duration: 0.1,
-						ease: "none",
-						overwrite: "auto",
-					});
-				},
-			});
-
-			// Add hover event listeners
-			containerRef.current.addEventListener("mouseenter", () => hoverTl.play());
-			containerRef.current.addEventListener("mouseleave", () =>
-				hoverTl.reverse()
-			);
-
-			// Cleanup
-			return () => {
-				if (containerRef.current) {
-					containerRef.current.removeEventListener("mouseenter", () =>
-						hoverTl.play()
-					);
-					containerRef.current.removeEventListener("mouseleave", () =>
-						hoverTl.reverse()
-					);
-				}
-			};
-		},
-		{ scope: containerRef }
-	);
-
-	return (
-		<div
-			ref={containerRef}
-			className="relative w-full aspect-square max-w-md mx-auto perspective-1000 cursor-pointer"
-			style={{ willChange: "transform" }}
-		>
-			<div
-				ref={borderRef}
-				className="absolute -inset-4 border-2 border-primary/20 rounded-2xl -z-10"
-			/>
-
-			<div
-				ref={imageWrapperRef}
-				className="w-full h-full rounded-xl overflow-hidden bg-gray-900/50"
-				style={{ willChange: "clip-path" }}
-			>
-				<Image
-					ref={imageRef}
-					src="/images/my-image.jpg"
-					alt="Profile"
-					fill
-					sizes="(max-width: 768px) 100vw, 50vw"
-					className="object-cover"
-					style={{ willChange: "transform, opacity" }}
-					priority
-				/>
-			</div>
-
-			<div
-				ref={overlayRef}
-				className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 pointer-events-none"
-			/>
-		</div>
-	);
+  return (
+    <div ref={containerRef} className="relative w-full group">
+      <div
+        ref={borderRef}
+        className="absolute -inset-1.5 border border-primary/20 rounded-2xl pointer-events-none animate-pulse"
+        style={{ willChange: "opacity", animationDuration: "2s" }}
+      />
+      <div
+        ref={wrapperRef}
+        className="relative aspect-square w-full rounded-lg overflow-hidden"
+        style={{ willChange: "clip-path" }}
+      >
+        <Image
+          ref={imageRef}
+          src="/images/my-image.jpg"
+          alt="Profile"
+          fill
+          sizes="(max-width: 1023px) 90vw, 30vw"
+          className="object-cover grayscale group-hover:grayscale-0 transition-filter duration-300 ease-out"
+          style={{ willChange: "transform, opacity, filter" }}
+          priority
+        />
+      </div>
+    </div>
+  );
 };
 
 export default ImageSection;
