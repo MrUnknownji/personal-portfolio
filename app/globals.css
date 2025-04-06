@@ -109,18 +109,32 @@ html {
     color: var(--color-dark);
 }
 
-/* Updated Frosted Background Utility */
 @layer utilities {
     .bg-frosted-dark {
-        /* Subtle gradient background instead of solid color + blur */
+        /* --- Core Frosted Effect --- */
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+
+        /* --- Background Appearance --- */
         background: linear-gradient(
-            135deg,
-            rgba(39, 39, 42, 0.5) 0%,
-            rgba(24, 24, 27, 0.7) 100%
-        ); /* zinc-800 -> zinc-900 with alpha */
-        border: 1px solid rgba(63, 63, 70, 0.3);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            140deg,
+            rgba(39, 39, 42, 0.35) 0%,
+            rgba(24, 24, 27, 0.55) 100%
+        );
+
+        /* --- Edges and Depth --- */
+        border: 1px solid rgba(241, 241, 241, 0.1);
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 1px rgba(241, 241, 241, 0.05);
+
+        /* Optional: Add a subtle transition */
+        /* transition:
+            background-color 0.3s ease,
+            border-color 0.3s ease,
+            box-shadow 0.3s ease; */
     }
+
     .skill-chip {
         @apply px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium cursor-default transition-colors border border-primary/20;
     }

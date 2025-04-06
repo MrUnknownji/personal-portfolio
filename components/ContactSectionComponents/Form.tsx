@@ -1,395 +1,278 @@
 "use client";
-import React, { useRef, useState, useCallback, useEffect } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { FiSend } from "react-icons/fi";
 
 interface FormProps {
-	onSubmitSuccess: () => void;
+  onSubmitSuccess: () => void;
 }
 
 const ANIMATION_CONFIG = {
-	FORM_ITEMS: {
-		DURATION: 0.8,
-		STAGGER: 0.15,
-		Y_OFFSET: 30,
-		OPACITY: 0,
-		EASE: "power3.out",
-		ROTATION: 2,
-		SCALE: 0.95,
-	},
-	INPUT: {
-		FOCUS: {
-			DURATION: 0.4,
-			EASE: "power2.out",
-			BORDER: {
-				NORMAL: "rgb(31, 41, 55)",
-				FOCUSED: "rgb(79, 209, 197)",
-			},
-			BG: {
-				NORMAL: "rgba(17, 24, 39, 0.5)",
-				FOCUSED: "rgba(17, 24, 39, 0.7)",
-			},
-			SHADOW: {
-				NORMAL: "none",
-				FOCUSED: "0 0 20px rgba(79, 209, 197, 0.15)",
-			},
-		},
-	},
-	BUTTON: {
-		HOVER: {
-			DURATION: 0.3,
-			EASE: "power2.out",
-			GAP: {
-				NORMAL: "0.5rem",
-				HOVER: "1rem",
-			},
-			ICON_ROTATION: 20,
-			BG: {
-				NORMAL:
-					"linear-gradient(to right, rgb(79, 209, 197), rgb(64, 175, 255))",
-				HOVER:
-					"linear-gradient(to right, rgb(64, 175, 255), rgb(79, 209, 197))",
-			},
-		},
-	},
-	SCROLL_TRIGGER: {
-		START: "top 80%",
-		END: "bottom 20%",
-		TOGGLE_ACTIONS: "play none none reverse",
-	},
-} as const;
-
-const INPUT_CLASSES = {
-	base: "w-full bg-gray-900/50 rounded-lg border border-gray-800 text-gray-200 px-4 py-3 outline-none placeholder:text-gray-500",
-	error: "border-red-500 bg-red-500/5",
-	wrapper: "relative overflow-hidden",
+  FORM_ITEMS: {
+    DURATION: 0.8,
+    STAGGER: 0.15,
+    Y_OFFSET: 30,
+    OPACITY: 0,
+    EASE: "power3.out",
+    ROTATION: 2,
+    SCALE: 0.95,
+  },
+  SCROLL_TRIGGER: {
+    START: "top 85%",
+    END: "bottom 20%",
+    TOGGLE_ACTIONS: "play none none reverse",
+  },
+  INPUT_FLOAT: {
+    DURATION: 2.5,
+    Y_OFFSET: 4,
+    EASE: "sine.inOut",
+  },
 } as const;
 
 const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
-	const [errors, setErrors] = useState<Record<string, string>>({});
-	const formRef = useRef<HTMLFormElement>(null);
-	const formContainerRef = useRef<HTMLDivElement>(null);
-	const inputRefs = useRef<(HTMLInputElement | HTMLTextAreaElement)[]>([]);
-	const buttonRef = useRef<HTMLButtonElement>(null);
-	const buttonTextRef = useRef<HTMLSpanElement>(null);
-	const buttonIconRef = useRef<HTMLSpanElement>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const formContainerRef = useRef<HTMLDivElement>(null);
+  const categoryInputRef = useRef<HTMLInputElement>(null);
+  const subjectInputRef = useRef<HTMLInputElement>(null);
+  const messageTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
-	const validateForm = useCallback(() => {
-		const newErrors: Record<string, string> = {};
+  const validateForm = useCallback(() => {
+    const newErrors: Record<string, string> = {};
+    if (!categoryInputRef.current?.value) {
+      newErrors.category = "Category is required";
+    }
+    if (!subjectInputRef.current?.value) {
+      newErrors.subject = "Subject is required";
+    }
+    if (!messageTextareaRef.current?.value) {
+      newErrors.message = "Message is required";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, []);
 
-		if (!inputRefs.current[0]?.value) {
-			newErrors.category = "Category is required";
-		}
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm() || isSubmitting) return;
 
-		if (!inputRefs.current[1]?.value) {
-			newErrors.subject = "Subject is required";
-		}
+    setIsSubmitting(true);
 
-		if (!inputRefs.current[2]?.value) {
-			newErrors.message = "Message is required";
-		}
+    try {
+      if (submitButtonRef.current) {
+        gsap.to(submitButtonRef.current, {
+          scale: 0.97,
+          duration: 0.15,
+          ease: "power2.inOut",
+          yoyo: true,
+          repeat: 1,
+        });
+      }
 
-		setErrors(newErrors);
-		return Object.keys(newErrors).length === 0;
-	}, []);
+      const category = categoryInputRef.current?.value || "";
+      const subject = subjectInputRef.current?.value || "";
+      const message = messageTextareaRef.current?.value || "";
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!validateForm()) return;
+      const mailtoLink = `mailto:sandeepkhati788@gmail.com?subject=${encodeURIComponent(
+        `[${category}] ${subject}`,
+      )}&body=${encodeURIComponent(message)}`;
 
-		try {
-			// Animate button on submit
-			if (buttonRef.current) {
-				gsap.to(buttonRef.current, {
-					scale: 0.95,
-					duration: 0.2,
-					ease: "power2.in",
-					yoyo: true,
-					repeat: 1,
-				});
-			}
+      const mailWindow = window.open(mailtoLink, "_blank");
 
-			const category = inputRefs.current[0]?.value || "";
-			const subject = inputRefs.current[1]?.value || "";
-			const message = inputRefs.current[2]?.value || "";
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-			const mailtoLink = `mailto:sandeepkhati788@gmail.com?subject=${encodeURIComponent(
-				`[${category}] ${subject}`
-			)}&body=${encodeURIComponent(message)}`;
-			window.open(mailtoLink, "_blank");
+      if (
+        !mailWindow ||
+        mailWindow.closed ||
+        typeof mailWindow.closed == "undefined"
+      ) {
+        console.warn(
+          "Mailto link might be blocked. Consider providing manual instructions.",
+        );
+      }
 
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-			onSubmitSuccess();
-			if (formRef.current) formRef.current.reset();
-			setErrors({});
-		} catch (error) {
-			console.error("Error submitting form:", error);
-		}
-	};
+      onSubmitSuccess();
+      formRef.current?.reset();
+      setErrors({});
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-	const handleFocus = useCallback((index: number) => {
-		if (!inputRefs.current[index]) return;
+  useGSAP(
+    () => {
+      if (!formRef.current || !formContainerRef.current) return;
 
-		const input = inputRefs.current[index];
-		const wrapper = input.parentElement;
+      const formElements = gsap.utils.toArray<HTMLElement>(
+        formRef.current.querySelectorAll(".form-item-wrapper"),
+      );
 
-		gsap.to(input, {
-			borderColor: ANIMATION_CONFIG.INPUT.FOCUS.BORDER.FOCUSED,
-			backgroundColor: ANIMATION_CONFIG.INPUT.FOCUS.BG.FOCUSED,
-			boxShadow: ANIMATION_CONFIG.INPUT.FOCUS.SHADOW.FOCUSED,
-			duration: ANIMATION_CONFIG.INPUT.FOCUS.DURATION,
-			ease: ANIMATION_CONFIG.INPUT.FOCUS.EASE,
-		});
+      gsap.set(formElements, {
+        y: ANIMATION_CONFIG.FORM_ITEMS.Y_OFFSET,
+        opacity: ANIMATION_CONFIG.FORM_ITEMS.OPACITY,
+        rotationZ: ANIMATION_CONFIG.FORM_ITEMS.ROTATION,
+        scale: ANIMATION_CONFIG.FORM_ITEMS.SCALE,
+        willChange: "transform, opacity",
+        force3D: true,
+      });
 
-		// Add a subtle flash effect on the wrapper
-		if (wrapper) {
-			gsap.fromTo(
-				wrapper,
-				{ boxShadow: "0 0 0 0 rgba(79, 209, 197, 0)" },
-				{
-					boxShadow: "0 0 10px 2px rgba(79, 209, 197, 0.2)",
-					duration: 0.4,
-					ease: "power2.out",
-					yoyo: true,
-					repeat: 1,
-				}
-			);
-		}
-	}, []);
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: formContainerRef.current,
+          start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
+          end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
+          toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
+          markers: false,
+        },
+      });
 
-	const handleBlur = useCallback((index: number) => {
-		if (!inputRefs.current[index]) return;
+      tl.to(formElements, {
+        y: 0,
+        opacity: 1,
+        rotationZ: 0,
+        scale: 1,
+        duration: ANIMATION_CONFIG.FORM_ITEMS.DURATION,
+        stagger: ANIMATION_CONFIG.FORM_ITEMS.STAGGER,
+        ease: ANIMATION_CONFIG.FORM_ITEMS.EASE,
+        clearProps: "transform, opacity, willChange",
+        force3D: true,
+      });
 
-		const input = inputRefs.current[index];
+      const inputWrappers = formElements.slice(0, -1);
+      tl.to(
+        inputWrappers,
+        {
+          y: (i) => Math.sin(i * 0.8) * ANIMATION_CONFIG.INPUT_FLOAT.Y_OFFSET,
+          duration: ANIMATION_CONFIG.INPUT_FLOAT.DURATION,
+          ease: ANIMATION_CONFIG.INPUT_FLOAT.EASE,
+          stagger: 0.1,
+          repeat: -1,
+          yoyo: true,
+          force3D: true,
+          willChange: "transform",
+        },
+        "-=0.5",
+      );
+    },
+    { scope: formContainerRef },
+  );
 
-		gsap.to(input, {
-			borderColor: ANIMATION_CONFIG.INPUT.FOCUS.BORDER.NORMAL,
-			backgroundColor: ANIMATION_CONFIG.INPUT.FOCUS.BG.NORMAL,
-			boxShadow: ANIMATION_CONFIG.INPUT.FOCUS.SHADOW.NORMAL,
-			duration: ANIMATION_CONFIG.INPUT.FOCUS.DURATION,
-			ease: ANIMATION_CONFIG.INPUT.FOCUS.EASE,
-		});
-	}, []);
+  const getInputClasses = (hasError: boolean): string => {
+    return `
+      w-full bg-neutral/30 rounded-lg border text-light px-4 py-3
+      outline-none placeholder:text-muted transition-all duration-300 ease-out
+      focus:border-primary focus:bg-neutral/50 focus:ring-2 focus:ring-primary/30
+      ${
+        hasError
+          ? "border-destructive bg-destructive/10"
+          : "border-neutral/70 hover:border-primary/50"
+      }
+    `;
+  };
 
-	useEffect(() => {
-		if (!buttonRef.current || !buttonTextRef.current || !buttonIconRef.current)
-			return;
+  return (
+    <div ref={formContainerRef} className="w-full">
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit}
+        className="space-y-6"
+        noValidate
+      >
+        <div className="form-item-wrapper relative pb-5">
+          <input
+            ref={categoryInputRef}
+            type="text"
+            name="category"
+            placeholder="Category (e.g., Project Inquiry, Collaboration)"
+            className={getInputClasses(!!errors.category)}
+            aria-invalid={!!errors.category}
+            aria-describedby={errors.category ? "category-error" : undefined}
+            disabled={isSubmitting}
+          />
+          {errors.category && (
+            <span
+              id="category-error"
+              className="absolute bottom-0 left-0 text-sm text-destructive"
+              role="alert"
+            >
+              {errors.category}
+            </span>
+          )}
+        </div>
 
-		const button = buttonRef.current;
-		// const buttonText = buttonTextRef.current;
-		const buttonIcon = buttonIconRef.current;
+        <div className="form-item-wrapper relative pb-5">
+          <input
+            ref={subjectInputRef}
+            type="text"
+            name="subject"
+            placeholder="Subject"
+            className={getInputClasses(!!errors.subject)}
+            aria-invalid={!!errors.subject}
+            aria-describedby={errors.subject ? "subject-error" : undefined}
+            disabled={isSubmitting}
+          />
+          {errors.subject && (
+            <span
+              id="subject-error"
+              className="absolute bottom-0 left-0 text-sm text-destructive"
+              role="alert"
+            >
+              {errors.subject}
+            </span>
+          )}
+        </div>
 
-		// Set initial gap
-		gsap.set(button, {
-			background: ANIMATION_CONFIG.BUTTON.HOVER.BG.NORMAL,
-			gap: ANIMATION_CONFIG.BUTTON.HOVER.GAP.NORMAL,
-		});
+        <div className="form-item-wrapper relative pb-5">
+          <textarea
+            ref={messageTextareaRef}
+            name="message"
+            placeholder="Your Message"
+            rows={6}
+            className={`${getInputClasses(!!errors.message)} resize-none`}
+            aria-invalid={!!errors.message}
+            aria-describedby={errors.message ? "message-error" : undefined}
+            disabled={isSubmitting}
+          />
+          {errors.message && (
+            <span
+              id="message-error"
+              className="absolute bottom-0 left-0 text-sm text-destructive"
+              role="alert"
+            >
+              {errors.message}
+            </span>
+          )}
+        </div>
 
-		const handleMouseEnter = () => {
-			gsap.to(button, {
-				background: ANIMATION_CONFIG.BUTTON.HOVER.BG.HOVER,
-				gap: ANIMATION_CONFIG.BUTTON.HOVER.GAP.HOVER,
-				duration: ANIMATION_CONFIG.BUTTON.HOVER.DURATION,
-				ease: ANIMATION_CONFIG.BUTTON.HOVER.EASE,
-			});
-
-			gsap.to(buttonIcon, {
-				rotate: ANIMATION_CONFIG.BUTTON.HOVER.ICON_ROTATION,
-				duration: ANIMATION_CONFIG.BUTTON.HOVER.DURATION,
-				ease: "back.out(1.7)",
-			});
-		};
-
-		const handleMouseLeave = () => {
-			gsap.to(button, {
-				background: ANIMATION_CONFIG.BUTTON.HOVER.BG.NORMAL,
-				gap: ANIMATION_CONFIG.BUTTON.HOVER.GAP.NORMAL,
-				duration: ANIMATION_CONFIG.BUTTON.HOVER.DURATION,
-				ease: ANIMATION_CONFIG.BUTTON.HOVER.EASE,
-			});
-
-			gsap.to(buttonIcon, {
-				rotate: 0,
-				duration: ANIMATION_CONFIG.BUTTON.HOVER.DURATION,
-				ease: "back.out(1.7)",
-			});
-		};
-
-		button.addEventListener("mouseenter", handleMouseEnter);
-		button.addEventListener("mouseleave", handleMouseLeave);
-
-		return () => {
-			button.removeEventListener("mouseenter", handleMouseEnter);
-			button.removeEventListener("mouseleave", handleMouseLeave);
-		};
-	}, []);
-
-	useGSAP(() => {
-		if (!formRef.current || !formContainerRef.current) return;
-
-		// Set initial state for all form elements
-		const formElements = formRef.current.querySelectorAll(".form-item-wrapper");
-		gsap.set(formElements, {
-			y: ANIMATION_CONFIG.FORM_ITEMS.Y_OFFSET,
-			opacity: ANIMATION_CONFIG.FORM_ITEMS.OPACITY,
-			rotationZ: ANIMATION_CONFIG.FORM_ITEMS.ROTATION,
-			scale: ANIMATION_CONFIG.FORM_ITEMS.SCALE,
-		});
-
-		// Create the main timeline with ScrollTrigger
-		const tl = gsap.timeline({
-			scrollTrigger: {
-				trigger: formContainerRef.current,
-				start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
-				end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
-				toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
-				markers: false,
-			},
-		});
-
-		// Staggered entrance animation for form elements
-		tl.to(formElements, {
-			y: 0,
-			opacity: 1,
-			rotationZ: 0,
-			scale: 1,
-			duration: ANIMATION_CONFIG.FORM_ITEMS.DURATION,
-			stagger: ANIMATION_CONFIG.FORM_ITEMS.STAGGER,
-			ease: ANIMATION_CONFIG.FORM_ITEMS.EASE,
-			clearProps: "transform",
-		});
-
-		// Add a subtle pulse animation to the button
-		if (buttonRef.current) {
-			tl.to(
-				buttonRef.current,
-				{
-					boxShadow: "0 0 20px 5px rgba(79, 209, 197, 0.2)",
-					duration: 1,
-					repeat: 1,
-					yoyo: true,
-					ease: "sine.inOut",
-				},
-				"-=0.5"
-			);
-		}
-
-		// Add a subtle floating animation to inputs
-		const inputWrappers = formRef.current.querySelectorAll(
-			".form-item-wrapper:not(:last-child)"
-		);
-		tl.to(
-			inputWrappers,
-			{
-				y: (i) => Math.sin(i * Math.PI) * 5,
-				duration: 1.5,
-				ease: "sine.inOut",
-				stagger: 0.1,
-				repeat: -1,
-				yoyo: true,
-			},
-			"-=1"
-		);
-
-		return () => {
-			// Clean up ScrollTrigger instances when component unmounts
-			ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-		};
-	}, []);
-
-	return (
-		<div ref={formContainerRef} className="w-full">
-			<form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-				<div className={`${INPUT_CLASSES.wrapper} form-item-wrapper`}>
-					<input
-						ref={(el) => {
-							if (el) inputRefs.current[0] = el;
-						}}
-						type="text"
-						placeholder="Category"
-						className={`${INPUT_CLASSES.base} ${
-							errors.category ? INPUT_CLASSES.error : ""
-						}`}
-						onFocus={() => handleFocus(0)}
-						onBlur={() => handleBlur(0)}
-					/>
-					{errors.category && (
-						<span className="absolute -bottom-5 left-0 text-sm text-red-500">
-							{errors.category}
-						</span>
-					)}
-				</div>
-
-				<div className={`${INPUT_CLASSES.wrapper} form-item-wrapper`}>
-					<input
-						ref={(el) => {
-							if (el) inputRefs.current[1] = el;
-						}}
-						type="text"
-						placeholder="Subject"
-						className={`${INPUT_CLASSES.base} ${
-							errors.subject ? INPUT_CLASSES.error : ""
-						}`}
-						onFocus={() => handleFocus(1)}
-						onBlur={() => handleBlur(1)}
-					/>
-					{errors.subject && (
-						<span className="absolute -bottom-5 left-0 text-sm text-red-500">
-							{errors.subject}
-						</span>
-					)}
-				</div>
-
-				<div className={`${INPUT_CLASSES.wrapper} form-item-wrapper`}>
-					<textarea
-						ref={(el) => {
-							if (el) inputRefs.current[2] = el;
-						}}
-						placeholder="Your Message"
-						rows={6}
-						className={`${INPUT_CLASSES.base} resize-none ${
-							errors.message ? INPUT_CLASSES.error : ""
-						}`}
-						onFocus={() => handleFocus(2)}
-						onBlur={() => handleBlur(2)}
-					/>
-					{errors.message && (
-						<span className="absolute -bottom-5 left-0 text-sm text-red-500">
-							{errors.message}
-						</span>
-					)}
-				</div>
-
-				<div className="form-item-wrapper">
-					<button
-						ref={buttonRef}
-						type="submit"
-						className="w-full text-gray-900 font-semibold py-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 flex items-center justify-center"
-						style={{ willChange: "transform, background, gap" }}
-					>
-						<span ref={buttonTextRef}>Send Message</span>
-						<span ref={buttonIconRef} className="inline-block">
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								width="20"
-								height="20"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="currentColor"
-								strokeWidth="2"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-							>
-								<line x1="22" y1="2" x2="11" y2="13"></line>
-								<polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-							</svg>
-						</span>
-					</button>
-				</div>
-			</form>
-		</div>
-	);
+        <div className="form-item-wrapper">
+          <button
+            ref={submitButtonRef}
+            type="submit"
+            disabled={isSubmitting}
+            className="group/submitbtn w-full bg-gradient-to-r from-primary to-accent text-dark font-semibold py-3.5 px-6 rounded-lg
+                        focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-secondary
+                        flex items-center justify-center gap-x-2 transform transition-all duration-300 ease-out
+                        hover:from-accent hover:to-primary hover:shadow-lg hover:shadow-primary/30 hover:gap-x-3
+                        disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+          >
+            <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
+            <FiSend
+              className={`w-5 h-5 transition-transform duration-300 ease-out ${
+                isSubmitting
+                  ? "animate-spin"
+                  : "group-hover/submitbtn:rotate-[40deg]"
+              }`}
+            />
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 };
 
 export default Form;

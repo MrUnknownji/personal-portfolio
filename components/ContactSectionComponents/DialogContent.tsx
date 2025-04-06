@@ -1,276 +1,187 @@
 "use client";
 import React, { useRef, useCallback } from "react";
-import { FiMail, FiCopy } from "react-icons/fi";
+import { FiMail, FiCopy, FiCheck } from "react-icons/fi";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 
 interface DialogContentProps {
-	email: string;
-	onCopy: () => void;
+  email: string;
+  onCopy: () => void;
+  isCopied: boolean;
 }
 
 const ANIMATION_CONFIG = {
-	ICON: {
-		DURATION: 0.5,
-		EASE: "back.out(1.7)",
-		SCALE: {
-			START: 0,
-			END: 1,
-		},
-		ROTATE: {
-			START: -180,
-			END: 0,
-		},
-		HOVER: {
-			DURATION: 0.3,
-			ROTATE: 12,
-			EASE: "power2.out",
-		},
-	},
-	CONTENT: {
-		DURATION: 0.4,
-		STAGGER: 0.08,
-		Y_OFFSET: 20,
-		EASE: "power2.out",
-	},
-	BUTTON: {
-		DURATION: 0.4,
-		EASE: "power2.out",
-		HOVER: {
-			DURATION: 0.2,
-			SCALE: 1.02,
-			OPACITY: 0.9,
-		},
-	},
-	SHINE: {
-		DURATION: 0.7,
-		EASE: "power2.inOut",
-	},
+  ENTRANCE_ICON: {
+    DURATION: 0.6,
+    EASE: "back.out(1.7)",
+    SCALE: 0,
+    ROTATE: -180,
+  },
+  ENTRANCE_CONTENT: {
+    DURATION: 0.5,
+    STAGGER: 0.08,
+    Y_OFFSET: 20,
+    EASE: "power2.out",
+  },
 } as const;
 
-const DialogContent = ({ email, onCopy }: DialogContentProps) => {
-	const iconWrapperRef = useRef<HTMLDivElement>(null);
-	const mailIconWrapperRef = useRef<HTMLDivElement>(null);
-	const contentRef = useRef<HTMLDivElement>(null);
-	const buttonRef = useRef<HTMLButtonElement>(null);
-	const copyIconWrapperRef = useRef<HTMLDivElement>(null);
-	const shineRef = useRef<HTMLDivElement>(null);
-	const emailRef = useRef<HTMLParagraphElement>(null);
+const DialogContent = ({ email, onCopy, isCopied }: DialogContentProps) => {
+  const contentWrapperRef = useRef<HTMLDivElement>(null);
+  const iconWrapperRef = useRef<HTMLDivElement>(null);
+  const mailIconRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
-	// Function to handle mobile copy
-	const handleMobileCopy = useCallback(() => {
-		// For mobile devices, use a different approach
-		if (navigator.userAgent.match(/iphone|ipod|ipad|android/i)) {
-			// Create a temporary input element
-			const tempInput = document.createElement("input");
-			tempInput.value = email;
-			document.body.appendChild(tempInput);
+  const handleCopyClick = useCallback(() => {
+    navigator.clipboard
+      .writeText(email)
+      .then(() => {
+        onCopy(); // Notify parent
+      })
+      .catch((err) => {
+        console.error("Failed to copy text: ", err);
+        try {
+          const tempInput = document.createElement("input");
+          tempInput.value = email;
+          document.body.appendChild(tempInput);
+          tempInput.select();
+          document.execCommand("copy");
+          document.body.removeChild(tempInput);
+          onCopy();
+        } catch (copyErr) {
+          console.error("Fallback copy failed: ", copyErr);
+        }
+      });
+  }, [email, onCopy]);
 
-			// Select the text
-			tempInput.select();
-			tempInput.setSelectionRange(0, 99999); // For mobile devices
+  useGSAP(
+    () => {
+      if (
+        !iconWrapperRef.current ||
+        !contentWrapperRef.current ||
+        !buttonRef.current
+      )
+        return;
 
-			// Execute copy command
-			try {
-				document.execCommand("copy");
-				onCopy();
-			} catch (err) {
-				console.error("Failed to copy text: ", err);
-				// Fallback for newer browsers
-				if (navigator.clipboard) {
-					navigator.clipboard.writeText(email).then(onCopy);
-				}
-			}
+      const contentElements = gsap.utils.toArray<HTMLElement>(
+        contentWrapperRef.current.querySelectorAll(".animate-content"),
+      );
 
-			// Remove the temporary element
-			document.body.removeChild(tempInput);
-		} else {
-			// For desktop, use the standard clipboard API
-			navigator.clipboard.writeText(email).then(onCopy);
-		}
-	}, [email, onCopy]);
+      gsap.set(iconWrapperRef.current, {
+        opacity: 0,
+        scale: ANIMATION_CONFIG.ENTRANCE_ICON.SCALE,
+        rotate: ANIMATION_CONFIG.ENTRANCE_ICON.ROTATE,
+        force3D: true,
+        willChange: "transform, opacity",
+      });
 
-	useGSAP(() => {
-		if (!iconWrapperRef.current || !contentRef.current || !buttonRef.current)
-			return;
+      gsap.set([contentElements, buttonRef.current], {
+        opacity: 0,
+        y: ANIMATION_CONFIG.ENTRANCE_CONTENT.Y_OFFSET,
+        force3D: true,
+        willChange: "transform, opacity",
+      });
 
-		const ctx = gsap.context(() => {
-			gsap.set(
-				[
-					iconWrapperRef.current,
-					contentRef.current?.querySelectorAll(".animate-content"),
-					buttonRef.current,
-				],
-				{
-					opacity: 0,
-					force3D: true,
-					willChange: "transform, opacity",
-				}
-			);
+      const timeline = gsap.timeline({ defaults: { force3D: true } });
 
-			gsap.set(iconWrapperRef.current, {
-				scale: ANIMATION_CONFIG.ICON.SCALE.START,
-				rotate: ANIMATION_CONFIG.ICON.ROTATE.START,
-				force3D: true,
-				willChange: "transform, opacity",
-			});
+      timeline
+        .to(iconWrapperRef.current, {
+          opacity: 1,
+          scale: 1,
+          rotate: 0,
+          duration: ANIMATION_CONFIG.ENTRANCE_ICON.DURATION,
+          ease: ANIMATION_CONFIG.ENTRANCE_ICON.EASE,
+          clearProps: "all",
+        })
+        .to(
+          contentElements,
+          {
+            opacity: 1,
+            y: 0,
+            duration: ANIMATION_CONFIG.ENTRANCE_CONTENT.DURATION,
+            stagger: ANIMATION_CONFIG.ENTRANCE_CONTENT.STAGGER,
+            ease: ANIMATION_CONFIG.ENTRANCE_CONTENT.EASE,
+            clearProps: "transform, opacity, willChange",
+          },
+          "-=0.3",
+        )
+        .to(
+          buttonRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: ANIMATION_CONFIG.ENTRANCE_CONTENT.DURATION,
+            ease: ANIMATION_CONFIG.ENTRANCE_CONTENT.EASE,
+            clearProps: "all",
+          },
+          "-=0.2",
+        );
+    },
+    { scope: contentWrapperRef },
+  );
 
-			gsap.set(
-				[
-					contentRef.current?.querySelectorAll(".animate-content"),
-					buttonRef.current,
-				],
-				{
-					y: ANIMATION_CONFIG.CONTENT.Y_OFFSET,
-					force3D: true,
-					willChange: "transform, opacity",
-				}
-			);
+  return (
+    <div ref={contentWrapperRef} className="p-6 sm:p-8 space-y-6">
+      {/* Icon */}
+      <div className="flex items-center justify-center">
+        <div
+          ref={iconWrapperRef}
+          className="group p-4 bg-primary/10 rounded-2xl inline-block"
+        >
+          <div
+            ref={mailIconRef}
+            className="inline-flex transform-gpu transition-transform duration-300 ease-out
+                                 group-hover:rotate-12"
+          >
+            <FiMail className="w-12 h-12 text-primary" />
+          </div>
+        </div>
+      </div>
 
-			const timeline = gsap.timeline();
+      {/* Text Content */}
+      <div className="space-y-3 text-center">
+        <h3 className="animate-content text-2xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          Thank You for Reaching Out!
+        </h3>
+        <p className="animate-content text-muted">
+          Your message is on its way. You can also copy my email address below:
+        </p>
+      </div>
 
-			timeline
-				.to(iconWrapperRef.current, {
-					scale: ANIMATION_CONFIG.ICON.SCALE.END,
-					rotate: ANIMATION_CONFIG.ICON.ROTATE.END,
-					opacity: 1,
-					duration: ANIMATION_CONFIG.ICON.DURATION,
-					ease: ANIMATION_CONFIG.ICON.EASE,
-					force3D: true,
-				})
-				.to(
-					contentRef.current?.querySelectorAll(".animate-content") || [],
-					{
-						opacity: 1,
-						y: 0,
-						duration: ANIMATION_CONFIG.CONTENT.DURATION,
-						stagger: ANIMATION_CONFIG.CONTENT.STAGGER,
-						ease: ANIMATION_CONFIG.CONTENT.EASE,
-						force3D: true,
-					},
-					"-=0.2"
-				)
-				.to(
-					buttonRef.current,
-					{
-						opacity: 1,
-						y: 0,
-						duration: ANIMATION_CONFIG.BUTTON.DURATION,
-						ease: ANIMATION_CONFIG.BUTTON.EASE,
-						force3D: true,
-					},
-					"-=0.2"
-				);
-		});
+      {/* Email Display */}
+      <div className="animate-content bg-neutral/30 rounded-xl p-4 backdrop-blur-sm">
+        <p className="text-center text-primary font-medium break-all select-all">
+          {email}
+        </p>
+      </div>
 
-		return () => ctx.revert();
-	}, []);
-
-	const handleIconHover = useCallback((isEntering: boolean) => {
-		if (!mailIconWrapperRef.current) return;
-
-		gsap.to(mailIconWrapperRef.current, {
-			rotate: isEntering ? ANIMATION_CONFIG.ICON.HOVER.ROTATE : 0,
-			duration: ANIMATION_CONFIG.ICON.HOVER.DURATION,
-			ease: ANIMATION_CONFIG.ICON.HOVER.EASE,
-			willChange: "transform",
-		});
-	}, []);
-
-	const handleButtonHover = useCallback((isEntering: boolean) => {
-		if (!buttonRef.current || !copyIconWrapperRef.current || !shineRef.current)
-			return;
-
-		const ctx = gsap.context(() => {
-			gsap.to(buttonRef.current, {
-				scale: isEntering ? ANIMATION_CONFIG.BUTTON.HOVER.SCALE : 1,
-				opacity: isEntering ? ANIMATION_CONFIG.BUTTON.HOVER.OPACITY : 1,
-				duration: ANIMATION_CONFIG.BUTTON.HOVER.DURATION,
-				ease: ANIMATION_CONFIG.BUTTON.EASE,
-				force3D: true,
-				willChange: "transform, opacity",
-			});
-
-			gsap.to(copyIconWrapperRef.current, {
-				rotate: isEntering ? ANIMATION_CONFIG.ICON.HOVER.ROTATE : 0,
-				duration: ANIMATION_CONFIG.ICON.HOVER.DURATION,
-				ease: ANIMATION_CONFIG.ICON.HOVER.EASE,
-				willChange: "transform",
-			});
-
-			if (isEntering) {
-				gsap.fromTo(
-					shineRef.current,
-					{ x: "-100%", willChange: "transform" },
-					{
-						x: "100%",
-						duration: ANIMATION_CONFIG.SHINE.DURATION,
-						ease: ANIMATION_CONFIG.SHINE.EASE,
-						willChange: "transform",
-					}
-				);
-			}
-		});
-
-		return () => ctx.revert();
-	}, []);
-
-	return (
-		<div ref={contentRef} className="p-6 sm:p-8 space-y-6">
-			<div className="flex items-center justify-center">
-				<div
-					ref={iconWrapperRef}
-					className="p-4 bg-primary/10 rounded-2xl transform-gpu"
-					onMouseEnter={() => handleIconHover(true)}
-					onMouseLeave={() => handleIconHover(false)}
-				>
-					<div ref={mailIconWrapperRef} className="inline-flex transform-gpu">
-						<FiMail className="w-12 h-12 text-primary" />
-					</div>
-				</div>
-			</div>
-
-			<div className="space-y-3 text-center">
-				<h3 className="text-2xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent animate-content transform-gpu">
-					Thank You for Reaching Out!
-				</h3>
-				<p className="text-gray-400 animate-content transform-gpu">
-					I&apos;ll get back to you as soon as possible. You can copy my email
-					address to send me a message:
-				</p>
-			</div>
-
-			<div className="bg-gray-700/30 rounded-xl p-4 backdrop-blur-sm animate-content transform-gpu">
-				<p
-					ref={emailRef}
-					className="text-center text-primary font-medium break-all select-all"
-				>
-					{email}
-				</p>
-			</div>
-
-			<button
-				ref={buttonRef}
-				onClick={handleMobileCopy}
-				onMouseEnter={() => handleButtonHover(true)}
-				onMouseLeave={() => handleButtonHover(false)}
-				className="w-full py-3 px-4 bg-primary text-secondary rounded-xl relative overflow-hidden transform-gpu"
-			>
-				<span className="font-medium relative z-10">Copy to Clipboard</span>
-				<div
-					ref={copyIconWrapperRef}
-					className="inline-flex ml-2 transform-gpu"
-				>
-					<FiCopy className="w-4 h-4" />
-				</div>
-
-				<div
-					ref={shineRef}
-					className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform-gpu"
-				/>
-			</button>
-		</div>
-	);
+      {/* Copy Button */}
+      <button
+        ref={buttonRef}
+        onClick={handleCopyClick}
+        disabled={isCopied}
+        className="group w-full py-3 px-4 bg-primary text-secondary rounded-xl relative overflow-hidden transform-gpu
+                 flex items-center justify-center gap-2 transition-all duration-300 ease-out focus:outline-none
+                 focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-secondary/50
+                 hover:scale-[1.02] hover:bg-opacity-90 hover:shadow-md hover:shadow-primary/20
+                 disabled:opacity-60 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none"
+      >
+        {isCopied ? (
+          <>
+            <FiCheck className="w-5 h-5" />
+            <span className="font-medium">Copied!</span>
+          </>
+        ) : (
+          <>
+            <span className="font-medium">Copy to Clipboard</span>
+            <FiCopy
+              className="w-4 h-4 transition-transform duration-300 ease-out
+                                   group-hover:rotate-12"
+            />
+          </>
+        )}
+      </button>
+    </div>
+  );
 };
 
 export default DialogContent;

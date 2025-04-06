@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -11,156 +11,116 @@ import Title from "./ui/Title";
 gsap.registerPlugin(ScrollTrigger);
 
 const ANIMATION_CONFIG = {
-	SECTION: {
-		DURATION: 0.8,
-		EASE: "linear",
-		TRIGGER_START: "top 80%",
-		TRIGGER_END: "bottom 20%",
-	},
-	CONTENT: {
-		DURATION: 0.8,
-		STAGGER: 0.15,
-		Y_OFFSET: 50,
-		EASE: "linear",
-	},
-	BORDER: {
-		DURATION: 0.4,
-		EASE: "linear",
-	},
+  SECTION_ENTRANCE: {
+    DURATION: 0.8,
+    EASE: "power3.out",
+    Y_OFFSET: 50,
+    OPACITY: 0,
+    DELAY: 0.2,
+  },
+  SCROLL_TRIGGER: {
+    START: "top 80%",
+    END: "bottom center",
+    TOGGLE_ACTIONS: "play none none reverse",
+  },
 } as const;
 
 const ContactForm: React.FC = () => {
-	const [isThankYouOpen, setIsThankYouOpen] = useState(false);
-	const sectionRef = useRef<HTMLElement>(null);
-	const containerRef = useRef<HTMLDivElement>(null);
-	const borderRefs = useRef<(HTMLDivElement | null)[]>([
-		null,
-		null,
-		null,
-		null,
-	]);
+  const [isThankYouOpen, setIsThankYouOpen] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-	const handleMouseEnter = useCallback(() => {
-		if (!containerRef.current) return;
+  useGSAP(
+    () => {
+      if (!containerRef.current) return;
 
-		borderRefs.current.forEach((border) => {
-			if (border) {
-				gsap.to(border, {
-					borderColor: "rgba(79, 209, 197, 0.5)",
-					duration: ANIMATION_CONFIG.BORDER.DURATION,
-					ease: ANIMATION_CONFIG.BORDER.EASE,
-				});
-			}
-		});
-	}, []);
+      gsap.set(containerRef.current, {
+        opacity: ANIMATION_CONFIG.SECTION_ENTRANCE.OPACITY,
+        y: ANIMATION_CONFIG.SECTION_ENTRANCE.Y_OFFSET,
+        force3D: true,
+        willChange: "transform, opacity",
+      });
 
-	const handleMouseLeave = useCallback(() => {
-		if (!containerRef.current) return;
+      gsap.to(containerRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.SECTION_ENTRANCE.DURATION,
+        ease: ANIMATION_CONFIG.SECTION_ENTRANCE.EASE,
+        delay: ANIMATION_CONFIG.SECTION_ENTRANCE.DELAY,
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
+          end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
+          toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
+          markers: false,
+        },
+        clearProps: "all",
+        force3D: true,
+      });
+    },
+    { scope: sectionRef },
+  );
 
-		borderRefs.current.forEach((border) => {
-			if (border) {
-				gsap.to(border, {
-					borderColor: "rgba(79, 209, 197, 0.3)",
-					duration: ANIMATION_CONFIG.BORDER.DURATION,
-					ease: ANIMATION_CONFIG.BORDER.EASE,
-				});
-			}
-		});
-	}, []);
+  const handleFormSubmitSuccess = () => {
+    setIsThankYouOpen(true);
+  };
 
-	useGSAP(() => {
-		if (!sectionRef.current || !containerRef.current) return;
+  const handleCloseDialog = () => {
+    setIsThankYouOpen(false);
+  };
 
-		gsap.set(containerRef.current, {
-			opacity: 0,
-			y: ANIMATION_CONFIG.CONTENT.Y_OFFSET,
-			force3D: true,
-		});
+  return (
+    <section ref={sectionRef} id="contact" className="relative py-20 md:py-28">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Title
+          title="Get in Touch"
+          subtitle="Let's collaborate and bring your ideas to life. Feel free to reach out!"
+          showGlowBar={true}
+          className="mb-12 md:mb-16 text-center"
+        />
 
-		gsap
-			.timeline({
-				scrollTrigger: {
-					trigger: sectionRef.current,
-					start: ANIMATION_CONFIG.SECTION.TRIGGER_START,
-					end: ANIMATION_CONFIG.SECTION.TRIGGER_END,
-					toggleActions: "play none none reverse",
-					markers: false,
-				},
-			})
-			.to(
-				containerRef.current,
-				{
-					opacity: 1,
-					y: 0,
-					duration: ANIMATION_CONFIG.CONTENT.DURATION,
-					ease: ANIMATION_CONFIG.CONTENT.EASE,
-					force3D: true,
-				},
-				"+=0.4"
-			);
-	}, []);
+        {/* Give the container a named group */}
+        <div
+          ref={containerRef}
+          className="group/container relative bg-secondary/80 backdrop-blur-md rounded-xl overflow-hidden transform-gpu border border-neutral/30"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-70 pointer-events-none" />
 
-	return (
-		<section ref={sectionRef} id="contact" className="relative py-20">
-			<div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
+          <div className="relative p-6 sm:p-8 md:p-12">
+            <div className="grid md:grid-cols-2 gap-10 md:gap-12 lg:gap-16">
+              {/* These components contain their OWN named groups now */}
+              <ContactInfo />
+              <Form onSubmitSuccess={handleFormSubmitSuccess} />
+            </div>
+          </div>
 
-			<div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-				<Title
-					title="Get in Touch"
-					subtitle={`Let's collaborate and bring your ideas to life. Feel free to reach out for any inquiries or opportunities.`}
-					showGlowBar={true}
-					className="mb-16"
-				/>
+          {/* Make corners react ONLY to the named container group */}
+          <div
+            className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-accent rounded-tl-xl
+                                   transition-colors duration-300 ease-out group-hover/container:border-primary"
+          />
+          <div
+            className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-accent rounded-tr-xl
+                                   transition-colors duration-300 ease-out group-hover/container:border-primary"
+          />
+          <div
+            className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-accent rounded-bl-xl
+                                   transition-colors duration-300 ease-out group-hover/container:border-primary"
+          />
+          <div
+            className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-accent rounded-br-xl
+                                   transition-colors duration-300 ease-out group-hover/container:border-primary"
+          />
+        </div>
+      </div>
 
-				<div
-					ref={containerRef}
-					className="relative bg-secondary/95 rounded-xl overflow-hidden transform-gpu"
-					onMouseEnter={handleMouseEnter}
-					onMouseLeave={handleMouseLeave}
-				>
-					<div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
-
-					<div className="relative p-4 sm:p-8 md:p-12">
-						<div className="grid md:grid-cols-2 gap-8 md:gap-12">
-							<ContactInfo />
-							<Form onSubmitSuccess={() => setIsThankYouOpen(true)} />
-						</div>
-					</div>
-
-					<div
-						ref={(el: HTMLDivElement | null) => {
-							borderRefs.current[0] = el;
-						}}
-						className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-primary/30 rounded-tl-xl"
-					/>
-					<div
-						ref={(el: HTMLDivElement | null): void => {
-							borderRefs.current[1] = el;
-						}}
-						className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-primary/30 rounded-tr-xl"
-					/>
-					<div
-						ref={(el: HTMLDivElement | null): void => {
-							borderRefs.current[2] = el;
-						}}
-						className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-primary/30 rounded-bl-xl"
-					/>
-					<div
-						ref={(el: HTMLDivElement | null): void => {
-							borderRefs.current[3] = el;
-						}}
-						className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-primary/30 rounded-br-xl"
-					/>
-				</div>
-			</div>
-
-			<ThankYouDialog
-				isOpen={isThankYouOpen}
-				onClose={() => setIsThankYouOpen(false)}
-				email="sandeepkhati788@gmail.com"
-			/>
-		</section>
-	);
+      <ThankYouDialog
+        isOpen={isThankYouOpen}
+        onClose={handleCloseDialog}
+        email="sandeepkhati788@gmail.com"
+      />
+    </section>
+  );
 };
 
 export default ContactForm;

@@ -1,516 +1,261 @@
 "use client";
-import Link from "next/link";
-import {
-	FiGithub,
-	FiLinkedin,
-	FiTwitter,
-	FiMail,
-	FiPhone,
-	FiMapPin,
-} from "react-icons/fi";
-import { useRef, useState, useCallback } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import React, { useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import {
+  FiGithub,
+  FiLinkedin,
+  FiTwitter,
+  FiMail,
+  FiPhone,
+  FiMapPin,
+} from "react-icons/fi";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const ANIMATION_CONFIG = {
-	SCROLL_TRIGGER: {
-		START: "top 90%",
-		END: "bottom bottom",
-		TOGGLE_ACTIONS: "play none none reverse",
-	},
-	DURATIONS: {
-		CONTAINER: 0.6,
-		GRID_ITEMS: 0.5,
-		SOCIAL_ICONS: 0.4,
-		QUICK_LINKS: 0.4,
-		CONTACT_ITEMS: 0.4,
-		FOOTER_BOTTOM: 0.5,
-	},
-	DELAYS: {
-		GRID_ITEMS: -0.4,
-		SOCIAL_ICONS: -0.3,
-		QUICK_LINKS: -0.2,
-		CONTACT_ITEMS: -0.2,
-		FOOTER_BOTTOM: -0.1,
-	},
-	STAGGER: {
-		GRID_ITEMS: 0.1,
-		SOCIAL_ICONS: 0.1,
-		QUICK_LINKS: 0.05,
-		CONTACT_ITEMS: 0.05,
-	},
-	HOVER: {
-		DURATION: 0.2,
-		ROTATION_DURATION: 4,
-		SCALE: 1.05,
-		Y_OFFSET: -2,
-	},
+  SCROLL_TRIGGER: {
+    START: "top 95%",
+    END: "bottom 90%",
+    TOGGLE_ACTIONS: "play none none reverse",
+  },
+  ENTRANCE: {
+    DURATION: 0.6,
+    STAGGER: 0.08,
+    Y_OFFSET: 25,
+    EASE: "power2.out",
+  },
 } as const;
 
 const SOCIAL_LINKS = [
-	{
-		href: "https://github.com/MrUnknownji",
-		icon: <FiGithub className="w-6 h-6" />,
-		label: "GitHub",
-	},
-	{
-		href: "https://linkedin.com/in/sandeep-kumar-sk1707",
-		icon: <FiLinkedin className="w-6 h-6" />,
-		label: "LinkedIn",
-	},
-	{
-		href: "https://twitter.com/MrUnknownG786",
-		icon: <FiTwitter className="w-6 h-6" />,
-		label: "Twitter",
-	},
+  {
+    href: "https://github.com/MrUnknownji",
+    icon: <FiGithub className="w-6 h-6" />,
+    label: "GitHub",
+  },
+  {
+    href: "https://linkedin.com/in/sandeep-kumar-sk1707",
+    icon: <FiLinkedin className="w-6 h-6" />,
+    label: "LinkedIn",
+  },
+  {
+    href: "https://twitter.com/MrUnknownG786",
+    icon: <FiTwitter className="w-6 h-6" />,
+    label: "Twitter",
+  },
 ];
 
 const QUICK_LINKS = [
-	{ href: "/", id: "", text: "Home" },
-	{ href: "/#about", id: "about", text: "About" },
-	{ href: "/my-projects", id: "", text: "Projects" },
-	{ href: "/#contact", id: "contact", text: "Contact" },
+  { href: "/", id: "", text: "Home" },
+  { href: "/#about", id: "about", text: "About" },
+  { href: "/my-projects", id: "", text: "Projects" },
+  { href: "/#contact", id: "contact", text: "Contact" },
 ];
 
 const CONTACT_INFO = [
-	{
-		icon: <FiMail className="w-5 h-5 text-primary" />,
-		text: "sandeepkhati788@gmail.com",
-	},
-	{
-		icon: <FiPhone className="w-5 h-5 text-primary" />,
-		text: "+91 9876543210",
-	},
-	{
-		icon: <FiMapPin className="w-5 h-5 text-primary" />,
-		text: "Punjab, India",
-	},
+  {
+    icon: <FiMail className="w-5 h-5 text-primary" />,
+    text: "sandeepkhati788@gmail.com",
+    href: "mailto:sandeepkhati788@gmail.com",
+    label: "Email Sandeep",
+  },
+  {
+    icon: <FiPhone className="w-5 h-5 text-primary" />,
+    text: "+91 9876543210", // Placeholder
+    href: "tel:+919876543210", // Placeholder
+    label: "Call Sandeep",
+  },
+  {
+    icon: <FiMapPin className="w-5 h-5 text-primary" />,
+    text: "Punjab, India",
+    href: "https://maps.google.com/?q=Punjab,India",
+    label: "View location on map",
+  },
 ];
 
 const Footer = () => {
-	const footerRef = useRef<HTMLElement>(null);
-	const contentRef = useRef<HTMLDivElement>(null);
-	const timelineRef = useRef<gsap.core.Timeline | null>(null);
-	const socialIconsRef = useRef<(HTMLAnchorElement | null)[]>([]);
-	const quickLinksRef = useRef<(HTMLAnchorElement | null)[]>([]);
-	const contactItemsRef = useRef<(HTMLLIElement | null)[]>([]);
-	const [hoveredLink, setHoveredLink] = useState<string | null>(null);
-	const currentYear: number = new Date().getFullYear();
-	const pathname = usePathname();
-	const router = useRouter();
+  const footerRef = useRef<HTMLElement>(null);
+  const currentYear: number = new Date().getFullYear();
+  const pathname = usePathname();
+  const router = useRouter();
 
-	// Function to handle smooth scrolling to elements
-	const scrollToElement = useCallback((elementId: string) => {
-		// If no element ID, scroll to top
-		if (!elementId) {
-			window.scrollTo({
-				top: 0,
-				behavior: "smooth",
-			});
-			return;
-		}
+  const scrollToElement = useCallback((elementId: string) => {
+    if (!elementId) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
 
-		// Find the element and scroll to it
-		const element = document.getElementById(elementId);
-		if (element) {
-			element.scrollIntoView({
-				behavior: "smooth",
-				block: "start",
-			});
-		}
-	}, []);
+  const handleQuickLinkClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, link: (typeof QUICK_LINKS)[0]) => {
+      e.preventDefault();
+      const isHome = pathname === "/";
+      const isProjectsPage = pathname === "/my-projects";
 
-	// Handle quick link clicks
-	const handleQuickLinkClick = useCallback(
-		(e: React.MouseEvent, link: (typeof QUICK_LINKS)[0]) => {
-			e.preventDefault();
+      if (link.text === "Home") {
+        if (isHome) scrollToElement("");
+        else router.push("/");
+      } else if (link.text === "Projects") {
+        if (isProjectsPage) scrollToElement("");
+        else router.push("/my-projects");
+      } else if (link.id) {
+        if (isHome) scrollToElement(link.id);
+        else router.push(`/#${link.id}`);
+      } else {
+        router.push(link.href);
+      }
+    },
+    [pathname, router, scrollToElement],
+  );
 
-			// Check if we're already on the target page
-			const isHome = pathname === "/";
-			const isProjectsPage = pathname === "/my-projects";
+  useGSAP(
+    () => {
+      const elementsToAnimate = gsap.utils.toArray<HTMLElement>(
+        footerRef.current?.querySelectorAll(
+          ".animate-footer-col, .footer-bottom",
+        ) ?? [],
+      );
 
-			// Case 1: Home link
-			if (link.text === "Home") {
-				if (isHome) {
-					// Already on home page, scroll to top
-					scrollToElement("");
-				} else {
-					// Navigate to home page
-					router.push("/");
-				}
-			}
-			// Case 2: Projects link
-			else if (link.text === "Projects") {
-				if (isProjectsPage) {
-					// Already on projects page, scroll to top
-					scrollToElement("");
-				} else {
-					// Navigate to projects page
-					router.push("/my-projects");
-				}
-			}
-			// Case 3: About or Contact links (sections on home page)
-			else if (link.id) {
-				if (isHome) {
-					// Already on home page, scroll to section
-					scrollToElement(link.id);
-				} else {
-					// Navigate to home page with hash
-					router.push(`/#${link.id}`);
-				}
-			}
-		},
-		[pathname, router, scrollToElement]
-	);
+      if (elementsToAnimate.length === 0) return;
 
-	const setupAnimations = useCallback(() => {
-		if (!contentRef.current || !footerRef.current) return;
+      gsap.set(elementsToAnimate, {
+        opacity: 0,
+        y: ANIMATION_CONFIG.ENTRANCE.Y_OFFSET,
+        force3D: true,
+        willChange: "transform, opacity",
+      });
 
-		if (timelineRef.current) {
-			timelineRef.current.kill();
-		}
+      gsap.to(elementsToAnimate, {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.ENTRANCE.DURATION,
+        stagger: ANIMATION_CONFIG.ENTRANCE.STAGGER,
+        ease: ANIMATION_CONFIG.ENTRANCE.EASE,
+        scrollTrigger: {
+          trigger: footerRef.current,
+          start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
+          end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
+          toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
+        },
+        clearProps: "all",
+        force3D: true,
+      });
+    },
+    { scope: footerRef },
+  );
 
-		const gridContainer = contentRef.current.querySelector(".grid");
-		const gridItems = Array.from(
-			gridContainer?.querySelectorAll(".grid-item") || []
-		);
-		const footerBottom = contentRef.current.querySelector(".footer-bottom");
-		const socialAnchors = Array.from(
-			contentRef.current.querySelectorAll(".social-icon")
-		);
-		const listItems = Array.from(
-			contentRef.current.querySelectorAll(".quick-link")
-		);
-		const contactItems = Array.from(
-			contentRef.current.querySelectorAll(".contact-item")
-		);
+  const FooterHeading: React.FC<{ children: React.ReactNode }> = ({
+    children,
+  }) => (
+    <h3 className="text-xl font-semibold mb-5 md:mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+      {children}
+    </h3>
+  );
 
-		gsap.set(
-			[gridItems, socialAnchors, listItems, contactItems, footerBottom],
-			{
-				opacity: 0,
-				y: 20,
-			}
-		);
+  return (
+    <footer
+      ref={footerRef}
+      className="w-full bg-secondary/70 border-t border-neutral/30 py-12 md:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden backdrop-blur-sm"
+    >
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--color-border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--color-border))_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-5 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none -z-10" />
 
-		timelineRef.current = gsap.timeline({
-			scrollTrigger: {
-				trigger: footerRef.current,
-				start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
-				end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
-				toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
-			},
-		});
+      <div className="container mx-auto relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 lg:gap-12">
+          <div className="animate-footer-col">
+            <FooterHeading>Connect With Me</FooterHeading>
+            <div className="flex gap-3">
+              {SOCIAL_LINKS.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative w-11 h-11 flex items-center justify-center rounded-full bg-neutral/40 text-muted
+                                               border border-transparent hover:border-primary/40
+                                               transition-all duration-300 ease-out transform-gpu
+                                               hover:bg-neutral/60 hover:text-primary hover:scale-110 hover:-translate-y-1"
+                  aria-label={link.label}
+                >
+                  {link.icon}
+                </a>
+              ))}
+            </div>
+          </div>
 
-		timelineRef.current
-			.to(gridItems, {
-				opacity: 1,
-				y: 0,
-				duration: ANIMATION_CONFIG.DURATIONS.GRID_ITEMS,
-				stagger: ANIMATION_CONFIG.STAGGER.GRID_ITEMS,
-				ease: "power2.out",
-				clearProps: "transform",
-			})
-			.to(
-				socialAnchors,
-				{
-					opacity: 1,
-					y: 0,
-					duration: ANIMATION_CONFIG.DURATIONS.SOCIAL_ICONS,
-					stagger: ANIMATION_CONFIG.STAGGER.SOCIAL_ICONS,
-					ease: "power2.out",
-					clearProps: "transform",
-				},
-				ANIMATION_CONFIG.DELAYS.SOCIAL_ICONS
-			)
-			.to(
-				listItems,
-				{
-					opacity: 1,
-					y: 0,
-					duration: ANIMATION_CONFIG.DURATIONS.QUICK_LINKS,
-					stagger: ANIMATION_CONFIG.STAGGER.QUICK_LINKS,
-					ease: "power2.out",
-					clearProps: "transform",
-				},
-				ANIMATION_CONFIG.DELAYS.QUICK_LINKS
-			)
-			.to(
-				contactItems,
-				{
-					opacity: 1,
-					y: 0,
-					duration: ANIMATION_CONFIG.DURATIONS.CONTACT_ITEMS,
-					stagger: ANIMATION_CONFIG.STAGGER.CONTACT_ITEMS,
-					ease: "power2.out",
-					clearProps: "transform",
-				},
-				ANIMATION_CONFIG.DELAYS.CONTACT_ITEMS
-			)
-			.to(
-				footerBottom,
-				{
-					opacity: 1,
-					y: 0,
-					duration: ANIMATION_CONFIG.DURATIONS.FOOTER_BOTTOM,
-					ease: "power2.out",
-					clearProps: "transform",
-				},
-				ANIMATION_CONFIG.DELAYS.FOOTER_BOTTOM
-			);
-	}, []);
+          <div className="animate-footer-col">
+            <FooterHeading>Quick Links</FooterHeading>
+            <ul className="space-y-2.5">
+              {QUICK_LINKS.map((link) => (
+                <li key={link.text}>
+                  <a
+                    href={link.href}
+                    onClick={(e) => handleQuickLinkClick(e, link)}
+                    className="group relative inline-block text-muted transition-colors duration-300 ease-out
+                                                   hover:text-primary focus-visible:text-primary outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded px-1"
+                  >
+                    {link.text}
+                    <span
+                      className="absolute bottom-0 left-0 block h-0.5 bg-gradient-to-r from-primary to-accent origin-left
+                                                       w-full scale-x-0 transition-transform duration-300 ease-out
+                                                       group-hover:scale-x-100 group-focus-visible:scale-x-100"
+                      aria-hidden="true"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-	const handleLinkHover = useCallback((index: string, isEntering: boolean) => {
-		setHoveredLink(isEntering ? index : null);
-		gsap.to(`.quick-link-${index} .underline`, {
-			width: isEntering ? "100%" : "0%",
-			duration: ANIMATION_CONFIG.HOVER.DURATION,
-			ease: "power3.out",
-		});
-	}, []);
+          <div className="animate-footer-col">
+            <FooterHeading>Contact Info</FooterHeading>
+            <ul className="space-y-3">
+              {CONTACT_INFO.map((info, index) => (
+                <li key={index}>
+                  <a
+                    href={info.href}
+                    target={
+                      info.text.includes("@") || info.text.includes("+")
+                        ? "_self"
+                        : "_blank"
+                    }
+                    rel={
+                      info.text.includes("@") || info.text.includes("+")
+                        ? undefined
+                        : "noopener noreferrer"
+                    }
+                    aria-label={info.label}
+                    className="group flex items-center gap-3 text-muted transition-all duration-300 ease-out
+                                                   hover:text-light focus-visible:text-light outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded px-1 py-0.5"
+                  >
+                    <span
+                      className="flex-shrink-0 p-1.5 rounded-md bg-neutral/40 transition-colors duration-300 ease-out
+                                                       group-hover:bg-primary/20"
+                      aria-hidden="true"
+                    >
+                      {info.icon}
+                    </span>
+                    <span className="transition-transform duration-300 ease-out group-hover:translate-x-1">
+                      {info.text}
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
-	useGSAP(() => {
-		setupAnimations();
-
-		// Social icons animation setup
-		socialIconsRef.current.forEach((icon) => {
-			if (!icon) return;
-
-			const border = document.createElement("div");
-			border.className =
-				"absolute inset-0 border-2 border-dashed border-primary/50 rounded-full opacity-0 transform-gpu";
-			icon.appendChild(border);
-
-			const ctx = gsap.context(() => {
-				const rotationTween = gsap.to(border, {
-					rotation: 360,
-					duration: ANIMATION_CONFIG.HOVER.ROTATION_DURATION,
-					ease: "none",
-					repeat: -1,
-					paused: true,
-				});
-
-				icon.addEventListener("mouseenter", () => {
-					gsap.to(border, {
-						opacity: 1,
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-					});
-					gsap.to(icon.querySelector("svg"), {
-						color: "#00ff9f",
-						scale: ANIMATION_CONFIG.HOVER.SCALE,
-						y: ANIMATION_CONFIG.HOVER.Y_OFFSET,
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: "power2.out",
-					});
-					rotationTween.play();
-				});
-
-				icon.addEventListener("mouseleave", () => {
-					gsap.to(border, {
-						opacity: 0,
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-					});
-					gsap.to(icon.querySelector("svg"), {
-						color: "rgb(156 163 175)",
-						scale: 1,
-						y: 0,
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: "power2.out",
-					});
-					rotationTween.pause();
-				});
-			}, icon);
-
-			return () => ctx.revert();
-		});
-
-		// Quick links animation setup
-		quickLinksRef.current.forEach((link, index) => {
-			if (!link) return;
-
-			const ctx = gsap.context(() => {
-				link.addEventListener("mouseenter", () => {
-					gsap.to(link, {
-						color: "#00ff9f",
-						x: 3,
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: "power2.out",
-					});
-					handleLinkHover(index.toString(), true);
-				});
-
-				link.addEventListener("mouseleave", () => {
-					gsap.to(link, {
-						color: "rgb(156 163 175)",
-						x: 0,
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: "power2.out",
-					});
-					handleLinkHover(index.toString(), false);
-				});
-			}, link);
-
-			return () => ctx.revert();
-		});
-
-		// Contact items animation setup
-		contactItemsRef.current.forEach((item) => {
-			if (!item) return;
-
-			const icon = item.querySelector(".contact-icon-container");
-			const text = item.querySelector(".contact-text");
-
-			const ctx = gsap.context(() => {
-				item.addEventListener("mouseenter", () => {
-					gsap.to(item, {
-						color: "#ffffff",
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: "power2.out",
-					});
-					gsap.to(icon, {
-						backgroundColor: "rgba(0, 255, 159, 0.2)",
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: "power2.out",
-					});
-					gsap.to(text, {
-						x: 4,
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: "power2.out",
-					});
-				});
-
-				item.addEventListener("mouseleave", () => {
-					gsap.to(item, {
-						color: "rgb(156 163 175)",
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: "power2.out",
-					});
-					gsap.to(icon, {
-						backgroundColor: "rgba(31, 41, 55, 0.5)",
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: "power2.out",
-					});
-					gsap.to(text, {
-						x: 0,
-						duration: ANIMATION_CONFIG.HOVER.DURATION,
-						ease: "power2.out",
-					});
-				});
-			}, item);
-
-			return () => ctx.revert();
-		});
-
-		return () => {
-			if (timelineRef.current) {
-				timelineRef.current.kill();
-			}
-		};
-	}, [setupAnimations, handleLinkHover]);
-
-	return (
-		<footer
-			ref={footerRef}
-			className="w-full bg-gray-900/50 border-t border-gray-800/50 py-12 px-8 relative overflow-hidden"
-			style={{ willChange: "transform" }}
-		>
-			{/* Replace blur with gradient background */}
-			<div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
-
-			<div
-				ref={contentRef}
-				className="container mx-auto px-4 relative"
-				style={{ willChange: "transform" }}
-			>
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 lg:gap-12">
-					<div className="grid-item flex justify-center md:justify-start">
-						<div>
-							<h3 className="text-xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-								Connect With Me
-							</h3>
-							<div className="flex gap-4">
-								{SOCIAL_LINKS.map((link, index) => (
-									<Link
-										key={link.label}
-										href={link.href}
-										target="_blank"
-										rel="noopener noreferrer"
-										ref={(el: HTMLAnchorElement | null) => {
-											if (el) {
-												socialIconsRef.current[index] = el;
-											}
-										}}
-										className="social-icon relative w-12 h-12 flex items-center justify-center rounded-full bg-gray-800/50 text-gray-400 transform-gpu"
-										aria-label={link.label}
-									>
-										{link.icon}
-									</Link>
-								))}
-							</div>
-						</div>
-					</div>
-
-					<div className="grid-item">
-						<h3 className="text-xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-							Quick Links
-						</h3>
-						<ul className="space-y-3">
-							{QUICK_LINKS.map((link, index) => (
-								<li key={link.text}>
-									<a
-										href={link.href}
-										onClick={(e) => handleQuickLinkClick(e, link)}
-										ref={(el: HTMLAnchorElement | null) => {
-											if (el) {
-												quickLinksRef.current[index] = el;
-											}
-										}}
-										className={`quick-link quick-link-${index} relative inline-block text-gray-400 transform-gpu ${
-											hoveredLink === index.toString() ? "text-primary" : ""
-										}`}
-									>
-										{link.text}
-										<div className="underline absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-accent transform-gpu" />
-									</a>
-								</li>
-							))}
-						</ul>
-					</div>
-
-					<div className="grid-item">
-						<h3 className="text-xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-							Contact Info
-						</h3>
-						<ul className="space-y-4">
-							{CONTACT_INFO.map((info, index) => (
-								<li
-									key={index}
-									ref={(el: HTMLLIElement | null) => {
-										if (el) {
-											contactItemsRef.current[index] = el;
-										}
-									}}
-									className="contact-item flex items-center gap-3 text-gray-400 transform-gpu"
-								>
-									<span className="contact-icon-container flex-shrink-0 p-2 rounded-lg bg-gray-800/50">
-										{info.icon}
-									</span>
-									<span className="contact-text transform-gpu">
-										{info.text}
-									</span>
-								</li>
-							))}
-						</ul>
-					</div>
-				</div>
-
-				<div className="footer-bottom mt-12 pt-8 border-t border-gray-800/30 text-center text-gray-400">
-					<p>© {currentYear} Sandeep Kumar. All rights reserved.</p>
-				</div>
-			</div>
-		</footer>
-	);
+        <div className="footer-bottom mt-12 md:mt-16 pt-8 border-t border-neutral/30 text-center text-muted text-sm">
+          <p>© {currentYear} Sandeep Kumar. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;
