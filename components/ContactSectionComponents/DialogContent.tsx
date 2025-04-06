@@ -7,7 +7,7 @@ import gsap from "gsap";
 interface DialogContentProps {
   email: string;
   onCopy: () => void;
-  isCopied: boolean;
+  isCopied?: boolean;
 }
 
 const ANIMATION_CONFIG = {

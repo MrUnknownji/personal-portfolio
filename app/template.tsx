@@ -37,7 +37,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
       const tl = gsap.timeline({
         onStart: () => {
           lenis?.stop();
-          bodyStyle.cursor = "wait"; // 'wait' might be more appropriate than 'not-allowed'
+          bodyStyle.cursor = "wait";
           overlayRef.current?.classList.remove("pointer-events-none");
         },
         onComplete: () => {
