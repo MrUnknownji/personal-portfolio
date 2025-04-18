@@ -2,12 +2,13 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import ProjectCard from "@/components/ProjectCard";
 import ProjectModal from "@/components/ProjectModal";
+import Title from "@/components/ui/Title";
 import { projects } from "@/data/data";
 import { Project } from "@/types/Project";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { FiSearch } from "react-icons/fi";
+import { FiSearch, FiX } from "react-icons/fi";
 
 const ANIMATION_CONFIG = {
   STAGGER: 0.08,
@@ -30,6 +31,18 @@ const ANIMATION_CONFIG = {
     DURATION: 0.5,
     EASE: "power2.out",
   },
+  FILTER: {
+    OUT_DURATION: 0.3,
+    OUT_STAGGER: 0.03,
+    OUT_EASE: "power2.in",
+    OUT_SCALE: 0.95,
+    OUT_Y: 20,
+    IN_DURATION: 0.4,
+    IN_STAGGER: 0.06,
+    IN_EASE: "power3.out",
+    IN_SCALE: 0.95,
+    IN_Y: -20,
+  },
 } as const;
 
 export default function MyProjects() {
@@ -38,7 +51,6 @@ export default function MyProjects() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const headerRef = useRef<HTMLHeadingElement>(null);
   const controlsRef = useRef<HTMLDivElement>(null);
   const projectsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -72,12 +84,6 @@ export default function MyProjects() {
           defaults: { ease: ANIMATION_CONFIG.EASE, overwrite: "auto" },
         });
 
-        initialTl.fromTo(
-          headerRef.current,
-          { opacity: 0, y: -30 },
-          { opacity: 1, y: 0, duration: ANIMATION_CONFIG.DURATION },
-        );
-
         if (controlsRef.current && controlsRef.current.children.length > 0) {
           initialTl.fromTo(
             controlsRef.current.children,
@@ -88,7 +94,7 @@ export default function MyProjects() {
               duration: ANIMATION_CONFIG.DURATION,
               stagger: ANIMATION_CONFIG.STAGGER,
             },
-            "-=0.3",
+            0.2,
           );
         }
 
@@ -96,8 +102,8 @@ export default function MyProjects() {
           const searchInput = searchRef.current;
           searchInput.addEventListener("focus", () => {
             gsap.to(searchInput, {
-              borderColor: "rgba(79, 209, 197, 0.5)",
-              boxShadow: "0 0 0 2px rgba(79, 209, 197, 0.25)",
+              borderColor: "var(--color-primary)",
+              boxShadow: "0 0 0 2px rgba(0, 255, 159, 0.2)",
               duration: ANIMATION_CONFIG.FOCUS.DURATION,
               ease: ANIMATION_CONFIG.FOCUS.EASE,
               overwrite: true,
@@ -105,7 +111,7 @@ export default function MyProjects() {
           });
           searchInput.addEventListener("blur", () => {
             gsap.to(searchInput, {
-              borderColor: "rgba(55, 65, 81, 0.5)",
+              borderColor: "var(--color-neutral)",
               boxShadow: "none",
               duration: ANIMATION_CONFIG.FOCUS.DURATION,
               ease: ANIMATION_CONFIG.FOCUS.EASE,
@@ -118,7 +124,7 @@ export default function MyProjects() {
           const clearButton = clearButtonRef.current;
           clearButton.addEventListener("mouseenter", () => {
             gsap.to(clearButton, {
-              color: "#4FD1C5",
+              color: "var(--color-accent)",
               duration: ANIMATION_CONFIG.HOVER.DURATION,
               ease: ANIMATION_CONFIG.HOVER.EASE,
               overwrite: true,
@@ -126,7 +132,7 @@ export default function MyProjects() {
           });
           clearButton.addEventListener("mouseleave", () => {
             gsap.to(clearButton, {
-              color: "#00FF9F",
+              color: "var(--color-primary)",
               duration: ANIMATION_CONFIG.HOVER.DURATION,
               ease: ANIMATION_CONFIG.HOVER.EASE,
               overwrite: true,
@@ -134,24 +140,29 @@ export default function MyProjects() {
           });
         }
 
-        gsap.fromTo(
+        const cards = projectsRef.current?.querySelectorAll(
           ".project-card-container",
-          { opacity: 0, y: 50 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: ANIMATION_CONFIG.SCROLL_TRIGGER.DURATION,
-            ease: ANIMATION_CONFIG.SCROLL_TRIGGER.EASE,
-            stagger: ANIMATION_CONFIG.SCROLL_TRIGGER.STAGGER,
-            scrollTrigger: {
-              trigger: projectsRef.current,
-              start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
-              end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
-              toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
-            },
-            clearProps: "transform, opacity",
-          },
         );
+        if (cards?.length) {
+          gsap.fromTo(
+            cards,
+            { opacity: 0, y: 50 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: ANIMATION_CONFIG.SCROLL_TRIGGER.DURATION,
+              ease: ANIMATION_CONFIG.SCROLL_TRIGGER.EASE,
+              stagger: ANIMATION_CONFIG.SCROLL_TRIGGER.STAGGER,
+              scrollTrigger: {
+                trigger: projectsRef.current,
+                start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
+                end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
+                toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
+              },
+              clearProps: "transform, opacity",
+            },
+          );
+        }
       });
 
       return () => {
@@ -164,55 +175,67 @@ export default function MyProjects() {
 
   const animateFilterChange = useCallback(() => {
     if (!projectsRef.current || isAnimating) return;
+    if (filterTimelineRef.current) filterTimelineRef.current.kill();
+
+    const existingCards = projectsRef.current.querySelectorAll(
+      ".project-card-container",
+    );
+
+    if (!existingCards.length && !filteredProjects.length) {
+      ScrollTrigger.refresh();
+      return;
+    }
 
     setIsAnimating(true);
-
-    if (filterTimelineRef.current) {
-      filterTimelineRef.current.kill();
-    }
 
     filterTimelineRef.current = gsap.timeline({
       onComplete: () => {
         setIsAnimating(false);
         filterTimelineRef.current = null;
         ScrollTrigger.refresh();
+        gsap.set(".project-card-container", { clearProps: "all" });
       },
       defaults: {
-        ease: "power2.out",
         overwrite: "auto",
       },
     });
 
-    filterTimelineRef.current
-      .to(".project-card-container", {
-        opacity: 0,
-        y: 10,
-        duration: 0.2,
-        stagger: 0.02,
-        clearProps: "all",
-      })
-      .add(() => {
-        const cards = projectsRef.current?.querySelectorAll(
+    filterTimelineRef.current.to(existingCards, {
+      opacity: 0,
+      scale: ANIMATION_CONFIG.FILTER.OUT_SCALE,
+      y: ANIMATION_CONFIG.FILTER.OUT_Y,
+      duration: ANIMATION_CONFIG.FILTER.OUT_DURATION,
+      stagger: ANIMATION_CONFIG.FILTER.OUT_STAGGER,
+      ease: ANIMATION_CONFIG.FILTER.OUT_EASE,
+    });
+
+    filterTimelineRef.current.add(() => {
+      requestAnimationFrame(() => {
+        const newCards = projectsRef.current?.querySelectorAll(
           ".project-card-container",
         );
-        if (cards?.length) {
+        if (newCards?.length) {
           gsap.fromTo(
-            cards,
-            { opacity: 0, y: 20 },
+            newCards,
+            {
+              opacity: 0,
+              scale: ANIMATION_CONFIG.FILTER.IN_SCALE,
+              y: ANIMATION_CONFIG.FILTER.IN_Y,
+            },
             {
               opacity: 1,
+              scale: 1,
               y: 0,
-              duration: 0.4,
-              stagger: 0.05,
-              clearProps: "all",
-              onComplete: () => {
-                gsap.set(cards, { clearProps: "all" });
-              },
+              duration: ANIMATION_CONFIG.FILTER.IN_DURATION,
+              stagger: ANIMATION_CONFIG.FILTER.IN_STAGGER,
+              ease: ANIMATION_CONFIG.FILTER.IN_EASE,
+              clearProps: "transform, opacity",
             },
           );
         }
-      }, "+=0.1");
-  }, [isAnimating]);
+      });
+    });
+  }, [isAnimating, filteredProjects.length]);
 
   useEffect(() => {
     animateFilterChange();
@@ -251,28 +274,30 @@ export default function MyProjects() {
     [],
   );
 
+  const clearSearch = () => {
+    setSearchQuery("");
+    searchRef.current?.focus();
+  };
+
   return (
     <div
       ref={pageRef}
-      className="min-h-screen py-16 md:py-20 bg-gradient-to-b from-secondary to-gray-900"
+      className="min-h-screen py-16 md:py-24 lg:py-28 bg-gradient-to-b from-gray-950 via-secondary to-gray-950"
     >
-      <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-10">
-        <h1
-          ref={headerRef}
-          className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent mb-10 md:mb-16 text-center"
-          style={{ willChange: "transform, opacity" }}
-        >
-          My Projects
-        </h1>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <Title
+          title="My Projects"
+          className="mb-12 md:mb-16 lg:mb-20"
+          showGlowBar
+        />
 
         <div
           ref={controlsRef}
-          className="flex flex-col md:flex-row gap-6 mb-8 md:mb-12"
-          style={{ willChange: "transform, opacity" }}
+          className="flex flex-col md:flex-row justify-between items-center gap-6 mb-10 md:mb-14"
         >
-          <div className="w-full md:w-64 relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <FiSearch className="text-gray-400 w-5 h-5" />
+          <div className="w-full md:w-auto md:max-w-xs relative">
+            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none z-10">
+              <FiSearch className="text-muted w-5 h-5" />
             </div>
             <input
               ref={searchRef}
@@ -280,27 +305,34 @@ export default function MyProjects() {
               placeholder="Search projects..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-800/50 border border-gray-700/50 rounded-xl
-                text-white placeholder-gray-400 focus:outline-none"
-              style={{
-                willChange: "transform, opacity, box-shadow, border-color",
-              }}
+              className="w-full pl-10 pr-8 py-2.5 border rounded-xl
+               bg-secondary/60 border-neutral/40 text-light placeholder-muted
+                 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30
+                 transition duration-200"
             />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute inset-y-0 right-2 flex items-center justify-center p-1 text-muted hover:text-light transition-colors rounded-full"
+                aria-label="Clear search"
+              >
+                <FiX className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
-          <div className="flex flex-wrap gap-2 md:gap-4">
+          <div className="flex flex-wrap justify-center gap-2 md:gap-3">
             {categories.map((category) => (
               <button
                 key={category}
-                className={`px-4 md:px-6 py-2 rounded-xl text-sm md:text-base font-medium transition-transform duration-200 ease-out ${
+                className={`px-4 py-2 rounded-lg text-sm md:text-base font-medium transition-all duration-200 ease-out transform-gpu ${
                   filter === category
-                    ? "bg-primary text-secondary shadow-lg"
-                    : "bg-gray-800/50 text-gray-300 border border-gray-700/50 hover:border-gray-600"
+                    ? "bg-primary text-secondary shadow-md scale-105"
+                    : "bg-frosted-dark text-muted hover:text-light hover:border-primary/40"
                 }`}
                 onClick={() => setFilter(category)}
                 onMouseEnter={handleButtonHover}
                 onMouseLeave={handleButtonLeave}
-                style={{ willChange: "transform" }}
               >
                 {category}
               </button>
@@ -310,7 +342,7 @@ export default function MyProjects() {
 
         <div
           ref={projectsRef}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10"
         >
           {filteredProjects.map((project) => (
             <div key={project.id} className="project-card-container">
@@ -323,8 +355,8 @@ export default function MyProjects() {
         </div>
 
         {filteredProjects.length === 0 && !isAnimating && (
-          <div className="text-center py-12 opacity-0 animate-fade-in">
-            <p className="text-gray-400 text-lg md:text-xl mb-4">
+          <div className="text-center py-16 opacity-0 animate-fade-in">
+            <p className="text-muted text-lg md:text-xl mb-6">
               No projects found matching your criteria.
             </p>
             <button
@@ -333,10 +365,9 @@ export default function MyProjects() {
                 setFilter("All");
                 setSearchQuery("");
               }}
-              className="text-primary"
-              style={{ willChange: "color" }}
+              className="text-primary text-lg font-medium hover:text-accent transition-colors duration-200"
             >
-              Clear filters
+              Clear Filters & Search
             </button>
           </div>
         )}

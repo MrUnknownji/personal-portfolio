@@ -3,16 +3,14 @@
 @import "tailwindcss";
 
 @theme {
-    /* Colors */
     --color-primary: #00ff9f;
-    --color-secondary: #1e1e1e; /* Used for dark backgrounds/elements */
+    --color-secondary: #1e1e1e;
     --color-accent: #00d1ff;
-    --color-dark: #141414; /* Deepest dark */
-    --color-light: #f1f1f1; /* Light text/elements */
-    --color-neutral: #333333; /* Mid-gray */
-    --color-muted: #666666; /* Lighter gray / muted text */
+    --color-dark: #141414;
+    --color-light: #f1f1f1;
+    --color-neutral: #333333;
+    --color-muted: #666666;
 
-    /* HSL Colors */
     --color-background: hsl(0 0% 100%);
     --color-foreground: hsl(240 10% 3.9%);
     --color-card: hsl(0 0% 100%);
@@ -30,11 +28,9 @@
     --color-chart-4: hsl(43 74% 66%);
     --color-chart-5: hsl(27 87% 67%);
 
-    /* Font Family */
     --font-sans: "Poppins", sans-serif;
     --font-outfit: "Outfit", sans-serif;
 
-    /* Border Radius */
     --rounded-lg: 0.75rem;
     --rounded-md: calc(0.75rem - 2px);
     --rounded-sm: calc(0.75rem - 4px);
@@ -42,24 +38,23 @@
 
 @variant dark {
     @theme {
-        --color-background: hsl(240 10% 3.9%); /* #0a0a0a */
-        --color-foreground: hsl(0 0% 98%); /* #fafafa */
+        --color-background: hsl(240 10% 3.9%);
+        --color-foreground: hsl(0 0% 98%);
         --color-card: hsl(240 10% 3.9%);
         --color-card-foreground: hsl(0 0% 98%);
         --color-popover: hsl(240 10% 3.9%);
         --color-popover-foreground: hsl(0 0% 98%);
         --color-destructive: hsl(0 62.8% 30.6%);
         --color-destructive-foreground: hsl(0 0% 98%);
-        --color-border: hsl(240 3.7% 15.9%); /* #27272a - Neutral 800 */
+        --color-border: hsl(240 3.7% 15.9%);
         --color-input: hsl(240 3.7% 15.9%);
         --color-ring: hsl(240 4.9% 83.9%);
 
-        /* Custom dark theme overrides */
-        --color-secondary: #18181b; /* zinc-900 */
-        --color-dark: #09090b; /* zinc-950 */
-        --color-light: #f4f4f5; /* zinc-100 */
-        --color-neutral: #27272a; /* zinc-800 */
-        --color-muted: #71717a; /* zinc-500 */
+        --color-secondary: #18181b;
+        --color-dark: #09090b;
+        --color-light: #f4f4f5;
+        --color-neutral: #27272a;
+        --color-muted: #71717a;
 
         --color-chart-1: hsl(220 70% 50%);
         --color-chart-2: hsl(160 60% 45%);
@@ -111,28 +106,19 @@ html {
 
 @layer utilities {
     .bg-frosted-dark {
-        /* --- Core Frosted Effect --- */
         -webkit-backdrop-filter: blur(10px);
         backdrop-filter: blur(10px);
 
-        /* --- Background Appearance --- */
         background: linear-gradient(
             140deg,
             rgba(39, 39, 42, 0.35) 0%,
             rgba(24, 24, 27, 0.55) 100%
         );
 
-        /* --- Edges and Depth --- */
         border: 1px solid rgba(241, 241, 241, 0.1);
         box-shadow:
             0 8px 32px rgba(0, 0, 0, 0.3),
             inset 0 1px 1px rgba(241, 241, 241, 0.05);
-
-        /* Optional: Add a subtle transition */
-        /* transition:
-            background-color 0.3s ease,
-            border-color 0.3s ease,
-            box-shadow 0.3s ease; */
     }
 
     .skill-chip {
@@ -141,6 +127,15 @@ html {
     .skill-chip:hover {
         @apply bg-primary text-dark border-primary;
     }
+}
+
+.page-content {
+    opacity: 0;
+}
+.transition-overlay {
+    opacity: 1;
+    display: flex;
+    pointer-events: auto;
 }
 
 @utility perspective-1000 {

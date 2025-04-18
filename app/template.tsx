@@ -19,7 +19,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
   useGSAP(
     () => {
       if (!overlayRef.current || !contentRef.current || !counterRef.current) {
-        console.warn("Transition refs not found, skipping animation.");
         gsap.set(contentRef.current, { opacity: 1 });
         gsap.set(overlayRef.current, { display: "none" });
         return;
@@ -43,11 +42,13 @@ export default function Template({ children }: { children: React.ReactNode }) {
         onComplete: () => {
           lenis?.start();
           bodyStyle.cursor = "";
-          gsap.set(overlayRef.current, { display: "none", opacity: 1 });
+          gsap.set(overlayRef.current, { display: "none" });
           overlayRef.current?.classList.add("pointer-events-none");
-          gsap.set(counterRef.current, { textContent: "0%", opacity: 0 });
-          ScrollTrigger.refresh();
-          window.scrollTo(0, 0);
+
+          gsap.delayedCall(0.01, () => {
+            ScrollTrigger.refresh();
+            window.scrollTo(0, 0);
+          });
         },
         defaults: { ease: "power2.inOut" },
       });
@@ -57,7 +58,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
       const overlayFadeOutDelay = counterDuration - 0.1;
       const overlayFadeOutDuration = 0.4;
 
-      tl.set(overlayRef.current, { display: "flex", opacity: 1 })
+      tl.set(overlayRef.current, { opacity: 1, display: "flex" })
         .set(contentRef.current, { opacity: 0 })
         .set(counterRef.current, { textContent: "0%", opacity: 1 })
 
@@ -79,7 +80,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
           {
             opacity: 1,
             duration: 0.5,
-            clearProps: "opacity",
           },
           contentFadeInDelay,
         )
@@ -122,7 +122,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
           bg-gray-950
           pointer-events-none
         "
-        style={{ display: "none", opacity: 0 }}
       >
         <span
           ref={counterRef}
