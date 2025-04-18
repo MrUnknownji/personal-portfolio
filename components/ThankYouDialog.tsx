@@ -101,7 +101,7 @@ const ThankYouDialog = ({
     } else if (isVisible) {
       startCloseProcess();
     }
-  }, [isOpen, isVisible]);
+  }, [isOpen, isVisible, startCloseProcess]);
 
   useGSAP(() => {
     if (!isVisible || !overlayRef.current || !dialogRef.current) {

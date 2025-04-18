@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, useRef, useCallback } from "react";
+import React, { memo, useRef } from "react";
 import Image from "next/image";
 import { Project } from "@/types/Project";
 import gsap from "gsap";
@@ -61,7 +61,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       scale: 1,
       y: 0,
       boxShadow:
-        "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)", // Default shadow or none
+        "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
       duration: ANIMATION_CONFIG.HOVER_DURATION,
       ease: ANIMATION_CONFIG.HOVER_EASE,
       overwrite: true,

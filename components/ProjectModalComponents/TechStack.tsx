@@ -42,9 +42,9 @@ export const TechStack = ({ technologies }: TechStackProps) => {
     });
     item.addEventListener("mouseleave", () => {
       gsap.to(item, {
-        backgroundColor: "rgba(0, 255, 159, 0.1)", // bg-primary/10
+        backgroundColor: "rgba(0, 255, 159, 0.1)",
         color: "var(--color-primary)",
-        borderColor: "rgba(0, 255, 159, 0.2)", // border-primary/20
+        borderColor: "rgba(0, 255, 159, 0.2)",
         duration: ANIMATION_CONFIG.HOVER_DURATION,
         ease: ANIMATION_CONFIG.HOVER_EASE,
       });

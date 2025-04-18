@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import { FiExternalLink, FiGithub, FiX, FiChevronRight } from "react-icons/fi";
 import { Dialog, DialogTitle } from "@/components/ui/Dialog";
 import { Project } from "@/types/Project";
@@ -7,6 +7,8 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ExpandableSection } from "./ProjectModalComponents/ExpandableSection";
 import { TechStack } from "./ProjectModalComponents/TechStack";
+import { MediaGallery } from "./ProjectModalComponents/MediaGallery";
+import { useLenis } from "lenis/react";
 
 interface ProjectModalProps {
   project: Project;
@@ -25,6 +27,7 @@ const ANIMATION_CONFIG = {
 const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const lenis = useLenis();
   const { contextSafe } = useGSAP({ scope: contentRef });
 
   const handleCloseAnimation = useCallback(() => {
@@ -32,7 +35,10 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       opacity: 0,
       duration: ANIMATION_CONFIG.DURATION_FAST,
       ease: ANIMATION_CONFIG.EASE_IN,
-      onComplete: onClose,
+      onComplete: () => {
+        onClose();
+        lenis?.start();
+      },
       overwrite: true,
     });
     gsap.to(contentRef.current, {
@@ -41,33 +47,41 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       ease: ANIMATION_CONFIG.EASE_IN,
       overwrite: true,
     });
-  }, [onClose]);
+  }, [onClose, lenis]);
 
-  useGSAP(
-    () => {
-      if (isOpen) {
-        gsap.set(overlayRef.current, { opacity: 0 });
-        gsap.set(contentRef.current, {
-          opacity: 0,
-          scale: ANIMATION_CONFIG.SCALE_CLOSE,
-        });
+  useEffect(() => {
+    if (isOpen) {
+      lenis?.stop();
 
-        gsap.to(overlayRef.current, {
-          opacity: 1,
-          duration: ANIMATION_CONFIG.DURATION_NORMAL,
-          ease: ANIMATION_CONFIG.EASE_OUT,
-        });
-        gsap.to(contentRef.current, {
+      gsap.set(overlayRef.current, { opacity: 0 });
+      gsap.set(contentRef.current, {
+        opacity: 0,
+        scale: ANIMATION_CONFIG.SCALE_CLOSE,
+      });
+
+      const tl = gsap.timeline();
+      tl.to(overlayRef.current, {
+        opacity: 1,
+        duration: ANIMATION_CONFIG.DURATION_NORMAL,
+        ease: ANIMATION_CONFIG.EASE_OUT,
+      }).to(
+        contentRef.current,
+        {
           opacity: 1,
           scale: 1,
           duration: ANIMATION_CONFIG.DURATION_NORMAL,
           ease: ANIMATION_CONFIG.EASE_OUT,
-          delay: 0.1,
-        });
-      }
-    },
-    { dependencies: [isOpen] },
-  );
+        },
+        "-=0.3",
+      );
+    } else {
+      lenis?.start();
+    }
+
+    return () => {
+      lenis?.start();
+    };
+  }, [isOpen, lenis]);
 
   const setupButtonHover = contextSafe(
     (button: HTMLElement | null, iconSelector: string, isPrimary = false) => {
@@ -83,12 +97,6 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       gsap.set(button, { backgroundColor: originalBg });
 
       button.addEventListener("mouseenter", () => {
-        console.log(
-          "Mouse entered and original background is " +
-            originalBg +
-            " and hover background is " +
-            hoverBg,
-        );
         gsap.to(button, {
           backgroundColor: hoverBg,
           duration: ANIMATION_CONFIG.DURATION_FAST,
@@ -104,12 +112,6 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
           });
       });
       button.addEventListener("mouseleave", () => {
-        console.log(
-          "Mouse left and original background is " +
-            originalBg +
-            " and hover background is " +
-            hoverBg,
-        );
         gsap.to(button, {
           backgroundColor: originalBg,
           duration: ANIMATION_CONFIG.DURATION_FAST,
@@ -216,9 +218,9 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
             <FiX className="w-6 h-6" />
           </button>
 
-          <div className="flex flex-col md:flex-row gap-6 md:gap-8 p-6 md:p-8 overflow-hidden flex-grow">
-            <div className="md:w-1/2 flex flex-col space-y-4">
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg border border-neutral/30">
+          <div className="flex flex-col md:flex-row gap-6 md:gap-8 p-6 md:p-8 flex-grow overflow-hidden">
+            <div className="md:w-1/2 flex flex-col space-y-4 flex-grow overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-neutral/40 scrollbar-track-transparent">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg border border-neutral/30 flex-shrink-0">
                 <Image
                   src={project.image}
                   alt={project.title}
@@ -228,7 +230,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                   priority
                 />
               </div>
-              <div className="pt-1 pb-1">
+              <div className="flex-shrink-0">
                 <DialogTitle className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   {project.title}
                 </DialogTitle>
@@ -236,6 +238,10 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
               <p className="text-muted text-sm md:text-base flex-shrink-0">
                 {project.shortDescription}
               </p>
+
+              <div className="flex-grow">
+                <MediaGallery items={project.gallery || []} />
+              </div>
             </div>
 
             <div className="md:w-1/2 flex flex-col h-full overflow-hidden">
