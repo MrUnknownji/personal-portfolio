@@ -6,9 +6,9 @@ import Title from "@/components/ui/Title";
 import { projects } from "@/data/data";
 import { Project } from "@/types/Project";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { FiSearch, FiX } from "react-icons/fi";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 const ANIMATION_CONFIG = {
   STAGGER: 0.08,
@@ -77,6 +77,12 @@ export default function MyProjects() {
     ...Array.from(new Set(projects.map((project) => project.category))),
   ];
 
+  useEffect(() => {
+    gsap.delayedCall(0.01, () => {
+      ScrollTrigger.refresh();
+    });
+  }, []);
+
   useGSAP(
     () => {
       animationContextRef.current = gsap.context(() => {
@@ -139,30 +145,6 @@ export default function MyProjects() {
             });
           });
         }
-
-        const cards = projectsRef.current?.querySelectorAll(
-          ".project-card-container",
-        );
-        if (cards?.length) {
-          gsap.fromTo(
-            cards,
-            { opacity: 0, y: 50 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: ANIMATION_CONFIG.SCROLL_TRIGGER.DURATION,
-              ease: ANIMATION_CONFIG.SCROLL_TRIGGER.EASE,
-              stagger: ANIMATION_CONFIG.SCROLL_TRIGGER.STAGGER,
-              scrollTrigger: {
-                trigger: projectsRef.current,
-                start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
-                end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
-                toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
-              },
-              clearProps: "transform, opacity",
-            },
-          );
-        }
       });
 
       return () => {
@@ -182,7 +164,6 @@ export default function MyProjects() {
     );
 
     if (!existingCards.length && !filteredProjects.length) {
-      ScrollTrigger.refresh();
       return;
     }
 
@@ -192,7 +173,6 @@ export default function MyProjects() {
       onComplete: () => {
         setIsAnimating(false);
         filterTimelineRef.current = null;
-        ScrollTrigger.refresh();
         gsap.set(".project-card-container", { clearProps: "all" });
       },
       defaults: {
@@ -200,14 +180,18 @@ export default function MyProjects() {
       },
     });
 
-    filterTimelineRef.current.to(existingCards, {
-      opacity: 0,
-      scale: ANIMATION_CONFIG.FILTER.OUT_SCALE,
-      y: ANIMATION_CONFIG.FILTER.OUT_Y,
-      duration: ANIMATION_CONFIG.FILTER.OUT_DURATION,
-      stagger: ANIMATION_CONFIG.FILTER.OUT_STAGGER,
-      ease: ANIMATION_CONFIG.FILTER.OUT_EASE,
-    });
+    if (existingCards.length > 0) {
+      filterTimelineRef.current.to(existingCards, {
+        opacity: 0,
+        scale: ANIMATION_CONFIG.FILTER.OUT_SCALE,
+        y: ANIMATION_CONFIG.FILTER.OUT_Y,
+        duration: ANIMATION_CONFIG.FILTER.OUT_DURATION,
+        stagger: ANIMATION_CONFIG.FILTER.OUT_STAGGER,
+        ease: ANIMATION_CONFIG.FILTER.OUT_EASE,
+      });
+    } else {
+      filterTimelineRef.current.to({}, { duration: 0.01 });
+    }
 
     filterTimelineRef.current.add(() => {
       requestAnimationFrame(() => {

@@ -21,6 +21,12 @@ export default function Template({ children }: { children: React.ReactNode }) {
       if (!overlayRef.current || !contentRef.current || !counterRef.current) {
         gsap.set(contentRef.current, { opacity: 1 });
         gsap.set(overlayRef.current, { display: "none" });
+        gsap.delayedCall(0.01, () => {
+          requestAnimationFrame(() => {
+            lenis?.resize();
+            ScrollTrigger.refresh();
+          });
+        });
         return;
       }
 
@@ -45,9 +51,21 @@ export default function Template({ children }: { children: React.ReactNode }) {
           gsap.set(overlayRef.current, { display: "none" });
           overlayRef.current?.classList.add("pointer-events-none");
 
-          gsap.delayedCall(0.01, () => {
-            ScrollTrigger.refresh();
-            window.scrollTo(0, 0);
+          const refreshDelay = 0.01;
+          gsap.delayedCall(refreshDelay, () => {
+            requestAnimationFrame(() => {
+              if (lenis) {
+                console.log("Template: Resizing Lenis...");
+                lenis.resize();
+              }
+
+              console.log(
+                `Template: Refreshing ScrollTrigger after resize and ${refreshDelay}s delay`,
+              );
+              ScrollTrigger.refresh();
+
+              window.scrollTo(0, 0);
+            });
           });
         },
         defaults: { ease: "power2.inOut" },
