@@ -3,312 +3,337 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useCallback } from "react";
 import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { usePathname, useRouter } from "next/navigation";
 
 const ANIMATION_CONFIG = {
-	HEADER: {
-		DURATION: 0.3,
-		EASE: "power2.inOut",
-		SCROLL: {
-			THRESHOLD: 10,
-			CLASS_HIDDEN: "header-hidden",
-		},
-	},
-	LOGO: {
-		DURATION: 0.6,
-		EASE: "power2.out",
-		SCALE: {
-			START: 0.8,
-			END: 1,
-		},
-	},
-	CONTACT: {
-		DURATION: 0.6,
-		EASE: "power2.out",
-		SCALE: {
-			START: 0.8,
-			END: 1,
-		},
-	},
-	SHINE: {
-		DURATION: 1,
-		EASE: "none",
-		DELAY: 2,
-	},
-	HOVER: {
-		DURATION: 0.2,
-		EASE: "power2.out",
-		SCALE: 1.02,
-	},
-	LOGO_HOVER: {
-		DURATION: 0.3,
-		EASE: "power2.out",
-		SCALE: 1.05,
-	},
+  HEADER: {
+    DURATION: 0.3,
+    EASE: "power2.inOut",
+    SCROLL: { THRESHOLD: 10, CLASS_HIDDEN: "header-hidden" },
+  },
+  LOGO: {
+    DURATION: 0.6,
+    EASE: "power2.out",
+    HOVER_DURATION: 0.3,
+    HOVER_EASE: "power2.out",
+    HOVER_SCALE: 1.05,
+  },
+  CONTACT: {
+    DURATION: 0.6,
+    EASE: "power2.out",
+    HOVER_DURATION: 0.3,
+    HOVER_EASE: "power3.out",
+    PARTICLE_INTERVAL: 25,
+    PARTICLE_DURATION_MIN: 1.3,
+    PARTICLE_DURATION_MAX: 2.2,
+    PARTICLE_TRAVEL_DISTANCE: 100,
+    PARTICLE_SCALE_MIN: 0.2,
+    PARTICLE_SCALE_MAX: 0.6,
+    PARTICLE_VISIBLE_DELAY_FACTOR: 0.15,
+    PARTICLE_FADE_IN_FACTOR: 0.3,
+  },
 } as const;
 
 const Header = () => {
-	const headerRef = useRef<HTMLElement>(null);
-	const logoRef = useRef<HTMLDivElement>(null);
-	const logoImageRef = useRef<HTMLImageElement>(null);
-	const contactRef = useRef<HTMLButtonElement>(null);
-	const shineRef = useRef<HTMLDivElement>(null);
-	const buttonBorderRef = useRef<HTMLDivElement>(null);
-	const buttonShadowRef = useRef<HTMLDivElement>(null);
-	const buttonBgRef = useRef<HTMLDivElement>(null);
-	const pathname = usePathname();
-	const router = useRouter();
+  const headerRef = useRef<HTMLElement>(null);
+  const logoLinkRef = useRef<HTMLAnchorElement>(null);
+  const logoImageRef = useRef<HTMLImageElement>(null);
+  const contactButtonRef = useRef<HTMLButtonElement>(null);
+  const particlesContainerRef = useRef<HTMLDivElement>(null);
+  const particleIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const pathname = usePathname();
+  const router = useRouter();
+  const { contextSafe } = useGSAP({ scope: headerRef });
 
-	// Function to handle smooth scrolling to elements
-	const scrollToElement = useCallback((elementId: string) => {
-		// If no element ID, scroll to top
-		if (!elementId) {
-			window.scrollTo({
-				top: 0,
-				behavior: "smooth",
-			});
-			return;
-		}
+  const scrollToElement = useCallback((elementId: string) => {
+    if (!elementId) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
 
-		// Find the element and scroll to it
-		const element = document.getElementById(elementId);
-		if (element) {
-			element.scrollIntoView({
-				behavior: "smooth",
-				block: "start",
-			});
-		}
-	}, []);
+  const handleContactClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      const isHome = pathname === "/";
+      if (isHome) {
+        scrollToElement("contact");
+      } else {
+        router.push("/#contact");
+      }
+    },
+    [pathname, router, scrollToElement],
+  );
 
-	// Handle contact button click
-	const handleContactClick = useCallback(
-		(e: React.MouseEvent) => {
-			e.preventDefault();
+  useEffect(() => {
+    let prevScrollPos = window.scrollY;
+    const header = headerRef.current;
 
-			const isHome = pathname === "/";
+    const handleScroll = () => {
+      if (!header) return;
+      const currentScrollPos = window.scrollY;
+      const shouldHide =
+        currentScrollPos > prevScrollPos &&
+        currentScrollPos > ANIMATION_CONFIG.HEADER.SCROLL.THRESHOLD;
 
-			if (isHome) {
-				// Already on home page, scroll to contact section
-				scrollToElement("contact");
-			} else {
-				// Navigate to home page with contact hash
-				router.push("/#contact");
-			}
-		},
-		[pathname, router, scrollToElement]
-	);
+      if (shouldHide) {
+        header.classList.add(ANIMATION_CONFIG.HEADER.SCROLL.CLASS_HIDDEN);
+      } else {
+        header.classList.remove(ANIMATION_CONFIG.HEADER.SCROLL.CLASS_HIDDEN);
+      }
+      prevScrollPos = currentScrollPos;
+    };
 
-	useEffect(() => {
-		let prevScrollPos = window.scrollY;
-		const header = headerRef.current;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(
+        logoLinkRef.current,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: ANIMATION_CONFIG.LOGO.DURATION,
+          ease: ANIMATION_CONFIG.LOGO.EASE,
+          clearProps: "opacity",
+        },
+      );
+      gsap.fromTo(
+        contactButtonRef.current,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: ANIMATION_CONFIG.CONTACT.DURATION,
+          ease: ANIMATION_CONFIG.CONTACT.EASE,
+          clearProps: "opacity",
+        },
+      );
+    }, headerRef);
 
-		// Use vanilla JS for scroll animation
-		const handleScroll = () => {
-			if (!header) return;
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (particleIntervalRef.current)
+        clearInterval(particleIntervalRef.current);
+      ctx.revert();
+    };
+  }, []);
 
-			const currentScrollPos = window.scrollY;
-			const shouldShow =
-				prevScrollPos > currentScrollPos ||
-				currentScrollPos < ANIMATION_CONFIG.HEADER.SCROLL.THRESHOLD;
+  const createAndAnimateParticle = contextSafe(() => {
+    if (!particlesContainerRef.current || !contactButtonRef.current) return;
 
-			// Toggle class
-			if (shouldShow) {
-				header.classList.remove(ANIMATION_CONFIG.HEADER.SCROLL.CLASS_HIDDEN);
-			} else {
-				header.classList.add(ANIMATION_CONFIG.HEADER.SCROLL.CLASS_HIDDEN);
-			}
+    const particle = document.createElement("div");
+    const buttonRect = contactButtonRef.current.getBoundingClientRect();
+    const containerRect = particlesContainerRef.current.getBoundingClientRect();
 
-			prevScrollPos = currentScrollPos;
-		};
+    const startX =
+      buttonRect.width / 2 + (buttonRect.left - containerRect.left);
+    const startY = buttonRect.height / 2 + (buttonRect.top - containerRect.top);
 
-		const ctx = gsap.context(() => {
-			gsap.fromTo(
-				logoRef.current,
-				{
-					opacity: 0,
-					scale: ANIMATION_CONFIG.LOGO.SCALE.START,
-				},
-				{
-					opacity: 1,
-					scale: ANIMATION_CONFIG.LOGO.SCALE.END,
-					duration: ANIMATION_CONFIG.LOGO.DURATION,
-					ease: ANIMATION_CONFIG.LOGO.EASE,
-					clearProps: "transform",
-					force3D: true,
-				}
-			);
+    particle.className =
+      "absolute w-1 h-1 bg-primary rounded-full pointer-events-none";
+    particle.style.left = `${startX}px`;
+    particle.style.top = `${startY}px`;
+    particle.style.opacity = "0";
+    particle.style.transform = "scale(0)";
 
-			gsap.fromTo(
-				contactRef.current,
-				{
-					opacity: 0,
-					scale: ANIMATION_CONFIG.CONTACT.SCALE.START,
-				},
-				{
-					opacity: 1,
-					scale: ANIMATION_CONFIG.CONTACT.SCALE.END,
-					duration: ANIMATION_CONFIG.CONTACT.DURATION,
-					ease: ANIMATION_CONFIG.CONTACT.EASE,
-					clearProps: "transform",
-					force3D: true,
-				}
-			);
+    particlesContainerRef.current.appendChild(particle);
 
-			gsap.fromTo(
-				shineRef.current,
-				{ x: "-100%" },
-				{
-					x: "100%",
-					duration: ANIMATION_CONFIG.SHINE.DURATION,
-					ease: ANIMATION_CONFIG.SHINE.EASE,
-					repeat: -1,
-					repeatDelay: ANIMATION_CONFIG.SHINE.DELAY,
-					force3D: true,
-				}
-			);
-		});
+    const duration = gsap.utils.random(
+      ANIMATION_CONFIG.CONTACT.PARTICLE_DURATION_MIN,
+      ANIMATION_CONFIG.CONTACT.PARTICLE_DURATION_MAX,
+    );
+    const angle = Math.random() * Math.PI * 2;
+    const travelDistance =
+      ANIMATION_CONFIG.CONTACT.PARTICLE_TRAVEL_DISTANCE *
+      (Math.random() * 0.4 + 0.8);
+    const endX = Math.cos(angle) * travelDistance;
+    const endY = Math.sin(angle) * travelDistance;
 
-		window.addEventListener("scroll", handleScroll);
-		return () => {
-			window.removeEventListener("scroll", handleScroll);
-			ctx.revert();
-		};
-	}, []);
+    const peakScale = gsap.utils.random(
+      ANIMATION_CONFIG.CONTACT.PARTICLE_SCALE_MIN,
+      ANIMATION_CONFIG.CONTACT.PARTICLE_SCALE_MAX,
+    );
+    const visibleDelay =
+      duration * ANIMATION_CONFIG.CONTACT.PARTICLE_VISIBLE_DELAY_FACTOR;
+    const fadeInDuration =
+      duration * ANIMATION_CONFIG.CONTACT.PARTICLE_FADE_IN_FACTOR;
+    const moveFadeOutDuration = duration - visibleDelay - fadeInDuration;
 
-	const handleButtonHover = (isEntering: boolean) => {
-		if (!contactRef.current) return;
+    const tl = gsap.timeline({ onComplete: () => particle.remove() });
 
-		const tl = gsap.timeline();
+    tl.to(
+      particle,
+      {
+        x: endX * (visibleDelay / duration),
+        y: endY * (visibleDelay / duration),
+        duration: visibleDelay,
+        ease: "none",
+      },
+      0,
+    );
 
-		tl.to(contactRef.current, {
-			scale: isEntering ? ANIMATION_CONFIG.HOVER.SCALE : 1,
-			duration: ANIMATION_CONFIG.HOVER.DURATION,
-			ease: ANIMATION_CONFIG.HOVER.EASE,
-			force3D: true,
-		});
+    tl.to(
+      particle,
+      {
+        opacity: gsap.utils.random(0.6, 1.0),
+        scale: peakScale,
+        duration: fadeInDuration,
+        ease: "power1.out",
+      },
+      visibleDelay,
+    );
+    tl.to(
+      particle,
+      {
+        x: `+=${endX * (fadeInDuration / duration)}`,
+        y: `+=${endY * (fadeInDuration / duration)}`,
+        duration: fadeInDuration,
+        ease: "none",
+      },
+      visibleDelay,
+    );
 
-		if (buttonBorderRef.current) {
-			tl.to(
-				buttonBorderRef.current,
-				{
-					borderColor: isEntering
-						? "rgba(0, 255, 159, 0.5)"
-						: "rgba(55, 65, 81, 1)",
-					duration: ANIMATION_CONFIG.HOVER.DURATION,
-					ease: ANIMATION_CONFIG.HOVER.EASE,
-				},
-				0
-			);
-		}
+    tl.to(
+      particle,
+      {
+        opacity: 0,
+        scale: 0,
+        duration: moveFadeOutDuration,
+        ease: "power1.in",
+      },
+      visibleDelay + fadeInDuration,
+    );
+    tl.to(
+      particle,
+      {
+        x: `+=${endX * (moveFadeOutDuration / duration)}`,
+        y: `+=${endY * (moveFadeOutDuration / duration)}`,
+        duration: moveFadeOutDuration,
+        ease: "none",
+      },
+      visibleDelay + fadeInDuration,
+    );
+  });
 
-		if (buttonShadowRef.current) {
-			tl.to(
-				buttonShadowRef.current,
-				{
-					boxShadow: isEntering
-						? "0 4px 20px rgba(0, 255, 159, 0.2)"
-						: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-					duration: ANIMATION_CONFIG.HOVER.DURATION,
-					ease: ANIMATION_CONFIG.HOVER.EASE,
-				},
-				0
-			);
-		}
+  const handleButtonHover = contextSafe((isEntering: boolean) => {
+    const button = contactButtonRef.current;
+    if (!button) return;
 
-		if (buttonBgRef.current) {
-			tl.to(
-				buttonBgRef.current,
-				{
-					backgroundColor: isEntering
-						? "rgba(31, 41, 55, 1)"
-						: "rgba(17, 24, 39, 1)",
-					duration: ANIMATION_CONFIG.HOVER.DURATION,
-					ease: ANIMATION_CONFIG.HOVER.EASE,
-				},
-				0
-			);
-		}
-	};
+    gsap.to(button, {
+      "--glow-opacity": isEntering ? 1 : 0,
+      "--border-opacity-hover": isEntering ? 0.4 : 0.2,
+      duration: ANIMATION_CONFIG.CONTACT.HOVER_DURATION,
+      ease: ANIMATION_CONFIG.CONTACT.HOVER_EASE,
+      overwrite: true,
+    });
 
-	const handleLogoHover = (isEntering: boolean) => {
-		if (!logoImageRef.current) return;
+    if (isEntering) {
+      if (particleIntervalRef.current)
+        clearInterval(particleIntervalRef.current);
+      particleIntervalRef.current = setInterval(
+        createAndAnimateParticle,
+        ANIMATION_CONFIG.CONTACT.PARTICLE_INTERVAL,
+      );
+    } else {
+      if (particleIntervalRef.current) {
+        clearInterval(particleIntervalRef.current);
+        particleIntervalRef.current = null;
+      }
+    }
+  });
 
-		gsap.to(logoImageRef.current, {
-			scale: isEntering ? ANIMATION_CONFIG.LOGO_HOVER.SCALE : 1,
-			duration: ANIMATION_CONFIG.LOGO_HOVER.DURATION,
-			ease: ANIMATION_CONFIG.LOGO_HOVER.EASE,
-			force3D: true,
-		});
-	};
+  const handleLogoHover = contextSafe((isEntering: boolean) => {
+    gsap.to(logoImageRef.current, {
+      scale: isEntering ? ANIMATION_CONFIG.LOGO.HOVER_SCALE : 1,
+      duration: ANIMATION_CONFIG.LOGO.HOVER_DURATION,
+      ease: ANIMATION_CONFIG.LOGO.HOVER_EASE,
+      overwrite: true,
+    });
+  });
 
-	return (
-		<header
-			ref={headerRef}
-			className="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm bg-gray-950/80 transition-transform duration-300 ease-in-out"
-			style={{ willChange: "transform" }}
-		>
-			<div className="container mx-auto px-6 py-4">
-				<nav className="relative flex items-center justify-between">
-					<div ref={logoRef} style={{ willChange: "transform" }}>
-						<Link
-							href="/"
-							className="flex items-center space-x-2 group"
-							onMouseEnter={() => handleLogoHover(true)}
-							onMouseLeave={() => handleLogoHover(false)}
-						>
-							<Image
-								ref={logoImageRef}
-								src="/images/logo.svg"
-								alt="Logo"
-								width={50}
-								height={50}
-								priority
-								className="rounded-xl"
-								style={{ willChange: "transform" }}
-							/>
-						</Link>
-					</div>
+  return (
+    <header
+      ref={headerRef}
+      className="sticky top-0 left-0 right-0 z-50 overflow-hidden
+                       bg-gradient-to-b from-secondary/80 to-gray-950/90
+                       backdrop-blur-md border-b border-neutral/20
+                       transition-transform duration-300 ease-in-out"
+      style={{ willChange: "transform" }}
+    >
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <nav className="relative flex items-center justify-between h-16 md:h-20">
+          <Link
+            ref={logoLinkRef}
+            href="/"
+            className="flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-full"
+            onMouseEnter={() => handleLogoHover(true)}
+            onMouseLeave={() => handleLogoHover(false)}
+            style={{ willChange: "opacity" }}
+            aria-label="Homepage"
+          >
+            <Image
+              ref={logoImageRef}
+              src="/images/logo.svg"
+              alt="Logo"
+              width={44}
+              height={44}
+              priority
+              className="rounded-full md:w-[50px] md:h-[50px]"
+              style={{ willChange: "transform" }}
+            />
+          </Link>
 
-					<div
-						className="relative"
-						ref={buttonBorderRef}
-						style={{ willChange: "transform" }}
-					>
-						<div
-							ref={buttonShadowRef}
-							className="absolute inset-0 rounded-xl"
-							style={{ willChange: "box-shadow" }}
-						></div>
-						<div
-							ref={buttonBgRef}
-							className="absolute inset-0 rounded-xl bg-gray-900"
-							style={{ willChange: "background-color" }}
-						></div>
-						<button
-							ref={contactRef}
-							className="relative overflow-hidden text-white font-semibold px-6 py-2.5 rounded-xl
-                border border-gray-700 z-10"
-							style={{ willChange: "transform" }}
-							onMouseEnter={() => handleButtonHover(true)}
-							onMouseLeave={() => handleButtonHover(false)}
-							onClick={handleContactClick}
-						>
-							<div
-								ref={shineRef}
-								className="absolute inset-0 w-full h-full pointer-events-none"
-								style={{
-									background:
-										"linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)",
-									willChange: "transform",
-								}}
-							/>
-							<span className="relative z-10">Contact Me</span>
-						</button>
-					</div>
-				</nav>
-			</div>
-		</header>
-	);
+          <div className="relative">
+            <button
+              ref={contactButtonRef}
+              className="contact-button relative inline-flex items-center justify-center px-5 py-2 md:px-6 md:py-2.5 rounded-lg
+                                    font-semibold group
+                                    focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 z-10 overflow-visible"
+              style={
+                {
+                  "--glow-opacity": 0,
+                  "--border-opacity-hover": 0.2,
+                  willChange: "opacity",
+                } as React.CSSProperties
+              }
+              onMouseEnter={() => handleButtonHover(true)}
+              onMouseLeave={() => handleButtonHover(false)}
+              onClick={handleContactClick}
+            >
+              <span
+                className="absolute inset-0 z-0 bg-gradient-to-br from-neutral/70 via-secondary/60 to-neutral/70 backdrop-blur-sm rounded-lg border border-primary/20 group-hover:border-primary/[var(--border-opacity-hover)]"
+                style={{
+                  borderColor: "rgba(0, 255, 159, var(--border-opacity-hover))",
+                }}
+                aria-hidden="true"
+              />
+
+              <span
+                className="relative z-10 text-light/90 group-hover:text-light"
+                style={
+                  {
+                    textShadow:
+                      "0 0 8px rgba(0, 255, 159, var(--glow-opacity))",
+                    willChange: "opacity, text-shadow",
+                  } as React.CSSProperties
+                }
+              >
+                Contact Me
+              </span>
+            </button>
+            <div
+              ref={particlesContainerRef}
+              className="absolute inset-0 z-0 pointer-events-none overflow-visible"
+              aria-hidden="true"
+            />
+          </div>
+        </nav>
+      </div>
+    </header>
+  );
 };
 
 export default Header;

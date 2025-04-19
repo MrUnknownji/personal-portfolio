@@ -282,7 +282,7 @@ export default function MyProjects() {
   return (
     <div
       ref={pageRef}
-      className="min-h-screen py-16 md:py-24 lg:py-28 bg-gradient-to-b from-gray-950 via-secondary to-gray-950"
+      className="min-h-screen py-12 md:py-20 lg:py-24 bg-gradient-to-b from-gray-950 via-secondary to-gray-950"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Title
