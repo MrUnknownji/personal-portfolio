@@ -257,7 +257,7 @@ const Header = () => {
   return (
     <header
       ref={headerRef}
-      className="sticky top-0 left-0 right-0 z-50 overflow-hidden
+      className="fixed top-0 left-0 right-0 z-50 overflow-hidden
                        bg-gradient-to-b from-secondary/80 to-gray-950/90
                        backdrop-blur-md border-b border-neutral/20
                        transition-transform duration-300 ease-in-out"

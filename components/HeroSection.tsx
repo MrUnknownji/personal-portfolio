@@ -60,7 +60,7 @@ const HeroSection = () => {
   return (
     <div
       ref={sectionRef}
-      className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative pb-24 pt-10"
+      className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative pt-20"
     >
       <div className="w-full max-w-7xl mx-auto relative">
         <div className="absolute -inset-[1px] rounded-3xl overflow-hidden z-1">

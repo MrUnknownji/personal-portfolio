@@ -103,7 +103,9 @@ const ImageSection = () => {
       >
         <Image
           ref={imageRef}
-          src="/images/my-image.jpg"
+          src={
+            "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062501/MyImageUncropped-transformed-transparent2_osyd7d.png"
+          }
           alt="Profile"
           fill
           sizes="(max-width: 1023px) 90vw, 30vw"

@@ -282,14 +282,10 @@ export default function MyProjects() {
   return (
     <div
       ref={pageRef}
-      className="min-h-screen py-12 md:py-20 lg:py-24 bg-gradient-to-b from-gray-950 via-secondary to-gray-950"
+      className="min-h-screen md:py-20 lg:py-24 bg-gradient-to-b from-gray-950 via-secondary to-gray-950"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Title
-          title="My Projects"
-          className="mb-12 md:mb-16 lg:mb-20"
-          showGlowBar
-        />
+        <Title title="My Projects" className="mb-8" showGlowBar />
 
         <div
           ref={controlsRef}
