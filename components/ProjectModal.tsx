@@ -4,7 +4,6 @@ import { FiExternalLink, FiGithub, FiX, FiChevronRight } from "react-icons/fi";
 import { Dialog } from "@/components/ui/Dialog";
 import { Project } from "@/types/Project";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { ExpandableSection } from "./ProjectModalComponents/ExpandableSection";
 import { TechStack } from "./ProjectModalComponents/TechStack";
 import { MediaGallery } from "./ProjectModalComponents/MediaGallery";
