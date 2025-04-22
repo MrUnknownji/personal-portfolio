@@ -10,6 +10,8 @@ import { useGSAP } from "@gsap/react";
 import { FiSearch, FiX } from "react-icons/fi";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+gsap.registerPlugin(ScrollTrigger);
+
 const ANIMATION_CONFIG = {
   STAGGER: 0.08,
   DURATION: 0.6,
@@ -264,12 +266,9 @@ export default function MyProjects() {
   };
 
   return (
-    <div
-      ref={pageRef}
-      className="min-h-screen md:py-20 lg:py-24 bg-gradient-to-b from-gray-950 via-secondary to-gray-950"
-    >
+    <div ref={pageRef} className="min-h-screen pt-20 pb-20 md:pb-28 lg:pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Title title="My Projects" className="mb-8" showGlowBar />
+        <Title title="My Projects" className="mb-12 md:mb-16" showGlowBar />
 
         <div
           ref={controlsRef}
@@ -285,15 +284,15 @@ export default function MyProjects() {
               placeholder="Search projects..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-8 py-2.5 border rounded-xl
-               bg-secondary/60 border-neutral/40 text-light placeholder-muted
-                 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30
-                 transition duration-200"
+              className="w-full pl-10 pr-10 py-2.5 border rounded-xl
+               bg-neutral/30 border-neutral/70 text-light placeholder-muted
+                 focus:outline-none focus:border-primary focus:bg-neutral/50 focus:ring-2 focus:ring-primary/30
+                 transition-all duration-300 ease-out"
             />
             {searchQuery && (
               <button
                 onClick={clearSearch}
-                className="absolute inset-y-0 right-2 flex items-center justify-center p-1 text-muted hover:text-light transition-colors rounded-full"
+                className="absolute inset-y-0 right-2 flex items-center justify-center p-1 text-muted hover:text-light transition-colors rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50"
                 aria-label="Clear search"
               >
                 <FiX className="w-4 h-4" />
@@ -305,10 +304,10 @@ export default function MyProjects() {
             {categories.map((category) => (
               <button
                 key={category}
-                className={`px-4 py-2 rounded-lg text-sm md:text-base font-medium transition-all duration-200 ease-out transform-gpu ${
+                className={`px-4 py-2 rounded-lg text-sm md:text-base font-medium transition-all duration-300 ease-out transform-gpu border ${
                   filter === category
-                    ? "bg-primary text-secondary shadow-md scale-105"
-                    : "bg-frosted-dark text-muted hover:text-light hover:border-primary/40"
+                    ? "bg-primary text-dark shadow-md border-primary"
+                    : "bg-neutral/30 border-neutral/70 text-muted hover:text-light hover:border-primary/30 hover:bg-neutral/50"
                 }`}
                 onClick={() => setFilter(category)}
                 onMouseEnter={handleButtonHover}
@@ -345,7 +344,7 @@ export default function MyProjects() {
                 setFilter("All");
                 setSearchQuery("");
               }}
-              className="text-primary text-lg font-medium hover:text-accent transition-colors duration-200"
+              className="text-primary text-lg font-medium hover:text-accent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-md px-3 py-1"
             >
               Clear Filters & Search
             </button>

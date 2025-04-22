@@ -30,33 +30,8 @@ export const TechStack = ({ technologies }: TechStackProps) => {
     });
   }, []);
 
-  const setupHover = contextSafe((item: HTMLDivElement) => {
-    item.addEventListener("mouseenter", () => {
-      gsap.to(item, {
-        backgroundColor: "var(--color-primary)",
-        color: "var(--color-dark)",
-        borderColor: "var(--color-primary)",
-        duration: ANIMATION_CONFIG.HOVER_DURATION,
-        ease: ANIMATION_CONFIG.HOVER_EASE,
-      });
-    });
-    item.addEventListener("mouseleave", () => {
-      gsap.to(item, {
-        backgroundColor: "rgba(0, 255, 159, 0.1)",
-        color: "var(--color-primary)",
-        borderColor: "rgba(0, 255, 159, 0.2)",
-        duration: ANIMATION_CONFIG.HOVER_DURATION,
-        ease: ANIMATION_CONFIG.HOVER_EASE,
-      });
-    });
-  });
-
-  useGSAP(() => {
-    const items = gsap.utils.toArray<HTMLDivElement>(
-      containerRef.current?.children || [],
-    );
-    items.forEach(setupHover);
-  }, []);
+  // Use the skill-chip class directly for styling and hover effects defined in globals.css
+  // No need for JS hover handling if the CSS handles it
 
   return (
     <div className="space-y-3">
@@ -68,9 +43,6 @@ export const TechStack = ({ technologies }: TechStackProps) => {
             className="skill-chip"
             style={{
               willChange: "background-color, border-color, color",
-              backgroundColor: "rgba(0, 255, 159, 0.1)",
-              borderColor: "rgba(0, 255, 159, 0.2)",
-              color: "var(--color-primary)",
             }}
           >
             {tech}

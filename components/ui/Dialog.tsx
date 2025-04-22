@@ -1,5 +1,4 @@
 import React, {
-  useRef,
   useEffect,
   useState,
   ReactNode,
@@ -24,17 +23,13 @@ export const Dialog: FC<PropsWithChildren<DialogProps>> = ({
   children,
   className = "",
 }) => {
-  const portalNodeRef = useRef<Element | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    portalNodeRef.current = document.body;
     setMounted(true);
-    // Optional: Add body overflow hidden logic here if needed
-    // return () => { /* Cleanup overflow */ };
   }, []);
 
-  if (!mounted || !portalNodeRef.current || !open) {
+  if (!mounted || !open) {
     return null;
   }
 
@@ -46,23 +41,13 @@ export const Dialog: FC<PropsWithChildren<DialogProps>> = ({
       aria-modal="true"
       aria-hidden={!open}
     >
-      <div
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-        style={{ zIndex: OVERLAY_Z_INDEX }}
-        onClick={onClose}
-        aria-hidden="true"
-      />
-      <div className="flex min-h-screen items-center justify-center p-0 md:p-4">
-        <div
-          className={`relative text-left align-middle ${className}`}
-          style={{ zIndex: DIALOG_Z_INDEX }}
-          onClick={(e) => e.stopPropagation()}
-        >
+      <div className="flex min-h-full items-center justify-center p-0 md:p-4">
+        <div className={`relative text-left align-middle ${className}`}>
           {children}
         </div>
       </div>
     </div>,
-    portalNodeRef.current,
+    document.body,
   ) as ReactPortal;
 };
 
