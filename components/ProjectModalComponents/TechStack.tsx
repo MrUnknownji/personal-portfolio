@@ -16,7 +16,6 @@ const ANIMATION_CONFIG = {
 
 export const TechStack = ({ technologies }: TechStackProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { contextSafe } = useGSAP({ scope: containerRef });
 
   useGSAP(() => {
     gsap.from(containerRef.current?.children || [], {
@@ -29,9 +28,6 @@ export const TechStack = ({ technologies }: TechStackProps) => {
       clearProps: "transform, opacity",
     });
   }, []);
-
-  // Use the skill-chip class directly for styling and hover effects defined in globals.css
-  // No need for JS hover handling if the CSS handles it
 
   return (
     <div className="space-y-3">

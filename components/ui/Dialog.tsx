@@ -15,11 +15,9 @@ interface DialogProps {
 }
 
 const DIALOG_Z_INDEX: number = 50;
-const OVERLAY_Z_INDEX: number = 40;
 
 export const Dialog: FC<PropsWithChildren<DialogProps>> = ({
   open,
-  onClose,
   children,
   className = "",
 }) => {

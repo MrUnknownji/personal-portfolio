@@ -34,13 +34,12 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   const leftColumnRef = useRef<HTMLDivElement>(null);
   const rightColumnRef = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
-  const { contextSafe } = useGSAP({ scope: contentRef });
   const [isDesktop, setIsDesktop] = useState(
     typeof window !== "undefined"
       ? window.innerWidth >= DESKTOP_BREAKPOINT
       : true,
   );
-  const wheelHandlerRef = useRef<Function | null>(null);
+  const wheelHandlerRef = useRef<((event: WheelEvent) => void) | null>(null);
   const hasAnimatedIn = useRef(false);
 
   useEffect(() => {
@@ -90,12 +89,9 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     return () => {
       if (isDesktop && lenis) {
         if (wheelHandlerRef.current) {
-          document.removeEventListener(
-            "wheel",
-            wheelHandlerRef.current as any,
-            { passive: false } as EventListenerOptions,
-          );
-          wheelHandlerRef.current = null;
+          document.removeEventListener("wheel", wheelHandlerRef.current, {
+            passive: false,
+          } as EventListenerOptions);
         }
         lenis.start();
       }
@@ -147,12 +143,9 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         onClose();
         if (currentIsDesktop && lenis) {
           if (wheelHandlerRef.current) {
-            document.removeEventListener(
-              "wheel",
-              wheelHandlerRef.current as any,
-              { passive: false } as EventListenerOptions,
-            );
-            wheelHandlerRef.current = null;
+            document.removeEventListener("wheel", wheelHandlerRef.current, {
+              passive: false,
+            } as EventListenerOptions);
           }
           lenis.start();
         }
