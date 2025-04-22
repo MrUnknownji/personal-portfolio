@@ -22,9 +22,14 @@ const ANIMATION_CONFIG = {
     TOGGLE_ACTIONS: "play none none reverse",
   },
   ENTRANCE: {
-    DURATION: 0.6,
-    STAGGER: 0.08,
-    Y_OFFSET: 25,
+    DURATION: 0.7,
+    STAGGER: 0.1,
+    Y_OFFSET: 30,
+    OPACITY: 0,
+    EASE: "power3.out",
+  },
+  HOVER: {
+    DURATION: 0.25,
     EASE: "power2.out",
   },
 } as const;
@@ -32,17 +37,17 @@ const ANIMATION_CONFIG = {
 const SOCIAL_LINKS = [
   {
     href: "https://github.com/MrUnknownji",
-    icon: <FiGithub className="w-6 h-6" />,
+    icon: <FiGithub className="w-5 h-5" />,
     label: "GitHub",
   },
   {
     href: "https://linkedin.com/in/sandeep-kumar-sk1707",
-    icon: <FiLinkedin className="w-6 h-6" />,
+    icon: <FiLinkedin className="w-5 h-5" />,
     label: "LinkedIn",
   },
   {
     href: "https://twitter.com/MrUnknownG786",
-    icon: <FiTwitter className="w-6 h-6" />,
+    icon: <FiTwitter className="w-5 h-5" />,
     label: "Twitter",
   },
 ];
@@ -63,8 +68,8 @@ const CONTACT_INFO = [
   },
   {
     icon: <FiPhone className="w-5 h-5 text-primary" />,
-    text: "+91 9876543210", // Placeholder
-    href: "tel:+919876543210", // Placeholder
+    text: "+91 9876543210",
+    href: "tel:+919876543210",
     label: "Call Sandeep",
   },
   {
@@ -125,7 +130,7 @@ const Footer = () => {
       if (elementsToAnimate.length === 0) return;
 
       gsap.set(elementsToAnimate, {
-        opacity: 0,
+        opacity: ANIMATION_CONFIG.ENTRANCE.OPACITY,
         y: ANIMATION_CONFIG.ENTRANCE.Y_OFFSET,
         force3D: true,
         willChange: "transform, opacity",
@@ -142,9 +147,80 @@ const Footer = () => {
           start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
           end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
           toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
+          markers: false,
         },
         clearProps: "all",
         force3D: true,
+      });
+
+      const socialLinks = gsap.utils.toArray<HTMLAnchorElement>(
+        footerRef.current?.querySelectorAll(".social-link") ?? [],
+      );
+      socialLinks.forEach((link) => {
+        const icon = link.querySelector("svg");
+        link.addEventListener("mouseenter", () => {
+          gsap.to(link, {
+            scale: 1.1,
+            y: -2,
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+          });
+          if (icon)
+            gsap.to(icon, {
+              color: "var(--color-primary)",
+              duration: ANIMATION_CONFIG.HOVER.DURATION,
+              ease: ANIMATION_CONFIG.HOVER.EASE,
+            });
+        });
+        link.addEventListener("mouseleave", () => {
+          gsap.to(link, {
+            scale: 1,
+            y: 0,
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+          });
+          if (icon)
+            gsap.to(icon, {
+              color: "var(--color-muted)",
+              duration: ANIMATION_CONFIG.HOVER.DURATION,
+              ease: ANIMATION_CONFIG.HOVER.EASE,
+            });
+        });
+      });
+
+      const contactItems = gsap.utils.toArray<HTMLAnchorElement>(
+        footerRef.current?.querySelectorAll(".contact-item") ?? [],
+      );
+      contactItems.forEach((item) => {
+        const iconContainer = item.querySelector(".contact-icon-container");
+        item.addEventListener("mouseenter", () => {
+          gsap.to(item, {
+            color: "var(--color-light)",
+            x: 4,
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+          });
+          if (iconContainer)
+            gsap.to(iconContainer, {
+              backgroundColor: "rgba(0, 255, 159, 0.15)",
+              duration: ANIMATION_CONFIG.HOVER.DURATION,
+              ease: ANIMATION_CONFIG.HOVER.EASE,
+            });
+        });
+        item.addEventListener("mouseleave", () => {
+          gsap.to(item, {
+            color: "var(--color-muted)",
+            x: 0,
+            duration: ANIMATION_CONFIG.HOVER.DURATION,
+            ease: ANIMATION_CONFIG.HOVER.EASE,
+          });
+          if (iconContainer)
+            gsap.to(iconContainer, {
+              backgroundColor: "rgba(55, 65, 81, 0.5)",
+              duration: ANIMATION_CONFIG.HOVER.DURATION,
+              ease: ANIMATION_CONFIG.HOVER.EASE,
+            });
+        });
       });
     },
     { scope: footerRef },
@@ -161,26 +237,26 @@ const Footer = () => {
   return (
     <footer
       ref={footerRef}
-      className="w-full bg-secondary/70 border-t border-neutral/30 py-12 md:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden backdrop-blur-sm"
+      className="w-full bg-gradient-to-b from-secondary via-dark to-dark border-t border-neutral/20 py-12 md:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden backdrop-blur-md"
     >
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,hsl(var(--color-border))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--color-border))_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-5 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] pointer-events-none -z-10" />
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('/noise.svg')] bg-repeat"></div>
 
-      <div className="container mx-auto relative">
+      <div className="container mx-auto relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8 lg:gap-12">
           <div className="animate-footer-col">
             <FooterHeading>Connect With Me</FooterHeading>
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               {SOCIAL_LINKS.map((link) => (
                 <a
                   key={link.label}
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative w-11 h-11 flex items-center justify-center rounded-full bg-neutral/40 text-muted
-                                               border border-transparent hover:border-primary/40
-                                               transition-all duration-300 ease-out transform-gpu
-                                               hover:bg-neutral/60 hover:text-primary hover:scale-110 hover:-translate-y-1"
+                  className="social-link group relative w-11 h-11 flex items-center justify-center rounded-lg bg-neutral/30 text-muted
+                                 border border-neutral/40 ring-1 ring-inset ring-neutral/50 transition-colors duration-300 ease-out transform-gpu
+                                 hover:bg-neutral/50 hover:border-primary/30 hover:ring-primary/30"
                   aria-label={link.label}
+                  style={{ willChange: "transform, color" }}
                 >
                   {link.icon}
                 </a>
@@ -197,13 +273,13 @@ const Footer = () => {
                     href={link.href}
                     onClick={(e) => handleQuickLinkClick(e, link)}
                     className="group relative inline-block text-muted transition-colors duration-300 ease-out
-                                                   hover:text-primary focus-visible:text-primary outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded px-1"
+                                   hover:text-primary focus-visible:text-primary outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded px-1"
                   >
                     {link.text}
                     <span
                       className="absolute bottom-0 left-0 block h-0.5 bg-gradient-to-r from-primary to-accent origin-left
-                                                       w-full scale-x-0 transition-transform duration-300 ease-out
-                                                       group-hover:scale-x-100 group-focus-visible:scale-x-100"
+                                     w-full scale-x-0 transition-transform duration-300 ease-out
+                                     group-hover:scale-x-100 group-focus-visible:scale-x-100"
                       aria-hidden="true"
                     />
                   </a>
@@ -230,19 +306,18 @@ const Footer = () => {
                         : "noopener noreferrer"
                     }
                     aria-label={info.label}
-                    className="group flex items-center gap-3 text-muted transition-all duration-300 ease-out
-                                                   hover:text-light focus-visible:text-light outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded px-1 py-0.5"
+                    className="contact-item group flex items-center gap-3 text-muted transition-colors duration-300 ease-out
+                                   focus-visible:text-light outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded px-1 py-0.5"
+                    style={{ willChange: "transform, color" }}
                   >
                     <span
-                      className="flex-shrink-0 p-1.5 rounded-md bg-neutral/40 transition-colors duration-300 ease-out
-                                                       group-hover:bg-primary/20"
+                      className="contact-icon-container flex-shrink-0 p-1.5 rounded-md bg-neutral/50 border border-neutral/40 transition-colors duration-300 ease-out"
                       aria-hidden="true"
+                      style={{ willChange: "background-color" }}
                     >
                       {info.icon}
                     </span>
-                    <span className="transition-transform duration-300 ease-out group-hover:translate-x-1">
-                      {info.text}
-                    </span>
+                    <span>{info.text}</span>
                   </a>
                 </li>
               ))}
@@ -250,7 +325,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="footer-bottom mt-12 md:mt-16 pt-8 border-t border-neutral/30 text-center text-muted text-sm">
+        <div className="footer-bottom mt-12 md:mt-16 pt-8 border-t border-neutral/20 text-center text-muted text-sm">
           <p>© {currentYear} Sandeep Kumar. All rights reserved.</p>
         </div>
       </div>

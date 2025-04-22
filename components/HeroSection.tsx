@@ -12,20 +12,11 @@ const ANIMATION_CONFIG = {
     DURATION: 1,
     EASE: "power3.out",
   },
-  BORDER: {
-    DURATION: 3,
-    GRADIENT_POSITIONS: {
-      START: "0%",
-      PEAK: "50%",
-      END: "100%",
-    },
-  },
 } as const;
 
 const HeroSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const borderRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
@@ -46,13 +37,6 @@ const HeroSection = () => {
           force3D: true,
         },
       );
-
-      gsap.to(borderRef.current, {
-        backgroundPosition: "200% 0",
-        duration: ANIMATION_CONFIG.BORDER.DURATION,
-        ease: "none",
-        repeat: -1,
-      });
     },
     { scope: sectionRef },
   );
@@ -63,32 +47,15 @@ const HeroSection = () => {
       className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative pt-20"
     >
       <div className="w-full max-w-7xl mx-auto relative">
-        <div className="absolute -inset-[1px] rounded-3xl overflow-hidden z-1">
-          <div
-            ref={borderRef}
-            className="absolute inset-0"
-            style={{
-              background: `linear-gradient(
-            90deg,
-            transparent ${ANIMATION_CONFIG.BORDER.GRADIENT_POSITIONS.START},
-            rgba(79, 209, 197, 0.2) 25%,
-            rgba(79, 209, 197, 0.5) ${ANIMATION_CONFIG.BORDER.GRADIENT_POSITIONS.PEAK},
-            rgba(79, 209, 197, 0.2) 75%,
-            transparent ${ANIMATION_CONFIG.BORDER.GRADIENT_POSITIONS.END}
-            )`,
-              backgroundSize: "200% 100%",
-              willChange: "background-position",
-            }}
-          />
-        </div>
-
         <div
           ref={cardRef}
           className="relative rounded-3xl p-6 md:p-8 lg:p-12
-          bg-gray-900/85 border border-gray-800/50 z-10
+          bg-secondary/80 backdrop-blur-md border border-neutral/30 z-10
           shadow-xl shadow-gray-950/20 transform-gpu"
         >
-          <div className="relative flex flex-col lg:flex-row gap-8 h-full justify-center items-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-70 pointer-events-none -z-1" />
+
+          <div className="relative z-10 flex flex-col lg:flex-row gap-8 h-full justify-center items-center">
             <div className="z-10 w-full h-full">
               <HeroContent />
             </div>

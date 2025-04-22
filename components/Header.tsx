@@ -5,6 +5,7 @@ import { useEffect, useRef, useCallback } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { usePathname, useRouter } from "next/navigation";
+import { FiArrowRight } from "react-icons/fi";
 
 const ANIMATION_CONFIG = {
   HEADER: {
@@ -18,12 +19,12 @@ const ANIMATION_CONFIG = {
     HOVER_DURATION: 0.3,
     HOVER_EASE: "power2.out",
     HOVER_SCALE: 1.05,
-    PARTICLE_INTERVAL: 45,
+    PARTICLE_INTERVAL: 55,
     PARTICLE_DURATION_MIN: 1.2,
     PARTICLE_DURATION_MAX: 2.0,
-    PARTICLE_TRAVEL_DISTANCE: 65,
+    PARTICLE_TRAVEL_DISTANCE: 60,
     PARTICLE_SCALE_MIN: 0.15,
-    PARTICLE_SCALE_MAX: 0.45,
+    PARTICLE_SCALE_MAX: 0.4,
     PARTICLE_VISIBLE_DELAY_FACTOR: 0.1,
     PARTICLE_FADE_IN_FACTOR: 0.25,
   },
@@ -32,12 +33,13 @@ const ANIMATION_CONFIG = {
     EASE: "power2.out",
     HOVER_DURATION: 0.3,
     HOVER_EASE: "power3.out",
-    PARTICLE_INTERVAL: 25,
+    HOVER_SCALE: 1.03,
+    PARTICLE_INTERVAL: 30,
     PARTICLE_DURATION_MIN: 1.3,
     PARTICLE_DURATION_MAX: 2.2,
-    PARTICLE_TRAVEL_DISTANCE: 100,
+    PARTICLE_TRAVEL_DISTANCE: 80,
     PARTICLE_SCALE_MIN: 0.2,
-    PARTICLE_SCALE_MAX: 0.6,
+    PARTICLE_SCALE_MAX: 0.5,
     PARTICLE_VISIBLE_DELAY_FACTOR: 0.15,
     PARTICLE_FADE_IN_FACTOR: 0.3,
   },
@@ -50,6 +52,7 @@ const Header = () => {
   const logoLinkRef = useRef<HTMLAnchorElement>(null);
   const logoImageRef = useRef<HTMLImageElement>(null);
   const contactButtonRef = useRef<HTMLButtonElement>(null);
+  const contactButtonIconWrapperRef = useRef<HTMLSpanElement>(null);
   const particlesContainerRef = useRef<HTMLDivElement>(null);
   const contactParticleIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const logoParticleIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -99,11 +102,14 @@ const Header = () => {
       originRect.width / 2 + (originRect.left - containerRect.left);
     const startY = originRect.height / 2 + (originRect.top - containerRect.top);
 
-    particle.className = `absolute w-1 h-1 ${origin === "logo" ? "bg-accent/80" : "bg-primary"} rounded-full pointer-events-none`;
+    particle.className = `absolute w-1 h-1 ${
+      origin === "logo" ? "bg-accent/70" : "bg-primary/90"
+    } rounded-full pointer-events-none mix-blend-lighten`;
     particle.style.left = `${startX}px`;
     particle.style.top = `${startY}px`;
     particle.style.opacity = "0";
     particle.style.transform = "scale(0)";
+    particle.style.filter = "blur(0.5px)";
 
     particlesContainerRef.current.appendChild(particle);
 
@@ -136,49 +142,49 @@ const Header = () => {
         ease: "none",
       },
       0,
-    );
-
-    tl.to(
-      particle,
-      {
-        opacity: gsap.utils.random(0.5, 0.9),
-        scale: peakScale,
-        duration: fadeInDuration,
-        ease: "power1.out",
-      },
-      visibleDelay,
-    );
-    tl.to(
-      particle,
-      {
-        x: `+=${endX * (fadeInDuration / duration)}`,
-        y: `+=${endY * (fadeInDuration / duration)}`,
-        duration: fadeInDuration,
-        ease: "none",
-      },
-      visibleDelay,
-    );
-
-    tl.to(
-      particle,
-      {
-        opacity: 0,
-        scale: 0,
-        duration: moveFadeOutDuration,
-        ease: "power1.in",
-      },
-      visibleDelay + fadeInDuration,
-    );
-    tl.to(
-      particle,
-      {
-        x: `+=${endX * (moveFadeOutDuration / duration)}`,
-        y: `+=${endY * (moveFadeOutDuration / duration)}`,
-        duration: moveFadeOutDuration,
-        ease: "none",
-      },
-      visibleDelay + fadeInDuration,
-    );
+    )
+      .to(
+        particle,
+        {
+          opacity: gsap.utils.random(0.6, 1.0),
+          scale: peakScale,
+          filter: "blur(0px)",
+          duration: fadeInDuration,
+          ease: "power1.out",
+        },
+        visibleDelay,
+      )
+      .to(
+        particle,
+        {
+          x: `+=${endX * (fadeInDuration / duration)}`,
+          y: `+=${endY * (fadeInDuration / duration)}`,
+          duration: fadeInDuration,
+          ease: "none",
+        },
+        visibleDelay,
+      )
+      .to(
+        particle,
+        {
+          opacity: 0,
+          scale: 0,
+          filter: "blur(1px)",
+          duration: moveFadeOutDuration,
+          ease: "power1.in",
+        },
+        visibleDelay + fadeInDuration,
+      )
+      .to(
+        particle,
+        {
+          x: `+=${endX * (moveFadeOutDuration / duration)}`,
+          y: `+=${endY * (moveFadeOutDuration / duration)}`,
+          duration: moveFadeOutDuration,
+          ease: "none",
+        },
+        visibleDelay + fadeInDuration,
+      );
   });
 
   useEffect(() => {
@@ -222,22 +228,26 @@ const Header = () => {
     () => {
       gsap.fromTo(
         logoLinkRef.current,
-        { opacity: 0 },
+        { opacity: 0, y: -10 },
         {
           opacity: 1,
+          y: 0,
           duration: ANIMATION_CONFIG.LOGO.DURATION,
           ease: ANIMATION_CONFIG.LOGO.EASE,
-          clearProps: "opacity",
+          delay: 0.1,
+          clearProps: "all",
         },
       );
       gsap.fromTo(
         contactButtonRef.current,
-        { opacity: 0 },
+        { opacity: 0, y: -10 },
         {
           opacity: 1,
+          y: 0,
           duration: ANIMATION_CONFIG.CONTACT.DURATION,
           ease: ANIMATION_CONFIG.CONTACT.EASE,
-          clearProps: "opacity",
+          delay: 0.2,
+          clearProps: "all",
         },
       );
     },
@@ -246,15 +256,29 @@ const Header = () => {
 
   const handleContactButtonHover = contextSafe((isEntering: boolean) => {
     const button = contactButtonRef.current;
+    const iconWrapper = contactButtonIconWrapperRef.current;
     if (!button) return;
 
     gsap.to(button, {
-      "--glow-opacity": isEntering ? 1 : 0,
-      "--border-opacity-hover": isEntering ? 0.4 : 0.2,
+      scale: isEntering ? ANIMATION_CONFIG.CONTACT.HOVER_SCALE : 1,
+      backgroundColor: isEntering
+        ? "rgba(55, 65, 81, 0.7)"
+        : "rgba(55, 65, 81, 0.5)",
+      borderColor: isEntering
+        ? "rgba(0, 255, 159, 0.4)"
+        : "rgba(0, 255, 159, 0.2)",
       duration: ANIMATION_CONFIG.CONTACT.HOVER_DURATION,
       ease: ANIMATION_CONFIG.CONTACT.HOVER_EASE,
       overwrite: true,
     });
+    if (iconWrapper) {
+      gsap.to(iconWrapper, {
+        x: isEntering ? 3 : 0,
+        duration: ANIMATION_CONFIG.CONTACT.HOVER_DURATION,
+        ease: ANIMATION_CONFIG.CONTACT.HOVER_EASE,
+        overwrite: true,
+      });
+    }
 
     if (isEntering) {
       if (contactParticleIntervalRef.current)
@@ -283,17 +307,17 @@ const Header = () => {
   return (
     <header
       ref={headerRef}
-      className="fixed top-0 left-0 right-0 z-50
-                       bg-gradient-to-b from-secondary/80 to-gray-950/90
-                       backdrop-blur-md border-b border-neutral/20
-                       transition-transform duration-300 ease-in-out"
+      className="fixed top-0 left-0 right-0 z-50 transform-gpu
+                 bg-gradient-to-b from-secondary/85 via-secondary/70 to-transparent
+                 backdrop-blur-lg border-b border-neutral/20
+                 transition-transform duration-300 ease-out"
       style={{ willChange: "transform" }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <nav className="relative flex items-center justify-between h-16 md:h-20">
           <div
             ref={particlesContainerRef}
-            className="absolute inset-0 z-0 pointer-events-none overflow-visible"
+            className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
             aria-hidden="true"
           />
           <Link
@@ -302,7 +326,7 @@ const Header = () => {
             className="relative flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-full z-10"
             onMouseEnter={() => handleLogoScaleHover(true)}
             onMouseLeave={() => handleLogoScaleHover(false)}
-            style={{ willChange: "opacity" }}
+            style={{ willChange: "opacity, transform" }}
             aria-label="Homepage"
           >
             <Image
@@ -312,47 +336,32 @@ const Header = () => {
               width={44}
               height={44}
               priority
-              className="rounded-full md:w-[50px] md:h-[50px]"
+              className="md:w-[50px] md:h-[50px]"
               style={{ willChange: "transform" }}
             />
           </Link>
 
-          <div className="relative">
+          <div className="relative z-10">
             <button
               ref={contactButtonRef}
               className="contact-button relative inline-flex items-center justify-center px-5 py-2 md:px-6 md:py-2.5 rounded-lg
-                                    font-semibold group
-                                    focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 z-10 overflow-visible"
-              style={
-                {
-                  "--glow-opacity": 0,
-                  "--border-opacity-hover": 0.2,
-                  willChange: "opacity",
-                } as React.CSSProperties
-              }
+                         bg-neutral/50 backdrop-blur-sm border border-primary/20 text-light/90
+                         font-medium group transition-colors duration-300 ease-out
+                         hover:text-light focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 overflow-hidden"
+              style={{
+                willChange: "transform, background-color, border-color",
+              }}
               onMouseEnter={() => handleContactButtonHover(true)}
               onMouseLeave={() => handleContactButtonHover(false)}
               onClick={handleContactClick}
             >
+              <span className="relative z-10">Contact Me</span>
               <span
-                className="absolute inset-0 z-0 bg-gradient-to-br from-neutral/70 via-secondary/60 to-neutral/70 backdrop-blur-sm rounded-lg border border-primary/20 group-hover:border-primary/[var(--border-opacity-hover)]"
-                style={{
-                  borderColor: "rgba(0, 255, 159, var(--border-opacity-hover))",
-                }}
-                aria-hidden="true"
-              />
-
-              <span
-                className="relative z-10 text-light/90 group-hover:text-light"
-                style={
-                  {
-                    textShadow:
-                      "0 0 8px rgba(0, 255, 159, var(--glow-opacity))",
-                    willChange: "opacity, text-shadow",
-                  } as React.CSSProperties
-                }
+                ref={contactButtonIconWrapperRef}
+                className="inline-block ml-2 transition-transform duration-200 ease-out"
+                style={{ willChange: "transform" }}
               >
-                Contact Me
+                <FiArrowRight className="w-4 h-4" />
               </span>
             </button>
           </div>

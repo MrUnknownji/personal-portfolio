@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Outfit, Poppins } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -14,6 +15,19 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
 };
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-outfit",
+  display: "swap",
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Sandeep's Portfolio",
@@ -36,23 +50,34 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html className="scroll-smooth" lang="en">
-      <body className="bg-gray-950" suppressHydrationWarning>
-        <div className="fixed inset-0 z-0 overflow-visible">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-gray-950 to-black"></div>
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_40%,transparent_100%)]"></div>
+    <html className={`${outfit.variable} ${poppins.variable}`} lang="en">
+      <body className="bg-secondary text-light" suppressHydrationWarning>
+        <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
+          <div className="absolute inset-0 bg-gradient-to-br from-dark via-secondary to-dark"></div>
           <div
-            className="absolute inset-0 opacity-20"
+            className="absolute inset-0 opacity-[0.15]"
+            style={{
+              backgroundImage: `
+                radial-gradient(at 20% 30%, hsla(160, 80%, 40%, 0.3) 0px, transparent 50%),
+                radial-gradient(at 80% 10%, hsla(197, 70%, 50%, 0.25) 0px, transparent 50%),
+                radial-gradient(at 70% 80%, hsla(210, 60%, 35%, 0.2) 0px, transparent 50%),
+                radial-gradient(at 30% 90%, hsla(160, 50%, 25%, 0.15) 0px, transparent 60%),
+                radial-gradient(at 90% 60%, hsla(197, 40%, 30%, 0.2) 0px, transparent 50%)
+              `,
+            }}
+          />
+          <div
+            className="absolute inset-0 opacity-15 mix-blend-soft-light"
             style={{
               backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
             }}
-          ></div>
+          />
         </div>
 
         <SmoothScrollLenisGSAP lenisOptions={lenisOptions}>
           <div className="relative z-10">
             <Header />
-            <div className="min-h-screen">{children}</div>
+            <main className="min-h-screen">{children}</main>
             <Footer />
           </div>
         </SmoothScrollLenisGSAP>

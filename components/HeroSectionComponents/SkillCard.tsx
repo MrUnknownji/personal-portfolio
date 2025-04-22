@@ -10,18 +10,17 @@ interface SkillCardProps {
 const SkillCard = ({ icon, text }: SkillCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
-  const gradientFillRef = useRef<HTMLDivElement>(null);
   const svgPathRef = useRef<SVGPathElement>(null);
+  const backgroundRef = useRef<HTMLDivElement>(null);
 
   const hoverTimelineRef = useRef<gsap.core.Timeline | null>(null);
 
   const HOVER_ICON_Y = -4;
-  const HOVER_GRADIENT_X = 0;
-  const BORDER_TRACE_DURATION = 0.8;
-  const ANIM_DURATION = 0.35;
+  const BORDER_TRACE_DURATION = 0.6;
+  const ANIM_DURATION = 0.3;
   const EASE_TYPE = "power2.out";
   const BORDER_COLOR = "var(--color-primary)";
-  const BORDER_WIDTH = 2;
+  const BORDER_WIDTH = 1.5;
 
   const svgInternalWidth = 200;
   const svgInternalHeight = 64;
@@ -30,14 +29,14 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
     () => {
       const { current: cardElement } = cardRef;
       const { current: iconElement } = iconRef;
-      const { current: gradientFillElement } = gradientFillRef;
       const { current: pathElement } = svgPathRef;
+      const { current: backgroundElement } = backgroundRef;
 
-      if (!cardElement || !iconElement || !gradientFillElement || !pathElement)
+      if (!cardElement || !iconElement || !pathElement || !backgroundElement)
         return;
 
       gsap.delayedCall(0.01, () => {
-        if (!pathElement || !iconElement || !gradientFillElement) return;
+        if (!pathElement || !iconElement || !backgroundElement) return;
 
         const pathLength = pathElement.getTotalLength();
 
@@ -50,12 +49,12 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
         }
 
         gsap.set(iconElement, { y: 0, color: "rgb(209 213 219)" });
-        gsap.set(gradientFillElement, { xPercent: -101 });
         gsap.set(pathElement, {
           strokeDasharray: pathLength,
           strokeDashoffset: pathLength,
           opacity: 0,
         });
+        gsap.set(backgroundElement, { opacity: 0 });
 
         hoverTimelineRef.current = gsap
           .timeline({ paused: true })
@@ -70,10 +69,10 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
             0,
           )
           .to(
-            gradientFillElement,
+            backgroundElement,
             {
-              xPercent: HOVER_GRADIENT_X,
-              duration: ANIM_DURATION * 1.1,
+              opacity: 1,
+              duration: ANIM_DURATION * 0.8,
               ease: EASE_TYPE,
             },
             0,
@@ -112,7 +111,7 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
           cardElement.removeEventListener("mouseenter", handleMouseEnter);
           cardElement.removeEventListener("mouseleave", handleMouseLeave);
           hoverTimelineRef.current?.kill();
-          gsap.killTweensOf([iconElement, gradientFillElement, pathElement]);
+          gsap.killTweensOf([iconElement, pathElement, backgroundElement]);
         };
       });
     },
@@ -134,15 +133,17 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
   return (
     <div
       ref={cardRef}
-      className="relative bg-white/10 backdrop-blur-md rounded-xl p-4 cursor-pointer h-16 flex items-center overflow-hidden transform-gpu shadow-md transition-shadow duration-300 hover:shadow-primary/20 w-full sm:w-auto"
+      className="relative bg-neutral/40 backdrop-blur-sm rounded-xl p-4 cursor-pointer h-16 flex items-center overflow-hidden
+                 transform-gpu shadow-md border border-neutral/50 transition-colors duration-300 hover:border-primary/30
+                 w-full sm:w-auto"
       style={{
-        willChange: "transform, box-shadow",
+        willChange: "transform, box-shadow, border-color",
       }}
     >
       <div
-        ref={gradientFillRef}
-        className="absolute inset-0 z-0 bg-gradient-to-r from-primary/40 via-primary/25 to-primary/15 pointer-events-none opacity-90"
-        style={{ willChange: "transform" }}
+        ref={backgroundRef}
+        className="absolute inset-0 z-0 bg-gradient-to-r from-primary/15 via-primary/5 to-transparent pointer-events-none"
+        style={{ willChange: "opacity" }}
       />
 
       <svg
@@ -159,6 +160,7 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
           strokeWidth={strokeW}
           strokeLinecap="round"
           strokeLinejoin="round"
+          style={{ willChange: "stroke-dashoffset, opacity" }}
         />
       </svg>
 
@@ -170,10 +172,7 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
         >
           {icon}
         </div>
-        <div className="text-gray-200 text-sm font-medium truncate">
-          {" "}
-          {text}
-        </div>
+        <div className="text-gray-200 text-sm font-medium truncate">{text}</div>
       </div>
     </div>
   );

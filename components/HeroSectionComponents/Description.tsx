@@ -16,9 +16,9 @@ export const Description = () => {
   const TARGET_SCALE = 1.18;
   const TARGET_OPACITY = 1;
   const BASE_OPACITY = 1;
-  const STAGGER_TOTAL_DURATION_IN = 0.15;
+  const STAGGER_TOTAL_DURATION_IN = 0.35;
   const STAGGER_TOTAL_DURATION_OUT = 0.65;
-  const CHARACTER_ANIMATION_DURATION = 0.2;
+  const CHARACTER_ANIMATION_DURATION = 0.4;
   const EASE_TYPE_IN = "power3.out";
   const EASE_TYPE_OUT = "power2.inOut";
 
