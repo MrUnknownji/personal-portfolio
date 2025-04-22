@@ -69,15 +69,15 @@ const HeroSection = () => {
             className="absolute inset-0"
             style={{
               background: `linear-gradient(
-                  90deg,
-                  transparent ${ANIMATION_CONFIG.BORDER.GRADIENT_POSITIONS.START},
-                  rgba(79, 209, 197, 0.2) 25%,
-                  rgba(79, 209, 197, 0.5) ${ANIMATION_CONFIG.BORDER.GRADIENT_POSITIONS.PEAK},
-                  rgba(79, 209, 197, 0.2) 75%,
-                  transparent ${ANIMATION_CONFIG.BORDER.GRADIENT_POSITIONS.END}
-                )`,
+            90deg,
+            transparent ${ANIMATION_CONFIG.BORDER.GRADIENT_POSITIONS.START},
+            rgba(79, 209, 197, 0.2) 25%,
+            rgba(79, 209, 197, 0.5) ${ANIMATION_CONFIG.BORDER.GRADIENT_POSITIONS.PEAK},
+            rgba(79, 209, 197, 0.2) 75%,
+            transparent ${ANIMATION_CONFIG.BORDER.GRADIENT_POSITIONS.END}
+            )`,
               backgroundSize: "200% 100%",
-              willChange: "background-position", // Hint for background animation
+              willChange: "background-position",
             }}
           />
         </div>
@@ -85,8 +85,8 @@ const HeroSection = () => {
         <div
           ref={cardRef}
           className="relative rounded-3xl p-6 md:p-8 lg:p-12
-              bg-gray-900/85 border border-gray-800/50 z-10
-              shadow-xl shadow-gray-950/20 transform-gpu"
+          bg-gray-900/85 border border-gray-800/50 z-10
+          shadow-xl shadow-gray-950/20 transform-gpu"
         >
           <div className="relative flex flex-col lg:flex-row gap-8 h-full justify-center items-center">
             <div className="z-10 w-full h-full">

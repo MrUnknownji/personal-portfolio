@@ -85,7 +85,7 @@ const JourneySection = () => {
           trigger: containerRef.current,
           start: "top 80%",
           end: "bottom 20%",
-          toggleActions: "play none none reverse",
+          toggleActions: "play pause resume reverse",
           markers: false,
         },
       });
@@ -134,11 +134,12 @@ const JourneySection = () => {
           );
         }
       });
+
       return () => {
-        gsap.killTweensOf([titleRef.current, lineRef.current, items, circles]);
         if (tl.scrollTrigger) {
           tl.scrollTrigger.kill();
         }
+        gsap.killTweensOf([titleRef.current, lineRef.current, items, circles]);
       };
     },
     { scope: containerRef },

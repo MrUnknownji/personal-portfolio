@@ -6,20 +6,21 @@ import { useGSAP } from "@gsap/react";
 export const Description = () => {
   const descriptionRef = useRef<HTMLParagraphElement>(null);
   const splitInstanceRef = useRef<SplitType | null>(null);
-  const lastMousePosRef = useRef({ x: 0, y: 0 });
-  const isHoveringRef = useRef(false);
-  const lastEnterTimelineRef = useRef<gsap.core.Timeline | null>(null);
-  const lastLeaveTimelineRef = useRef<gsap.core.Timeline | null>(null);
+  const initialHoverPosRef = useRef<{ x: number; y: number } | null>(null);
+  const activeEnterTimelineRef = useRef<gsap.core.Timeline | null>(null);
+  const activeLeaveTimelineRef = useRef<gsap.core.Timeline | null>(null);
+  const isCurrentlyHoveringRef = useRef(false);
   const initialCharsRef = useRef<HTMLElement[]>([]);
 
   const HOVER_COLOR = "#00ff9f";
-  const TARGET_SCALE = 1.1;
+  const TARGET_SCALE = 1.18;
   const TARGET_OPACITY = 1;
   const BASE_OPACITY = 1;
-  const STAGGER_TOTAL_DURATION_IN = 0.5;
-  const STAGGER_TOTAL_DURATION_OUT = 0.4;
-  const CHARACTER_ANIMATION_DURATION = 0.3;
-  const EASE_TYPE = "power2.out";
+  const STAGGER_TOTAL_DURATION_IN = 0.15;
+  const STAGGER_TOTAL_DURATION_OUT = 0.65;
+  const CHARACTER_ANIMATION_DURATION = 0.2;
+  const EASE_TYPE_IN = "power3.out";
+  const EASE_TYPE_OUT = "power2.inOut";
 
   const runAnimation = useCallback(
     (originX: number, originY: number, isEntering: boolean) => {
@@ -35,30 +36,44 @@ export const Description = () => {
 
       const maxDist =
         Math.max(
-          Math.sqrt(relativeOriginX ** 2 + relativeOriginY ** 2),
-          Math.sqrt((rect.width - relativeOriginX) ** 2 + relativeOriginY ** 2),
-          Math.sqrt(
-            relativeOriginX ** 2 + (rect.height - relativeOriginY) ** 2,
-          ),
-          Math.sqrt(
-            (rect.width - relativeOriginX) ** 2 +
-              (rect.height - relativeOriginY) ** 2,
+          Math.hypot(relativeOriginX, relativeOriginY),
+          Math.hypot(rect.width - relativeOriginX, relativeOriginY),
+          Math.hypot(relativeOriginX, rect.height - relativeOriginY),
+          Math.hypot(
+            rect.width - relativeOriginX,
+            rect.height - relativeOriginY,
           ),
         ) || 1;
 
       const tl = gsap.timeline({
         defaults: {
           duration: CHARACTER_ANIMATION_DURATION,
-          ease: EASE_TYPE,
+          ease: isEntering ? EASE_TYPE_IN : EASE_TYPE_OUT,
           overwrite: "auto",
+        },
+        onComplete: () => {
+          if (isEntering) {
+            activeEnterTimelineRef.current = null;
+            if (!isCurrentlyHoveringRef.current && initialHoverPosRef.current) {
+              runAnimation(
+                initialHoverPosRef.current.x,
+                initialHoverPosRef.current.y,
+                false,
+              );
+            }
+          } else {
+            activeLeaveTimelineRef.current = null;
+            initialHoverPosRef.current = null;
+          }
         },
       });
 
       if (isEntering) {
-        lastEnterTimelineRef.current = tl;
-        lastLeaveTimelineRef.current?.kill();
+        activeEnterTimelineRef.current = tl;
+        activeLeaveTimelineRef.current?.kill();
       } else {
-        lastLeaveTimelineRef.current = tl;
+        activeLeaveTimelineRef.current = tl;
+        activeEnterTimelineRef.current?.kill();
       }
 
       currentChars.forEach((char) => {
@@ -67,14 +82,15 @@ export const Description = () => {
         const charCenterX = charRect.left + charRect.width / 2 - rect.left;
         const charCenterY = charRect.top + charRect.height / 2 - rect.top;
 
-        const distance = Math.sqrt(
-          Math.pow(relativeOriginX - charCenterX, 2) +
-            Math.pow(relativeOriginY - charCenterY, 2),
+        const distance = Math.hypot(
+          relativeOriginX - charCenterX,
+          relativeOriginY - charCenterY,
         );
 
         const delay =
           (distance / maxDist) *
           (isEntering ? STAGGER_TOTAL_DURATION_IN : STAGGER_TOTAL_DURATION_OUT);
+
         const targetVars = isEntering
           ? { color: HOVER_COLOR, scale: TARGET_SCALE, opacity: TARGET_OPACITY }
           : {
@@ -95,29 +111,45 @@ export const Description = () => {
       CHARACTER_ANIMATION_DURATION,
       STAGGER_TOTAL_DURATION_IN,
       STAGGER_TOTAL_DURATION_OUT,
-      EASE_TYPE,
+      EASE_TYPE_IN,
+      EASE_TYPE_OUT,
     ],
   );
 
-  const handleMouseMove = useCallback((event: MouseEvent) => {
-    lastMousePosRef.current = { x: event.clientX, y: event.clientY };
-  }, []);
-
   const handleMouseEnter = useCallback(
     (event: MouseEvent) => {
-      if (!isHoveringRef.current) {
-        isHoveringRef.current = true;
-        lastMousePosRef.current = { x: event.clientX, y: event.clientY };
-        runAnimation(event.clientX, event.clientY, true);
+      isCurrentlyHoveringRef.current = true;
+      activeLeaveTimelineRef.current?.kill();
+
+      if (!activeEnterTimelineRef.current && !initialHoverPosRef.current) {
+        initialHoverPosRef.current = { x: event.clientX, y: event.clientY };
+        runAnimation(
+          initialHoverPosRef.current.x,
+          initialHoverPosRef.current.y,
+          true,
+        );
+      } else if (
+        !activeEnterTimelineRef.current &&
+        initialHoverPosRef.current
+      ) {
+        runAnimation(
+          initialHoverPosRef.current.x,
+          initialHoverPosRef.current.y,
+          true,
+        );
       }
     },
     [runAnimation],
   );
 
   const handleMouseLeave = useCallback(() => {
-    if (isHoveringRef.current) {
-      isHoveringRef.current = false;
-      runAnimation(lastMousePosRef.current.x, lastMousePosRef.current.y, false);
+    isCurrentlyHoveringRef.current = false;
+    if (!activeEnterTimelineRef.current && initialHoverPosRef.current) {
+      runAnimation(
+        initialHoverPosRef.current.x,
+        initialHoverPosRef.current.y,
+        false,
+      );
     }
   }, [runAnimation]);
 
@@ -129,8 +161,7 @@ export const Description = () => {
       tagName: "span",
     });
 
-    initialCharsRef.current =
-      (splitInstanceRef.current.chars as HTMLElement[]) || [];
+    initialCharsRef.current = splitInstanceRef.current.chars || [];
     const chars = initialCharsRef.current;
 
     if (!chars || chars.length === 0) {
@@ -138,44 +169,38 @@ export const Description = () => {
       return;
     }
 
-    gsap.set(chars, { opacity: 0, y: 20 });
+    gsap.set(chars, { opacity: 0, y: 25, transformOrigin: "center center" });
 
     gsap.to(chars, {
       y: 0,
       opacity: BASE_OPACITY,
-      stagger: 0.01,
-      duration: 0.6,
+      stagger: 0.015,
+      duration: 0.8,
       ease: "power3.out",
-      delay: 0.5,
+      delay: 0.7,
     });
 
     const currentDescriptionRef = descriptionRef.current;
     currentDescriptionRef.addEventListener("mouseenter", handleMouseEnter);
-    currentDescriptionRef.addEventListener("mousemove", handleMouseMove);
     currentDescriptionRef.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
       currentDescriptionRef.removeEventListener("mouseenter", handleMouseEnter);
-      currentDescriptionRef.removeEventListener("mousemove", handleMouseMove);
       currentDescriptionRef.removeEventListener("mouseleave", handleMouseLeave);
-      lastEnterTimelineRef.current?.kill();
-      lastLeaveTimelineRef.current?.kill();
+      activeEnterTimelineRef.current?.kill();
+      activeLeaveTimelineRef.current?.kill();
       splitInstanceRef.current?.revert();
       gsap.killTweensOf(chars);
+      initialHoverPosRef.current = null;
+      isCurrentlyHoveringRef.current = false;
     };
-  }, [
-    handleMouseEnter,
-    handleMouseMove,
-    handleMouseLeave,
-    BASE_OPACITY,
-    runAnimation,
-  ]);
+  }, [handleMouseEnter, handleMouseLeave, BASE_OPACITY]);
 
   return (
-    <div className="overflow-visible cursor-default py-1">
+    <div className="overflow-visible cursor-default py-1 group">
       <p
         ref={descriptionRef}
-        className="hero-description text-gray-300 text-lg leading-relaxed max-w-2xl"
+        className="hero-description text-gray-300 text-lg leading-relaxed max-w-2xl select-none"
         style={{ willChange: "transform, opacity, color" }}
       >
         Transforming ideas into elegant digital solutions with clean code and

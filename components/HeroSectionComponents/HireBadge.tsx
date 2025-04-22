@@ -11,11 +11,11 @@ const HireBadge = () => {
       if (!badgeRef.current || !pulseRef.current) return;
 
       gsap.to(pulseRef.current, {
-        scale: 1.8, // Slightly larger pulse
+        scale: 1.8,
         opacity: 0,
         duration: 1.5,
         repeat: -1,
-        ease: "power1.out", // Smoother ease out
+        ease: "power1.out",
       });
 
       const hoverTl = gsap.timeline({ paused: true });

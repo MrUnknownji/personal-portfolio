@@ -113,7 +113,6 @@ const TypedText = () => {
       animationRef.current = masterTimeline;
 
       if (currentChars.length > 0 && currentWrapper) {
-        // === Transitioning ===
         const { chars: nextChars } = createChars(nextText, container);
 
         gsap.set(nextChars, {
@@ -150,7 +149,6 @@ const TypedText = () => {
           `startExit+=${ANIMATION_CONFIG.EXIT.DURATION * (1 - ANIMATION_CONFIG.OVERLAP_FACTOR)}`,
         );
       } else {
-        // === First run ===
         const { chars, wrapper } = createChars(currentText, container);
         currentWrapper = wrapper;
         currentChars = chars;

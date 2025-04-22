@@ -45,7 +45,7 @@ const ImageSection = () => {
           trigger: containerRef.current,
           start: "top 80%",
           end: "bottom 20%",
-          toggleActions: "play none none reverse",
+          toggleActions: "play pause resume reverse",
           markers: false,
         },
       });
@@ -76,14 +76,14 @@ const ImageSection = () => {
         );
 
       return () => {
+        if (tl.scrollTrigger) {
+          tl.scrollTrigger.kill();
+        }
         gsap.killTweensOf([
           wrapperRef.current,
           imageRef.current,
           borderRef.current,
         ]);
-        if (tl.scrollTrigger) {
-          tl.scrollTrigger.kill();
-        }
       };
     },
     { scope: containerRef },

@@ -18,6 +18,14 @@ const ANIMATION_CONFIG = {
     HOVER_DURATION: 0.3,
     HOVER_EASE: "power2.out",
     HOVER_SCALE: 1.05,
+    PARTICLE_INTERVAL: 45,
+    PARTICLE_DURATION_MIN: 1.2,
+    PARTICLE_DURATION_MAX: 2.0,
+    PARTICLE_TRAVEL_DISTANCE: 65,
+    PARTICLE_SCALE_MIN: 0.15,
+    PARTICLE_SCALE_MAX: 0.45,
+    PARTICLE_VISIBLE_DELAY_FACTOR: 0.1,
+    PARTICLE_FADE_IN_FACTOR: 0.25,
   },
   CONTACT: {
     DURATION: 0.6,
@@ -35,13 +43,16 @@ const ANIMATION_CONFIG = {
   },
 } as const;
 
+type ParticleOrigin = "logo" | "contact";
+
 const Header = () => {
   const headerRef = useRef<HTMLElement>(null);
   const logoLinkRef = useRef<HTMLAnchorElement>(null);
   const logoImageRef = useRef<HTMLImageElement>(null);
   const contactButtonRef = useRef<HTMLButtonElement>(null);
   const particlesContainerRef = useRef<HTMLDivElement>(null);
-  const particleIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const contactParticleIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const logoParticleIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pathname = usePathname();
   const router = useRouter();
   const { contextSafe } = useGSAP({ scope: headerRef });
@@ -70,70 +81,25 @@ const Header = () => {
     [pathname, router, scrollToElement],
   );
 
-  useEffect(() => {
-    let prevScrollPos = window.scrollY;
-    const header = headerRef.current;
+  const createAndAnimateParticle = contextSafe((origin: ParticleOrigin) => {
+    if (!particlesContainerRef.current) return;
 
-    const handleScroll = () => {
-      if (!header) return;
-      const currentScrollPos = window.scrollY;
-      const shouldHide =
-        currentScrollPos > prevScrollPos &&
-        currentScrollPos > ANIMATION_CONFIG.HEADER.SCROLL.THRESHOLD;
+    const originElement =
+      origin === "logo" ? logoLinkRef.current : contactButtonRef.current;
+    if (!originElement) return;
 
-      if (shouldHide) {
-        header.classList.add(ANIMATION_CONFIG.HEADER.SCROLL.CLASS_HIDDEN);
-      } else {
-        header.classList.remove(ANIMATION_CONFIG.HEADER.SCROLL.CLASS_HIDDEN);
-      }
-      prevScrollPos = currentScrollPos;
-    };
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        logoLinkRef.current,
-        { opacity: 0 },
-        {
-          opacity: 1,
-          duration: ANIMATION_CONFIG.LOGO.DURATION,
-          ease: ANIMATION_CONFIG.LOGO.EASE,
-          clearProps: "opacity",
-        },
-      );
-      gsap.fromTo(
-        contactButtonRef.current,
-        { opacity: 0 },
-        {
-          opacity: 1,
-          duration: ANIMATION_CONFIG.CONTACT.DURATION,
-          ease: ANIMATION_CONFIG.CONTACT.EASE,
-          clearProps: "opacity",
-        },
-      );
-    }, headerRef);
-
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (particleIntervalRef.current)
-        clearInterval(particleIntervalRef.current);
-      ctx.revert();
-    };
-  }, []);
-
-  const createAndAnimateParticle = contextSafe(() => {
-    if (!particlesContainerRef.current || !contactButtonRef.current) return;
+    const config =
+      origin === "logo" ? ANIMATION_CONFIG.LOGO : ANIMATION_CONFIG.CONTACT;
 
     const particle = document.createElement("div");
-    const buttonRect = contactButtonRef.current.getBoundingClientRect();
+    const originRect = originElement.getBoundingClientRect();
     const containerRect = particlesContainerRef.current.getBoundingClientRect();
 
     const startX =
-      buttonRect.width / 2 + (buttonRect.left - containerRect.left);
-    const startY = buttonRect.height / 2 + (buttonRect.top - containerRect.top);
+      originRect.width / 2 + (originRect.left - containerRect.left);
+    const startY = originRect.height / 2 + (originRect.top - containerRect.top);
 
-    particle.className =
-      "absolute w-1 h-1 bg-primary rounded-full pointer-events-none";
+    particle.className = `absolute w-1 h-1 ${origin === "logo" ? "bg-accent/80" : "bg-primary"} rounded-full pointer-events-none`;
     particle.style.left = `${startX}px`;
     particle.style.top = `${startY}px`;
     particle.style.opacity = "0";
@@ -142,24 +108,21 @@ const Header = () => {
     particlesContainerRef.current.appendChild(particle);
 
     const duration = gsap.utils.random(
-      ANIMATION_CONFIG.CONTACT.PARTICLE_DURATION_MIN,
-      ANIMATION_CONFIG.CONTACT.PARTICLE_DURATION_MAX,
+      config.PARTICLE_DURATION_MIN,
+      config.PARTICLE_DURATION_MAX,
     );
     const angle = Math.random() * Math.PI * 2;
     const travelDistance =
-      ANIMATION_CONFIG.CONTACT.PARTICLE_TRAVEL_DISTANCE *
-      (Math.random() * 0.4 + 0.8);
+      config.PARTICLE_TRAVEL_DISTANCE * (Math.random() * 0.4 + 0.8);
     const endX = Math.cos(angle) * travelDistance;
     const endY = Math.sin(angle) * travelDistance;
 
     const peakScale = gsap.utils.random(
-      ANIMATION_CONFIG.CONTACT.PARTICLE_SCALE_MIN,
-      ANIMATION_CONFIG.CONTACT.PARTICLE_SCALE_MAX,
+      config.PARTICLE_SCALE_MIN,
+      config.PARTICLE_SCALE_MAX,
     );
-    const visibleDelay =
-      duration * ANIMATION_CONFIG.CONTACT.PARTICLE_VISIBLE_DELAY_FACTOR;
-    const fadeInDuration =
-      duration * ANIMATION_CONFIG.CONTACT.PARTICLE_FADE_IN_FACTOR;
+    const visibleDelay = duration * config.PARTICLE_VISIBLE_DELAY_FACTOR;
+    const fadeInDuration = duration * config.PARTICLE_FADE_IN_FACTOR;
     const moveFadeOutDuration = duration - visibleDelay - fadeInDuration;
 
     const tl = gsap.timeline({ onComplete: () => particle.remove() });
@@ -178,7 +141,7 @@ const Header = () => {
     tl.to(
       particle,
       {
-        opacity: gsap.utils.random(0.6, 1.0),
+        opacity: gsap.utils.random(0.5, 0.9),
         scale: peakScale,
         duration: fadeInDuration,
         ease: "power1.out",
@@ -218,7 +181,70 @@ const Header = () => {
     );
   });
 
-  const handleButtonHover = contextSafe((isEntering: boolean) => {
+  useEffect(() => {
+    let prevScrollPos = window.scrollY;
+    const header = headerRef.current;
+
+    const handleScroll = () => {
+      if (!header) return;
+      const currentScrollPos = window.scrollY;
+      const shouldHide =
+        currentScrollPos > prevScrollPos &&
+        currentScrollPos > ANIMATION_CONFIG.HEADER.SCROLL.THRESHOLD;
+
+      if (shouldHide) {
+        header.classList.add(ANIMATION_CONFIG.HEADER.SCROLL.CLASS_HIDDEN);
+      } else {
+        header.classList.remove(ANIMATION_CONFIG.HEADER.SCROLL.CLASS_HIDDEN);
+      }
+      prevScrollPos = currentScrollPos;
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    if (logoParticleIntervalRef.current)
+      clearInterval(logoParticleIntervalRef.current);
+    logoParticleIntervalRef.current = setInterval(
+      () => createAndAnimateParticle("logo"),
+      ANIMATION_CONFIG.LOGO.PARTICLE_INTERVAL,
+    );
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (contactParticleIntervalRef.current)
+        clearInterval(contactParticleIntervalRef.current);
+      if (logoParticleIntervalRef.current)
+        clearInterval(logoParticleIntervalRef.current);
+    };
+  }, [createAndAnimateParticle]);
+
+  useGSAP(
+    () => {
+      gsap.fromTo(
+        logoLinkRef.current,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: ANIMATION_CONFIG.LOGO.DURATION,
+          ease: ANIMATION_CONFIG.LOGO.EASE,
+          clearProps: "opacity",
+        },
+      );
+      gsap.fromTo(
+        contactButtonRef.current,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: ANIMATION_CONFIG.CONTACT.DURATION,
+          ease: ANIMATION_CONFIG.CONTACT.EASE,
+          clearProps: "opacity",
+        },
+      );
+    },
+    { scope: headerRef },
+  );
+
+  const handleContactButtonHover = contextSafe((isEntering: boolean) => {
     const button = contactButtonRef.current;
     if (!button) return;
 
@@ -231,21 +257,21 @@ const Header = () => {
     });
 
     if (isEntering) {
-      if (particleIntervalRef.current)
-        clearInterval(particleIntervalRef.current);
-      particleIntervalRef.current = setInterval(
-        createAndAnimateParticle,
+      if (contactParticleIntervalRef.current)
+        clearInterval(contactParticleIntervalRef.current);
+      contactParticleIntervalRef.current = setInterval(
+        () => createAndAnimateParticle("contact"),
         ANIMATION_CONFIG.CONTACT.PARTICLE_INTERVAL,
       );
     } else {
-      if (particleIntervalRef.current) {
-        clearInterval(particleIntervalRef.current);
-        particleIntervalRef.current = null;
+      if (contactParticleIntervalRef.current) {
+        clearInterval(contactParticleIntervalRef.current);
+        contactParticleIntervalRef.current = null;
       }
     }
   });
 
-  const handleLogoHover = contextSafe((isEntering: boolean) => {
+  const handleLogoScaleHover = contextSafe((isEntering: boolean) => {
     gsap.to(logoImageRef.current, {
       scale: isEntering ? ANIMATION_CONFIG.LOGO.HOVER_SCALE : 1,
       duration: ANIMATION_CONFIG.LOGO.HOVER_DURATION,
@@ -257,7 +283,7 @@ const Header = () => {
   return (
     <header
       ref={headerRef}
-      className="fixed top-0 left-0 right-0 z-50 overflow-hidden
+      className="fixed top-0 left-0 right-0 z-50
                        bg-gradient-to-b from-secondary/80 to-gray-950/90
                        backdrop-blur-md border-b border-neutral/20
                        transition-transform duration-300 ease-in-out"
@@ -265,12 +291,17 @@ const Header = () => {
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <nav className="relative flex items-center justify-between h-16 md:h-20">
+          <div
+            ref={particlesContainerRef}
+            className="absolute inset-0 z-0 pointer-events-none overflow-visible"
+            aria-hidden="true"
+          />
           <Link
             ref={logoLinkRef}
             href="/"
-            className="flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-full"
-            onMouseEnter={() => handleLogoHover(true)}
-            onMouseLeave={() => handleLogoHover(false)}
+            className="relative flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-full z-10"
+            onMouseEnter={() => handleLogoScaleHover(true)}
+            onMouseLeave={() => handleLogoScaleHover(false)}
             style={{ willChange: "opacity" }}
             aria-label="Homepage"
           >
@@ -299,8 +330,8 @@ const Header = () => {
                   willChange: "opacity",
                 } as React.CSSProperties
               }
-              onMouseEnter={() => handleButtonHover(true)}
-              onMouseLeave={() => handleButtonHover(false)}
+              onMouseEnter={() => handleContactButtonHover(true)}
+              onMouseLeave={() => handleContactButtonHover(false)}
               onClick={handleContactClick}
             >
               <span
@@ -324,11 +355,6 @@ const Header = () => {
                 Contact Me
               </span>
             </button>
-            <div
-              ref={particlesContainerRef}
-              className="absolute inset-0 z-0 pointer-events-none overflow-visible"
-              aria-hidden="true"
-            />
           </div>
         </nav>
       </div>

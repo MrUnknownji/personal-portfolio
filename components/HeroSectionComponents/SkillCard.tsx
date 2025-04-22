@@ -141,7 +141,7 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
     >
       <div
         ref={gradientFillRef}
-        className="absolute inset-0 z-0 bg-gradient-to-r from-primary/40 via-accent/30 to-accent/40 pointer-events-none opacity-90"
+        className="absolute inset-0 z-0 bg-gradient-to-r from-primary/40 via-primary/25 to-primary/15 pointer-events-none opacity-90"
         style={{ willChange: "transform" }}
       />
 

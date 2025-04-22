@@ -21,9 +21,9 @@ export const Subtitle = () => {
       y: 50,
       opacity: 0,
       stagger: 0.02,
-      duration: 0.8, // Adjusted duration
+      duration: 0.8,
       ease: "power3.out",
-      delay: 0.1, // Add slight delay
+      delay: 0.1,
     });
 
     const handleMouseMove = (event: MouseEvent) => {
@@ -32,7 +32,7 @@ export const Subtitle = () => {
 
       const rect = subtitleElement.getBoundingClientRect();
       const mouseX = event.clientX - rect.left;
-      const maxDistance = 150; // Increased interaction radius
+      const maxDistance = 150;
 
       splitInstanceRef.current.chars.forEach((char) => {
         if (!char) return;
@@ -71,7 +71,7 @@ export const Subtitle = () => {
       currentSubtitleRef.removeEventListener("mousemove", handleMouseMove);
       currentSubtitleRef.removeEventListener("mouseleave", handleMouseLeave);
       splitInstanceRef.current?.revert();
-      gsap.killTweensOf(chars); // Ensure all tweens are killed
+      gsap.killTweensOf(chars);
     };
   }, []);
 
