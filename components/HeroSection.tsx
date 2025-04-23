@@ -50,7 +50,7 @@ const HeroSection = () => {
         <div
           ref={cardRef}
           className="relative rounded-3xl p-6 md:p-8 lg:p-12
-          bg-secondary/80 backdrop-blur-md border border-neutral/30 z-10
+          bg-secondary/80 backdrop-blur-sm border border-neutral/30 z-10
           shadow-xl shadow-gray-950/20 transform-gpu"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-70 pointer-events-none -z-1" />

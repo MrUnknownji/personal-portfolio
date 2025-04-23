@@ -145,7 +145,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             ref={previewOverlayRef}
-            className="fixed inset-0 bg-dark/80 backdrop-blur-md"
+            className="fixed inset-0 bg-dark/80 backdrop-blur-sm"
             onClick={handleClosePreviewAnimation}
           />
           <div

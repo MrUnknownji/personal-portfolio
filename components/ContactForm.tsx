@@ -79,22 +79,20 @@ const ContactForm: React.FC = () => {
           className="mb-12 md:mb-16 text-center"
         />
 
-        {/* Give the container a named group */}
         <div
           ref={containerRef}
-          className="group/container relative bg-secondary/80 backdrop-blur-md rounded-xl overflow-hidden transform-gpu border border-neutral/30"
+          className="group/container relative bg-secondary/80 backdrop-blur-sm rounded-xl overflow-hidden transform-gpu border border-neutral/30"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-70 pointer-events-none" />
 
-          <div className="relative p-6 sm:p-8 md:p-12">
+          {/* Adjusted padding here: less horizontal padding on small screens */}
+          <div className="relative px-4 py-6 sm:px-6 sm:py-8 md:p-12">
             <div className="grid md:grid-cols-2 gap-10 md:gap-12 lg:gap-16">
-              {/* These components contain their OWN named groups now */}
               <ContactInfo />
               <Form onSubmitSuccess={handleFormSubmitSuccess} />
             </div>
           </div>
 
-          {/* Make corners react ONLY to the named container group */}
           <div
             className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-accent rounded-tl-xl
                                    transition-colors duration-300 ease-out group-hover/container:border-primary"

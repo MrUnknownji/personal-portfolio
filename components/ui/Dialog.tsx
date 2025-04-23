@@ -33,13 +33,15 @@ export const Dialog: FC<PropsWithChildren<DialogProps>> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 overflow-y-auto"
+      className="fixed inset-0" // Removed overflow-y-auto
       style={{ zIndex: DIALOG_Z_INDEX }}
       role="dialog"
       aria-modal="true"
       aria-hidden={!open}
     >
+      {/* Container to center the dialog content */}
       <div className="flex min-h-full items-center justify-center p-0 md:p-4">
+        {/* The actual dialog content passed as children */}
         <div className={`relative text-left align-middle ${className}`}>
           {children}
         </div>
@@ -62,3 +64,4 @@ export const DialogTitle: FC<DialogTitleProps> = ({
     {children}
   </h2>
 );
+

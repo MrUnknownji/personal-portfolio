@@ -89,7 +89,7 @@ const ImageSection = () => {
     <div
       ref={containerRef}
       className="relative w-full p-2 group/container
-                 bg-secondary/60 backdrop-blur-md rounded-2xl border border-neutral/30
+                 bg-secondary/60 backdrop-blur-sm rounded-2xl border border-neutral/30
                  shadow-lg shadow-black/20 ring-1 ring-inset ring-white/5"
     >
       <div
@@ -105,7 +105,7 @@ const ImageSection = () => {
           alt="Profile"
           fill
           sizes="(max-width: 1023px) 90vw, 30vw"
-          className="object-cover grayscale group-hover/container:grayscale-0 transition-filter duration-400 ease-out"
+          className="object-cover grayscale-0 md:grayscale md:group-hover/container:grayscale-0 transition-filter duration-400 ease-out"
           style={{ willChange: "transform, opacity, filter" }}
           priority
         />
@@ -116,32 +116,32 @@ const ImageSection = () => {
         ref={(el) => {
           if (el) borderElementsRef.current[0] = el;
         }}
-        className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-accent rounded-tl-lg
-                   transition-colors duration-300 ease-out group-hover/container:border-primary opacity-0"
+        className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 border-primary md:border-accent rounded-tl-lg
+                   transition-colors duration-300 ease-out md:group-hover/container:border-primary opacity-0"
         style={{ willChange: "opacity, border-color" }}
       />
       <div
         ref={(el) => {
           if (el) borderElementsRef.current[1] = el;
         }}
-        className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-accent rounded-tr-lg
-                   transition-colors duration-300 ease-out group-hover/container:border-primary opacity-0"
+        className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 border-primary md:border-accent rounded-tr-lg
+                   transition-colors duration-300 ease-out md:group-hover/container:border-primary opacity-0"
         style={{ willChange: "opacity, border-color" }}
       />
       <div
         ref={(el) => {
           if (el) borderElementsRef.current[2] = el;
         }}
-        className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-accent rounded-bl-lg
-                   transition-colors duration-300 ease-out group-hover/container:border-primary opacity-0"
+        className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 border-primary md:border-accent rounded-bl-lg
+                   transition-colors duration-300 ease-out md:group-hover/container:border-primary opacity-0"
         style={{ willChange: "opacity, border-color" }}
       />
       <div
         ref={(el) => {
           if (el) borderElementsRef.current[3] = el;
         }}
-        className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-accent rounded-br-lg
-                   transition-colors duration-300 ease-out group-hover/container:border-primary opacity-0"
+        className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 border-primary md:border-accent rounded-br-lg
+                   transition-colors duration-300 ease-out md:group-hover/container:border-primary opacity-0"
         style={{ willChange: "opacity, border-color" }}
       />
     </div>

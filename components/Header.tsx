@@ -33,7 +33,7 @@ const ANIMATION_CONFIG = {
     EASE: "power2.out",
     HOVER_DURATION: 0.3,
     HOVER_EASE: "power3.out",
-    HOVER_SCALE: 1.03,
+    HOVER_SCALE: 1.015,
     PARTICLE_INTERVAL: 30,
     PARTICLE_DURATION_MIN: 1.3,
     PARTICLE_DURATION_MAX: 2.2,
@@ -42,6 +42,10 @@ const ANIMATION_CONFIG = {
     PARTICLE_SCALE_MAX: 0.5,
     PARTICLE_VISIBLE_DELAY_FACTOR: 0.15,
     PARTICLE_FADE_IN_FACTOR: 0.3,
+    HOVER_BG_COLOR: "rgba(55, 65, 81, 0.8)",
+    INITIAL_BG_COLOR: "rgba(55, 65, 81, 0.5)",
+    HOVER_BORDER_COLOR: "rgba(0, 255, 159, 0.5)",
+    INITIAL_BORDER_COLOR: "rgba(0, 255, 159, 0.2)",
   },
 } as const;
 
@@ -262,15 +266,16 @@ const Header = () => {
     gsap.to(button, {
       scale: isEntering ? ANIMATION_CONFIG.CONTACT.HOVER_SCALE : 1,
       backgroundColor: isEntering
-        ? "rgba(55, 65, 81, 0.7)"
-        : "rgba(55, 65, 81, 0.5)",
+        ? ANIMATION_CONFIG.CONTACT.HOVER_BG_COLOR
+        : ANIMATION_CONFIG.CONTACT.INITIAL_BG_COLOR,
       borderColor: isEntering
-        ? "rgba(0, 255, 159, 0.4)"
-        : "rgba(0, 255, 159, 0.2)",
+        ? ANIMATION_CONFIG.CONTACT.HOVER_BORDER_COLOR
+        : ANIMATION_CONFIG.CONTACT.INITIAL_BORDER_COLOR,
       duration: ANIMATION_CONFIG.CONTACT.HOVER_DURATION,
       ease: ANIMATION_CONFIG.CONTACT.HOVER_EASE,
       overwrite: true,
     });
+
     if (iconWrapper) {
       gsap.to(iconWrapper, {
         x: isEntering ? 3 : 0,
@@ -309,7 +314,7 @@ const Header = () => {
       ref={headerRef}
       className="fixed top-0 left-0 right-0 z-50 transform-gpu
                  bg-gradient-to-b from-secondary/85 via-secondary/70 to-transparent
-                 backdrop-blur-lg border-b border-neutral/20
+                 backdrop-blur-sm border-b border-neutral/20
                  transition-transform duration-300 ease-out"
       style={{ willChange: "transform" }}
     >
@@ -345,8 +350,8 @@ const Header = () => {
             <button
               ref={contactButtonRef}
               className="contact-button relative inline-flex items-center justify-center px-5 py-2 md:px-6 md:py-2.5 rounded-lg
-                         bg-neutral/50 backdrop-blur-sm border border-primary/20 text-light/90
-                         font-medium group transition-colors duration-300 ease-out
+                         bg-[rgba(55, 65, 81, 0.5)] backdrop-blur-sm border border-primary/20 text-light/90
+                         font-medium group
                          hover:text-light focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 overflow-hidden"
               style={{
                 willChange: "transform, background-color, border-color",
@@ -358,7 +363,7 @@ const Header = () => {
               <span className="relative z-10">Contact Me</span>
               <span
                 ref={contactButtonIconWrapperRef}
-                className="inline-block ml-2 transition-transform duration-200 ease-out"
+                className="inline-block ml-2"
                 style={{ willChange: "transform" }}
               >
                 <FiArrowRight className="w-4 h-4" />

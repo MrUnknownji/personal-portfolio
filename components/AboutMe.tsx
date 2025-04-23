@@ -1,9 +1,9 @@
-"use client";
+// "use client"; removed - This is now a Server Component by default
 import React from "react";
-import ImageSection from "./AboutMeSectionComponents/ImageSection";
-import JourneySection from "./AboutMeSectionComponents/JourneySection";
-import SkillsSection from "./AboutMeSectionComponents/SkillsSection";
-import Title from "./ui/Title";
+import ImageSection from "./AboutMeSectionComponents/ImageSection"; // Client Component
+import JourneySection from "./AboutMeSectionComponents/JourneySection"; // Client Component
+import SkillsSection from "./AboutMeSectionComponents/SkillsSection"; // Client Component
+import Title from "./ui/Title"; // Can be Server or Client (assuming it doesn't use client hooks)
 
 const AboutMe = () => {
   return (
@@ -26,14 +26,17 @@ const AboutMe = () => {
       />
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-5 lg:gap-16">
         <div className="lg:col-span-2 h-full flex items-center justify-center">
+          {/* ImageSection remains a Client Component due to useGSAP */}
           <ImageSection />
         </div>
         <div className="lg:col-span-3">
+          {/* JourneySection remains a Client Component due to useGSAP */}
           <JourneySection />
         </div>
       </div>
 
       <div className="w-full pt-6 lg:pt-8">
+        {/* SkillsSection remains a Client Component due to useGSAP */}
         <SkillsSection />
       </div>
     </section>

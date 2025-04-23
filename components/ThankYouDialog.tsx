@@ -171,7 +171,7 @@ const ThankYouDialog = ({
 
       <div
         ref={dialogRef}
-        className="relative w-full max-w-md m-4 bg-secondary/95 backdrop-blur-lg
+        className="relative w-full max-w-md m-4 bg-secondary/95 backdrop-blur-sm
                      rounded-2xl overflow-hidden shadow-2xl border border-primary/20 text-left
                      transform-gpu will-change-transform"
       >
