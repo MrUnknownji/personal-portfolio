@@ -18,74 +18,103 @@ interface ProjectModalProps {
 }
 
 const ANIMATION_CONFIG = {
-  DURATION_FAST: 0.2,
-  DURATION_NORMAL: 0.4,
-  EASE_IN: "power2.in",
+  DURATION: 0.3,
   EASE_OUT: "power3.out",
-  SCALE_CLOSE: 0.97,
-  SCALE_OPEN: 0.97,
+  EASE_IN: "power2.in",
+  SCALE_START: 0.97,
 } as const;
-
-const DESKTOP_BREAKPOINT = 768;
 
 const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const leftColumnRef = useRef<HTMLDivElement>(null);
-  const rightColumnRef = useRef<HTMLDivElement>(null);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
   const lenis = useLenis();
-  const [isDesktop, setIsDesktop] = useState(
-    typeof window !== "undefined"
-      ? window.innerWidth >= DESKTOP_BREAKPOINT
-      : true,
-  );
-  const hasAnimatedIn = useRef(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isAnimatingOut, setIsAnimatingOut] = useState(false);
+  const isActuallyOpen = isOpen || isAnimatingOut;
 
   useEffect(() => {
-    const checkDesktop = () =>
-      setIsDesktop(window.innerWidth >= DESKTOP_BREAKPOINT);
-
-    checkDesktop();
-    window.addEventListener("resize", checkDesktop);
-    return () => window.removeEventListener("resize", checkDesktop);
+    setIsMounted(true);
   }, []);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isActuallyOpen) {
       lenis?.stop();
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
     } else {
-      if (hasAnimatedIn.current) {
-        lenis?.start();
-      }
+      lenis?.start();
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
     }
+
     return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
       if (lenis && lenis.isStopped) {
         lenis.start();
       }
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     };
-  }, [isOpen, lenis]);
+  }, [isActuallyOpen, lenis]);
+
+  const runCloseAnimation = useCallback(() => {
+    if (!contentRef.current || !overlayRef.current) {
+      onClose();
+      setIsAnimatingOut(false);
+      return;
+    }
+
+    gsap.killTweensOf([overlayRef.current, contentRef.current]);
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        onClose();
+        setIsAnimatingOut(false);
+        gsap.set([overlayRef.current, contentRef.current], {
+          clearProps: "opacity,transform,scale",
+        });
+      },
+      defaults: {
+        duration: ANIMATION_CONFIG.DURATION,
+        ease: ANIMATION_CONFIG.EASE_IN,
+        overwrite: true,
+        force3D: true,
+      },
+    });
+
+    tl.to(contentRef.current, {
+      opacity: 0,
+      scale: ANIMATION_CONFIG.SCALE_START,
+    }).to(
+      overlayRef.current,
+      {
+        opacity: 0,
+      },
+      "<",
+    );
+  }, [onClose]);
 
   useGSAP(
     () => {
-      if (isOpen && !hasAnimatedIn.current) {
+      if (
+        isOpen &&
+        !isAnimatingOut &&
+        isMounted &&
+        contentRef.current &&
+        overlayRef.current
+      ) {
+        gsap.killTweensOf([overlayRef.current, contentRef.current]);
+
         gsap.set(overlayRef.current, { opacity: 0 });
         gsap.set(contentRef.current, {
           opacity: 0,
-          scale: isDesktop ? ANIMATION_CONFIG.SCALE_OPEN : 1,
-          y: isDesktop ? 0 : 50,
+          scale: ANIMATION_CONFIG.SCALE_START,
           force3D: true,
         });
 
         const tl = gsap.timeline({
           defaults: {
-            duration: ANIMATION_CONFIG.DURATION_NORMAL,
+            duration: ANIMATION_CONFIG.DURATION,
             ease: ANIMATION_CONFIG.EASE_OUT,
             overwrite: true,
             force3D: true,
@@ -97,71 +126,35 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
           {
             opacity: 1,
             scale: 1,
-            y: 0,
           },
-          "-=0.25",
+          "<+=0.05",
         );
-
-        hasAnimatedIn.current = true;
+      } else if (!isOpen && !isAnimatingOut && isMounted) {
+        if (contentRef.current && overlayRef.current) {
+          setIsAnimatingOut(true);
+          runCloseAnimation();
+        } else {
+          setIsAnimatingOut(false);
+        }
       }
     },
-    { scope: contentRef, dependencies: [isOpen, isDesktop] },
+    { dependencies: [isOpen, isAnimatingOut, isMounted], scope: contentRef },
   );
 
-  const handleCloseAnimation = useCallback(() => {
-    if (!hasAnimatedIn.current) {
-      onClose();
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-      return;
-    }
-
-    const tl = gsap.timeline({
-      onComplete: () => {
-        onClose();
-        lenis?.start();
-        document.body.style.overflow = "";
-        document.documentElement.style.overflow = "";
-        hasAnimatedIn.current = false;
-        gsap.set([overlayRef.current, contentRef.current], {
-          clearProps: "all",
-        });
-      },
-      defaults: {
-        duration: ANIMATION_CONFIG.DURATION_FAST,
-        ease: ANIMATION_CONFIG.EASE_IN,
-        overwrite: true,
-        force3D: true,
-      },
-    });
-
-    tl.to([overlayRef.current, contentRef.current], {
-      opacity: 0,
-    });
-
-    if (isDesktop && contentRef.current) {
-      tl.to(
-        contentRef.current,
-        {
-          scale: ANIMATION_CONFIG.SCALE_CLOSE,
-        },
-        0,
-      );
-    } else if (contentRef.current) {
-      tl.to(contentRef.current, { y: 50 }, 0);
-    }
-  }, [onClose, isDesktop, lenis]);
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <Dialog
-      open={isOpen}
-      onClose={handleCloseAnimation}
+      open={isActuallyOpen}
+      onClose={onClose}
       className="w-full h-full md:w-auto md:h-auto"
     >
       <div
         ref={overlayRef}
         className="fixed inset-0 bg-dark/70 backdrop-blur-sm z-40"
-        onClick={handleCloseAnimation}
+        onClick={onClose}
         aria-hidden="true"
       />
 
@@ -177,7 +170,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         style={{ backfaceVisibility: "hidden" }}
       >
         <button
-          onClick={handleCloseAnimation}
+          onClick={onClose}
           aria-label="Close project details"
           className="group absolute top-3 right-3 md:top-4 md:right-4 p-2 md:p-2.5 rounded-full z-[51]
                      bg-zinc-800/50 text-zinc-400
@@ -194,19 +187,18 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                      overscroll-behavior-y-contain
                      scrollbar-thin scrollbar-thumb-neutral/40 scrollbar-track-transparent"
           style={{ WebkitOverflowScrolling: "touch" }}
-          data-lenis-prevent // Keep this to allow native scroll within modal
+          data-lenis-prevent
         >
           <div
             className="flex flex-col md:flex-row gap-6 md:gap-8 px-6 pb-6 pt-10 md:p-8
                        md:h-full"
           >
             <div
-              ref={leftColumnRef}
               className="w-full md:w-1/2 flex flex-col space-y-4 flex-shrink-0
                          md:h-full md:overflow-y-auto md:scrollbar-thin md:scrollbar-thumb-neutral/40
                          md:scrollbar-track-transparent md:pr-2 md:overscroll-behavior-y-contain"
               style={{ WebkitOverflowScrolling: "touch" }}
-              data-lenis-prevent // Prevent lenis on desktop left column
+              data-lenis-prevent
             >
               <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg border border-neutral/30 flex-shrink-0">
                 <Image
@@ -234,12 +226,11 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
 
             <div className="w-full md:w-1/2 flex flex-col md:h-full">
               <div
-                ref={rightColumnRef}
                 className="space-y-4 flex-grow min-h-0
                            md:overflow-y-auto md:scrollbar-thin md:scrollbar-thumb-neutral/40
                            md:scrollbar-track-transparent md:pr-2 md:overscroll-behavior-y-contain"
                 style={{ WebkitOverflowScrolling: "touch" }}
-                data-lenis-prevent // Prevent lenis on desktop right column
+                data-lenis-prevent
               >
                 <ExpandableSection
                   title="Description"

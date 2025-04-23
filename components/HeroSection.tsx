@@ -1,9 +1,12 @@
+// HeroSection.tsx (Changes indicated)
+
 "use client";
+
 import { useRef } from "react";
 import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import HeroContent from "./HeroSectionComponents/HeroContent";
 import CodeDisplay from "./HeroSectionComponents/CodeDisplay";
-import { useGSAP } from "@gsap/react";
 
 const ANIMATION_CONFIG = {
   HERO: {
@@ -49,11 +52,26 @@ const HeroSection = () => {
       <div className="w-full max-w-7xl mx-auto relative">
         <div
           ref={cardRef}
-          className="relative rounded-3xl p-6 md:p-8 lg:p-12
-          bg-secondary/80 backdrop-blur-sm border border-neutral/30 z-10
-          shadow-xl shadow-gray-950/20 transform-gpu"
+          className={`
+            relative rounded-3xl p-6 md:p-8 lg:p-12
+            bg-secondary/80
+            border border-neutral/30 z-10
+            shadow-xl shadow-gray-950/20 transform-gpu
+            isolate 
+          `}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-70 pointer-events-none -z-1" />
+          <div
+           aria-hidden="true"
+           className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none -z-1"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-70 pointer-events-none -z-1" />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-radial from-white/5 via-transparent to-transparent opacity-50 pointer-events-none -z-1"
+          />
+
 
           <div className="relative z-10 flex flex-col lg:flex-row gap-8 h-full justify-center items-center">
             <div className="z-10 w-full h-full">

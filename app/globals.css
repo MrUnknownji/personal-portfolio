@@ -125,6 +125,20 @@ html {
     .skill-chip:hover {
         @apply bg-primary text-dark border-primary;
     }
+    .bg-noise {
+        /* Simple noise using repeating conic gradient */
+        background-image: repeating-conic-gradient(#000 0% 0.0001%, transparent 0.0001% 0.0002%),
+                          repeating-conic-gradient(#fff 0% 0.0001%, transparent 0.0001% 0.0002%);
+        background-size: 100px 100px; /* Adjust size as needed */
+        background-position: 0 0, 50px 50px; /* Offset the two layers */
+        /* Or use a base64 encoded tiny noise PNG */
+        /* background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABZJREFUeNpiYGBgSNX///8/AwgwAADkBQY5f3B/AAAAAElFTkSuQmCC'); */
+      }
+    
+      /* Optional: Define radial gradient utility if needed */
+      .bg-gradient-radial {
+         background-image: radial-gradient(circle, var(--tw-gradient-stops));
+      }
 }
 
 .page-content {
