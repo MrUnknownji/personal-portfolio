@@ -133,7 +133,7 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
   return (
     <div
       ref={cardRef}
-      className="relative bg-neutral/40 backdrop-blur-sm rounded-xl p-4 cursor-pointer h-16 flex items-center overflow-hidden
+      className="relative bg-neutral/60 rounded-xl p-4 cursor-pointer h-16 flex items-center overflow-hidden
                  transform-gpu shadow-md border border-neutral/50 transition-colors duration-300 hover:border-primary/30
                  w-full sm:w-auto"
       style={{

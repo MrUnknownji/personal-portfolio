@@ -132,7 +132,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent transition-opacity duration-200 group-hover:opacity-70" />
             {item.type === "video" && (
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="p-2 bg-black/50 rounded-full backdrop-blur-sm">
+                <div className="p-2 bg-black/60 rounded-full">
                   <FiPlay className="w-5 h-5 sm:w-6 sm:h-6 text-white/90 drop-shadow-lg" />
                 </div>
               </div>
@@ -145,7 +145,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             ref={previewOverlayRef}
-            className="fixed inset-0 bg-dark/80 backdrop-blur-sm"
+            className="fixed inset-0 bg-dark/90"
             onClick={handleClosePreviewAnimation}
           />
           <div
@@ -185,7 +185,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
                   controls
                   autoPlay
                   onError={() => setIsVideoError(true)}
-                  className="w-full max-h-[85vh] object-contain aspect-video bg-dark" // Added dark bg
+                  className="w-full max-h-[85vh] object-contain aspect-video bg-dark"
                 >
                   Your browser does not support the video tag.
                 </video>

@@ -14,9 +14,8 @@ interface ThankYouDialogProps {
 
 const ANIMATION_CONFIG = {
   OVERLAY: {
-    OPACITY: { OPEN: 0.75, CLOSE: 0 },
+    OPACITY: { OPEN: 0.85, CLOSE: 0 },
     DURATION: { OPEN: 0.4, CLOSE: 0.3 },
-    BLUR: { OPEN: "blur(8px)", CLOSE: "blur(0px)" },
   },
   DIALOG: {
     SCALE: { OPEN: 1, CLOSE: 0.95 },
@@ -77,7 +76,6 @@ const ThankYouDialog = ({
       overlayRef.current,
       {
         opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
-        backdropFilter: ANIMATION_CONFIG.OVERLAY.BLUR.CLOSE,
         duration: ANIMATION_CONFIG.OVERLAY.DURATION.CLOSE,
         ease: ANIMATION_CONFIG.EASE.CLOSE,
       },
@@ -114,8 +112,7 @@ const ThankYouDialog = ({
     const ctx = gsap.context(() => {
       gsap.set(overlayRef.current, {
         opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
-        backdropFilter: ANIMATION_CONFIG.OVERLAY.BLUR.CLOSE,
-        willChange: "opacity, backdrop-filter",
+        willChange: "opacity",
         force3D: true,
       });
       gsap.set(dialogRef.current, {
@@ -129,7 +126,6 @@ const ThankYouDialog = ({
       const tl = gsap.timeline();
       tl.to(overlayRef.current, {
         opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.OPEN,
-        backdropFilter: ANIMATION_CONFIG.OVERLAY.BLUR.OPEN,
         duration: ANIMATION_CONFIG.OVERLAY.DURATION.OPEN,
         ease: ANIMATION_CONFIG.EASE.OPEN,
       }).to(
@@ -164,14 +160,14 @@ const ThankYouDialog = ({
     >
       <div
         ref={overlayRef}
-        className="fixed inset-0 bg-black/75"
+        className="fixed inset-0 bg-black/85" 
         onClick={startCloseProcess}
         aria-hidden="true"
       />
 
       <div
         ref={dialogRef}
-        className="relative w-full max-w-md m-4 bg-secondary/95 backdrop-blur-sm
+        className="relative w-full max-w-md m-4 bg-secondary
                      rounded-2xl overflow-hidden shadow-2xl border border-primary/20 text-left
                      transform-gpu will-change-transform"
       >

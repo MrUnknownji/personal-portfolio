@@ -50,7 +50,7 @@ const CodeDisplay = () => {
         style={{ transformStyle: "preserve-3d" }}
       >
         <div
-          className="absolute inset-0 bg-secondary/70 backdrop-blur-sm rounded-2xl shadow-2xl shadow-black/30
+          className="absolute inset-0 bg-secondary/85 rounded-2xl shadow-2xl shadow-black/30
                      border border-neutral/30 overflow-hidden
                      ring-1 ring-inset ring-white/10"
         >

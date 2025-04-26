@@ -89,7 +89,7 @@ const ImageSection = () => {
     <div
       ref={containerRef}
       className="relative w-full p-2 group/container
-                 bg-secondary/60 backdrop-blur-sm rounded-2xl border border-neutral/30
+                 bg-secondary/80 rounded-2xl border border-neutral/30
                  shadow-lg shadow-black/20 ring-1 ring-inset ring-white/5"
     >
       <div

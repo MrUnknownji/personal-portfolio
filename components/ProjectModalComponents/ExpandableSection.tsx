@@ -65,7 +65,7 @@ export const ExpandableSection = ({
   return (
     <div
       ref={containerRef}
-      className="overflow-hidden bg-neutral/20 rounded-xl border border-neutral/30 backdrop-blur-sm transition-colors duration-300 hover:border-neutral/50"
+      className="overflow-hidden bg-neutral/20 rounded-xl border border-neutral/30 transition-colors duration-300 hover:border-neutral/50"
     >
       <button
         ref={headerRef}

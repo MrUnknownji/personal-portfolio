@@ -59,10 +59,9 @@ const DialogActions = ({ onClose, isEmailCopied }: DialogActionsProps) => {
   return (
     <div
       ref={containerRef}
-      className="px-6 py-4 sm:px-8 bg-secondary/50 backdrop-blur-sm border-t border-primary/20
+      className="px-6 py-4 sm:px-8 bg-secondary/[.65] border-t border-primary/20
         flex flex-col sm:flex-row-reverse gap-3 sm:gap-4"
     >
-      {/* View Projects Button */}
       <Link
         ref={projectsButtonRef}
         href="#projects"
@@ -78,7 +77,6 @@ const DialogActions = ({ onClose, isEmailCopied }: DialogActionsProps) => {
           className="w-5 h-5 ml-2 transition-transform duration-300 ease-out
                              group-hover:translate-x-1"
         />
-        {/* Subtle shine effect with pseudo-element */}
         <span
           className="absolute inset-0 block w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent
                    opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out
@@ -87,14 +85,13 @@ const DialogActions = ({ onClose, isEmailCopied }: DialogActionsProps) => {
         />
       </Link>
 
-      {/* Close Button */}
       <button
         ref={closeButtonRef}
         type="button"
         className="group inline-flex justify-center items-center px-6 py-3 rounded-xl
           border border-primary/20 text-light font-medium shadow-sm focus:outline-none
           focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-secondary/50
-          bg-neutral/30 backdrop-blur-sm transform-gpu transition-all duration-300 ease-out
+          bg-neutral/30 transform-gpu transition-all duration-300 ease-out
           hover:scale-[1.03] hover:border-primary/40 hover:bg-neutral/50"
         onClick={onClose}
       >

@@ -11,7 +11,7 @@ const ANIMATION_CONFIG = {
   HEADER: {
     DURATION: 0.3,
     EASE: "power2.inOut",
-    SCROLL: { THRESHOLD: 10, CLASS_HIDDEN: "header-hidden" },
+    SCROLL: { THRESHOLD: 10 },
   },
   LOGO: {
     DURATION: 0.6,
@@ -42,8 +42,8 @@ const ANIMATION_CONFIG = {
     PARTICLE_SCALE_MAX: 0.5,
     PARTICLE_VISIBLE_DELAY_FACTOR: 0.15,
     PARTICLE_FADE_IN_FACTOR: 0.3,
-    HOVER_BG_COLOR: "rgba(55, 65, 81, 0.8)",
-    INITIAL_BG_COLOR: "rgba(55, 65, 81, 0.5)",
+    HOVER_BG_COLOR: "var(--color-neutral-hover, #3f3f46)",
+    INITIAL_BG_COLOR: "var(--color-neutral, #27272a)",
     HOVER_BORDER_COLOR: "rgba(0, 255, 159, 0.5)",
     INITIAL_BORDER_COLOR: "rgba(0, 255, 159, 0.2)",
   },
@@ -60,6 +60,8 @@ const Header = () => {
   const particlesContainerRef = useRef<HTMLDivElement>(null);
   const contactParticleIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const logoParticleIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const prevScrollPosRef = useRef<number>(0);
+  const isHeaderHiddenRef = useRef<boolean>(false);
   const pathname = usePathname();
   const router = useRouter();
   const { contextSafe } = useGSAP({ scope: headerRef });
@@ -191,26 +193,36 @@ const Header = () => {
       );
   });
 
-  useEffect(() => {
-    let prevScrollPos = window.scrollY;
+  const handleScroll = contextSafe(() => {
     const header = headerRef.current;
+    if (!header) return;
 
-    const handleScroll = () => {
-      if (!header) return;
-      const currentScrollPos = window.scrollY;
-      const shouldHide =
-        currentScrollPos > prevScrollPos &&
-        currentScrollPos > ANIMATION_CONFIG.HEADER.SCROLL.THRESHOLD;
+    const currentScrollPos = window.scrollY;
+    const scrollingDown = currentScrollPos > prevScrollPosRef.current;
+    const shouldHide =
+      scrollingDown && currentScrollPos > ANIMATION_CONFIG.HEADER.SCROLL.THRESHOLD;
 
-      if (shouldHide) {
-        header.classList.add(ANIMATION_CONFIG.HEADER.SCROLL.CLASS_HIDDEN);
-      } else {
-        header.classList.remove(ANIMATION_CONFIG.HEADER.SCROLL.CLASS_HIDDEN);
-      }
-      prevScrollPos = currentScrollPos;
-    };
+    if (shouldHide !== isHeaderHiddenRef.current) {
+      isHeaderHiddenRef.current = shouldHide;
+      gsap.to(header, {
+        yPercent: shouldHide ? -100 : 0,
+        duration: ANIMATION_CONFIG.HEADER.DURATION,
+        ease: ANIMATION_CONFIG.HEADER.EASE,
+        overwrite: true,
+      });
+    }
 
-    window.addEventListener("scroll", handleScroll);
+    prevScrollPosRef.current = currentScrollPos;
+  });
+
+  useEffect(() => {
+    prevScrollPosRef.current = window.scrollY;
+    isHeaderHiddenRef.current = window.scrollY > ANIMATION_CONFIG.HEADER.SCROLL.THRESHOLD;
+    if (headerRef.current && isHeaderHiddenRef.current) {
+        gsap.set(headerRef.current, { yPercent: -100 });
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     if (logoParticleIntervalRef.current)
       clearInterval(logoParticleIntervalRef.current);
@@ -226,7 +238,7 @@ const Header = () => {
       if (logoParticleIntervalRef.current)
         clearInterval(logoParticleIntervalRef.current);
     };
-  }, [createAndAnimateParticle]);
+  }, [createAndAnimateParticle, handleScroll]);
 
   useGSAP(
     () => {
@@ -313,9 +325,8 @@ const Header = () => {
     <header
       ref={headerRef}
       className="fixed top-0 left-0 right-0 z-50 transform-gpu
-                 bg-gradient-to-b from-secondary/85 via-secondary/70 to-transparent
-                 backdrop-blur-sm border-b border-neutral/20
-                 transition-transform duration-300 ease-out"
+                 bg-secondary
+                 border-b border-neutral/20"
       style={{ willChange: "transform" }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -350,11 +361,13 @@ const Header = () => {
             <button
               ref={contactButtonRef}
               className="contact-button relative inline-flex items-center justify-center px-5 py-2 md:px-6 md:py-2.5 rounded-lg
-                         bg-[rgba(55, 65, 81, 0.5)] backdrop-blur-sm border border-primary/20 text-light/90
+                         bg-neutral
+                         border border-primary/20 text-light/90
                          font-medium group
                          hover:text-light focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 overflow-hidden"
               style={{
                 willChange: "transform, background-color, border-color",
+                backgroundColor: ANIMATION_CONFIG.CONTACT.INITIAL_BG_COLOR,
               }}
               onMouseEnter={() => handleContactButtonHover(true)}
               onMouseLeave={() => handleContactButtonHover(false)}

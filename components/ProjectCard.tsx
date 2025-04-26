@@ -126,7 +126,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
   return (
     <div
       ref={cardRef}
-      className="relative bg-secondary/80 backdrop-blur-sm rounded-xl overflow-hidden shadow-md cursor-pointer transform-gpu border transition-colors duration-300"
+      className="relative bg-secondary rounded-xl overflow-hidden shadow-md cursor-pointer transform-gpu border transition-colors duration-300"
       onClick={onClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -153,7 +153,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
               backfaceVisibility: "hidden",
             }}
             sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw"
-            // Removed priority prop
           />
         </div>
         <div

@@ -153,7 +153,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     >
       <div
         ref={overlayRef}
-        className="fixed inset-0 bg-dark/70 backdrop-blur-sm z-40"
+        className="fixed inset-0 bg-dark/85 z-40"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -161,7 +161,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       <div
         ref={contentRef}
         className="relative z-50 flex flex-col transform-gpu
-                     bg-secondary/95 backdrop-blur-sm shadow-2xl
+                     bg-secondary shadow-2xl
                      h-screen w-full
                      md:max-w-5xl md:h-[90vh] md:max-h-[800px]
                      md:rounded-2xl md:border md:border-neutral/30

@@ -35,7 +35,7 @@ const DialogContent = ({ email, onCopy, isCopied }: DialogContentProps) => {
     navigator.clipboard
       .writeText(email)
       .then(() => {
-        onCopy(); // Notify parent
+        onCopy();
       })
       .catch((err) => {
         console.error("Failed to copy text: ", err);
@@ -121,7 +121,6 @@ const DialogContent = ({ email, onCopy, isCopied }: DialogContentProps) => {
 
   return (
     <div ref={contentWrapperRef} className="p-6 sm:p-8 space-y-6">
-      {/* Icon */}
       <div className="flex items-center justify-center">
         <div
           ref={iconWrapperRef}
@@ -137,7 +136,6 @@ const DialogContent = ({ email, onCopy, isCopied }: DialogContentProps) => {
         </div>
       </div>
 
-      {/* Text Content */}
       <div className="space-y-3 text-center">
         <h3 className="animate-content text-2xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
           Thank You for Reaching Out!
@@ -147,14 +145,12 @@ const DialogContent = ({ email, onCopy, isCopied }: DialogContentProps) => {
         </p>
       </div>
 
-      {/* Email Display */}
-      <div className="animate-content bg-neutral/30 rounded-xl p-4 backdrop-blur-sm">
+      <div className="animate-content bg-neutral/[.45] rounded-xl p-4">
         <p className="text-center text-primary font-medium break-all select-all">
           {email}
         </p>
       </div>
 
-      {/* Copy Button */}
       <button
         ref={buttonRef}
         onClick={handleCopyClick}

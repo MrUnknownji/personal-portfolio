@@ -61,7 +61,7 @@ const ViewProjectsButton = () => {
       <div
         ref={buttonRef}
         className="relative overflow-hidden group px-8 py-3 rounded-xl
-          bg-primary/10 backdrop-blur-[2px] border border-white/20 cursor-pointer"
+          bg-primary/15 border border-white/20 cursor-pointer"
       >
         <div
           ref={sweepRef}

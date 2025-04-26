@@ -81,11 +81,10 @@ const ContactForm: React.FC = () => {
 
         <div
           ref={containerRef}
-          className="group/container relative bg-secondary/80 backdrop-blur-sm rounded-xl overflow-hidden transform-gpu border border-neutral/30"
+          className="group/container relative bg-secondary/[.85] rounded-xl overflow-hidden transform-gpu border border-neutral/30"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-70 pointer-events-none" />
 
-          {/* Adjusted padding here: less horizontal padding on small screens */}
           <div className="relative px-4 py-6 sm:px-6 sm:py-8 md:p-12">
             <div className="grid md:grid-cols-2 gap-10 md:gap-12 lg:gap-16">
               <ContactInfo />

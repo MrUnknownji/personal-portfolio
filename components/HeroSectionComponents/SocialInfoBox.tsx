@@ -50,7 +50,7 @@ const SocialInfoBox = ({
   const content = (
     <div
       ref={boxRef}
-      className="fixed pointer-events-none z-[60] transform-gpu backdrop-blur-sm"
+      className="fixed pointer-events-none z-[60] transform-gpu"
       style={{
         left: `${position.x}px`,
         top: `${adjustedY - offsetY}px`,
@@ -61,8 +61,8 @@ const SocialInfoBox = ({
       }}
     >
       <div
-        className="relative w-72 p-4 rounded-xl backdrop-blur-sm shadow-xl
-                   bg-gradient-to-br from-gray-800/90 via-secondary/85 to-gray-900/90
+        className="relative w-72 p-4 rounded-xl shadow-xl
+                   bg-gradient-to-br from-gray-800/95 via-secondary/90 to-gray-900/95
                    border border-neutral/30 ring-1 ring-inset ring-white/10"
       >
         <div className="space-y-3">
@@ -118,7 +118,7 @@ const SocialInfoBox = ({
 
         <div
           className="absolute left-1/2 w-4 h-4 border-neutral/30
-                     bg-gradient-to-br from-gray-800/90 via-secondary/85 to-gray-900/90"
+                     bg-gradient-to-br from-gray-800/95 via-secondary/90 to-gray-900/95"
           style={{
             bottom: "-8px",
             transform: "translateX(-50%) rotate(-45deg)",
