@@ -62,7 +62,7 @@ const SocialInfoBox = ({
     >
       <div
         className="relative w-72 p-4 rounded-xl shadow-xl
-                   bg-gradient-to-br from-gray-800/95 via-secondary/90 to-gray-900/95
+                   bg-gradient-to-br from-gray-800 via-secondary to-gray-900
                    border border-neutral/30 ring-1 ring-inset ring-white/10"
       >
         <div className="space-y-3">

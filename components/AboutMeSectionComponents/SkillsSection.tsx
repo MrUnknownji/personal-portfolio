@@ -153,7 +153,6 @@ const SkillsSection = () => {
           >
             <h4 className="text-xl font-medium capitalize text-light/90 border-b border-neutral/30 pb-2 mb-3">
               {" "}
-              {/* Adjusted border color */}
               {category.replace(/([A-Z])/g, " $1").trim()}
             </h4>
             <div className="flex flex-wrap gap-2">

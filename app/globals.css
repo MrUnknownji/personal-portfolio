@@ -108,9 +108,8 @@ html {
             radial-gradient(
                 circle at center,
                 rgba(200, 200, 200, 0.06) 0%,
-                transparent 50%
+                transparent 75%
             ),
-
             linear-gradient(
                 140deg,
                 rgba(39, 39, 42, 0.75) 0%,
@@ -139,7 +138,7 @@ html {
         background-size: 100px 100px;
         background-position: 0 0, 50px 50px;
     }
-    
+
       .bg-gradient-radial {
          background-image: radial-gradient(circle, var(--tw-gradient-stops));
       }
