@@ -203,8 +203,7 @@ export const Description = () => {
         className="hero-description text-gray-300 text-lg leading-relaxed max-w-2xl select-none"
         style={{ willChange: "transform, opacity, color" }}
       >
-        Transforming ideas into elegant digital solutions with clean code and
-        innovative thinking.
+        "Code is like humor. When you have to explain it, it’s bad." – Cory House
       </p>
     </div>
   );

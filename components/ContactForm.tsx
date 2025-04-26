@@ -74,7 +74,28 @@ const ContactForm: React.FC = () => {
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <Title
           title="Get in Touch"
-          subtitle="Let's collaborate and bring your ideas to life. Feel free to reach out!"
+          subtitle={
+            <>
+              <span className="inline-block">
+              "Information flow is what the Internet is about. 
+              </span>
+              <span className="inline-block">
+              Information sharing is power. 
+              </span>
+              <span className="inline-block">
+              If you don't share your ideas, 
+              </span>
+              <span className="inline-block">
+              smart people can't do anything about them, 
+              </span>
+              <span className="inline-block">
+              and you'll remain anonymous and powerless."
+              </span>
+              <span className="inline-block">
+              - Vint Cerf
+              </span>
+            </>
+          }
           showGlowBar={true}
           className="mb-12 md:mb-16 text-center"
         />

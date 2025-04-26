@@ -1,9 +1,8 @@
-// "use client"; removed - This is now a Server Component by default
 import React from "react";
-import ImageSection from "./AboutMeSectionComponents/ImageSection"; // Client Component
-import JourneySection from "./AboutMeSectionComponents/JourneySection"; // Client Component
-import SkillsSection from "./AboutMeSectionComponents/SkillsSection"; // Client Component
-import Title from "./ui/Title"; // Can be Server or Client (assuming it doesn't use client hooks)
+import ImageSection from "./AboutMeSectionComponents/ImageSection"; 
+import JourneySection from "./AboutMeSectionComponents/JourneySection"; 
+import SkillsSection from "./AboutMeSectionComponents/SkillsSection"; 
+import Title from "./ui/Title"; 
 
 const AboutMe = () => {
   return (
@@ -16,27 +15,27 @@ const AboutMe = () => {
         subtitle={
           <>
             <span className="inline-block">
-              Passionate about creating seamless user experiences
-            </span>{" "}
+            "Any fool can write code that a computer can understand. 
+            </span>
             <span className="inline-block">
-              and bringing innovative ideas to life through code.
+            Good programmers write code that humans can understand." 
+            </span>
+            <span className="inline-block">
+              - Martin Fowler
             </span>
           </>
         }
       />
       <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-5 lg:gap-16">
         <div className="lg:col-span-2 h-full flex items-center justify-center">
-          {/* ImageSection remains a Client Component due to useGSAP */}
           <ImageSection />
         </div>
         <div className="lg:col-span-3">
-          {/* JourneySection remains a Client Component due to useGSAP */}
           <JourneySection />
         </div>
       </div>
 
       <div className="w-full pt-6 lg:pt-8">
-        {/* SkillsSection remains a Client Component due to useGSAP */}
         <SkillsSection />
       </div>
     </section>

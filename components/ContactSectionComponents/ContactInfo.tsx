@@ -22,8 +22,8 @@ const CONTACT_INFO = [
   {
     icon: <FiPhone className="w-5 h-5" />,
     label: "Phone",
-    value: "+91 1234567890",
-    link: "tel:+911234567890",
+    value: "+91 9878692682",
+    link: "tel:+919878692682",
   },
   {
     icon: <FiMapPin className="w-5 h-5" />,
@@ -204,7 +204,7 @@ const ContactInfo = () => {
                 className="social-icon-link group w-12 h-12 flex items-center justify-center rounded-lg bg-neutral/50 text-muted
                            border border-transparent hover:border-primary/30
                            transition-all duration-300 ease-out transform-gpu
-                           hover:bg-neutral/70 hover:text-primary hover:scale-110 hover:-translate-y-1"
+                           hover:bg-neutral/70 hover:text-primary hover:-translate-y-1"
                 aria-label={social.label}
               >
                 {social.icon}
@@ -214,7 +214,6 @@ const ContactInfo = () => {
         </div>
       </div>
 
-      {/* Decorative elements */}
       <div className="absolute -left-8 -bottom-8 w-48 h-48 bg-primary/5 rounded-full filter blur-3xl pointer-events-none -z-10" />
       <div className="absolute -right-8 -top-8 w-48 h-48 bg-accent/5 rounded-full filter blur-3xl pointer-events-none -z-10" />
     </div>

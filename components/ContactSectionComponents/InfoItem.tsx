@@ -22,7 +22,6 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, link }) => {
                        transform-gpu transition-all duration-300 ease-out
                        hover:bg-neutral/50 hover:border-primary/30 hover:shadow-md hover:shadow-primary/10 hover:translate-x-1"
     >
-      {/* Icon */}
       <div
         className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-primary/10 text-primary
                                    transition-colors duration-300 ease-out
@@ -31,7 +30,6 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, link }) => {
         {icon}
       </div>
 
-      {/* Text Content */}
       <div>
         <div
           className="text-sm text-muted transition-colors duration-300 ease-out
