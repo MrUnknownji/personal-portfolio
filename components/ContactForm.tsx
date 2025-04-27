@@ -77,19 +77,19 @@ const ContactForm: React.FC = () => {
           subtitle={
             <>
               <span className="inline-block">
-              "Information flow is what the Internet is about. 
+              &quot;Information flow is what the Internet is about. 
               </span>
               <span className="inline-block">
               Information sharing is power. 
               </span>
               <span className="inline-block">
-              If you don't share your ideas, 
+              If you don&apos;t share your ideas, 
               </span>
               <span className="inline-block">
-              smart people can't do anything about them, 
+              smart people can&apos;t do anything about them, 
               </span>
               <span className="inline-block">
-              and you'll remain anonymous and powerless."
+              and you&apos;ll remain anonymous and powerless.&quot;
               </span>
               <span className="inline-block">
               - Vint Cerf

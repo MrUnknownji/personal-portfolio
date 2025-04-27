@@ -203,7 +203,7 @@ export const Description = () => {
         className="hero-description text-gray-300 text-lg leading-relaxed max-w-2xl select-none"
         style={{ willChange: "transform, opacity, color" }}
       >
-        "Code is like humor. When you have to explain it, it’s bad." – Cory House
+        &quot;Code is like humor. When you have to explain it, it&rsquo;s bad.&quot; &ndash; Cory House
       </p>
     </div>
   );

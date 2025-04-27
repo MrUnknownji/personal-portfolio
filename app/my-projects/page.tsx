@@ -271,7 +271,7 @@ export default function MyProjects() {
         <Title title="My Projects" subtitle={
           <>
             <span className="inline-block">
-            "The function
+            &quot;The function
             </span>
             <span className="inline-block">
             &nbsp;of good software
@@ -286,7 +286,7 @@ export default function MyProjects() {
             &nbsp;appear to
             </span>
             <span className="inline-block">
-            &nbsp;be simple."
+            &nbsp;be simple.&quot;
             </span>
             <span className="inline-block">
             - Grady Booch

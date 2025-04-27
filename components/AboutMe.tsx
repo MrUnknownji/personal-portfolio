@@ -15,10 +15,10 @@ const AboutMe = () => {
         subtitle={
           <>
             <span className="inline-block">
-            "Any fool can write code that a computer can understand. 
+            &quot;Any fool can write code that a computer can understand. 
             </span>
             <span className="inline-block">
-            Good programmers write code that humans can understand." 
+            Good programmers write code that humans can understand.&quot; 
             </span>
             <span className="inline-block">
               - Martin Fowler
