@@ -127,7 +127,7 @@ const Footer = () => {
   return (
     <footer
       ref={footerRef}
-      className="w-full bg-gradient-to-b from-secondary via-dark to-dark border-t border-neutral/20 py-12 md:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
+      className="w-full bg-[linear-gradient(180deg,_var(--color-secondary)_0%,_rgba(var(--color-secondary-rgb),0.95)_40%,_rgba(var(--color-dark-rgb),0.92)_70%,_var(--color-dark)_100%)] border-t border-neutral/20 py-12 md:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
     >
       <div className="absolute inset-0 opacity-[0.04] pointer-events-none bg-[url('/noise.svg')] bg-repeat"></div>
       <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50"></div>
