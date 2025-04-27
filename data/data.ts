@@ -420,102 +420,34 @@ export const HeroSectionSkills = [
   },
 ];
 
-export const AboutMeSkills = [
-  {
-    name: "Full Stack Development",
-    icon: "💻",
-    description:
-      "Proficient in both frontend and backend technologies, creating seamless web applications.",
-  },
-  {
-    name: "UI/UX Design",
-    icon: "🎨",
-    description:
-      "Passionate about creating intuitive and visually appealing user interfaces.",
-  },
-  {
-    name: "Database Management",
-    icon: "🗄️",
-    description:
-      "Experienced in designing and optimizing database structures for efficient data handling.",
-  },
-  {
-    name: "Cloud Services",
-    icon: "☁️",
-    description:
-      "Skilled in deploying and managing applications on various cloud platforms.",
-  },
-];
-
-export const TechnicalSectionSkills = [
-  {
-    category: "Frontend",
-    icon: "🎨",
-    items: [
-      "React",
-      "Next.js",
-      "TypeScript",
-      "Tailwind CSS",
-      "HTML5",
-      "CSS3",
-      "JavaScript",
-      "Vue.js",
-      "Angular",
-      "Redux",
-      "Chakra UI",
-      "Framer Motion",
-    ],
-  },
-  {
-    category: "Mobile",
-    icon: "📱",
-    items: ["React Native", "Expo", "Reanimated"],
-  },
-  {
-    category: "Backend",
-    icon: "⚙️",
-    items: [
-      "Node.js",
-      "Express",
-      "Python",
-      "Django",
-      "RESTful APIs",
-      "GraphQL",
-      "Java",
-      "Spring Boot",
-      "PHP",
-    ],
-  },
-  {
-    category: "Database",
-    icon: "🗄️",
-    items: [
-      "MongoDB",
-      "PostgreSQL",
-      "MySQL",
-      "Redis",
-      "Elasticsearch",
-      "SQLite",
-      "Oracle",
-      "Cassandra",
-    ],
-  },
-  {
-    category: "DevOps & Tools",
-    icon: "🛠️",
-    items: [
-      "Git",
-      "Docker",
-      "AWS",
-      "CI/CD",
-      "Webpack",
-      "Babel",
-      "Jenkins",
-      "Kubernetes",
-      "Terraform",
-      "axios",
-      "Vercel",
-      "Chart.js",
-    ],
-  },
-];
+export const SkillsData = {
+  frontend: [
+    "React",
+    "React Native",
+    "TypeScript",
+    "Tailwind CSS",
+    "GSAP",
+    "Framer Motion",
+    "Reanimated",
+  ],
+  backend: ["Node.js", "Express", "MongoDB", "REST APIs", "GraphQL"],
+  tools: [
+    "Git",
+    "GitHub",
+    "Docker",
+    "AWS (S3, EC2)",
+    "Next js",
+    "Vercel",
+    "Expo",
+    "Postman",
+    "Figma",
+  ],
+  other: [
+    "UI/UX Principles",
+    "Performance",
+    "SEO Basics",
+    "Responsive Design",
+    "Agile/Scrum",
+    "Problem Solving",
+  ],
+} as const;

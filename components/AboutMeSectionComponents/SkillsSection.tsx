@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SkillsData } from "@/data/data";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -19,36 +20,6 @@ const ANIMATION_CONFIG = {
   SKILL_EASE: "back.out(1.4)",
   HOVER_DURATION: 0.2,
   HOVER_EASE: "power1.out",
-} as const;
-
-const skillsData = {
-  frontend: [
-    "React",
-    "Next.js",
-    "TypeScript",
-    "Tailwind CSS",
-    "GSAP",
-    "Framer Motion",
-    "JavaScript (ES6+)",
-  ],
-  backend: ["Node.js", "Express", "MongoDB", "REST APIs", "GraphQL", "tRPC"],
-  tools: [
-    "Git",
-    "GitHub",
-    "Docker",
-    "AWS (S3, EC2)",
-    "Vercel",
-    "Postman",
-    "Figma",
-  ],
-  other: [
-    "UI/UX Principles",
-    "Performance",
-    "SEO Basics",
-    "Responsive Design",
-    "Agile/Scrum",
-    "Problem Solving",
-  ],
 } as const;
 
 const SkillsSection = () => {
@@ -145,7 +116,7 @@ const SkillsSection = () => {
         ref={skillsGridRef}
         className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-4"
       >
-        {Object.entries(skillsData).map(([category, skills]) => (
+        {Object.entries(SkillsData).map(([category, skills]) => (
           <div
             key={category}
             className="bg-frosted-dark rounded-lg p-5 space-y-4 flex flex-col"
