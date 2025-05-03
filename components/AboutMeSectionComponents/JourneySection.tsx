@@ -136,9 +136,6 @@ const JourneySection = () => {
       });
 
       return () => {
-        if (tl.scrollTrigger) {
-          tl.scrollTrigger.kill();
-        }
         gsap.killTweensOf([titleRef.current, lineRef.current, items, circles]);
       };
     },

@@ -4,7 +4,6 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { TextPlugin } from "gsap/TextPlugin";
-import { useLenis } from "lenis/react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, TextPlugin);
@@ -14,7 +13,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
-  const lenis = useLenis();
 
   useGSAP(
     () => {
@@ -23,7 +21,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
         gsap.set(overlayRef.current, { display: "none" });
         gsap.delayedCall(0.01, () => {
           requestAnimationFrame(() => {
-            lenis?.resize();
             ScrollTrigger.refresh();
           });
         });
@@ -41,12 +38,10 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
       const tl = gsap.timeline({
         onStart: () => {
-          lenis?.stop();
           bodyStyle.cursor = "wait";
           overlayRef.current?.classList.remove("pointer-events-none");
         },
         onComplete: () => {
-          lenis?.start();
           bodyStyle.cursor = "";
           gsap.set(overlayRef.current, { display: "none" });
           overlayRef.current?.classList.add("pointer-events-none");
@@ -54,13 +49,8 @@ export default function Template({ children }: { children: React.ReactNode }) {
           const refreshDelay = 0.01;
           gsap.delayedCall(refreshDelay, () => {
             requestAnimationFrame(() => {
-              if (lenis) {
-                console.log("Template: Resizing Lenis...");
-                lenis.resize();
-              }
-
               console.log(
-                `Template: Refreshing ScrollTrigger after resize and ${refreshDelay}s delay`,
+                `Template: Refreshing ScrollTrigger after transition and ${refreshDelay}s delay`,
               );
               ScrollTrigger.refresh();
 
@@ -122,7 +112,9 @@ export default function Template({ children }: { children: React.ReactNode }) {
         );
     },
 
-    { dependencies: [children, lenis] },
+    {
+      dependencies: [children],
+    },
   );
 
   return (

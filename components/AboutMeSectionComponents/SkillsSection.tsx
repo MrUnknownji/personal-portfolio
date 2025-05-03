@@ -95,9 +95,6 @@ const SkillsSection = () => {
 
       return () => {
         gsap.killTweensOf([titleRef.current, categories, allSkillItems]);
-        if (mainTl.scrollTrigger) {
-          mainTl.scrollTrigger.kill();
-        }
       };
     },
     { scope: containerRef },

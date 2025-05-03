@@ -74,7 +74,6 @@ const ImageSection = () => {
         );
 
       return () => {
-        tl.scrollTrigger?.kill();
         gsap.killTweensOf([
           wrapperRef.current,
           imageRef.current,

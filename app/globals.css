@@ -75,7 +75,6 @@ body {
 html {
     font-family: var(--font-outfit), sans-serif;
     font-optical-sizing: auto;
-    scroll-behavior: smooth;
 }
 
 ::-webkit-scrollbar {

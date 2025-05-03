@@ -9,7 +9,6 @@ import { TechStack } from "./ProjectModalComponents/TechStack";
 import { MediaGallery } from "./ProjectModalComponents/MediaGallery";
 import Link from "next/link";
 import { useGSAP } from "@gsap/react";
-import { useLenis } from "lenis/react";
 
 interface ProjectModalProps {
   project: Project;
@@ -28,7 +27,6 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
-  const lenis = useLenis();
   const [isMounted, setIsMounted] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const isActuallyOpen = isOpen || isAnimatingOut;
@@ -39,23 +37,18 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
 
   useEffect(() => {
     if (isActuallyOpen) {
-      lenis?.stop();
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
     } else {
-      lenis?.start();
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
     }
 
     return () => {
-      if (lenis && lenis.isStopped) {
-        lenis.start();
-      }
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
     };
-  }, [isActuallyOpen, lenis]);
+  }, [isActuallyOpen]);
 
   const runCloseAnimation = useCallback(() => {
     if (!contentRef.current || !overlayRef.current) {
@@ -187,7 +180,6 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                      overscroll-behavior-y-contain
                      scrollbar-thin scrollbar-thumb-neutral/40 scrollbar-track-transparent"
           style={{ WebkitOverflowScrolling: "touch" }}
-          data-lenis-prevent
         >
           <div
             className="flex flex-col md:flex-row gap-6 md:gap-8 px-6 pb-6 pt-10 md:p-8
@@ -198,7 +190,6 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                          md:h-full md:overflow-y-auto md:scrollbar-thin md:scrollbar-thumb-neutral/40
                          md:scrollbar-track-transparent md:pr-2 md:overscroll-behavior-y-contain"
               style={{ WebkitOverflowScrolling: "touch" }}
-              data-lenis-prevent
             >
               <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg border border-neutral/30 flex-shrink-0">
                 <Image
@@ -230,7 +221,6 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                            md:overflow-y-auto md:scrollbar-thin md:scrollbar-thumb-neutral/40
                            md:scrollbar-track-transparent md:pr-2 md:overscroll-behavior-y-contain"
                 style={{ WebkitOverflowScrolling: "touch" }}
-                data-lenis-prevent
               >
                 <ExpandableSection
                   title="Description"

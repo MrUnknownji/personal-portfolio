@@ -4,7 +4,6 @@ import gsap from "gsap";
 import DialogContent from "./ContactSectionComponents/DialogContent";
 import DialogActions from "./ContactSectionComponents/DialogActions";
 import { useGSAP } from "@gsap/react";
-import { useLenis } from "lenis/react";
 
 interface ThankYouDialogProps {
   isOpen: boolean;
@@ -38,7 +37,23 @@ const ThankYouDialog = ({
   const dialogRef = useRef<HTMLDivElement>(null);
   const [isEmailCopied, setIsEmailCopied] = useState(false);
   const [isVisible, setIsVisible] = useState(isOpen);
-  const lenis = useLenis();
+
+
+  useEffect(() => {
+    const shouldPreventScroll = isOpen;
+    if (shouldPreventScroll) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, [isOpen]);
 
   const handleCopyEmail = useCallback(() => {
     navigator.clipboard
@@ -103,49 +118,39 @@ const ThankYouDialog = ({
 
   useGSAP(() => {
     if (!isVisible || !overlayRef.current || !dialogRef.current) {
-      lenis?.start();
       return;
     }
 
-    lenis?.stop();
+    gsap.set(overlayRef.current, {
+      opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
+      willChange: "opacity",
+      force3D: true,
+    });
+    gsap.set(dialogRef.current, {
+      opacity: 0,
+      scale: ANIMATION_CONFIG.DIALOG.SCALE.CLOSE,
+      y: ANIMATION_CONFIG.DIALOG.Y.CLOSE,
+      willChange: "transform, opacity",
+      force3D: true,
+    });
 
-    const ctx = gsap.context(() => {
-      gsap.set(overlayRef.current, {
-        opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.CLOSE,
-        willChange: "opacity",
-        force3D: true,
-      });
-      gsap.set(dialogRef.current, {
-        opacity: 0,
-        scale: ANIMATION_CONFIG.DIALOG.SCALE.CLOSE,
-        y: ANIMATION_CONFIG.DIALOG.Y.CLOSE,
-        willChange: "transform, opacity",
-        force3D: true,
-      });
-
-      const tl = gsap.timeline();
-      tl.to(overlayRef.current, {
-        opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.OPEN,
-        duration: ANIMATION_CONFIG.OVERLAY.DURATION.OPEN,
+    const tl = gsap.timeline();
+    tl.to(overlayRef.current, {
+      opacity: ANIMATION_CONFIG.OVERLAY.OPACITY.OPEN,
+      duration: ANIMATION_CONFIG.OVERLAY.DURATION.OPEN,
+      ease: ANIMATION_CONFIG.EASE.OPEN,
+    }).to(
+      dialogRef.current,
+      {
+        opacity: 1,
+        scale: ANIMATION_CONFIG.DIALOG.SCALE.OPEN,
+        y: ANIMATION_CONFIG.DIALOG.Y.OPEN,
+        duration: ANIMATION_CONFIG.DIALOG.DURATION.OPEN,
         ease: ANIMATION_CONFIG.EASE.OPEN,
-      }).to(
-        dialogRef.current,
-        {
-          opacity: 1,
-          scale: ANIMATION_CONFIG.DIALOG.SCALE.OPEN,
-          y: ANIMATION_CONFIG.DIALOG.Y.OPEN,
-          duration: ANIMATION_CONFIG.DIALOG.DURATION.OPEN,
-          ease: ANIMATION_CONFIG.EASE.OPEN,
-        },
-        "-=0.2",
-      );
-    }, dialogRef);
-
-    return () => {
-      ctx.revert();
-      lenis?.start();
-    };
-  }, [isVisible, lenis]);
+      },
+      "-=0.2",
+    );
+  }, [isVisible]);
 
   if (!isVisible && !isOpen) return null;
 

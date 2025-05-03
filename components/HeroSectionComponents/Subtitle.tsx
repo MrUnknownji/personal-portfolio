@@ -1,17 +1,18 @@
 import { useRef } from "react";
 import { gsap } from "gsap";
-import SplitType from "split-type";
+import { SplitText } from "gsap/SplitText";
 import { useGSAP } from "@gsap/react";
 
 export const Subtitle = () => {
   const subtitleRef = useRef<HTMLHeadingElement>(null);
-  const splitInstanceRef = useRef<SplitType | null>(null);
+  const splitInstanceRef = useRef<SplitText | null>(null);
 
   useGSAP(() => {
     if (!subtitleRef.current) return;
 
-    splitInstanceRef.current = new SplitType(subtitleRef.current, {
-      types: "chars",
+    splitInstanceRef.current = new SplitText(subtitleRef.current, {
+      type: "chars",
+      charsClass: "subtitle-char",
     });
 
     const chars = splitInstanceRef.current.chars;
@@ -34,9 +35,9 @@ export const Subtitle = () => {
       const mouseX = event.clientX - rect.left;
       const maxDistance = 150;
 
-      splitInstanceRef.current.chars.forEach((char) => {
+      splitInstanceRef.current.chars.forEach((char: Element) => {
         if (!char) return;
-        const charRect = char.getBoundingClientRect();
+        const charRect = (char as HTMLElement).getBoundingClientRect();
         const charCenter = charRect.left + charRect.width / 2 - rect.left;
         const distance = Math.abs(mouseX - charCenter);
 
@@ -54,7 +55,7 @@ export const Subtitle = () => {
 
     const handleMouseLeave = () => {
       if (!splitInstanceRef.current?.chars) return;
-      gsap.to(splitInstanceRef.current.chars, {
+      gsap.to(splitInstanceRef.current.chars as gsap.TweenTarget, {
         y: 0,
         scale: 1,
         duration: 0.4,
@@ -71,7 +72,7 @@ export const Subtitle = () => {
       currentSubtitleRef.removeEventListener("mousemove", handleMouseMove);
       currentSubtitleRef.removeEventListener("mouseleave", handleMouseLeave);
       splitInstanceRef.current?.revert();
-      gsap.killTweensOf(chars);
+      gsap.killTweensOf(chars as gsap.TweenTarget);
     };
   }, []);
 

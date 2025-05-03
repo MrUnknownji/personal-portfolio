@@ -1,16 +1,16 @@
 import { useRef, useCallback } from "react";
 import { gsap } from "gsap";
-import SplitType from "split-type";
+import { SplitText } from "gsap/SplitText";
 import { useGSAP } from "@gsap/react";
 
 export const Description = () => {
   const descriptionRef = useRef<HTMLParagraphElement>(null);
-  const splitInstanceRef = useRef<SplitType | null>(null);
+  const splitInstanceRef = useRef<SplitText | null>(null);
   const initialHoverPosRef = useRef<{ x: number; y: number } | null>(null);
   const activeEnterTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const activeLeaveTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const isCurrentlyHoveringRef = useRef(false);
-  const initialCharsRef = useRef<HTMLElement[]>([]);
+  const initialCharsRef = useRef<Element[]>([]);
 
   const HOVER_COLOR = "#00ff9f";
   const TARGET_SCALE = 1.18;
@@ -156,9 +156,9 @@ export const Description = () => {
   useGSAP(() => {
     if (!descriptionRef.current) return;
 
-    splitInstanceRef.current = new SplitType(descriptionRef.current, {
-      types: "chars",
-      tagName: "span",
+    splitInstanceRef.current = new SplitText(descriptionRef.current, {
+      type: "chars",
+      charsClass: "char",
     });
 
     initialCharsRef.current = splitInstanceRef.current.chars || [];
