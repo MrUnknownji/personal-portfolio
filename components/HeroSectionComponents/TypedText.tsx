@@ -34,7 +34,7 @@ const TypedText = () => {
     const textElement = containerRef.current.querySelector(`[data-index="${index}"]`);
     if (!textElement) return;
 
-    const splitInstance = new SplitText(textElement, { types: "chars", charsClass: "typed-char" });
+    const splitInstance = new SplitText(textElement, { type: "chars", charsClass: "typed-char" });
     const chars = splitInstance.chars;
 
     animationRef.current?.kill();
