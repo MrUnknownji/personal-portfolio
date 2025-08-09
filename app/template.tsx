@@ -1,10 +1,10 @@
 "use client";
+
 import { useRef } from "react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { TextPlugin } from "gsap/TextPlugin";
-import { useLenis } from "lenis/react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, TextPlugin);
@@ -14,19 +14,12 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
-  const lenis = useLenis();
 
   useGSAP(
     () => {
       if (!overlayRef.current || !contentRef.current || !counterRef.current) {
         gsap.set(contentRef.current, { opacity: 1 });
         gsap.set(overlayRef.current, { display: "none" });
-        gsap.delayedCall(0.01, () => {
-          requestAnimationFrame(() => {
-            lenis?.resize();
-            ScrollTrigger.refresh();
-          });
-        });
         return;
       }
 
@@ -41,31 +34,17 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
       const tl = gsap.timeline({
         onStart: () => {
-          lenis?.stop();
           bodyStyle.cursor = "wait";
           overlayRef.current?.classList.remove("pointer-events-none");
         },
         onComplete: () => {
-          lenis?.start();
           bodyStyle.cursor = "";
           gsap.set(overlayRef.current, { display: "none" });
           overlayRef.current?.classList.add("pointer-events-none");
 
-          const refreshDelay = 0.01;
-          gsap.delayedCall(refreshDelay, () => {
-            requestAnimationFrame(() => {
-              if (lenis) {
-                console.log("Template: Resizing Lenis...");
-                lenis.resize();
-              }
-
-              console.log(
-                `Template: Refreshing ScrollTrigger after resize and ${refreshDelay}s delay`,
-              );
-              ScrollTrigger.refresh();
-
-              window.scrollTo(0, 0);
-            });
+          gsap.delayedCall(0.05, () => {
+            ScrollTrigger.refresh();
+            window.scrollTo(0, 0);
           });
         },
         defaults: { ease: "power2.inOut" },
@@ -79,7 +58,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
       tl.set(overlayRef.current, { opacity: 1, display: "flex" })
         .set(contentRef.current, { opacity: 0 })
         .set(counterRef.current, { textContent: "0%", opacity: 1 })
-
         .to(
           counter,
           {
@@ -92,7 +70,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
           },
           0,
         )
-
         .to(
           contentRef.current,
           {
@@ -101,7 +78,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
           },
           contentFadeInDelay,
         )
-
         .to(
           overlayRef.current,
           {
@@ -110,7 +86,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
           },
           overlayFadeOutDelay,
         )
-
         .to(
           counterRef.current,
           {
@@ -121,13 +96,12 @@ export default function Template({ children }: { children: React.ReactNode }) {
           `-=${overlayFadeOutDuration * 0.3}`,
         );
     },
-
-    { dependencies: [children, lenis] },
+    { dependencies: [children] },
   );
 
   return (
     <>
-      <div ref={contentRef} className="page-content relative z-10">
+      <div ref={contentRef} className="page-content">
         {children}
       </div>
 
@@ -135,7 +109,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
         ref={overlayRef}
         className="
           transition-overlay
-          fixed inset-0 z-50
+          fixed top-0 left-0 w-screen h-dvh z-50
           flex items-center justify-center
           bg-gray-950
           pointer-events-none

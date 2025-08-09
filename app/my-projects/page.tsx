@@ -268,31 +268,21 @@ export default function MyProjects() {
   return (
     <div ref={pageRef} className="min-h-screen pt-24 pb-20 md:pb-28 lg:pb-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Title title="My Projects" subtitle={
-          <>
-            <span className="inline-block">
-            &quot;The function
-            </span>
-            <span className="inline-block">
-            &nbsp;of good software
-            </span>
-            <span className="inline-block">
-            &nbsp;is to make
-            </span>
-            <span className="inline-block">
-            &nbsp;the complex
-            </span>
-            <span className="inline-block">
-            &nbsp;appear to
-            </span>
-            <span className="inline-block">
-            &nbsp;be simple.&quot;
-            </span>
-            <span className="inline-block">
-            - Grady Booch
-            </span>
-          </>
-        } className="mb-12 md:mb-16" />
+        <Title
+          title="My Projects"
+          subtitle={
+            <>
+              <span className="inline-block">&quot;The function</span>
+              <span className="inline-block">&nbsp;of good software</span>
+              <span className="inline-block">&nbsp;is to make</span>
+              <span className="inline-block">&nbsp;the complex</span>
+              <span className="inline-block">&nbsp;appear to</span>
+              <span className="inline-block">&nbsp;be simple.&quot;</span>
+              <span className="inline-block">- Grady Booch</span>
+            </>
+          }
+          className="mb-12 md:mb-16"
+        />
 
         <div
           ref={controlsRef}

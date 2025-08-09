@@ -3,12 +3,8 @@ import { Outfit, Poppins } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import SmoothScrollLenisGSAP from "@/components/SmoothScrollLenisGSAP";
-import { LenisOptions } from "lenis";
-
-gsap.registerPlugin(ScrollTrigger);
+import SmoothScroller from "@/components/SmoothScroller";
+import Template from "./template";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -37,11 +33,6 @@ export const metadata: Metadata = {
     apple: "/favicon.svg",
     shortcut: "/favicon.svg",
   },
-};
-
-const lenisOptions: LenisOptions = {
-  lerp: 0.1,
-  smoothWheel: true,
 };
 
 export default function RootLayout({
@@ -73,14 +64,14 @@ export default function RootLayout({
             }}
           />
         </div>
+        <Header />
 
-        <SmoothScrollLenisGSAP lenisOptions={lenisOptions}>
-          <div className="relative z-10">
-            <Header />
-            <main className="min-h-screen">{children}</main>
-            <Footer />
-          </div>
-        </SmoothScrollLenisGSAP>
+        <SmoothScroller>
+          <main className="relative z-10 min-h-screen">
+            <Template>{children}</Template>
+          </main>
+          <Footer />
+        </SmoothScroller>
       </body>
     </html>
   );

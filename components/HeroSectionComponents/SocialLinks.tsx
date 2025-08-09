@@ -95,8 +95,7 @@ const SocialLinks = () => {
             ],
             profileImage:
               stats.github?.profileImage ||
-              "https://lh3.googleusercontent.com/ogw/AF2bZygBwXfKHcXOSnDY6Hc2WCcPfIrhSpncP8aUJMeObe5RuvM=s32-c-mo" ||
-              "https://placehold.co/600x600?text=Sandeep+Kumar",
+              "https://placehold.co/48x48/27272a/f1f1f1?text=GH",
             username: stats.github?.username || "MrUnknownji",
           },
           {
@@ -126,8 +125,7 @@ const SocialLinks = () => {
             ],
             profileImage:
               stats.linkedin?.profileImage ||
-              "https://lh3.googleusercontent.com/ogw/AF2bZygBwXfKHcXOSnDY6Hc2WCcPfIrhSpncP8aUJMeObe5RuvM=s32-c-mo" ||
-              "https://placehold.co/600x600?text=Sandeep+Kumar",
+              "https://placehold.co/48x48/27272a/f1f1f1?text=LI",
             username: stats.linkedin?.name || "sandeep-kumar-sk1707",
           },
           {
@@ -158,8 +156,7 @@ const SocialLinks = () => {
             ],
             profileImage:
               stats.twitter?.profileImage ||
-              "https://lh3.googleusercontent.com/ogw/AF2bZygBwXfKHcXOSnDY6Hc2WCcPfIrhSpncP8aUJMeObe5RuvM=s32-c-mo" ||
-              "https://placehold.co/600x600?text=Sandeep+Kumar",
+              "https://placehold.co/48x48/27272a/f1f1f1?text=TW",
             username: stats.twitter?.name || "MrUnknownG786",
           },
         ];

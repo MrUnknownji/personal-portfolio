@@ -4,7 +4,6 @@ import gsap from "gsap";
 import DialogContent from "./ContactSectionComponents/DialogContent";
 import DialogActions from "./ContactSectionComponents/DialogActions";
 import { useGSAP } from "@gsap/react";
-import { useLenis } from "lenis/react";
 
 interface ThankYouDialogProps {
   isOpen: boolean;
@@ -38,7 +37,6 @@ const ThankYouDialog = ({
   const dialogRef = useRef<HTMLDivElement>(null);
   const [isEmailCopied, setIsEmailCopied] = useState(false);
   const [isVisible, setIsVisible] = useState(isOpen);
-  const lenis = useLenis();
 
   const handleCopyEmail = useCallback(() => {
     navigator.clipboard
@@ -103,11 +101,8 @@ const ThankYouDialog = ({
 
   useGSAP(() => {
     if (!isVisible || !overlayRef.current || !dialogRef.current) {
-      lenis?.start();
       return;
     }
-
-    lenis?.stop();
 
     const ctx = gsap.context(() => {
       gsap.set(overlayRef.current, {
@@ -143,9 +138,8 @@ const ThankYouDialog = ({
 
     return () => {
       ctx.revert();
-      lenis?.start();
     };
-  }, [isVisible, lenis]);
+  }, [isVisible]);
 
   if (!isVisible && !isOpen) return null;
 
@@ -160,7 +154,7 @@ const ThankYouDialog = ({
     >
       <div
         ref={overlayRef}
-        className="fixed inset-0 bg-black/85" 
+        className="fixed inset-0 bg-black/85"
         onClick={startCloseProcess}
         aria-hidden="true"
       />

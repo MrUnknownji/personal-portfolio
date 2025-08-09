@@ -33,7 +33,6 @@ const SocialInfoBox = ({
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      setMounted(false);
     };
   }, []);
 
@@ -44,7 +43,7 @@ const SocialInfoBox = ({
     }
   }, [opacity, onHeightChange, socialLink]);
 
-  const offsetY = 25;
+  const offsetY = 30;
   const adjustedY = position.y - scrollY;
 
   const content = (
@@ -56,34 +55,29 @@ const SocialInfoBox = ({
         top: `${adjustedY - offsetY}px`,
         opacity: opacity,
         transform: `translate(-50%, -100%) scale(${opacity * 0.1 + 0.9})`,
-        transition: "opacity 0.15s ease-out, transform 0.15s ease-out",
+        transition: "opacity 0.2s ease-out, transform 0.2s ease-out",
         willChange: "opacity, transform",
       }}
     >
       <div
-        className="relative w-72 p-4 rounded-xl shadow-xl
-                   bg-gradient-to-br from-gray-800 via-secondary to-gray-900
-                   border border-neutral/30 ring-1 ring-inset ring-white/10"
+        className="relative w-72 p-4 rounded-xl shadow-2xl shadow-black/70
+                   bg-gradient-to-br from-neutral-800 via-secondary to-black
+                   border border-neutral-700/85 ring-1 ring-inset ring-white/5"
       >
         <div className="space-y-3">
           <div className="flex items-center gap-3">
-            {socialLink.profileImage ? (
-              <Image
-                src={socialLink.profileImage}
-                alt={socialLink.label}
-                width={48}
-                height={48}
-                className="rounded-lg object-cover border border-neutral/20 shadow-sm"
-              />
-            ) : (
-              <div
-                className="p-2 rounded-lg bg-neutral/50 w-12 h-12 flex items-center justify-center
-                           border border-neutral/30 shadow-inner shadow-black/20"
-                style={{ color: socialLink.hoverIconColor }}
-              >
-                {socialLink.icon}
-              </div>
-            )}
+            <Image
+              src={socialLink.profileImage || ""}
+              alt={socialLink.label}
+              width={48}
+              height={48}
+              className="rounded-lg object-cover border border-neutral/20 shadow-sm"
+              onError={(e) => {
+                e.currentTarget.src = `https://placehold.co/48x48/27272a/f1f1f1?text=${socialLink.label.charAt(
+                  0,
+                )}`;
+              }}
+            />
             <div>
               <h3 className="font-semibold text-light">
                 {socialLink.username}
@@ -105,35 +99,33 @@ const SocialInfoBox = ({
             {socialLink.stats.map((stat, index) => (
               <div
                 key={index}
-                className="text-center p-2 rounded-lg bg-neutral/30 border border-neutral/40 shadow-sm"
+                className="text-center p-2 rounded-lg bg-neutral-900/60 border border-neutral-700/80 shadow-sm"
               >
-                <div className="text-sm font-medium text-light">
+                <div className="text-sm font-semibold text-light">
                   {stat.value}
                 </div>
-                <div className="text-xs text-muted">{stat.label}</div>
+                <div className="text-xs text-muted truncate">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
 
         <div
-          className="absolute left-1/2 w-4 h-4 border-neutral/30
-                     bg-gradient-to-br from-gray-800/95 via-secondary/90 to-gray-900/95"
+          className="absolute left-1/2 w-4 h-4 border-neutral-700/80
+                     bg-gradient-to-br from-neutral-800/90 via-secondary/80 to-black/85"
           style={{
             bottom: "-8px",
-            transform: "translateX(-50%) rotate(-45deg)",
+            transform: "translateX(-50%) rotate(45deg)",
             borderRightWidth: "1px",
             borderBottomWidth: "1px",
-            clipPath: "polygon(0% 0%, 100% 100%, 0% 100%)",
+            zIndex: -1,
           }}
         />
       </div>
     </div>
   );
 
-  return mounted && typeof document !== "undefined"
-    ? createPortal(content, document.body)
-    : null;
+  return mounted ? createPortal(content, document.body) : null;
 };
 
 export default SocialInfoBox;

@@ -9,7 +9,6 @@ import { TechStack } from "./ProjectModalComponents/TechStack";
 import { MediaGallery } from "./ProjectModalComponents/MediaGallery";
 import Link from "next/link";
 import { useGSAP } from "@gsap/react";
-import { useLenis } from "lenis/react";
 
 interface ProjectModalProps {
   project: Project;
@@ -28,7 +27,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const scrollableContentRef = useRef<HTMLDivElement>(null);
-  const lenis = useLenis();
+  // const lenis = useLenis();
   const [isMounted, setIsMounted] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const isActuallyOpen = isOpen || isAnimatingOut;
@@ -39,23 +38,18 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
 
   useEffect(() => {
     if (isActuallyOpen) {
-      lenis?.stop();
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
     } else {
-      lenis?.start();
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
     }
 
     return () => {
-      if (lenis && lenis.isStopped) {
-        lenis.start();
-      }
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
     };
-  }, [isActuallyOpen, lenis]);
+  }, [isActuallyOpen]);
 
   const runCloseAnimation = useCallback(() => {
     if (!contentRef.current || !overlayRef.current) {

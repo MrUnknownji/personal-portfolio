@@ -1,6 +1,10 @@
+"use client";
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const CodeDisplay = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -8,10 +12,21 @@ const CodeDisplay = () => {
 
   useGSAP(
     () => {
-      if (!containerRef.current || !codeBlockRef.current) return;
+      const container = containerRef.current;
+      const codeBlock = codeBlockRef.current;
+      if (!container || !codeBlock) return;
 
-      gsap.fromTo(
-        codeBlockRef.current,
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: container,
+          start: "top 85%",
+          end: "bottom top",
+          toggleActions: "play none none reverse",
+        },
+      });
+
+      tl.fromTo(
+        codeBlock,
         {
           rotateY: 18,
           rotateX: -6,
@@ -25,13 +40,19 @@ const CodeDisplay = () => {
           opacity: 1,
           duration: 1.2,
           ease: "power3.out",
-          delay: 0.5,
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: "top 85%",
-            toggleActions: "play none none reverse",
-          },
         },
+      ).to(
+        codeBlock,
+        {
+          rotateX: -2,
+          rotateY: 14,
+          y: -5,
+          duration: 4,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+        },
+        "-=0.5",
       );
     },
     { scope: containerRef },
@@ -98,7 +119,6 @@ const CodeDisplay = () => {
               <code className="text-primary">{`};`}</code>
             </pre>
           </div>
-          <div className="absolute inset-0 pointer-events-none rounded-2xl ring-1 ring-inset ring-white/5" />
         </div>
       </div>
     </div>
