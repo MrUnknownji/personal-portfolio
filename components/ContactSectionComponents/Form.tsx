@@ -23,11 +23,6 @@ const ANIMATION_CONFIG = {
     END: "bottom 20%",
     TOGGLE_ACTIONS: "play none none reverse",
   },
-  INPUT_FLOAT: {
-    DURATION: 2.5,
-    Y_OFFSET: 4,
-    EASE: "sine.inOut",
-  },
 } as const;
 
 const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
@@ -143,21 +138,6 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         force3D: true,
       });
 
-      const inputWrappers = formElements.slice(0, -1);
-      tl.to(
-        inputWrappers,
-        {
-          y: (i) => Math.sin(i * 0.8) * ANIMATION_CONFIG.INPUT_FLOAT.Y_OFFSET,
-          duration: ANIMATION_CONFIG.INPUT_FLOAT.DURATION,
-          ease: ANIMATION_CONFIG.INPUT_FLOAT.EASE,
-          stagger: 0.1,
-          repeat: -1,
-          yoyo: true,
-          force3D: true,
-          willChange: "transform",
-        },
-        "-=0.5",
-      );
     },
     { scope: formContainerRef },
   );
@@ -183,7 +163,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         className="space-y-6"
         noValidate
       >
-        <div className="form-item-wrapper relative pb-5">
+        <div className="form-item-wrapper relative">
           <input
             ref={categoryInputRef}
             type="text"
@@ -205,7 +185,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           )}
         </div>
 
-        <div className="form-item-wrapper relative pb-5">
+        <div className="form-item-wrapper relative">
           <input
             ref={subjectInputRef}
             type="text"
@@ -227,7 +207,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           )}
         </div>
 
-        <div className="form-item-wrapper relative pb-5">
+        <div className="form-item-wrapper relative">
           <textarea
             ref={messageTextareaRef}
             name="message"

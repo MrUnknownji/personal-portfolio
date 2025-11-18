@@ -80,11 +80,11 @@ const ContactInfo = () => {
     () => {
       const title = containerRef.current?.querySelector(".contact-title");
       const infoItems = gsap.utils.toArray<HTMLElement>(
-        containerRef.current?.querySelectorAll(".info-item-wrapper") ?? [],
+        containerRef.current?.querySelectorAll(".info-item") ?? [],
       );
       const socialTitle = containerRef.current?.querySelector(".social-title");
       const socialIcons = gsap.utils.toArray<HTMLElement>(
-        containerRef.current?.querySelectorAll(".social-icon-link") ?? [],
+        containerRef.current?.querySelectorAll(".social-link") ?? [],
       );
 
       if (
@@ -176,14 +176,14 @@ const ContactInfo = () => {
 
   return (
     <div ref={containerRef} className="w-full relative">
-      <div className="space-y-8 md:space-y-10">
+      <div className="space-y-6">
         <div>
           <h3 className="contact-title text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-6">
             Contact Information
           </h3>
           <div className="space-y-4">
             {CONTACT_INFO.map((info) => (
-              <div key={info.label} className="info-item-wrapper">
+              <div key={info.label} className="info-item">
                 <InfoItem {...info} />
               </div>
             ))}
@@ -201,7 +201,7 @@ const ContactInfo = () => {
                 href={social.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-icon-link group w-12 h-12 flex items-center justify-center rounded-lg bg-neutral/50 text-muted
+                className="social-link group w-12 h-12 flex items-center justify-center rounded-lg bg-neutral/50 text-muted
                            border border-transparent hover:border-primary/30
                            transition-all duration-300 ease-out transform-gpu
                            hover:bg-neutral/70 hover:text-primary hover:-translate-y-1"
