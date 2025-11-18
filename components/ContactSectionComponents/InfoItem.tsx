@@ -20,7 +20,7 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, link }) => {
       }
       className="group/infoitem flex items-center gap-4 p-4 rounded-lg bg-neutral/30 border border-transparent
                        transform-gpu transition-all duration-300 ease-out
-                       hover:bg-neutral/50 hover:border-primary/30 hover:shadow-md hover:shadow-primary/10 hover:-translate-y-1"
+                       hover:bg-neutral/50 hover:border-primary/30 hover:shadow-md hover:shadow-primary/10"
     >
       <div
         className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-primary/10 text-primary

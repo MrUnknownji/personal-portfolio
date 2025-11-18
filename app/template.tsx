@@ -34,6 +34,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
       const tl = gsap.timeline({
         onStart: () => {
+          window.scrollTo(0, 0);
           bodyStyle.cursor = "wait";
           overlayRef.current?.classList.remove("pointer-events-none");
         },
@@ -44,7 +45,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
           gsap.delayedCall(0.05, () => {
             ScrollTrigger.refresh();
-            window.scrollTo(0, 0);
           });
         },
         defaults: { ease: "power2.inOut" },
