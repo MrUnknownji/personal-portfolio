@@ -143,21 +143,6 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         force3D: true,
       });
 
-      const inputWrappers = formElements.slice(0, -1);
-      tl.to(
-        inputWrappers,
-        {
-          y: (i) => Math.sin(i * 0.8) * ANIMATION_CONFIG.INPUT_FLOAT.Y_OFFSET,
-          duration: ANIMATION_CONFIG.INPUT_FLOAT.DURATION,
-          ease: ANIMATION_CONFIG.INPUT_FLOAT.EASE,
-          stagger: 0.1,
-          repeat: -1,
-          yoyo: true,
-          force3D: true,
-          willChange: "transform",
-        },
-        "-=0.5",
-      );
     },
     { scope: formContainerRef },
   );
