@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -14,6 +14,10 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [children]);
 
   useGSAP(
     () => {
@@ -36,7 +40,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
         onStart: () => {
           bodyStyle.cursor = "wait";
           overlayRef.current?.classList.remove("pointer-events-none");
-          window.scrollTo(0, 0);
           gsap.delayedCall(0.05, () => {
             ScrollTrigger.refresh();
           });
