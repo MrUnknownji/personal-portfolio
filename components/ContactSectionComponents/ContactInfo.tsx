@@ -11,6 +11,7 @@ import {
   FiTwitter,
 } from "react-icons/fi";
 import InfoItem from "./InfoItem";
+import SocialLink from "./SocialLink";
 
 const CONTACT_INFO = [
   {
@@ -196,26 +197,19 @@ const ContactInfo = () => {
           </h4>
           <div className="flex gap-4">
             {SOCIAL_LINKS.map((social) => (
-              <a
+              <SocialLink
                 key={social.label}
-                href={social.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="social-icon-link group w-12 h-12 flex items-center justify-center rounded-lg bg-neutral/50 text-muted
-                           border border-transparent hover:border-primary/30
-                           transition-all duration-300 ease-out transform-gpu
-                           hover:bg-neutral/70 hover:text-primary hover:-translate-y-1"
-                aria-label={social.label}
-              >
-                {social.icon}
-              </a>
+                icon={social.icon}
+                label={social.label}
+                link={social.link}
+              />
             ))}
           </div>
         </div>
       </div>
 
-      <div className="absolute -left-8 -bottom-8 w-48 h-48 bg-primary/5 rounded-full filter blur-3xl pointer-events-none -z-10" />
-      <div className="absolute -right-8 -top-8 w-48 h-48 bg-accent/5 rounded-full filter blur-3xl pointer-events-none -z-10" />
+      <div className="absolute -left-8 -bottom-8 w-48 h-48 bg-primary/5 rounded-full filter blur-3xl pointer-events-none -z-10 opacity-50" />
+      <div className="absolute -right-8 -top-8 w-48 h-48 bg-accent/5 rounded-full filter blur-3xl pointer-events-none -z-10 opacity-50" />
     </div>
   );
 };
