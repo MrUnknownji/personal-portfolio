@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SmoothScroller from "@/components/SmoothScroller";
 import Template from "./template";
+import { LoadingProvider } from "@/lib/loadingContext";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -43,9 +44,13 @@ export default function RootLayout({
   return (
     <html className={`${outfit.variable} ${poppins.variable}`} lang="en">
       <body className="bg-secondary text-light" suppressHydrationWarning>
-        <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
-          <div className="absolute inset-0 bg-gradient-to-br from-dark via-secondary to-dark"></div>
+        <LoadingProvider>
           <div
+            className="fixed inset-0 -z-10 overflow-hidden"
+            aria-hidden="true"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-dark via-secondary to-dark"></div>
+            <div
             className="absolute inset-0 opacity-[0.15]"
             style={{
               backgroundImage: `
@@ -72,6 +77,7 @@ export default function RootLayout({
           </main>
           <Footer />
         </SmoothScroller>
+        </LoadingProvider>
       </body>
     </html>
   );
