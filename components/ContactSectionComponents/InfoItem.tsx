@@ -18,9 +18,9 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, link }) => {
           ? undefined
           : "noopener noreferrer"
       }
-      className="group/infoitem flex items-center gap-4 p-4 rounded-lg bg-neutral/30 border border-neutral/70
+      className="group/infoitem flex items-center gap-4 p-4 rounded-lg bg-frosted-dark
                        transform-gpu transition-all duration-300 ease-out
-                       hover:bg-neutral/50 hover:border-primary/30 hover:shadow-md hover:shadow-primary/10 hover:translate-x-1"
+                       hover:bg-neutral/50 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10 hover:scale-[1.02]"
     >
       <div
         className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-primary/10 text-primary
