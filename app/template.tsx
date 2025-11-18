@@ -15,10 +15,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [children]);
-
   useGSAP(
     () => {
       if (!overlayRef.current || !contentRef.current || !counterRef.current) {
@@ -45,6 +41,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
           });
         },
         onComplete: () => {
+          window.scrollTo(0, 0);
           bodyStyle.cursor = "";
           gsap.set(overlayRef.current, { display: "none" });
           overlayRef.current?.classList.add("pointer-events-none");
