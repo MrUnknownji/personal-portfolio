@@ -318,11 +318,10 @@ export default function MyProjects() {
             {categories.map((category) => (
               <button
                 key={category}
-                className={`px-4 py-2 rounded-lg text-sm md:text-base font-medium transition-all duration-300 ease-out transform-gpu border ${
-                  filter === category
-                    ? "bg-primary text-dark shadow-md border-primary"
-                    : "bg-neutral/30 border-neutral/70 text-muted hover:text-light hover:border-primary/30 hover:bg-neutral/50"
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm md:text-base font-medium transition-all duration-300 ease-out transform-gpu border ${filter === category
+                  ? "bg-primary text-dark shadow-md border-primary"
+                  : "bg-neutral/30 border-neutral/70 text-muted hover:text-light hover:border-primary/30 hover:bg-neutral/50"
+                  }`}
                 onClick={() => setFilter(category)}
                 onMouseEnter={handleButtonHover}
                 onMouseLeave={handleButtonLeave}

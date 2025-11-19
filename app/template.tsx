@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -14,12 +15,15 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const counterRef = useRef<HTMLSpanElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useGSAP(
     () => {
       if (!overlayRef.current || !contentRef.current || !counterRef.current) {
-        gsap.set(contentRef.current, { opacity: 1 });
-        gsap.set(overlayRef.current, { display: "none" });
         return;
       }
 
@@ -35,14 +39,19 @@ export default function Template({ children }: { children: React.ReactNode }) {
       const tl = gsap.timeline({
         onStart: () => {
           bodyStyle.cursor = "wait";
+          bodyStyle.overflow = "hidden"; // Lock scroll
           overlayRef.current?.classList.remove("pointer-events-none");
+
+          // Ensure scroll is at top when transition starts, behind the overlay
+          window.scrollTo(0, 0);
+
           gsap.delayedCall(0.05, () => {
             ScrollTrigger.refresh();
           });
         },
         onComplete: () => {
-          window.scrollTo(0, 0);
           bodyStyle.cursor = "";
+          bodyStyle.overflow = ""; // Restore scroll
           gsap.set(overlayRef.current, { display: "none" });
           overlayRef.current?.classList.add("pointer-events-none");
         },
@@ -95,40 +104,45 @@ export default function Template({ children }: { children: React.ReactNode }) {
           `-=${overlayFadeOutDuration * 0.3}`,
         );
     },
-    { dependencies: [children] },
+    { dependencies: [children, mounted] },
   );
 
   return (
     <>
-      <div ref={contentRef} className="page-content">
+      <div ref={contentRef} className="page-content" style={{ opacity: 0 }}>
         {children}
       </div>
 
-      <div
-        ref={overlayRef}
-        className="
-          transition-overlay
-          fixed top-0 left-0 w-screen h-dvh z-50
-          flex items-center justify-center
-          bg-gray-950
-          pointer-events-none
-        "
-      >
-        <span
-          ref={counterRef}
-          className="
-            font-outfit font-light text-5xl sm:text-6xl md:text-7xl
-            bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent
-            opacity-0 pointer-events-none select-none
-          "
-          style={{
-            textShadow:
-              "0 0 15px rgba(0, 255, 159, 0.3), 0 0 25px rgba(0, 209, 255, 0.2)",
-          }}
-        >
-          0%
-        </span>
-      </div>
+      {mounted &&
+        createPortal(
+          <div
+            ref={overlayRef}
+            className="
+              transition-overlay
+              fixed top-0 left-0 w-screen h-dvh z-[9999]
+              flex items-center justify-center
+              bg-gray-950
+              pointer-events-none
+            "
+            style={{ opacity: 1 }}
+          >
+            <span
+              ref={counterRef}
+              className="
+                font-outfit font-light text-5xl sm:text-6xl md:text-7xl
+                bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent
+                opacity-0 pointer-events-none select-none
+              "
+              style={{
+                textShadow:
+                  "0 0 15px rgba(0, 255, 159, 0.3), 0 0 25px rgba(0, 209, 255, 0.2)",
+              }}
+            >
+              0%
+            </span>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

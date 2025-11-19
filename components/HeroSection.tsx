@@ -16,7 +16,7 @@ const HeroSection = () => {
       >
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-70 pointer-events-none -z-1 rounded-3xl" />
 
-        <div className="relative z-10 flex flex-col lg:flex-row gap-8 h-full justify-center items-center">
+        <div className="relative zd-10 flex flex-col lg:flex-row gap-8 h-full justify-center items-center">
           <div className="z-10 w-full h-full">
             <HeroContent />
           </div>

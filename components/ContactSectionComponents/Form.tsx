@@ -8,28 +8,10 @@ interface FormProps {
   onSubmitSuccess: () => void;
 }
 
-const ANIMATION_CONFIG = {
-  FORM_ITEMS: {
-    DURATION: 0.8,
-    STAGGER: 0.15,
-    Y_OFFSET: 30,
-    OPACITY: 0,
-    EASE: "power3.out",
-    ROTATION: 2,
-    SCALE: 0.95,
-  },
-  SCROLL_TRIGGER: {
-    START: "top 85%",
-    END: "bottom 20%",
-    TOGGLE_ACTIONS: "play none none reverse",
-  },
-} as const;
-
 const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const formContainerRef = useRef<HTMLDivElement>(null);
   const categoryInputRef = useRef<HTMLInputElement>(null);
   const subjectInputRef = useRef<HTMLInputElement>(null);
   const messageTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -99,76 +81,33 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     }
   };
 
-  useGSAP(
-    () => {
-      if (!formRef.current || !formContainerRef.current) return;
-
-      const formElements = gsap.utils.toArray<HTMLElement>(
-        formRef.current.querySelectorAll(".form-item-wrapper"),
-      );
-
-      gsap.set(formElements, {
-        y: ANIMATION_CONFIG.FORM_ITEMS.Y_OFFSET,
-        opacity: ANIMATION_CONFIG.FORM_ITEMS.OPACITY,
-        rotationZ: ANIMATION_CONFIG.FORM_ITEMS.ROTATION,
-        scale: ANIMATION_CONFIG.FORM_ITEMS.SCALE,
-        willChange: "transform, opacity",
-        force3D: true,
-      });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: formContainerRef.current,
-          start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
-          end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
-          toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
-          markers: false,
-        },
-      });
-
-      tl.to(formElements, {
-        y: 0,
-        opacity: 1,
-        rotationZ: 0,
-        scale: 1,
-        duration: ANIMATION_CONFIG.FORM_ITEMS.DURATION,
-        stagger: ANIMATION_CONFIG.FORM_ITEMS.STAGGER,
-        ease: ANIMATION_CONFIG.FORM_ITEMS.EASE,
-        clearProps: "transform, opacity, willChange",
-        force3D: true,
-      });
-
-    },
-    { scope: formContainerRef },
-  );
-
   const getInputClasses = (hasError: boolean): string => {
     return `
-      w-full bg-neutral/30 rounded-lg border text-light px-4 py-3
-      outline-none placeholder:text-muted transition-all duration-300 ease-out
-      focus:border-primary focus:bg-neutral/50 focus:ring-2 focus:ring-primary/30
-      ${
-        hasError
-          ? "border-destructive bg-destructive/10"
-          : "border-neutral/70 hover:border-primary/50"
+      w-full bg-neutral/10 rounded-xl border text-light px-5 py-4
+      outline-none placeholder:text-muted/50 transition-all duration-300 ease-out transform-none
+      focus:border-primary/50 focus:bg-neutral/20 focus:ring-4 focus:ring-primary/10
+      backdrop-blur-sm
+      ${hasError
+        ? "border-destructive/50 bg-destructive/5 focus:ring-destructive/10"
+        : "border-neutral/20 hover:border-primary/30 hover:bg-neutral/15"
       }
     `;
   };
 
   return (
-    <div ref={formContainerRef} className="w-full">
+    <div className="w-full">
       <form
         ref={formRef}
         onSubmit={handleSubmit}
         className="space-y-6"
         noValidate
       >
-        <div className="form-item-wrapper relative">
+        <div className="form-item-wrapper relative group">
           <input
             ref={categoryInputRef}
             type="text"
             name="category"
-            placeholder="Category (e.g., Project Inquiry, Collaboration)"
+            placeholder="Category (e.g., Project Inquiry)"
             className={getInputClasses(!!errors.category)}
             aria-invalid={!!errors.category}
             aria-describedby={errors.category ? "category-error" : undefined}
@@ -177,7 +116,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           {errors.category && (
             <span
               id="category-error"
-              className="absolute bottom-0 left-0 text-sm text-destructive"
+              className="absolute -bottom-5 left-1 text-xs text-destructive font-medium"
               role="alert"
             >
               {errors.category}
@@ -185,7 +124,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           )}
         </div>
 
-        <div className="form-item-wrapper relative">
+        <div className="form-item-wrapper relative group">
           <input
             ref={subjectInputRef}
             type="text"
@@ -199,7 +138,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           {errors.subject && (
             <span
               id="subject-error"
-              className="absolute bottom-0 left-0 text-sm text-destructive"
+              className="absolute -bottom-5 left-1 text-xs text-destructive font-medium"
               role="alert"
             >
               {errors.subject}
@@ -207,11 +146,11 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           )}
         </div>
 
-        <div className="form-item-wrapper relative">
+        <div className="form-item-wrapper relative group">
           <textarea
             ref={messageTextareaRef}
             name="message"
-            placeholder="Your Message"
+            placeholder="Your Message..."
             rows={6}
             className={`${getInputClasses(!!errors.message)} resize-none`}
             aria-invalid={!!errors.message}
@@ -221,7 +160,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           {errors.message && (
             <span
               id="message-error"
-              className="absolute bottom-0 left-0 text-sm text-destructive"
+              className="absolute -bottom-5 left-1 text-xs text-destructive font-medium"
               role="alert"
             >
               {errors.message}
@@ -229,24 +168,23 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           )}
         </div>
 
-        <div className="form-item-wrapper">
+        <div className="form-item-wrapper pt-2">
           <button
             ref={submitButtonRef}
             type="submit"
             disabled={isSubmitting}
-            className="group/submitbtn w-full bg-gradient-to-r from-primary to-accent text-dark font-semibold py-3.5 px-6 rounded-lg
-                        focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-secondary
+            className="group/submitbtn w-full bg-gradient-to-r from-primary to-accent text-dark font-bold py-4 px-6 rounded-xl
+                        focus:outline-none focus:ring-4 focus:ring-primary/20 focus:ring-offset-0
                         flex items-center justify-center gap-x-2 transform transition-all duration-300 ease-out
-                        hover:from-accent hover:to-primary hover:shadow-lg hover:shadow-primary/30 hover:gap-x-3
-                        disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
+                        hover:shadow-lg hover:shadow-primary/25 hover:scale-[1.02] active:scale-[0.98]
+                        disabled:opacity-70 disabled:cursor-not-allowed disabled:shadow-none"
           >
-            <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
+            <span className="tracking-wide">{isSubmitting ? "Sending..." : "Send Message"}</span>
             <FiSend
-              className={`w-5 h-5 transition-transform duration-300 ease-out ${
-                isSubmitting
-                  ? "animate-spin"
-                  : "group-hover/submitbtn:rotate-[40deg]"
-              }`}
+              className={`w-5 h-5 transition-transform duration-300 ease-out ${isSubmitting
+                ? "animate-spin"
+                : "group-hover/submitbtn:translate-x-1 group-hover/submitbtn:-translate-y-1"
+                }`}
             />
           </button>
         </div>

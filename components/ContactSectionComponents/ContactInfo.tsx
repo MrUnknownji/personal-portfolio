@@ -53,23 +53,23 @@ const SOCIAL_LINKS = [
 
 const ANIMATION_CONFIG = {
   ENTRANCE: {
-    DURATION: 0.7,
-    EASE: "power3.out",
-    Y_OFFSET: 30,
+    DURATION: 0.6,
+    EASE: "power2.out",
+    Y_OFFSET: 20,
     OPACITY: 0,
-    STAGGER: 0.1,
+    STAGGER: 0.08,
   },
   SOCIAL_ENTRANCE: {
     DURATION: 0.5,
-    STAGGER: 0.1,
-    SCALE: 0.8,
+    STAGGER: 0.05,
+    SCALE: 0.9,
     OPACITY: 0,
-    EASE: "back.out(1.7)",
+    EASE: "back.out(1.5)",
   },
   SCROLL_TRIGGER: {
     START: "top 85%",
     END: "bottom center",
-    TOGGLE_ACTIONS: "play none none reverse",
+    TOGGLE_ACTIONS: "play none none none",
   },
 } as const;
 
@@ -145,7 +145,7 @@ const ContactInfo = () => {
             ease: ANIMATION_CONFIG.ENTRANCE.EASE,
             clearProps: "all",
           },
-          "-=0.4",
+          "-=0.3",
         )
         .to(
           socialTitle,
@@ -156,7 +156,7 @@ const ContactInfo = () => {
             ease: ANIMATION_CONFIG.ENTRANCE.EASE,
             clearProps: "all",
           },
-          "-=0.5",
+          "-=0.4",
         )
         .to(
           socialIcons,
@@ -168,20 +168,20 @@ const ContactInfo = () => {
             ease: ANIMATION_CONFIG.SOCIAL_ENTRANCE.EASE,
             clearProps: "all",
           },
-          "-=0.4",
+          "-=0.3",
         );
     },
     { scope: containerRef },
   );
 
   return (
-    <div ref={containerRef} className="w-full relative">
-      <div className="space-y-6">
+    <div ref={containerRef} className="w-full relative h-full flex flex-col justify-between">
+      <div className="space-y-8">
         <div>
-          <h3 className="contact-title text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-6">
+          <h3 className="contact-title text-3xl font-bold text-light mb-8 tracking-tight">
             Contact Information
           </h3>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {CONTACT_INFO.map((info) => (
               <div key={info.label} className="info-item">
                 <InfoItem {...info} />
@@ -191,7 +191,7 @@ const ContactInfo = () => {
         </div>
 
         <div>
-          <h4 className="social-title text-lg font-semibold text-light mb-4">
+          <h4 className="social-title text-lg font-semibold text-light/90 mb-5 tracking-wide">
             Connect With Me
           </h4>
           <div className="flex gap-4">
@@ -201,10 +201,10 @@ const ContactInfo = () => {
                 href={social.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-link group w-12 h-12 flex items-center justify-center rounded-lg bg-neutral/50 text-muted
-                           border border-transparent hover:border-primary/30
+                className="social-link group w-12 h-12 flex items-center justify-center rounded-xl bg-neutral/10 text-muted
+                           border border-neutral/20 backdrop-blur-sm
                            transition-all duration-300 ease-out transform-gpu
-                           hover:bg-neutral/70 hover:text-primary hover:-translate-y-1"
+                           hover:border-primary/40 hover:bg-primary/10 hover:text-primary hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10"
                 aria-label={social.label}
               >
                 {social.icon}
@@ -214,8 +214,8 @@ const ContactInfo = () => {
         </div>
       </div>
 
-      <div className="absolute -left-8 -bottom-8 w-48 h-48 bg-primary/5 rounded-full filter blur-3xl pointer-events-none -z-10" />
-      <div className="absolute -right-8 -top-8 w-48 h-48 bg-accent/5 rounded-full filter blur-3xl pointer-events-none -z-10" />
+      <div className="absolute -left-8 -bottom-8 w-48 h-48 bg-primary/10 rounded-full filter blur-[60px] pointer-events-none -z-10 opacity-50" />
+      <div className="absolute -right-8 -top-8 w-48 h-48 bg-accent/10 rounded-full filter blur-[60px] pointer-events-none -z-10 opacity-50" />
     </div>
   );
 };
