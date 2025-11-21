@@ -63,8 +63,8 @@
 }
 
 body {
-    background-color: var(--color-dark);
-    color: var(--color-light);
+    background-color: var(--color-dark, #09090b);
+    color: var(--color-light, #f4f4f5);
 }
 
 :root {

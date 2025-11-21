@@ -5,11 +5,10 @@ import CodeDisplay from "./HeroSectionComponents/CodeDisplay";
 const HeroSection = () => {
   return (
     <div
-      className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative pt-20 overflow-hidden bg-dark"
+      className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative pt-20 overflow-hidden"
       style={{ perspective: "2000px" }}
     >
       {/* Subtle modern background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-dark via-[#111] to-dark -z-20" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-accent/5 blur-[100px] rounded-full pointer-events-none" />
 

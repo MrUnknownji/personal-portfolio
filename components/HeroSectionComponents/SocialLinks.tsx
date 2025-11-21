@@ -64,6 +64,7 @@ const SocialLinks = () => {
             stats: [
               { label: "Repos", value: stats.github?.public_repos?.toString() || "20+" },
               { label: "Followers", value: stats.github?.followers?.toString() || "100+" },
+              { label: "Stars", value: "50+" },
             ],
             profileImage: stats.github?.profileImage || "",
             username: stats.github?.username || "MrUnknownji",
@@ -81,6 +82,7 @@ const SocialLinks = () => {
             stats: [
               { label: "Connections", value: stats.linkedin?.connections || "500+" },
               { label: "Posts", value: stats.linkedin?.posts?.toString() || "25+" },
+              { label: "Views", value: "1k+" },
             ],
             profileImage: stats.linkedin?.profileImage || "",
             username: stats.linkedin?.name || "sandeep-kumar-sk1707",
@@ -98,6 +100,7 @@ const SocialLinks = () => {
             stats: [
               { label: "Followers", value: stats.twitter?.followers?.toString() || "250+" },
               { label: "Tweets", value: stats.twitter?.tweets?.toString() || "500+" },
+              { label: "Likes", value: "1k+" },
             ],
             profileImage: stats.twitter?.profileImage || "",
             username: stats.twitter?.name || "MrUnknownG786",

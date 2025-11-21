@@ -42,9 +42,9 @@ export default function RootLayout({
 }) {
   return (
     <html className={`${outfit.variable} ${poppins.variable}`} lang="en">
-      <body className="bg-secondary text-light" suppressHydrationWarning>
+      <body className="bg-[#09090b] text-light" suppressHydrationWarning>
         <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
-          <div className="absolute inset-0 bg-gradient-to-br from-dark via-secondary to-dark"></div>
+          <div className="absolute inset-0 bg-[#09090b]"></div>
           <div
             className="absolute inset-0 opacity-[0.15]"
             style={{
