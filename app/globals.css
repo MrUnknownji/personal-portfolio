@@ -153,15 +153,28 @@ html {
     pointer-events: auto;
 }
 
-@utility perspective-1000 {
+.perspective-1000 {
     perspective: 1000px;
 }
-@utility animation-delay-2000 {
+.animation-delay-2000 {
     animation-delay: 2s;
 }
-@utility animation-delay-4000 {
+.animation-delay-4000 {
     animation-delay: 4s;
 }
 .header-hidden {
     transform: translateY(-100%);
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-150%) skewX(12deg);
+    }
+    100% {
+        transform: translateX(150%) skewX(12deg);
+    }
+}
+
+.animate-shimmer {
+    animation: shimmer 1.5s ease-in-out infinite;
 }

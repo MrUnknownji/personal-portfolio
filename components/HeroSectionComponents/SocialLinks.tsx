@@ -172,71 +172,6 @@ const SocialLinks = () => {
     initializeSocialLinks();
   }, []);
 
-  useEffect(() => {
-    const enterHandlers: (() => void)[] = [];
-    const leaveHandlers: (() => void)[] = [];
-
-    const currentLinkRefs = linkRefs.current;
-    const currentIconRefs = iconRefs.current;
-
-    currentLinkRefs.forEach((link, index) => {
-      if (!link || !currentIconRefs[index] || !socialLinks[index]) return;
-
-      const icon = currentIconRefs[index];
-      const socialLink = socialLinks[index];
-
-      const handleMouseEnter = () => {
-        gsap.to(link, {
-          backgroundColor: socialLink.hoverBgColor,
-          borderColor: "rgba(75, 85, 99, 0.5)",
-          duration: ANIMATION_CONFIG.LINK_HOVER.DURATION,
-          ease: ANIMATION_CONFIG.LINK_HOVER.EASE,
-        });
-
-        gsap.to(icon, {
-          color: socialLink.hoverIconColor,
-          duration: ANIMATION_CONFIG.LINK_HOVER.DURATION,
-          ease: ANIMATION_CONFIG.LINK_HOVER.EASE,
-        });
-      };
-
-      const handleMouseLeave = () => {
-        gsap.to(link, {
-          backgroundColor: "rgba(31, 41, 55, 0.5)",
-          borderColor: "rgba(55, 65, 81, 0.5)",
-          duration: ANIMATION_CONFIG.LINK_HOVER.DURATION,
-          ease: ANIMATION_CONFIG.LINK_HOVER.EASE,
-        });
-
-        gsap.to(icon, {
-          color: socialLink.iconColor,
-          duration: ANIMATION_CONFIG.LINK_HOVER.DURATION,
-          ease: ANIMATION_CONFIG.LINK_HOVER.EASE,
-        });
-      };
-
-      enterHandlers.push(handleMouseEnter);
-      leaveHandlers.push(handleMouseLeave);
-
-      link.addEventListener("mouseenter", handleMouseEnter);
-      link.addEventListener("mouseleave", handleMouseLeave);
-    });
-
-    return () => {
-      currentLinkRefs.forEach((link, index) => {
-        if (!link || !enterHandlers[index] || !leaveHandlers[index]) return;
-        link.removeEventListener("mouseenter", enterHandlers[index]);
-        link.removeEventListener("mouseleave", leaveHandlers[index]);
-      });
-      currentLinkRefs.forEach((link) => {
-        if (link) gsap.killTweensOf(link);
-      });
-      currentIconRefs.forEach((icon) => {
-        if (icon) gsap.killTweensOf(icon);
-      });
-    };
-  }, [socialLinks]);
-
   const handleMouseEnter = useCallback((index: number) => {
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
@@ -309,8 +244,10 @@ const SocialLinks = () => {
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative p-3 rounded-xl bg-white/5 border border-white/10 transition-all duration-300 hover:scale-110 hover:border-primary/30"
-              style={{ willChange: "background-color, border-color, transform" }}
+              className="group relative p-3.5 rounded-xl bg-white/5 border border-white/10
+                         transition-all duration-300 ease-out
+                         hover:scale-110 hover:shadow-[0_0_20px_-5px_rgba(255,255,255,0.1)]
+                         hover:bg-white/10 hover:border-white/20"
               onMouseEnter={() => handleMouseEnter(index)}
               onMouseLeave={handleMouseLeave}
             >
@@ -318,11 +255,20 @@ const SocialLinks = () => {
                 ref={(el: HTMLDivElement | null): void => {
                   iconRefs.current[index] = el;
                 }}
-                className="text-neutral-300 transition-colors duration-200"
-                style={{ willChange: "color" }}
+                className="text-neutral-400 transition-colors duration-300 group-hover:text-white"
+                style={{
+                  color: undefined // Removed inline style to let CSS handle colors
+                }}
               >
                 {link.icon}
               </div>
+
+              <div
+                className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                style={{
+                  boxShadow: `inset 0 0 10px ${link.color}20`
+                }}
+              />
             </a>
           ))
         )}
