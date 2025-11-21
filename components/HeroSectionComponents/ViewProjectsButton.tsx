@@ -1,69 +1,38 @@
 "use client";
 import Link from "next/link";
-import { useRef } from "react";
-import { gsap } from "gsap";
-import { useGSAP } from "@gsap/react";
+import { FiArrowRight } from "react-icons/fi";
 
 const ViewProjectsButton = () => {
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const sweepRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(
-    () => {
-      const button = buttonRef.current;
-      const sweep = sweepRef.current;
-      if (!button || !sweep) return;
-
-      gsap.set(sweep, { rotate: -45, x: "100%", y: "-100%", opacity: 0 });
-
-      const tl = gsap.timeline({ paused: true });
-      tl.to(sweep, {
-        x: "-100%",
-        y: "100%",
-        opacity: 1,
-        duration: 1,
-        ease: "power2.inOut",
-      });
-
-      const handleEnter = () => {
-        gsap.set(sweep, { x: "100%", y: "-100%", opacity: 0 });
-        tl.play(0);
-      };
-
-      const handleLeave = () => {
-        gsap.to(sweep, {
-          x: "100%",
-          y: "-100%",
-          opacity: 0,
-          duration: 1,
-          ease: "power2.inOut",
-        });
-      };
-
-      button.addEventListener("mouseenter", handleEnter);
-      button.addEventListener("mouseleave", handleLeave);
-    },
-    { scope: buttonRef },
-  );
-
   return (
-    <Link href="/my-projects">
+    <Link href="/my-projects" className="group relative inline-block">
       <div
-        ref={buttonRef}
-        className="relative overflow-hidden group px-8 py-3 rounded-xl
-                   bg-primary/15 border border-white/20 cursor-pointer"
+        className="relative overflow-hidden rounded-full
+                   bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#1a1a1a]
+                   p-[1px]" // This p-[1px] acts as the border container
       >
-        <div
-          ref={sweepRef}
-          className="sweep absolute inset-0 w-[200%] h-[200%] top-[-50%] left-[-50%]"
-          style={{
-            background:
-              "linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent)",
-          }}
-        />
-        <span className="relative text-white font-medium z-10">
-          View My Projects
-        </span>
+         {/* Gradient Border Effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/20 to-white/10 opacity-50" />
+
+        {/* Inner Content */}
+        <div className="relative flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#0f0f0f]/90 backdrop-blur-xl
+                        transition-all duration-300 ease-out
+                        group-hover:bg-[#151515]/90 group-hover:shadow-[0_0_25px_-5px_rgba(0,255,159,0.15)]">
+
+          {/* Text */}
+          <span className="text-[15px] font-medium tracking-wide text-gray-200 group-hover:text-white transition-colors">
+            View Projects
+          </span>
+
+          {/* Arrow Icon */}
+          <FiArrowRight className="w-4 h-4 text-[#00ff9f] transition-transform duration-300 group-hover:translate-x-1" />
+
+          {/* Shine Effect */}
+           <div
+            className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-shimmer
+                       bg-gradient-to-r from-transparent via-white/5 to-transparent"
+            style={{ width: "200%" }}
+          />
+        </div>
       </div>
     </Link>
   );

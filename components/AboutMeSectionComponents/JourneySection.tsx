@@ -149,7 +149,7 @@ const JourneySection = () => {
     <div ref={containerRef} className="relative">
       <h3
         ref={titleRef}
-        className="text-3xl sm:text-4xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-10 text-left"
+        className="text-3xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-12 text-left"
       >
         My Journey
       </h3>
@@ -157,34 +157,41 @@ const JourneySection = () => {
       <div className="relative pl-8 pr-4">
         <div
           ref={lineRef}
-          className="absolute left-4 top-2 bottom-2 w-[2px] bg-gradient-to-b from-primary/60 via-primary/40 to-primary/10 origin-top"
+          className="absolute left-4 top-2 bottom-2 w-[2px] bg-gradient-to-b from-primary/40 via-primary/20 to-transparent origin-top"
           style={{ willChange: "transform, opacity" }}
         />
 
-        <div ref={itemsContainerRef} className="relative flex flex-col gap-y-8">
+        <div ref={itemsContainerRef} className="relative flex flex-col gap-y-10">
           {journeyData.map((item) => (
             <div
               key={item.year}
-              className="relative group"
+              className="relative group pl-6"
               style={{ willChange: "opacity, transform" }}
             >
               <div
-                className="journey-circle absolute top-3 w-3.5 h-3.5 rounded-full border-2 border-primary bg-secondary"
+                className="journey-circle absolute top-4 w-3 h-3 rounded-full border border-primary/50 bg-[#0a0a0a] shadow-[0_0_10px_rgba(0,255,159,0.3)] z-10"
                 style={{
-                  left: "-1.375rem",
+                  left: "-1.325rem",
                   willChange: "background-color, transform",
                 }}
               />
-              <div className="journey-content bg-frosted-dark rounded-lg p-5 transition-colors duration-300 ease-in-out group-hover:bg-zinc-900/75 group-hover:border-zinc-600/50">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
-                  <span className="journey-year inline-block px-2.5 py-1 text-xs rounded-full bg-primary/15 text-primary font-semibold tracking-wide transition-colors duration-300 group-hover:bg-primary/25">
-                    {item.year}
-                  </span>
-                  <h4 className="font-medium text-lg text-light/95">
+
+              {/* Card Style */}
+              <div className="relative bg-white/[0.02] backdrop-blur-sm border border-white/[0.05] rounded-xl p-6
+                              transition-all duration-300 ease-out
+                              hover:bg-white/[0.04] hover:border-primary/20 hover:shadow-lg hover:shadow-primary/5
+                              group-hover:-translate-y-1">
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                   <h4 className="font-medium text-lg text-gray-100 tracking-wide">
                     {item.title}
                   </h4>
+                  <span className="journey-year inline-block px-3 py-1 text-xs font-mono rounded-full
+                                   bg-primary/10 text-primary border border-primary/20">
+                    {item.year}
+                  </span>
                 </div>
-                <p className="text-muted text-sm sm:text-base leading-relaxed">
+                <p className="text-neutral-400 text-sm sm:text-base leading-relaxed">
                   {item.description}
                 </p>
               </div>

@@ -393,29 +393,31 @@ export const projects: Project[] = [
   },
 ];
 
+import { FiCpu, FiTrendingUp, FiUsers, FiClock, FiZap, FiSearch } from "react-icons/fi";
+
 export const HeroSectionSkills = [
   {
-    icon: "🚀",
+    icon: <FiCpu className="w-6 h-6" />,
     text: "Problem Solving",
   },
   {
-    icon: "🌱",
+    icon: <FiTrendingUp className="w-6 h-6" />,
     text: "Continuous Learning",
   },
   {
-    icon: "🤝",
+    icon: <FiUsers className="w-6 h-6" />,
     text: "Team Collaboration",
   },
   {
-    icon: "⏱️",
+    icon: <FiClock className="w-6 h-6" />,
     text: "Time Management",
   },
   {
-    icon: "💡",
+    icon: <FiZap className="w-6 h-6" />,
     text: "Creative Thinking",
   },
   {
-    icon: "🔍",
+    icon: <FiSearch className="w-6 h-6" />,
     text: "Attention to Detail",
   },
 ];

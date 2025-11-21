@@ -102,9 +102,11 @@ const ContactForm: React.FC = () => {
 
         <div
           ref={containerRef}
-          className="group/container relative bg-secondary/40 backdrop-blur-xl rounded-3xl overflow-hidden border border-neutral/10 shadow-2xl shadow-black/20"
+          className="group/container relative rounded-3xl overflow-hidden
+                     bg-white/[0.02] backdrop-blur-2xl
+                     shadow-[0_0_100px_-30px_rgba(0,0,0,0.5)] border border-white/[0.05]"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-50 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-30 pointer-events-none" />
 
           {/* Decorative background elements */}
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full filter blur-[100px] pointer-events-none -translate-y-1/2 translate-x-1/2" />

@@ -60,18 +60,18 @@ const SocialInfoBox = ({
       }}
     >
       <div
-        className="relative w-72 p-4 rounded-xl shadow-2xl shadow-black/70
-                   bg-gradient-to-br from-neutral-800 via-secondary to-black
-                   border border-neutral-700/85 ring-1 ring-inset ring-white/5"
+        className="relative w-72 p-4 rounded-xl shadow-[0_20px_40px_-10px_rgba(0,0,0,0.6)]
+                   bg-[#18181b]/95 backdrop-blur-md
+                   border border-white/10"
       >
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div className="flex items-center gap-3">
             <Image
               src={socialLink.profileImage || ""}
               alt={socialLink.label}
               width={48}
               height={48}
-              className="rounded-lg object-cover border border-neutral/20 shadow-sm"
+              className="rounded-lg object-cover border border-white/10 shadow-sm"
               onError={(e) => {
                 e.currentTarget.src = `https://placehold.co/48x48/27272a/f1f1f1?text=${socialLink.label.charAt(
                   0,
@@ -79,15 +79,15 @@ const SocialInfoBox = ({
               }}
             />
             <div>
-              <h3 className="font-semibold text-light">
+              <h3 className="font-semibold text-white tracking-wide">
                 {socialLink.username}
               </h3>
-              <p className="text-sm text-muted">{socialLink.label}</p>
+              <p className="text-xs text-neutral-400 uppercase tracking-wider">{socialLink.label}</p>
             </div>
           </div>
 
           <p
-            className="text-sm text-light/90 border-l-2 pl-3 py-1"
+            className="text-sm text-neutral-300 border-l-2 pl-3 py-1 italic"
             style={{
               borderColor: socialLink.color || socialLink.hoverIconColor,
             }}
@@ -99,20 +99,20 @@ const SocialInfoBox = ({
             {socialLink.stats.map((stat, index) => (
               <div
                 key={index}
-                className="text-center p-2 rounded-lg bg-neutral-900/60 border border-neutral-700/80 shadow-sm"
+                className="text-center p-2 rounded-lg bg-white/5 border border-white/5"
               >
-                <div className="text-sm font-semibold text-light">
+                <div className="text-sm font-bold text-white">
                   {stat.value}
                 </div>
-                <div className="text-xs text-muted truncate">{stat.label}</div>
+                <div className="text-[10px] text-neutral-500 uppercase tracking-wide truncate">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
 
         <div
-          className="absolute left-1/2 w-4 h-4 border-neutral-700/80
-                     bg-gradient-to-br from-neutral-800/90 via-secondary/80 to-black/85"
+          className="absolute left-1/2 w-4 h-4 border-white/10
+                     bg-[#18181b]/95 backdrop-blur-md"
           style={{
             bottom: "-8px",
             transform: "translateX(-50%) rotate(45deg)",
