@@ -67,7 +67,7 @@ const CodeDisplay = () => {
     { line: 6, content: <><span className="text-[#ce9178]">    &quot;Node.js&quot;</span>, <span className="text-[#ce9178]">&quot;Next.js&quot;</span>,</> },
     { line: 7, content: <><span className="text-[#ce9178]">    &quot;PostgreSQL&quot;</span>, <span className="text-[#ce9178]">&quot;AWS&quot;</span>,</> },
     { line: 8, content: <><span className="text-[#ce9178]">    &quot;Docker&quot;</span>, <span className="text-[#ce9178]">&quot;TailwindCSS&quot;</span></> },
-    { line: 9, content: <><span className="text-[#6a9955]">    // ...loading more skills</span></> },
+    { line: 9, content: <><span className="text-[#6a9955]">{`    // ...loading more skills`}</span></> },
     { line: 10, content: <>  ],</> },
     { line: 11, content: <><span className="text-[#9cdcfe]">  passion</span>: <span className="text-[#ce9178]">&quot;Building scalable systems&quot;</span>,</> },
     { line: 12, content: <><span className="text-[#9cdcfe]">  status</span>: <span className="text-[#ce9178]">&quot;Available for hire&quot;</span></> },

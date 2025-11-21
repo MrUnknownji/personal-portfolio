@@ -1,6 +1,5 @@
 "use client";
 import React, { useRef, useState, useCallback } from "react";
-import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { FiSend } from "react-icons/fi";
 
