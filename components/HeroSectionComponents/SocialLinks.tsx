@@ -309,8 +309,8 @@ const SocialLinks = () => {
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative p-3 rounded-xl bg-gray-800/50 border border-gray-700/50 transition-colors duration-200"
-              style={{ willChange: "background-color, border-color" }}
+              className="group relative p-3 rounded-xl bg-white/5 border border-white/10 transition-all duration-300 hover:scale-110 hover:border-primary/30"
+              style={{ willChange: "background-color, border-color, transform" }}
               onMouseEnter={() => handleMouseEnter(index)}
               onMouseLeave={handleMouseLeave}
             >
@@ -318,7 +318,7 @@ const SocialLinks = () => {
                 ref={(el: HTMLDivElement | null): void => {
                   iconRefs.current[index] = el;
                 }}
-                className="text-gray-300 transition-colors duration-200"
+                className="text-neutral-300 transition-colors duration-200"
                 style={{ willChange: "color" }}
               >
                 {link.icon}

@@ -84,11 +84,11 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
   return (
     <div
       ref={cardRef}
-      className="relative bg-neutral/60 rounded-xl p-4 h-16 flex items-center overflow-hidden border border-neutral/50 w-full sm:w-auto"
+      className="relative bg-white/5 backdrop-blur-md rounded-xl p-4 h-16 flex items-center overflow-hidden border border-white/10 w-full sm:w-auto transition-transform duration-300 hover:scale-105"
     >
-      <div className="skill-bg absolute inset-0 z-0 bg-gradient-to-r from-primary/15 via-primary/5 to-transparent opacity-0" />
+      <div className="skill-bg absolute inset-0 z-0 bg-gradient-to-r from-primary/20 via-primary/5 to-transparent opacity-0" />
       <svg
-        className="absolute inset-0 w-full h-full z-10"
+        className="absolute inset-0 w-full h-full z-10 pointer-events-none"
         fill="none"
         preserveAspectRatio="none"
         viewBox={`0 0 ${w} ${h}`}
@@ -103,8 +103,8 @@ const SkillCard = ({ icon, text }: SkillCardProps) => {
         />
       </svg>
       <div className="relative z-20 flex items-center gap-3">
-        <div className="skill-icon text-2xl text-gray-300">{icon}</div>
-        <div className="text-gray-200 text-sm font-medium">{text}</div>
+        <div className="skill-icon text-2xl text-neutral-300 transition-colors duration-300">{icon}</div>
+        <div className="text-neutral-200 text-sm font-medium tracking-wide">{text}</div>
       </div>
     </div>
   );

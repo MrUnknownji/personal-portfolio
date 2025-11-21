@@ -37,14 +37,14 @@ const HireBadge = () => {
   return (
     <div
       ref={badgeRef}
-      className="relative inline-flex items-center px-4 py-2 rounded-full
-                 bg-primary/10 text-primary text-sm font-medium border border-primary/20
-                 hover:bg-primary/20 transition-colors duration-300 cursor-pointer transform-gpu"
+      className="relative inline-flex items-center px-4 py-1.5 rounded-full
+                 bg-primary/5 text-primary text-xs uppercase tracking-widest font-semibold border border-primary/10
+                 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300 cursor-pointer transform-gpu shadow-[0_0_15px_-5px_rgba(0,255,159,0.2)]"
     >
-      <span className="relative flex h-2 w-2 mr-2">
+      <span className="relative flex h-2 w-2 mr-3">
         <span
           ref={pulseRef}
-          className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"
+          className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60"
         />
         <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
       </span>
