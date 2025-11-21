@@ -10,7 +10,7 @@ const HireBadge = () => {
   useGSAP(
     () => {
       gsap.to(pulseRef.current, {
-        scale: 1.8,
+        scale: 2,
         opacity: 0,
         duration: 1.5,
         repeat: -1,
@@ -18,7 +18,7 @@ const HireBadge = () => {
       });
 
       const hoverAnimation = gsap.to(badgeRef.current, {
-        scale: 1.05,
+        scale: 1.02,
         duration: 0.2,
         ease: "power2.out",
         paused: true,
@@ -37,16 +37,16 @@ const HireBadge = () => {
   return (
     <div
       ref={badgeRef}
-      className="relative inline-flex items-center px-4 py-1.5 rounded-full
-                 bg-primary/5 text-primary text-xs uppercase tracking-widest font-semibold border border-primary/10
-                 hover:bg-primary/10 hover:border-primary/30 transition-all duration-300 cursor-pointer transform-gpu shadow-[0_0_15px_-5px_rgba(0,255,159,0.2)]"
+      className="relative inline-flex items-center gap-2 px-3 py-1 rounded-full
+                 bg-emerald-500/10 text-emerald-400 text-[11px] font-medium tracking-wide border border-emerald-500/20
+                 hover:bg-emerald-500/20 transition-colors duration-300 cursor-default backdrop-blur-sm"
     >
-      <span className="relative flex h-2 w-2 mr-3">
+      <span className="relative flex h-2 w-2">
         <span
           ref={pulseRef}
-          className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-60"
+          className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50"
         />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
       </span>
       Available for hire
     </div>

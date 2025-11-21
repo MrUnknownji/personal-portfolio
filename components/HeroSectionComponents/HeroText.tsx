@@ -9,17 +9,20 @@ const HeroText = () => {
       <div className="space-y-4">
         <MagneticText
           as="h2"
-          className="hero-subtitle text-2xl md:text-3xl lg:text-4xl font-semibold text-accent/90 tracking-wide cursor-default"
+          className="hero-subtitle text-2xl md:text-3xl lg:text-4xl font-medium text-neutral-200 tracking-tight cursor-default"
         >
           Full Stack Developer
         </MagneticText>
-        <MagneticText
-          as="p"
-          className="hero-description text-neutral-300 text-lg md:text-xl leading-relaxed max-w-2xl select-none font-light"
-        >
-          &quot;Code is like humor. When you have to explain it, it&rsquo;s
-          bad.&quot; &ndash; Cory House
-        </MagneticText>
+        <div className="relative pl-4 border-l-2 border-white/10 py-1">
+          <MagneticText
+            as="p"
+            className="hero-description text-neutral-400 text-base md:text-lg leading-relaxed max-w-2xl select-none font-light italic"
+          >
+            &quot;Code is like humor. When you have to explain it, it&rsquo;s
+            bad.&quot;
+          </MagneticText>
+          <span className="text-xs text-neutral-500 font-medium mt-1 block uppercase tracking-wider">&mdash; Cory House</span>
+        </div>
       </div>
     </div>
   );
