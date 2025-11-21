@@ -8,34 +8,39 @@ const AboutMe = () => {
   return (
     <section
       id="about"
-      className="relative mx-auto max-w-7xl space-y-16 px-4 py-16 sm:px-6 sm:py-20 lg:space-y-24 lg:px-8 lg:py-24"
+      className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 space-y-20 sm:space-y-24"
     >
-      <Title
-        title="About Me"
-        subtitle={
-          <>
-            <span className="inline-block">
-            &quot;Any fool can write code that a computer can understand. 
-            </span>
-            <span className="inline-block">
-            Good programmers write code that humans can understand.&quot; 
-            </span>
-            <span className="inline-block">
-              - Martin Fowler
-            </span>
-          </>
-        }
-      />
-      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-5 lg:gap-16">
-        <div className="lg:col-span-2 h-full flex items-center justify-center">
-          <ImageSection />
+      {/* Background Gradient Blob */}
+      <div className="absolute top-1/4 -left-64 w-96 h-96 bg-primary/20 rounded-full blur-3xl -z-10 opacity-50 pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-64 w-96 h-96 bg-secondary/20 rounded-full blur-3xl -z-10 opacity-50 pointer-events-none" />
+
+      <div className="text-center space-y-4 max-w-3xl mx-auto">
+        <Title
+            title="About Me"
+            subtitle=""
+        />
+        <div className="text-lg sm:text-xl text-neutral-300 font-light italic leading-relaxed">
+            &quot;Any fool can write code that a computer can understand. <br className="hidden sm:block" />
+            <span className="text-primary/90 font-normal">Good programmers write code that humans can understand.</span>&quot;
+            <div className="text-sm text-neutral-500 mt-2 not-italic font-medium">- Martin Fowler</div>
         </div>
-        <div className="lg:col-span-3">
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        <div className="lg:col-span-5 h-full flex flex-col justify-center">
+           {/* Enhanced Image Container */}
+          <div className="relative">
+             <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-xl opacity-70" />
+             <ImageSection />
+          </div>
+        </div>
+
+        <div className="lg:col-span-7">
           <JourneySection />
         </div>
       </div>
 
-      <div className="w-full pt-6 lg:pt-8">
+      <div className="w-full border-t border-white/5 pt-16 lg:pt-24">
         <SkillsSection />
       </div>
     </section>

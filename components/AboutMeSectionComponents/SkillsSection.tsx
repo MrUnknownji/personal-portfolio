@@ -2,7 +2,8 @@ import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { SkillsData } from "@/data/data";
+import { SkillsData, HeroSectionSkills } from "@/data/data";
+import SkillCard from "../HeroSectionComponents/SkillCard";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,7 +11,7 @@ const ANIMATION_CONFIG = {
   TITLE_DURATION: 0.8,
   TITLE_EASE: "power3.out",
   TITLE_Y_OFFSET: 30,
-  CATEGORY_STAGGER: 0.15,
+  CATEGORY_STAGGER: 0.1,
   CATEGORY_DURATION: 0.6,
   CATEGORY_Y_OFFSET: 40,
   CATEGORY_EASE: "power2.out",
@@ -18,130 +19,121 @@ const ANIMATION_CONFIG = {
   SKILL_DURATION: 0.4,
   SKILL_SCALE_START: 0.8,
   SKILL_EASE: "back.out(1.4)",
-  HOVER_DURATION: 0.2,
-  HOVER_EASE: "power1.out",
 } as const;
 
 const SkillsSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const skillsGridRef = useRef<HTMLDivElement>(null);
+  const coreSkillsRef = useRef<HTMLDivElement>(null);
+  const techSkillsRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      if (!containerRef.current || !titleRef.current || !skillsGridRef.current)
+      if (!containerRef.current || !titleRef.current || !coreSkillsRef.current || !techSkillsRef.current)
         return;
 
-      const categories = gsap.utils.toArray<HTMLDivElement>(
-        skillsGridRef.current.children,
-      );
-      const allSkillItems = gsap.utils.toArray<HTMLSpanElement>(
-        ".skill-item",
-        skillsGridRef.current,
-      );
+      // Selectors
+      const coreSkillCards = gsap.utils.toArray<HTMLDivElement>(".core-skill-card", coreSkillsRef.current);
+      const categories = gsap.utils.toArray<HTMLDivElement>(".tech-category", techSkillsRef.current);
 
-      gsap.set(titleRef.current, {
-        opacity: 0,
-        y: ANIMATION_CONFIG.TITLE_Y_OFFSET,
-      });
-      gsap.set(categories, {
-        opacity: 0,
-        y: ANIMATION_CONFIG.CATEGORY_Y_OFFSET,
-      });
-      gsap.set(allSkillItems, {
-        opacity: 0,
-        scale: ANIMATION_CONFIG.SKILL_SCALE_START,
-      });
+      // Initial States
+      gsap.set(titleRef.current, { opacity: 0, y: ANIMATION_CONFIG.TITLE_Y_OFFSET });
+      gsap.set(coreSkillCards, { opacity: 0, y: 20 });
+      gsap.set(categories, { opacity: 0, y: ANIMATION_CONFIG.CATEGORY_Y_OFFSET });
 
-      const mainTl = gsap.timeline({
+      const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 85%",
           end: "bottom 15%",
           toggleActions: "play none none reverse",
-          markers: false,
         },
       });
 
-      mainTl
-        .to(titleRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: ANIMATION_CONFIG.TITLE_DURATION,
-          ease: ANIMATION_CONFIG.TITLE_EASE,
-        })
-        .to(
-          categories,
-          {
-            opacity: 1,
-            y: 0,
-            duration: ANIMATION_CONFIG.CATEGORY_DURATION,
-            stagger: ANIMATION_CONFIG.CATEGORY_STAGGER,
-            ease: ANIMATION_CONFIG.CATEGORY_EASE,
-          },
-          "-=0.5",
-        )
-        .to(
-          allSkillItems,
-          {
-            opacity: 1,
-            scale: 1,
-            duration: ANIMATION_CONFIG.SKILL_DURATION,
-            stagger: ANIMATION_CONFIG.SKILL_STAGGER,
-            ease: ANIMATION_CONFIG.SKILL_EASE,
-          },
-          "-=0.6",
-        );
+      tl.to(titleRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.TITLE_DURATION,
+        ease: ANIMATION_CONFIG.TITLE_EASE,
+      })
+      .to(coreSkillCards, {
+        opacity: 1,
+        y: 0,
+        duration: 0.5,
+        stagger: 0.05,
+        ease: "power2.out",
+      }, "-=0.4")
+      .to(categories, {
+        opacity: 1,
+        y: 0,
+        duration: ANIMATION_CONFIG.CATEGORY_DURATION,
+        stagger: ANIMATION_CONFIG.CATEGORY_STAGGER,
+        ease: ANIMATION_CONFIG.CATEGORY_EASE,
+      }, "-=0.2");
 
-      return () => {
-        gsap.killTweensOf([titleRef.current, categories, allSkillItems]);
-        if (mainTl.scrollTrigger) {
-          mainTl.scrollTrigger.kill();
-        }
-      };
     },
-    { scope: containerRef },
+    { scope: containerRef }
   );
 
   return (
-    <div ref={containerRef} className="space-y-10">
-      <h3
-        ref={titleRef}
-        className="text-3xl sm:text-4xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent text-center"
-      >
-        Skills & Technologies
-      </h3>
+    <div ref={containerRef} className="space-y-16">
+      <div className="space-y-4 text-center">
+        <h3
+          ref={titleRef}
+          className="text-3xl sm:text-4xl font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+        >
+          Skills & Technologies
+        </h3>
+        <p className="text-neutral-400 max-w-2xl mx-auto text-sm sm:text-base">
+           A blend of technical expertise and core competencies that define my professional journey.
+        </p>
+      </div>
 
-      <div
-        ref={skillsGridRef}
-        className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-4"
-      >
-        {Object.entries(SkillsData).map(([category, skills]) => (
-          <div
-            key={category}
-            className="bg-frosted-dark rounded-lg p-5 space-y-4 flex flex-col"
-            style={{ willChange: "transform, opacity" }}
-          >
-            <h4 className="text-xl font-medium capitalize text-light/90 border-b border-neutral/30 pb-2 mb-3">
-              {" "}
-              {category.replace(/([A-Z])/g, " $1").trim()}
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {skills.map((skill) => (
-                <span
-                  key={skill}
-                  className="skill-item skill-chip"
-                  style={{
-                    willChange:
-                      "transform, opacity, background-color, color, border-color",
-                  }}
-                >
-                  {skill}
-                </span>
-              ))}
+      {/* Core Competencies (Moved from Hero) */}
+      <div ref={coreSkillsRef} className="space-y-6">
+        <h4 className="text-xl font-medium text-white/90 text-center mb-6">
+            Core Competencies
+        </h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+            {HeroSectionSkills.map((skill, index) => (
+            <div key={index} className="core-skill-card">
+                <SkillCard {...skill} />
             </div>
-          </div>
-        ))}
+            ))}
+        </div>
+      </div>
+
+      {/* Tech Stack */}
+      <div ref={techSkillsRef} className="space-y-6">
+         <h4 className="text-xl font-medium text-white/90 text-center mb-6">
+            Technical Stack
+        </h4>
+        <div className="grid gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {Object.entries(SkillsData).map(([category, skills]) => (
+            <div
+                key={category}
+                className="tech-category bg-white/[0.02] backdrop-blur-sm border border-white/[0.05] rounded-xl p-6 space-y-4 flex flex-col
+                           hover:bg-white/[0.04] hover:border-white/[0.1] transition-colors duration-300"
+            >
+                <h4 className="text-lg font-medium capitalize text-gray-200 border-b border-white/10 pb-3">
+                {category.replace(/([A-Z])/g, " $1").trim()}
+                </h4>
+                <div className="flex flex-wrap gap-2.5">
+                {skills.map((skill) => (
+                    <span
+                    key={skill}
+                    className="px-3 py-1.5 text-xs sm:text-sm font-medium rounded-full
+                               bg-white/5 text-neutral-300 border border-white/5
+                               hover:text-primary hover:border-primary/30 hover:bg-primary/5
+                               transition-all duration-300 cursor-default"
+                    >
+                    {skill}
+                    </span>
+                ))}
+                </div>
+            </div>
+            ))}
+        </div>
       </div>
     </div>
   );
