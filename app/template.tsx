@@ -49,6 +49,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
           }
 
           // Use GSAP ScrollTo for robust resetting
+          window.scrollTo(0, 0);
           gsap.set(window, { scrollTo: { y: 0, autoKill: false } });
 
           // Force ScrollTrigger refresh slightly later to ensure layout is settled
@@ -57,6 +58,11 @@ export default function Template({ children }: { children: React.ReactNode }) {
           });
         },
         onComplete: () => {
+          // Ensure scroll is still at 0 if no hash, before restoring overflow
+          if (!window.location.hash) {
+              window.scrollTo(0, 0);
+          }
+
           bodyStyle.cursor = "";
           bodyStyle.overflow = ""; // Restore scroll
           gsap.set(overlayRef.current, { display: "none" });
@@ -117,7 +123,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
           {
             opacity: 0,
             duration: overlayFadeOutDuration * 0.5,
-            clearProps: "opacity",
           },
           `-=${overlayFadeOutDuration * 0.3}`,
         );

@@ -150,8 +150,8 @@ const Footer = () => {
                     </span>
 
                     {showArrow && (
-                        <span className="relative z-10 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary">
-                        <FiArrowUpRight className="w-3 h-3" />
+                        <span className="relative z-10 w-0 overflow-hidden opacity-0 -translate-x-2 group-hover:w-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary flex items-center justify-center">
+                        <FiArrowUpRight className="w-3 h-3 flex-shrink-0" />
                         </span>
                     )}
                   </a>

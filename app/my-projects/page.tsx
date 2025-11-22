@@ -199,8 +199,10 @@ export default function MyProjects() {
         >
           <div
             ref={controlsRef}
-            className="bg-secondary/60 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 md:p-3 shadow-2xl flex flex-col md:flex-row gap-3"
+            className="bg-secondary/80 backdrop-blur-md border border-white/10 rounded-2xl p-2 md:p-3 shadow-2xl flex flex-col md:flex-row gap-3 overflow-hidden relative"
           >
+            {/* Subtle glow effect behind controls */}
+            <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
 
             <div
               ref={searchContainerRef}
@@ -217,19 +219,19 @@ export default function MyProjects() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={handleSearchFocus}
                 onBlur={handleSearchBlur}
-                className="w-full pl-10 pr-10 py-3 bg-transparent text-light placeholder-muted/50 focus:outline-none text-sm md:text-base rounded-xl"
+                className="w-full pl-10 pr-10 py-3 bg-transparent text-light placeholder-muted/50 focus:outline-none text-sm md:text-base rounded-xl relative z-10"
               />
               {searchQuery && (
                 <button
                   onClick={clearSearch}
-                  className="absolute inset-y-0 right-3 flex items-center justify-center text-muted hover:text-primary transition-colors"
+                  className="absolute inset-y-0 right-3 flex items-center justify-center text-muted hover:text-primary transition-colors z-20"
                 >
                   <FiX />
                 </button>
               )}
             </div>
 
-            <div className="flex overflow-x-auto pb-1 md:pb-0 gap-2 no-scrollbar md:flex-wrap md:justify-end items-center px-1">
+            <div className="flex overflow-x-auto pb-1 md:pb-0 gap-2 no-scrollbar md:flex-wrap md:justify-end items-center px-1 relative z-10">
                <FiFilter className="text-muted hidden md:block mr-1" />
                {categories.map((category) => (
                 <button
@@ -239,7 +241,7 @@ export default function MyProjects() {
                     whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 relative overflow-hidden
                     ${filter === category
                       ? "text-dark bg-primary shadow-[0_0_15px_rgba(0,255,159,0.3)]"
-                      : "text-muted hover:text-light hover:bg-white/5"
+                      : "text-muted hover:text-light hover:bg-white/5 border border-transparent hover:border-white/10"
                     }
                   `}
                 >
@@ -265,22 +267,22 @@ export default function MyProjects() {
         </div>
 
         {filteredProjects.length === 0 && !isAnimating && (
-          <div className="text-center py-20">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 mb-6">
-               <FiSearch className="w-8 h-8 text-muted" />
+          <div className="text-center py-20 px-4">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/5 mb-6 ring-1 ring-white/10">
+               <FiSearch className="w-10 h-10 text-muted/50" />
             </div>
-            <h3 className="text-xl font-semibold text-light mb-2">No projects found</h3>
-            <p className="text-muted mb-8">
-              Try adjusting your search or filter to find what you&apos;re looking for.
+            <h3 className="text-2xl font-semibold text-light mb-3">No projects found</h3>
+            <p className="text-muted mb-8 max-w-md mx-auto">
+              We couldn&apos;t find any projects matching your criteria. Try adjusting your search terms or selecting a different category.
             </p>
             <button
               onClick={() => {
                 setFilter("All");
                 setSearchQuery("");
               }}
-              className="px-6 py-2 rounded-full border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
+              className="px-8 py-3 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-dark transition-all duration-300 font-medium border border-primary/20 hover:border-primary hover:shadow-[0_0_20px_rgba(0,255,159,0.3)]"
             >
-              Clear Filters
+              Clear All Filters
             </button>
           </div>
         )}

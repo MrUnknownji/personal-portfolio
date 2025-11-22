@@ -306,7 +306,7 @@ const Header = () => {
                          focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 overflow-hidden"
             >
               <span className="relative z-10">Contact Me</span>
-              <span className="contact-arrow inline-block ml-2 transition-transform duration-200">
+              <span className="contact-arrow inline-block ml-2">
                 <ArrowIcon />
               </span>
             </button>
