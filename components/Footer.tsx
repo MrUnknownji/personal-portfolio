@@ -71,22 +71,6 @@ const Footer = () => {
     [pathname, router, scrollToElement],
   );
 
-  const isExternalNavigation = useCallback(
-    (link: (typeof QUICK_LINKS)[0]): boolean => {
-      const isHome = pathname === "/";
-      const isProjectsPage = pathname === "/my-projects";
-
-      if (link.text === "Home" && !isHome) return true;
-      if (link.text === "Projects" && !isProjectsPage) return true;
-      if (link.id && !isHome) return true;
-      if (!link.id && link.href !== "/" && link.href !== "/my-projects")
-        return true;
-
-      return false;
-    },
-    [pathname],
-  );
-
   useGSAP(
     () => {
       const elementsToAnimate = gsap.utils.toArray<HTMLElement>(
@@ -139,20 +123,22 @@ const Footer = () => {
         <nav className="animate-links">
           <ul className="flex flex-wrap justify-center items-center gap-x-8 gap-y-4">
             {QUICK_LINKS.map((link) => {
-              const isExternal = isExternalNavigation(link);
               return (
                 <li key={link.text}>
                   <a
                     href={link.href}
                     onClick={(e) => handleQuickLinkClick(e, link)}
-                    className="group relative flex items-center gap-1.5 text-muted hover:text-primary transition-colors duration-300 px-2 py-1 text-sm font-medium"
+                    className="group relative flex items-center gap-1.5 px-2 py-1 text-sm font-medium overflow-hidden"
                   >
-                    <span className="relative z-10">{link.text}</span>
-                    <FiArrowUpRight
-                      className={`w-3 h-3 transition-transform duration-300
-                                  ${isExternal ? "group-hover:translate-x-0.5 group-hover:-translate-y-0.5" : ""}
-                                  ${!isExternal ? "opacity-0 w-0" : "opacity-100"}`}
-                    />
+                    <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-gradient-to-r from-primary via-accent to-primary transition-all duration-300 ease-out group-hover:w-full"></span>
+
+                    <span className="relative z-10 text-muted group-hover:text-white transition-colors duration-300">
+                      {link.text}
+                    </span>
+
+                    <span className="relative z-10 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary">
+                      <FiArrowUpRight className="w-3 h-3" />
+                    </span>
                   </a>
                 </li>
               );

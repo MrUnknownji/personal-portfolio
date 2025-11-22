@@ -43,6 +43,9 @@ export default function Template({ children }: { children: React.ReactNode }) {
           overlayRef.current?.classList.remove("pointer-events-none");
 
           // Ensure scroll is at top when transition starts, behind the overlay
+          if ("scrollRestoration" in history) {
+            history.scrollRestoration = "manual";
+          }
           window.scrollTo(0, 0);
 
           gsap.delayedCall(0.05, () => {
@@ -54,6 +57,15 @@ export default function Template({ children }: { children: React.ReactNode }) {
           bodyStyle.overflow = ""; // Restore scroll
           gsap.set(overlayRef.current, { display: "none" });
           overlayRef.current?.classList.add("pointer-events-none");
+
+          // Handle hash navigation after transition
+          if (window.location.hash) {
+            const id = window.location.hash.substring(1);
+            const element = document.getElementById(id);
+            if (element) {
+              element.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }
         },
         defaults: { ease: "power2.inOut" },
       });
