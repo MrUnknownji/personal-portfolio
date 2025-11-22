@@ -1,16 +1,52 @@
 "use client";
 import HeroContent from "./HeroSectionComponents/HeroContent";
 import CodeDisplay from "./HeroSectionComponents/CodeDisplay";
+import { useRef } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const HeroSection = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const bgGlow1Ref = useRef<HTMLDivElement>(null);
+  const bgGlow2Ref = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+      if (!bgGlow1Ref.current || !bgGlow2Ref.current) return;
+
+      // Parallax effect on background glows
+      gsap.to(bgGlow1Ref.current, {
+          y: 100,
+          scrollTrigger: {
+              trigger: containerRef.current,
+              start: "top top",
+              end: "bottom top",
+              scrub: 1
+          }
+      });
+
+      gsap.to(bgGlow2Ref.current, {
+          y: -50,
+          scrollTrigger: {
+              trigger: containerRef.current,
+              start: "top top",
+              end: "bottom top",
+              scrub: 1.5
+          }
+      });
+  }, { scope: containerRef });
+
   return (
     <div
+      ref={containerRef}
       className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative pt-20 overflow-hidden"
       style={{ perspective: "2000px" }}
     >
       {/* Subtle modern background gradient */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-accent/5 blur-[100px] rounded-full pointer-events-none" />
+      <div ref={bgGlow1Ref} className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+      <div ref={bgGlow2Ref} className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-accent/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div
         className="w-full max-w-7xl mx-auto relative rounded-3xl p-8 md:p-10 lg:p-16
