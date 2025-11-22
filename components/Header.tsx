@@ -7,8 +7,9 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { usePathname, useRouter } from "next/navigation";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 const ANIMATION_CONFIG = {
   HEADER: { DURATION: 0.4, EASE: "power3.inOut" },
@@ -76,7 +77,11 @@ const Header = () => {
     e.preventDefault();
     const element = document.getElementById("contact");
     if (pathname === "/" && element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      gsap.to(window, {
+        scrollTo: { y: element, offsetY: 100 },
+        duration: 1,
+        ease: "power2.inOut",
+      });
     } else {
       router.push("/#contact");
     }
@@ -297,7 +302,6 @@ const Header = () => {
               className="relative inline-flex items-center justify-center px-5 py-2 md:px-7 md:py-2.5 rounded-full
                          bg-white/5 border border-white/10 text-primary
                          font-medium tracking-wide text-sm md:text-base
-                         transition-colors duration-300
                          group
                          focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 overflow-hidden"
             >

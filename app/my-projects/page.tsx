@@ -8,9 +8,6 @@ import { Project } from "@/types/Project";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { FiSearch, FiX, FiFilter } from "react-icons/fi";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const ANIMATION_CONFIG = {
   STAGGER: 0.08,
@@ -62,12 +59,6 @@ export default function MyProjects() {
     ...Array.from(new Set(projects.map((project) => project.category))),
   ];
 
-  useEffect(() => {
-    gsap.delayedCall(0.01, () => {
-      ScrollTrigger.refresh();
-    });
-  }, []);
-
   const { contextSafe } = useGSAP(
     () => {
       animationContextRef.current = gsap.context(() => {
@@ -75,7 +66,6 @@ export default function MyProjects() {
           defaults: { ease: ANIMATION_CONFIG.EASE, overwrite: "auto" },
         });
 
-        // Animate controls entrance
         if (controlsRef.current) {
           initialTl.fromTo(
             controlsRef.current,
@@ -204,14 +194,14 @@ export default function MyProjects() {
           />
         </div>
 
-        {/* Controls Section */}
         <div
-          ref={controlsRef}
           className="sticky top-24 z-30 mb-12 md:mb-16 mx-auto max-w-4xl"
         >
-          <div className="bg-secondary/60 backdrop-blur-xl border border-white/10 rounded-2xl p-2 md:p-3 shadow-2xl flex flex-col md:flex-row gap-3">
+          <div
+            ref={controlsRef}
+            className="bg-secondary/60 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 md:p-3 shadow-2xl flex flex-col md:flex-row gap-3"
+          >
 
-            {/* Search Input */}
             <div
               ref={searchContainerRef}
               className="relative flex-1 group rounded-xl border border-white/5 bg-white/5"
@@ -239,7 +229,6 @@ export default function MyProjects() {
               )}
             </div>
 
-            {/* Filter Categories */}
             <div className="flex overflow-x-auto pb-1 md:pb-0 gap-2 no-scrollbar md:flex-wrap md:justify-end items-center px-1">
                <FiFilter className="text-muted hidden md:block mr-1" />
                {categories.map((category) => (
@@ -261,7 +250,6 @@ export default function MyProjects() {
           </div>
         </div>
 
-        {/* Projects Grid */}
         <div
           ref={projectsRef}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10"
@@ -276,7 +264,6 @@ export default function MyProjects() {
           ))}
         </div>
 
-        {/* Empty State */}
         {filteredProjects.length === 0 && !isAnimating && (
           <div className="text-center py-20">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 mb-6">

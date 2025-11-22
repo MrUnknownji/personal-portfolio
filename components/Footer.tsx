@@ -3,10 +3,11 @@ import React, { useRef, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { useGSAP } from "@gsap/react";
 import { FiArrowUpRight } from "react-icons/fi";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 const ANIMATION_CONFIG = {
   SCROLL_TRIGGER: {
@@ -40,13 +41,16 @@ const Footer = () => {
 
   const scrollToElement = useCallback((elementId: string) => {
     if (!elementId) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      gsap.to(window, { scrollTo: { y: 0 }, duration: 1, ease: "power2.inOut" });
       return;
     }
-    const element = document.getElementById(elementId);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+
+    // Use GSAP ScrollTo for elements
+    gsap.to(window, {
+        scrollTo: { y: `#${elementId}`, offsetY: 50 },
+        duration: 1.2,
+        ease: "power2.inOut"
+    });
   }, []);
 
   const handleQuickLinkClick = useCallback(
@@ -70,6 +74,14 @@ const Footer = () => {
     },
     [pathname, router, scrollToElement],
   );
+
+  const shouldShowArrow = (linkHref: string) => {
+     // Strip hash to get the base path
+     const targetPath = linkHref.split('#')[0] || '/';
+     // Current path logic. If pathname is '/', targetPath '/' is the same.
+     // If pathname is '/my-projects', targetPath '/' is different.
+     return targetPath !== pathname;
+  };
 
   useGSAP(
     () => {
@@ -123,6 +135,7 @@ const Footer = () => {
         <nav className="animate-links">
           <ul className="flex flex-wrap justify-center items-center gap-x-8 gap-y-4">
             {QUICK_LINKS.map((link) => {
+              const showArrow = shouldShowArrow(link.href);
               return (
                 <li key={link.text}>
                   <a
@@ -136,9 +149,11 @@ const Footer = () => {
                       {link.text}
                     </span>
 
-                    <span className="relative z-10 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary">
-                      <FiArrowUpRight className="w-3 h-3" />
-                    </span>
+                    {showArrow && (
+                        <span className="relative z-10 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary">
+                        <FiArrowUpRight className="w-3 h-3" />
+                        </span>
+                    )}
                   </a>
                 </li>
               );
