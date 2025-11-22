@@ -7,7 +7,10 @@ import { projects } from "@/data/data";
 import { Project } from "@/types/Project";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { FiSearch, FiX, FiFilter } from "react-icons/fi";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const ANIMATION_CONFIG = {
   STAGGER: 0.08,
@@ -74,6 +77,27 @@ export default function MyProjects() {
             0.2
           );
         }
+
+        // Initial load animation for projects
+        const cards = projectsRef.current?.querySelectorAll(".project-card-container");
+        if (cards && cards.length > 0) {
+            initialTl.fromTo(cards,
+                { opacity: 0, y: 50 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    stagger: 0.1,
+                    scrollTrigger: {
+                        trigger: projectsRef.current,
+                        start: "top 85%",
+                        end: "bottom 20%",
+                        toggleActions: "play none none none"
+                    }
+                },
+                0.4
+            );
+        }
       });
 
       return () => {
@@ -123,6 +147,7 @@ export default function MyProjects() {
         setIsAnimating(false);
         filterTimelineRef.current = null;
         gsap.set(".project-card-container", { clearProps: "all" });
+        ScrollTrigger.refresh();
       },
       defaults: { overwrite: "auto" },
     });
@@ -141,8 +166,7 @@ export default function MyProjects() {
     }
 
     filterTimelineRef.current.add(() => {
-      requestAnimationFrame(() => {
-        const newCards = projectsRef.current?.querySelectorAll(
+       const newCards = projectsRef.current?.querySelectorAll(
           ".project-card-container",
         );
         if (newCards?.length) {
@@ -164,12 +188,12 @@ export default function MyProjects() {
             },
           );
         }
-      });
     });
   }, [isAnimating, filteredProjects.length]);
 
   useEffect(() => {
     animateFilterChange();
+
     return () => {
       if (filterTimelineRef.current) {
         filterTimelineRef.current.kill();
