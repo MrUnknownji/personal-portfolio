@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SmoothScroller from "@/components/SmoothScroller";
 import Template from "./template";
+import Bot from "@/components/Bot";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -72,6 +73,7 @@ export default function RootLayout({
           </main>
           <Footer />
         </SmoothScroller>
+        <Bot />
       </body>
     </html>
   );
