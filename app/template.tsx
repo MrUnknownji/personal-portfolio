@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { useGSAP } from "@gsap/react";
 import { TextPlugin } from "gsap/TextPlugin";
 
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger, TextPlugin);
+  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, TextPlugin);
 }
 
 export default function Template({ children }: { children: React.ReactNode }) {
@@ -42,18 +43,41 @@ export default function Template({ children }: { children: React.ReactNode }) {
           bodyStyle.overflow = "hidden"; // Lock scroll
           overlayRef.current?.classList.remove("pointer-events-none");
 
-          // Ensure scroll is at top when transition starts, behind the overlay
-          window.scrollTo(0, 0);
+          // Ensure scroll is at top when transition starts
+          if ("scrollRestoration" in history) {
+            history.scrollRestoration = "manual";
+          }
 
-          gsap.delayedCall(0.05, () => {
-            ScrollTrigger.refresh();
+          // Use GSAP ScrollTo for robust resetting
+          window.scrollTo(0, 0);
+          gsap.set(window, { scrollTo: { y: 0, autoKill: false } });
+
+          // Force ScrollTrigger refresh slightly later to ensure layout is settled
+          gsap.delayedCall(0.1, () => {
+             ScrollTrigger.refresh();
           });
         },
         onComplete: () => {
+          // Ensure scroll is still at 0 if no hash, before restoring overflow
+          if (!window.location.hash) {
+              window.scrollTo(0, 0);
+          }
+
           bodyStyle.cursor = "";
           bodyStyle.overflow = ""; // Restore scroll
           gsap.set(overlayRef.current, { display: "none" });
           overlayRef.current?.classList.add("pointer-events-none");
+
+          // Handle hash navigation after transition
+          if (window.location.hash) {
+            const id = window.location.hash.substring(1);
+            // Use GSAP to scroll to the element if it exists
+            gsap.to(window, {
+              scrollTo: { y: `#${id}`, offsetY: 20, autoKill: false },
+              duration: 1,
+              ease: "power2.inOut"
+            });
+          }
         },
         defaults: { ease: "power2.inOut" },
       });
@@ -99,7 +123,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
           {
             opacity: 0,
             duration: overlayFadeOutDuration * 0.5,
-            clearProps: "opacity",
           },
           `-=${overlayFadeOutDuration * 0.3}`,
         );

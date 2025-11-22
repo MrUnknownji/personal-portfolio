@@ -7,14 +7,15 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { usePathname, useRouter } from "next/navigation";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 const ANIMATION_CONFIG = {
-  HEADER: { DURATION: 0.3, EASE: "power2.inOut" },
+  HEADER: { DURATION: 0.4, EASE: "power3.inOut" },
   LOGO: {
-    DURATION: 0.6,
-    EASE: "power2.out",
+    DURATION: 0.8,
+    EASE: "elastic.out(1, 0.8)",
     HOVER_DURATION: 0.3,
     HOVER_EASE: "power2.out",
     HOVER_SCALE: 1.05,
@@ -24,11 +25,9 @@ const ANIMATION_CONFIG = {
     EASE: "power2.out",
     HOVER_DURATION: 0.3,
     HOVER_EASE: "power3.out",
-    HOVER_SCALE: 1.015,
-    HOVER_BG_COLOR: "#3f3f46",
-    INITIAL_BG_COLOR: "#27272a",
-    HOVER_BORDER_COLOR: "rgba(0, 255, 159, 0.5)",
-    INITIAL_BORDER_COLOR: "rgba(0, 255, 159, 0.2)",
+    HOVER_SCALE: 1.02,
+    HOVER_BG: "rgba(255, 255, 255, 0.1)",
+    INITIAL_BG: "rgba(255, 255, 255, 0.05)",
   },
   PARTICLES: {
     POOL_SIZE: 40,
@@ -78,7 +77,11 @@ const Header = () => {
     e.preventDefault();
     const element = document.getElementById("contact");
     if (pathname === "/" && element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      gsap.to(window, {
+        scrollTo: { y: element, offsetY: 100 },
+        duration: 1,
+        ease: "power2.inOut",
+      });
     } else {
       router.push("/#contact");
     }
@@ -168,19 +171,21 @@ const Header = () => {
 
   useGSAP(
     () => {
+      // Entrance animation
       gsap.fromTo(
         [logoLinkRef.current, contactButtonRef.current],
-        { opacity: 0, y: -20 },
+        { opacity: 0, y: -30 },
         {
           opacity: 1,
           y: 0,
           duration: ANIMATION_CONFIG.LOGO.DURATION,
           ease: ANIMATION_CONFIG.LOGO.EASE,
-          stagger: 0.1,
+          stagger: 0.15,
           delay: 0.2,
         },
       );
 
+      // Scroll behavior (hide/show)
       const hideAnim = gsap.to(headerRef.current, {
         yPercent: -100,
         paused: true,
@@ -231,12 +236,11 @@ const Header = () => {
         contact.addEventListener("mouseenter", () => {
           gsap.to(contact, {
             scale: ANIMATION_CONFIG.CONTACT.HOVER_SCALE,
-            backgroundColor: ANIMATION_CONFIG.CONTACT.HOVER_BG_COLOR,
-            borderColor: ANIMATION_CONFIG.CONTACT.HOVER_BORDER_COLOR,
+            backgroundColor: ANIMATION_CONFIG.CONTACT.HOVER_BG,
             duration: ANIMATION_CONFIG.CONTACT.HOVER_DURATION,
             ease: ANIMATION_CONFIG.CONTACT.HOVER_EASE,
           });
-          gsap.to(".contact-arrow", { x: 3, duration: 0.2 });
+          gsap.to(".contact-arrow", { x: 4, duration: 0.2 });
           if (particleIntervalRef.current)
             clearInterval(particleIntervalRef.current);
           particleIntervalRef.current = setInterval(
@@ -247,8 +251,7 @@ const Header = () => {
         contact.addEventListener("mouseleave", () => {
           gsap.to(contact, {
             scale: 1,
-            backgroundColor: ANIMATION_CONFIG.CONTACT.INITIAL_BG_COLOR,
-            borderColor: ANIMATION_CONFIG.CONTACT.INITIAL_BORDER_COLOR,
+            backgroundColor: ANIMATION_CONFIG.CONTACT.INITIAL_BG,
             duration: ANIMATION_CONFIG.CONTACT.HOVER_DURATION,
           });
           gsap.to(".contact-arrow", { x: 0, duration: 0.2 });
@@ -264,17 +267,18 @@ const Header = () => {
     <header
       ref={headerRef}
       className="fixed top-0 left-0 right-0 z-40 transform-gpu
-                 bg-secondary/80 backdrop-blur-sm
-                 border-b border-neutral/20"
+                 bg-dark/70 backdrop-blur-xl
+                 border-b border-white/5"
       style={{ willChange: "transform" }}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <nav className="relative flex items-center justify-between h-16 md:h-20">
+        <nav className="relative flex items-center justify-between h-18 md:h-20">
           <div
             ref={particlesContainerRef}
             className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
             aria-hidden="true"
           />
+
           <Link
             ref={logoLinkRef}
             href="/"
@@ -287,7 +291,7 @@ const Header = () => {
               width={44}
               height={44}
               priority
-              className="md:w-[50px] md:h-[50px]"
+              className="w-10 h-10 md:w-12 md:h-12"
             />
           </Link>
 
@@ -295,13 +299,14 @@ const Header = () => {
             <button
               ref={contactButtonRef}
               onClick={handleContactClick}
-              className="relative inline-flex items-center justify-center px-5 py-2 md:px-6 md:py-2.5 rounded-lg
-                         bg-neutral border border-primary/20 text-light/90
-                         font-medium group
-                         hover:text-light focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 overflow-hidden"
+              className="relative inline-flex items-center justify-center px-5 py-2 md:px-7 md:py-2.5 rounded-full
+                         bg-white/5 border border-white/10 text-primary
+                         font-medium tracking-wide text-sm md:text-base
+                         group
+                         focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 overflow-hidden"
             >
               <span className="relative z-10">Contact Me</span>
-              <span className="contact-arrow inline-block ml-2 transition-transform duration-200">
+              <span className="contact-arrow inline-block ml-2">
                 <ArrowIcon />
               </span>
             </button>
