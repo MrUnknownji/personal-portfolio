@@ -7,7 +7,7 @@ import { projects } from "@/data/data";
 import { Project } from "@/types/Project";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { FiSearch, FiX } from "react-icons/fi";
+import { FiSearch, FiX, FiFilter } from "react-icons/fi";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -16,23 +16,6 @@ const ANIMATION_CONFIG = {
   STAGGER: 0.08,
   DURATION: 0.6,
   EASE: "power3.out",
-  HOVER: {
-    DURATION: 0.2,
-    EASE: "power2.out",
-    SCALE: 1.03,
-  },
-  FOCUS: {
-    DURATION: 0.3,
-    EASE: "power2.out",
-  },
-  SCROLL_TRIGGER: {
-    START: "top 85%",
-    END: "bottom top",
-    TOGGLE_ACTIONS: "play none none reset",
-    STAGGER: 0.05,
-    DURATION: 0.5,
-    EASE: "power2.out",
-  },
   FILTER: {
     OUT_DURATION: 0.3,
     OUT_STAGGER: 0.03,
@@ -56,10 +39,10 @@ export default function MyProjects() {
   const controlsRef = useRef<HTMLDivElement>(null);
   const projectsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
-  const clearButtonRef = useRef<HTMLButtonElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
   const animationContextRef = useRef<gsap.Context | null>(null);
   const filterTimelineRef = useRef<gsap.core.Timeline | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const filteredProjects = projects.filter((project) => {
     const lowerQuery = searchQuery.toLowerCase();
@@ -85,67 +68,21 @@ export default function MyProjects() {
     });
   }, []);
 
-  useGSAP(
+  const { contextSafe } = useGSAP(
     () => {
       animationContextRef.current = gsap.context(() => {
         const initialTl = gsap.timeline({
           defaults: { ease: ANIMATION_CONFIG.EASE, overwrite: "auto" },
         });
 
-        if (controlsRef.current && controlsRef.current.children.length > 0) {
+        // Animate controls entrance
+        if (controlsRef.current) {
           initialTl.fromTo(
-            controlsRef.current.children,
+            controlsRef.current,
             { opacity: 0, y: 30 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: ANIMATION_CONFIG.DURATION,
-              stagger: ANIMATION_CONFIG.STAGGER,
-            },
-            0.2,
+            { opacity: 1, y: 0, duration: 0.8 },
+            0.2
           );
-        }
-
-        if (searchRef.current) {
-          const searchInput = searchRef.current;
-          searchInput.addEventListener("focus", () => {
-            gsap.to(searchInput, {
-              borderColor: "var(--color-primary)",
-              boxShadow: "0 0 0 2px rgba(0, 255, 159, 0.2)",
-              duration: ANIMATION_CONFIG.FOCUS.DURATION,
-              ease: ANIMATION_CONFIG.FOCUS.EASE,
-              overwrite: true,
-            });
-          });
-          searchInput.addEventListener("blur", () => {
-            gsap.to(searchInput, {
-              borderColor: "var(--color-neutral)",
-              boxShadow: "none",
-              duration: ANIMATION_CONFIG.FOCUS.DURATION,
-              ease: ANIMATION_CONFIG.FOCUS.EASE,
-              overwrite: true,
-            });
-          });
-        }
-
-        if (clearButtonRef.current) {
-          const clearButton = clearButtonRef.current;
-          clearButton.addEventListener("mouseenter", () => {
-            gsap.to(clearButton, {
-              color: "var(--color-accent)",
-              duration: ANIMATION_CONFIG.HOVER.DURATION,
-              ease: ANIMATION_CONFIG.HOVER.EASE,
-              overwrite: true,
-            });
-          });
-          clearButton.addEventListener("mouseleave", () => {
-            gsap.to(clearButton, {
-              color: "var(--color-primary)",
-              duration: ANIMATION_CONFIG.HOVER.DURATION,
-              ease: ANIMATION_CONFIG.HOVER.EASE,
-              overwrite: true,
-            });
-          });
         }
       });
 
@@ -156,6 +93,26 @@ export default function MyProjects() {
     },
     { scope: pageRef },
   );
+
+  const handleSearchFocus = contextSafe(() => {
+    if (searchContainerRef.current) {
+      gsap.to(searchContainerRef.current, {
+        borderColor: "var(--color-primary)",
+        backgroundColor: "rgba(255, 255, 255, 0.08)",
+        duration: 0.3
+      });
+    }
+  });
+
+  const handleSearchBlur = contextSafe(() => {
+    if (searchContainerRef.current) {
+      gsap.to(searchContainerRef.current, {
+        borderColor: "rgba(255, 255, 255, 0.05)",
+        backgroundColor: "rgba(255, 255, 255, 0.03)",
+        duration: 0.3
+      });
+    }
+  });
 
   const animateFilterChange = useCallback(() => {
     if (!projectsRef.current || isAnimating) return;
@@ -177,9 +134,7 @@ export default function MyProjects() {
         filterTimelineRef.current = null;
         gsap.set(".project-card-container", { clearProps: "all" });
       },
-      defaults: {
-        overwrite: "auto",
-      },
+      defaults: { overwrite: "auto" },
     });
 
     if (existingCards.length > 0) {
@@ -225,7 +180,6 @@ export default function MyProjects() {
 
   useEffect(() => {
     animateFilterChange();
-
     return () => {
       if (filterTimelineRef.current) {
         filterTimelineRef.current.kill();
@@ -234,107 +188,83 @@ export default function MyProjects() {
     };
   }, [filter, searchQuery, animateFilterChange]);
 
-  const handleButtonHover = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (isAnimating) return;
-      gsap.to(e.currentTarget, {
-        scale: ANIMATION_CONFIG.HOVER.SCALE,
-        duration: ANIMATION_CONFIG.HOVER.DURATION,
-        ease: ANIMATION_CONFIG.HOVER.EASE,
-        overwrite: true,
-      });
-    },
-    [isAnimating],
-  );
-
-  const handleButtonLeave = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      gsap.to(e.currentTarget, {
-        scale: 1,
-        duration: ANIMATION_CONFIG.HOVER.DURATION,
-        ease: ANIMATION_CONFIG.HOVER.EASE,
-        overwrite: true,
-        clearProps: "transform",
-      });
-    },
-    [],
-  );
-
   const clearSearch = () => {
     setSearchQuery("");
     searchRef.current?.focus();
   };
 
   return (
-    <div ref={pageRef} className="min-h-screen pt-24 pb-20 md:pb-28 lg:pb-32">
+    <div ref={pageRef} className="min-h-screen pt-24 pb-20 md:pb-28 lg:pb-32 bg-dark">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Title
-          title="My Projects"
-          subtitle={
-            <>
-              <span className="inline-block">&quot;The function</span>
-              <span className="inline-block">&nbsp;of good software</span>
-              <span className="inline-block">&nbsp;is to make</span>
-              <span className="inline-block">&nbsp;the complex</span>
-              <span className="inline-block">&nbsp;appear to</span>
-              <span className="inline-block">&nbsp;be simple.&quot;</span>
-              <span className="inline-block">- Grady Booch</span>
-            </>
-          }
-          className="mb-12 md:mb-16"
-        />
+        <div className="mb-16 md:mb-20 text-center">
+          <Title
+            title="My Projects"
+            subtitle="A collection of my work, experiments, and open source contributions."
+            className="mb-8"
+          />
+        </div>
 
+        {/* Controls Section */}
         <div
           ref={controlsRef}
-          className="flex flex-col md:flex-row justify-between items-center gap-6 mb-10 md:mb-14"
+          className="sticky top-24 z-30 mb-12 md:mb-16 mx-auto max-w-4xl"
         >
-          <div className="w-full md:w-auto md:max-w-xs relative">
-            <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none z-10">
-              <FiSearch className="text-muted w-5 h-5" />
-            </div>
-            <input
-              ref={searchRef}
-              type="text"
-              placeholder="Search projects..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-10 py-2.5 border rounded-xl
-               bg-neutral/30 border-neutral/70 text-light placeholder-muted
-                 focus:outline-none focus:border-primary focus:bg-neutral/50 focus:ring-2 focus:ring-primary/30
-                 transition-all duration-300 ease-out"
-            />
-            {searchQuery && (
-              <button
-                onClick={clearSearch}
-                className="absolute inset-y-0 right-2 flex items-center justify-center p-1 text-muted hover:text-light transition-colors rounded-full focus:outline-none focus:ring-2 focus:ring-primary/50"
-                aria-label="Clear search"
-              >
-                <FiX className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+          <div className="bg-secondary/60 backdrop-blur-xl border border-white/10 rounded-2xl p-2 md:p-3 shadow-2xl flex flex-col md:flex-row gap-3">
 
-          <div className="flex flex-wrap justify-center gap-2 md:gap-3">
-            {categories.map((category) => (
-              <button
-                key={category}
-                className={`px-4 py-2 rounded-lg text-sm md:text-base font-medium transition-all duration-300 ease-out transform-gpu border ${filter === category
-                  ? "bg-primary text-dark shadow-md border-primary"
-                  : "bg-neutral/30 border-neutral/70 text-muted hover:text-light hover:border-primary/30 hover:bg-neutral/50"
-                  }`}
-                onClick={() => setFilter(category)}
-                onMouseEnter={handleButtonHover}
-                onMouseLeave={handleButtonLeave}
-              >
-                {category}
-              </button>
-            ))}
+            {/* Search Input */}
+            <div
+              ref={searchContainerRef}
+              className="relative flex-1 group rounded-xl border border-white/5 bg-white/5"
+            >
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none z-10">
+                <FiSearch className="text-muted group-focus-within:text-primary transition-colors duration-300" />
+              </div>
+              <input
+                ref={searchRef}
+                type="text"
+                placeholder="Search projects..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={handleSearchFocus}
+                onBlur={handleSearchBlur}
+                className="w-full pl-10 pr-10 py-3 bg-transparent text-light placeholder-muted/50 focus:outline-none text-sm md:text-base rounded-xl"
+              />
+              {searchQuery && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute inset-y-0 right-3 flex items-center justify-center text-muted hover:text-primary transition-colors"
+                >
+                  <FiX />
+                </button>
+              )}
+            </div>
+
+            {/* Filter Categories */}
+            <div className="flex overflow-x-auto pb-1 md:pb-0 gap-2 no-scrollbar md:flex-wrap md:justify-end items-center px-1">
+               <FiFilter className="text-muted hidden md:block mr-1" />
+               {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setFilter(category)}
+                  className={`
+                    whitespace-nowrap px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 relative overflow-hidden
+                    ${filter === category
+                      ? "text-dark bg-primary shadow-[0_0_15px_rgba(0,255,159,0.3)]"
+                      : "text-muted hover:text-light hover:bg-white/5"
+                    }
+                  `}
+                >
+                  {category}
+                </button>
+               ))}
+            </div>
           </div>
         </div>
 
+        {/* Projects Grid */}
         <div
           ref={projectsRef}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10"
         >
           {filteredProjects.map((project) => (
             <div key={project.id} className="project-card-container">
@@ -346,20 +276,24 @@ export default function MyProjects() {
           ))}
         </div>
 
+        {/* Empty State */}
         {filteredProjects.length === 0 && !isAnimating && (
-          <div className="text-center py-16 opacity-0 animate-fade-in">
-            <p className="text-muted text-lg md:text-xl mb-6">
-              No projects found matching your criteria.
+          <div className="text-center py-20">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 mb-6">
+               <FiSearch className="w-8 h-8 text-muted" />
+            </div>
+            <h3 className="text-xl font-semibold text-light mb-2">No projects found</h3>
+            <p className="text-muted mb-8">
+              Try adjusting your search or filter to find what you&apos;re looking for.
             </p>
             <button
-              ref={clearButtonRef}
               onClick={() => {
                 setFilter("All");
                 setSearchQuery("");
               }}
-              className="text-primary text-lg font-medium hover:text-accent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary/50 rounded-md px-3 py-1"
+              className="px-6 py-2 rounded-full border border-primary/30 text-primary hover:bg-primary/10 transition-colors"
             >
-              Clear Filters & Search
+              Clear Filters
             </button>
           </div>
         )}
