@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect } from "react";
 import gsap from "gsap";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { usePathname } from "next/navigation";
+import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother);
 
@@ -15,30 +16,25 @@ export default function SmoothScroller({
 }) {
   const pathname = usePathname();
 
-  useLayoutEffect(() => {
-    // Kill existing ScrollSmoother instance to avoid duplicates or conflicts
-    // ScrollSmoother.get()?.kill(); // Causes issues if not careful?
-    // Ideally, we create it once. But Next.js navigation might not unmount Layout?
-    // Layout wraps Template. Template is what transitions.
-    // If SmoothScroller is in RootLayout, it mounts once.
-
+  useGSAP(() => {
+    // Create smoother with slightly reduced settings for performance
     const smoother = ScrollSmoother.create({
-      smooth: 1,
+      smooth: 0.8, // Slightly less smoothing for more responsiveness
       effects: true,
       smoothTouch: 0.1,
-      normalizeScroll: true, // Helps with some mobile scroll jumps
+      normalizeScroll: false, // Disable to avoid potential jitter on some devices
     });
 
     return () => {
       smoother.kill();
     };
-  }, []);
+  }, { dependencies: [] });
 
   // Refresh ScrollTrigger on route change
   useEffect(() => {
       const timeout = setTimeout(() => {
           ScrollTrigger.refresh();
-      }, 100); // Delay to allow DOM updates
+      }, 200);
 
       return () => clearTimeout(timeout);
   }, [pathname]);

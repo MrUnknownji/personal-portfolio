@@ -11,12 +11,11 @@ const AboutMe = () => {
       id="about"
       className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 space-y-20 sm:space-y-24"
     >
-      {/* Background Gradient Blob */}
-      <div className="absolute top-1/4 -left-64 w-96 h-96 bg-primary/20 rounded-full blur-3xl -z-10 opacity-50 pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-64 w-96 h-96 bg-secondary/20 rounded-full blur-3xl -z-10 opacity-50 pointer-events-none" />
+      {/* Background Gradient Blob - Reduced blur and opacity */}
+      <div className="absolute top-1/4 -left-64 w-96 h-96 bg-primary/10 rounded-full blur-2xl -z-10 opacity-30 pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-64 w-96 h-96 bg-secondary/10 rounded-full blur-2xl -z-10 opacity-30 pointer-events-none" />
 
       <div className="text-center space-y-4 max-w-3xl mx-auto">
-        {/* Title Component already has ScrollTrigger built-in */}
         <Title
             title="About Me"
             subtitle=""
@@ -34,7 +33,7 @@ const AboutMe = () => {
         <div className="lg:col-span-5 h-full flex flex-col justify-center">
            {/* Enhanced Image Container */}
           <div className="relative">
-             <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-xl opacity-70" />
+             <div className="absolute -inset-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-3xl blur-lg opacity-50" />
              <ImageSection />
           </div>
         </div>

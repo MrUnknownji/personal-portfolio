@@ -136,18 +136,9 @@ export default function MyProjects() {
       ".project-card-container",
     );
 
-    // If it's the first render (or handled by initial animation), skip filter animation
-    // But simple check might be tricky. For now, we rely on user interaction triggering state change.
-    // However, on mount, animateFilterChange runs. We should maybe block it on mount if initial animation handles it.
-    // Actually, `useEffect` runs after mount.
-
     if (!existingCards.length && !filteredProjects.length) {
       return;
     }
-
-    // Only run this if NOT initial mount (hacky check, or trust that initialTl handles opacity=0)
-    // Ideally, we use a ref to track if initial animation is done.
-    // For simplicity, we let this run but with a check.
 
     setIsAnimating(true);
 
@@ -156,13 +147,12 @@ export default function MyProjects() {
         setIsAnimating(false);
         filterTimelineRef.current = null;
         gsap.set(".project-card-container", { clearProps: "all" });
-        ScrollTrigger.refresh(); // Refresh scroll trigger after layout change
+        ScrollTrigger.refresh();
       },
       defaults: { overwrite: "auto" },
     });
 
     if (existingCards.length > 0) {
-        // Fade out old
       filterTimelineRef.current.to(existingCards, {
         opacity: 0,
         scale: ANIMATION_CONFIG.FILTER.OUT_SCALE,
@@ -176,24 +166,6 @@ export default function MyProjects() {
     }
 
     filterTimelineRef.current.add(() => {
-       // React renders new cards here because state changed before this effect?
-       // No, this effect runs AFTER state change. So `filteredProjects` is already new.
-       // Wait, if `filteredProjects` changed, the DOM updates immediately.
-       // So `existingCards` are the NEW cards already?
-       // React updates DOM, then Effect runs.
-       // So we need to use `Flip` plugin or manually handle exit/enter.
-       // If we just use this effect, the DOM is already updated.
-       // So we are animating IN the new cards. We missed the exit animation of old cards?
-       // Correct. `animateFilterChange` in `useEffect` runs after render.
-       // To animate OUT, we need to use `useLayoutEffect` or intercept the state change.
-       // But given the code structure, let's assume we just animate IN.
-       // OR, we use Flip. Flip is best for filtering.
-       // Since we don't have Flip registered (maybe), we stick to simple Animate In.
-       // The previous code tried to animate existing cards, but they are already the new ones.
-
-       // Actually, the code logic was a bit flawed for React.
-       // Let's just animate IN the current cards nicely.
-
        const newCards = projectsRef.current?.querySelectorAll(
           ".project-card-container",
         );
@@ -218,19 +190,8 @@ export default function MyProjects() {
         }
     });
   }, [isAnimating, filteredProjects.length]);
-  // Removed `filter` and `searchQuery` from dependencies to avoid double triggering with state change?
-  // No, we need them to trigger effect.
-
-  // Optimized approach:
-  // We can't easily do exit animations with standard useEffect without keeping old state.
-  // So we will just focus on a nice Entrance animation for the filtered list.
 
   useEffect(() => {
-    // Skip animation on initial mount (handled by useGSAP)
-    if (animationContextRef.current) {
-         // This might be running on mount too.
-    }
-
     animateFilterChange();
 
     return () => {

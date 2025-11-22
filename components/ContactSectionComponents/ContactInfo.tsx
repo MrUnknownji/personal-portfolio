@@ -98,20 +98,14 @@ const ContactInfo = () => {
       gsap.set([title, socialTitle], {
         opacity: ANIMATION_CONFIG.ENTRANCE.OPACITY,
         y: ANIMATION_CONFIG.ENTRANCE.Y_OFFSET,
-        force3D: true,
-        willChange: "transform, opacity",
       });
       gsap.set(infoItems, {
         opacity: ANIMATION_CONFIG.ENTRANCE.OPACITY,
         y: ANIMATION_CONFIG.ENTRANCE.Y_OFFSET,
-        force3D: true,
-        willChange: "transform, opacity",
       });
       gsap.set(socialIcons, {
         opacity: ANIMATION_CONFIG.SOCIAL_ENTRANCE.OPACITY,
         scale: ANIMATION_CONFIG.SOCIAL_ENTRANCE.SCALE,
-        force3D: true,
-        willChange: "transform, opacity",
       });
 
       const tl = gsap.timeline({
@@ -122,10 +116,6 @@ const ContactInfo = () => {
           toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
           markers: false,
         },
-        defaults: {
-          force3D: true,
-          willChange: "transform, opacity",
-        },
       });
 
       tl.to(title, {
@@ -133,7 +123,7 @@ const ContactInfo = () => {
         y: 0,
         duration: ANIMATION_CONFIG.ENTRANCE.DURATION,
         ease: ANIMATION_CONFIG.ENTRANCE.EASE,
-        clearProps: "all",
+        clearProps: "transform, opacity",
       })
         .to(
           infoItems,
@@ -143,7 +133,7 @@ const ContactInfo = () => {
             duration: ANIMATION_CONFIG.ENTRANCE.DURATION,
             stagger: ANIMATION_CONFIG.ENTRANCE.STAGGER,
             ease: ANIMATION_CONFIG.ENTRANCE.EASE,
-            clearProps: "all",
+            clearProps: "transform, opacity",
           },
           "-=0.3",
         )
@@ -154,7 +144,7 @@ const ContactInfo = () => {
             y: 0,
             duration: ANIMATION_CONFIG.ENTRANCE.DURATION,
             ease: ANIMATION_CONFIG.ENTRANCE.EASE,
-            clearProps: "all",
+            clearProps: "transform, opacity",
           },
           "-=0.4",
         )
@@ -166,7 +156,7 @@ const ContactInfo = () => {
             duration: ANIMATION_CONFIG.SOCIAL_ENTRANCE.DURATION,
             stagger: ANIMATION_CONFIG.SOCIAL_ENTRANCE.STAGGER,
             ease: ANIMATION_CONFIG.SOCIAL_ENTRANCE.EASE,
-            clearProps: "all",
+            clearProps: "transform, opacity, scale",
           },
           "-=0.3",
         );
@@ -176,7 +166,7 @@ const ContactInfo = () => {
 
   return (
     <div ref={containerRef} className="w-full relative h-full flex flex-col justify-between">
-      <div className="space-y-8">
+      <div className="space-y-8 relative z-10">
         <div>
           <h3 className="contact-title text-3xl font-bold text-light mb-8 tracking-tight">
             Contact Information
@@ -194,7 +184,7 @@ const ContactInfo = () => {
           <h4 className="social-title text-lg font-semibold text-light/90 mb-5 tracking-wide">
             Connect With Me
           </h4>
-          <div className="flex gap-4">
+          <div className="flex gap-4 relative z-20">
             {SOCIAL_LINKS.map((social) => (
               <a
                 key={social.label}
@@ -214,8 +204,9 @@ const ContactInfo = () => {
         </div>
       </div>
 
-      <div className="absolute -left-8 -bottom-8 w-48 h-48 bg-primary/10 rounded-full filter blur-[60px] pointer-events-none -z-10 opacity-50" />
-      <div className="absolute -right-8 -top-8 w-48 h-48 bg-accent/10 rounded-full filter blur-[60px] pointer-events-none -z-10 opacity-50" />
+      {/* Reduced blur radius for performance */}
+      <div className="absolute -left-8 -bottom-8 w-48 h-48 bg-primary/10 rounded-full filter blur-[40px] pointer-events-none -z-10 opacity-40" />
+      <div className="absolute -right-8 -top-8 w-48 h-48 bg-accent/10 rounded-full filter blur-[40px] pointer-events-none -z-10 opacity-40" />
     </div>
   );
 };
