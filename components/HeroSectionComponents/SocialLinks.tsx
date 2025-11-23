@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi";
+import { FiGithub, FiLinkedin } from "react-icons/fi";
+import { FaXTwitter } from "react-icons/fa6";
 import gsap from "gsap";
 import { SocialLink } from "../../types/social";
 import { fetchSocialStats } from "../../utils/social";
@@ -88,14 +89,14 @@ const SocialLinks = () => {
             username: stats.linkedin?.name || "sandeep-kumar-sk1707",
           },
           {
-            icon: <FiTwitter className="w-5 h-5" />,
-            label: "Twitter",
+            icon: <FaXTwitter className="w-5 h-5" />,
+            label: "X",
             href: "https://twitter.com/MrUnknownG786",
-            bgColor: "rgba(29, 161, 242, 0)",
-            hoverBgColor: "rgba(29, 161, 242, 0.1)",
+            bgColor: "rgba(0, 0, 0, 0)",
+            hoverBgColor: "rgba(0, 0, 0, 0.1)",
             iconColor: "rgb(209, 213, 219)",
-            hoverIconColor: "rgb(29, 161, 242)",
-            color: "rgb(29, 161, 242)",
+            hoverIconColor: "rgb(0, 0, 0)",
+            color: "rgb(0, 0, 0)",
             description: "Tech insights and updates",
             stats: [
               { label: "Followers", value: stats.twitter?.followers?.toString() || "250+" },
@@ -154,14 +155,14 @@ const SocialLinks = () => {
                        transition-all duration-300 ease-out
                        hover:bg-white/10 hover:scale-110 hover:border-white/20"
             style={{
-                boxShadow: activeLink === index ? `0 0 15px ${link.color}40` : 'none',
-                borderColor: activeLink === index ? `${link.color}60` : ''
+              boxShadow: activeLink === index ? `0 0 15px ${link.color}40` : 'none',
+              borderColor: activeLink === index ? `${link.color}60` : ''
             }}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
           >
             <div className="text-neutral-400 transition-colors duration-300 group-hover:text-white"
-                 style={{ color: activeLink === index ? link.color : undefined }}>
+              style={{ color: activeLink === index ? link.color : undefined }}>
               {link.icon}
             </div>
           </a>
@@ -173,7 +174,7 @@ const SocialLinks = () => {
           socialLink={socialLinks[activeLink]}
           position={infoBoxPosition}
           opacity={infoBoxOpacity}
-          onHeightChange={() => {}}
+          onHeightChange={() => { }}
         />
       )}
     </div>

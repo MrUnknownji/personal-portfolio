@@ -8,8 +8,8 @@ import {
   FiMapPin,
   FiGithub,
   FiLinkedin,
-  FiTwitter,
 } from "react-icons/fi";
+import { FaXTwitter } from "react-icons/fa6";
 import InfoItem from "./InfoItem";
 
 const CONTACT_INFO = [
@@ -45,8 +45,8 @@ const SOCIAL_LINKS = [
     link: "https://linkedin.com/in/sandeep-kumar-sk1707",
   },
   {
-    icon: <FiTwitter className="w-6 h-6" />,
-    label: "Twitter",
+    icon: <FaXTwitter className="w-6 h-6" />,
+    label: "X",
     link: "https://twitter.com/MrUnknownG786",
   },
 ] as const;

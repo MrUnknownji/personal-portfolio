@@ -31,11 +31,16 @@ export default function SmoothScroller({
 
   // Refresh ScrollTrigger on route change
   useEffect(() => {
-      const timeout = setTimeout(() => {
-          ScrollTrigger.refresh();
-      }, 200);
+    const smoother = ScrollSmoother.get();
+    if (smoother) {
+      smoother.scrollTo(0, false);
+    }
 
-      return () => clearTimeout(timeout);
+    const timeout = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 200);
+
+    return () => clearTimeout(timeout);
   }, [pathname]);
 
   return (

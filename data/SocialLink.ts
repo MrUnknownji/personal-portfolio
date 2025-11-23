@@ -1,5 +1,6 @@
 import { SocialLink } from "@/types/social";
-import { FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi";
+import { FiGithub, FiLinkedin } from "react-icons/fi";
+import { FaXTwitter } from "react-icons/fa6";
 import React from "react";
 
 export const socialLinks: SocialLink[] = [
@@ -40,14 +41,14 @@ export const socialLinks: SocialLink[] = [
 		profileImage: "https://placehold.co/600x600?text=Sandeep+Kumar",
 	},
 	{
-		icon: React.createElement(FiTwitter, { className: "w-6 h-6" }),
+		icon: React.createElement(FaXTwitter, { className: "w-6 h-6" }),
 		href: "https://twitter.com/MrUnknownG786",
-		label: "Twitter",
-		bgColor: "rgba(29, 161, 242, 0)",
-		hoverBgColor: "rgba(29, 161, 242, 0.1)",
+		label: "X",
+		bgColor: "rgba(0, 0, 0, 0)",
+		hoverBgColor: "rgba(0, 0, 0, 0.1)",
 		iconColor: "rgb(209, 213, 219)",
-		hoverIconColor: "rgb(29, 161, 242)",
-		color: "#00acee",
+		hoverIconColor: "rgb(0, 0, 0)",
+		color: "#000000",
 		description: "Follow me for tech insights and updates",
 		stats: [
 			{ label: "Followers", value: "250+" },
