@@ -461,7 +461,7 @@ export default function Bot() {
 
             <div ref={containerRef} className="w-full h-full cursor-pointer" />
 
-            <div className={`absolute bottom-[20px] sm:bottom-[40px] left-1/2 -translate-x-1/2 translate-y-full w-[90%] sm:w-[300px] transition-all duration-300 ${chatOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-4'}`}>
+            <div className={`absolute bottom-[60px] sm:bottom-[40px] left-1/2 -translate-x-1/2 translate-y-full w-[90%] sm:w-[300px] transition-all duration-300 ${chatOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-4'}`}>
                 <div className="flex gap-2 bg-black/80 p-2 rounded-full border border-[#00ff99] shadow-[0_0_10px_rgba(0,255,153,0.2)]" >
                     <input
                         type="text"
