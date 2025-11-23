@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { chatWithBot } from '@/app/actions/chat';
-import { IoSend } from "react-icons/io5";
+import { IoSend, IoClose } from "react-icons/io5";
 
 export default function Bot() {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -16,6 +16,7 @@ export default function Bot() {
 
     const sceneRef = useRef<THREE.Scene | null>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+    const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
     const headPivotRef = useRef<THREE.Group | null>(null);
     const eyeTextureRef = useRef<THREE.CanvasTexture | null>(null);
     const eyeContextRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -49,17 +50,36 @@ export default function Bot() {
 
         const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
         camera.position.set(0, 2.2, 9.5);
+        cameraRef.current = camera;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(450, 450);
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
+        rendererRef.current = renderer;
 
         const container = containerRef.current;
         if (container) {
             container.appendChild(renderer.domElement);
+
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            renderer.setSize(width, height);
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
         }
-        rendererRef.current = renderer;
+
+        const updateSize = () => {
+            if (container && renderer && camera) {
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                renderer.setSize(width, height);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+            }
+        };
+
+        window.addEventListener('resize', updateSize);
 
         scene.add(new THREE.AmbientLight(0xffffff, 0.3));
         const mainLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -93,7 +113,6 @@ export default function Bot() {
         robotRef.current = robot;
         scene.add(robot);
 
-        // Set initial scale
         robot.scale.set(0.5, 0.5, 0.5);
 
         const body = new THREE.Mesh(new THREE.SphereGeometry(1.6, 48, 48), matBody);
@@ -163,6 +182,7 @@ export default function Bot() {
         animate();
 
         return () => {
+            window.removeEventListener('resize', updateSize);
             if (requestRef.current) cancelAnimationFrame(requestRef.current);
             if (container && renderer.domElement) {
                 container.removeChild(renderer.domElement);
@@ -281,15 +301,28 @@ export default function Bot() {
     }, [eyeState, isProcessing, isCooldown]);
 
     useEffect(() => {
-        const handleWindowMouseMove = (e: MouseEvent) => {
+        const handleWindowMouseMove = (e: MouseEvent | TouchEvent) => {
             if (!containerRef.current) return;
 
             const rect = containerRef.current.getBoundingClientRect();
             const botCenterX = rect.left + rect.width / 2;
             const botCenterY = rect.top + rect.height / 2;
 
-            const dx = e.clientX - botCenterX;
-            const dy = e.clientY - botCenterY;
+            let clientX, clientY;
+            if ('touches' in e) {
+                if (e.touches.length > 0) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    return;
+                }
+            } else {
+                clientX = (e as MouseEvent).clientX;
+                clientY = (e as MouseEvent).clientY;
+            }
+
+            const dx = clientX - botCenterX;
+            const dy = clientY - botCenterY;
 
             const x = (dx / window.innerWidth) * 4;
             const y = -(dy / window.innerHeight) * 4;
@@ -323,12 +356,14 @@ export default function Bot() {
         };
 
         window.addEventListener('mousemove', handleWindowMouseMove);
+        window.addEventListener('touchmove', handleWindowMouseMove);
         window.addEventListener('contextmenu', handleWindowRightClick);
         window.addEventListener('mousedown', handleWindowMouseDown);
         window.addEventListener('mouseup', handleWindowMouseUp);
 
         return () => {
             window.removeEventListener('mousemove', handleWindowMouseMove);
+            window.removeEventListener('touchmove', handleWindowMouseMove);
             window.removeEventListener('contextmenu', handleWindowRightClick);
             window.removeEventListener('mousedown', handleWindowMouseDown);
             window.removeEventListener('mouseup', handleWindowMouseUp);
@@ -345,6 +380,19 @@ export default function Bot() {
         if (!input && !isProcessing && !isCooldown) {
             setChatOpen(false);
         }
+    };
+
+    const handleContainerClick = () => {
+        if (!chatOpen) {
+            setChatOpen(true);
+            isHoveredRef.current = true;
+        }
+    };
+
+    const handleCloseChat = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setChatOpen(false);
+        isHoveredRef.current = false;
     };
 
     const handleDoubleClick = () => {
@@ -393,26 +441,27 @@ export default function Bot() {
 
     return (
         <div
-            className={`fixed z-50 transition-all duration-300 ease-in-out w-[450px] h-[450px] ${chatOpen
-                ? 'bottom-10 right-0'
-                : '-bottom-10 -right-30'
+            className={`fixed z-50 transition-all duration-300 ease-in-out w-[280px] h-[280px] sm:w-[450px] sm:h-[450px] ${chatOpen
+                ? 'bottom-0 right-0 sm:bottom-10'
+                : '-bottom-10 -right-10 sm:-right-30'
                 }`
             }
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onDoubleClick={handleDoubleClick}
+            onClick={handleContainerClick}
         >
             {chatOpen && <div className="absolute -bottom-[200px] -right-[200px] w-[150%] h-[150%] bg-transparent -z-10" />}
             <div
-                className={`absolute top-[0px] left-1/2 -translate-x-1/2 -translate-y-full mb-4 w-max max-w-[200px] bg-[#00ff99]/10 border-2 border-[#00ff99] text-[#00ff99] px-4 py-2 rounded-xl text-center font-mono text-sm font-bold shadow-[0_0_15px_#00ff99] pointer-events-none transition-opacity duration-200 ${bubbleText && chatOpen ? 'opacity-100' : 'opacity-0'}`}
+                className={`absolute top-[20px] sm:top-[0px] left-1/2 -translate-x-1/2 -translate-y-full mb-4 w-max max-w-[200px] bg-[#00ff99]/10 border-2 border-[#00ff99] text-[#00ff99] px-4 py-2 rounded-xl text-center font-mono text-sm font-bold shadow-[0_0_15px_#00ff99] pointer-events-none transition-opacity duration-200 ${bubbleText && chatOpen ? 'opacity-100' : 'opacity-0'}`}
             >
                 {bubbleText}
-                < div className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] border-t-[#00ff99]" > </div>
+                <div className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] border-t-[#00ff99]" > </div>
             </div>
 
-            < div ref={containerRef} className="w-full h-full cursor-pointer" />
+            <div ref={containerRef} className="w-full h-full cursor-pointer" />
 
-            <div className={`absolute bottom-[40px] left-1/2 -translate-x-1/2 translate-y-full w-[300px] transition-all duration-300 ${chatOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-4'}`}>
+            <div className={`absolute bottom-[20px] sm:bottom-[40px] left-1/2 -translate-x-1/2 translate-y-full w-[90%] sm:w-[300px] transition-all duration-300 ${chatOpen ? 'opacity-100 visible translate-y-0' : 'opacity-0 invisible translate-y-4'}`}>
                 <div className="flex gap-2 bg-black/80 p-2 rounded-full border border-[#00ff99] shadow-[0_0_10px_rgba(0,255,153,0.2)]" >
                     <input
                         type="text"
@@ -420,15 +469,22 @@ export default function Bot() {
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                         placeholder="Ask me anything..."
-                        className="flex-1 bg-transparent text-[#00ff99] placeholder-[#00ff99]/50 px-3 py-1 outline-none font-mono text-sm"
+                        className="flex-1 bg-transparent text-[#00ff99] placeholder-[#00ff99]/50 px-3 py-1 outline-none font-mono text-sm min-w-0"
                         disabled={isProcessing}
                     />
                     <button
                         onClick={handleSend}
                         disabled={isProcessing}
-                        className="bg-[#00ff99] text-black p-2 rounded-full hover:scale-105 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-[#00ff99] text-black p-2 rounded-full hover:scale-105 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
                     >
                         <IoSend />
+                    </button>
+                    <button
+                        onClick={handleCloseChat}
+                        className="bg-transparent text-[#00ff99] border border-[#00ff99] p-2 rounded-full hover:bg-[#00ff99]/10 active:scale-95 transition-all flex-shrink-0 sm:hidden"
+                        title="Close chat"
+                    >
+                        <IoClose />
                     </button>
                 </div>
             </div>
