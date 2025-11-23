@@ -53,8 +53,7 @@ export default function Bot() {
         cameraRef.current = camera;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        // Initial size setting based on container
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         rendererRef.current = renderer;
 
@@ -62,7 +61,6 @@ export default function Bot() {
         if (container) {
             container.appendChild(renderer.domElement);
 
-            // Set initial size
             const width = container.clientWidth;
             const height = container.clientHeight;
             renderer.setSize(width, height);
@@ -75,6 +73,7 @@ export default function Bot() {
                 const width = container.clientWidth;
                 const height = container.clientHeight;
                 renderer.setSize(width, height);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 camera.aspect = width / height;
                 camera.updateProjectionMatrix();
             }

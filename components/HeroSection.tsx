@@ -45,12 +45,12 @@ const HeroSection = () => {
       style={{ perspective: "2000px" }}
     >
       {/* Subtle modern background gradient */}
-      <div ref={bgGlow1Ref} className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
-      <div ref={bgGlow2Ref} className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-accent/5 blur-[100px] rounded-full pointer-events-none" />
+      <div ref={bgGlow1Ref} className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary/5 blur-[60px] sm:blur-[120px] rounded-full pointer-events-none" />
+      <div ref={bgGlow2Ref} className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-accent/5 blur-[50px] sm:blur-[100px] rounded-full pointer-events-none" />
 
       <div
         className="w-full max-w-7xl mx-auto relative rounded-3xl p-8 md:p-10 lg:p-16
-                   bg-white/[0.02] backdrop-blur-2xl z-10
+                   bg-white/[0.02] backdrop-blur-lg sm:backdrop-blur-2xl z-10
                    shadow-[0_0_100px_-30px_rgba(0,0,0,0.5)] border border-white/[0.05]"
       >
         {/* Inner subtle glow */}

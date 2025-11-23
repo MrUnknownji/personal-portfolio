@@ -17,12 +17,11 @@ export default function SmoothScroller({
   const pathname = usePathname();
 
   useGSAP(() => {
-    // Create smoother with slightly reduced settings for performance
     const smoother = ScrollSmoother.create({
-      smooth: 0.8, // Slightly less smoothing for more responsiveness
+      smooth: 0.8,
       effects: true,
-      smoothTouch: 0.1,
-      normalizeScroll: false, // Disable to avoid potential jitter on some devices
+      smoothTouch: 0,
+      normalizeScroll: false,
     });
 
     return () => {
