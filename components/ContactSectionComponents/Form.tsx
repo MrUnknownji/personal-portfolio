@@ -10,6 +10,8 @@ interface FormProps {
 const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
   const formRef = useRef<HTMLFormElement>(null);
   const categoryInputRef = useRef<HTMLInputElement>(null);
   const subjectInputRef = useRef<HTMLInputElement>(null);
@@ -40,9 +42,8 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     try {
       if (submitButtonRef.current) {
         gsap.to(submitButtonRef.current, {
-          scale: 0.97,
-          duration: 0.15,
-          ease: "power2.inOut",
+          scale: 0.95,
+          duration: 0.1,
           yoyo: true,
           repeat: 1,
         });
@@ -80,17 +81,44 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     }
   };
 
-  const getInputClasses = (hasError: boolean): string => {
+  const getInputClasses = (fieldName: string, hasError: boolean): string => {
+    const isFocused = focusedField === fieldName;
+
     return `
-      w-full bg-neutral/10 rounded-xl border text-light px-5 py-4
-      outline-none placeholder:text-muted/50 transition-all duration-300 ease-out transform-none
-      focus:border-primary/50 focus:bg-neutral/20 focus:ring-4 focus:ring-primary/10
-      backdrop-blur-sm
+      w-full bg-transparent rounded-none border-b-2 text-white px-0 py-4
+      outline-none placeholder:text-transparent transition-all duration-300
+      [&:-webkit-autofill]:bg-transparent
+      [&:-webkit-autofill]:[-webkit-text-fill-color:white]
+      [&:-webkit-autofill]:transition-[background-color]
+      [&:-webkit-autofill]:duration-[5000s]
+      [&:-webkit-autofill]:ease-in-out
       ${hasError
-        ? "border-destructive/50 bg-destructive/5 focus:ring-destructive/10"
-        : "border-neutral/20 hover:border-primary/30 hover:bg-neutral/15"
+        ? "border-red-500/80"
+        : isFocused
+          ? "border-primary"
+          : "border-white/20 hover:border-white/40"
       }
     `;
+  };
+
+  const renderFloatingLabel = (fieldName: string, label: string) => {
+    const isFocused = focusedField === fieldName;
+    const hasValue = fieldName === 'category' ? categoryInputRef.current?.value :
+      fieldName === 'subject' ? subjectInputRef.current?.value :
+        messageTextareaRef.current?.value;
+
+    return (
+      <label
+        className={`absolute left-0 transition-all duration-300 pointer-events-none
+          ${(isFocused || hasValue)
+            ? "-top-2 text-xs text-primary font-medium"
+            : "top-4 text-neutral-400"
+          }
+        `}
+      >
+        {label}
+      </label>
+    );
   };
 
   return (
@@ -98,89 +126,92 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
       <form
         ref={formRef}
         onSubmit={handleSubmit}
-        className="space-y-6"
+        className="space-y-8"
         noValidate
       >
-        <div className="form-item-wrapper relative group">
+        <div className="relative group">
           <input
             ref={categoryInputRef}
             type="text"
             name="category"
-            placeholder="Category (e.g., Project Inquiry)"
-            className={getInputClasses(!!errors.category)}
-            aria-invalid={!!errors.category}
-            aria-describedby={errors.category ? "category-error" : undefined}
+            className={getInputClasses('category', !!errors.category)}
+            onFocus={() => setFocusedField('category')}
+            onBlur={() => setFocusedField(null)}
+            onChange={() => {
+              if (errors.category) setErrors({ ...errors, category: '' });
+            }}
             disabled={isSubmitting}
+            style={{ backgroundColor: 'transparent' }}
           />
+          {renderFloatingLabel('category', 'Category (e.g., Project Inquiry)')}
           {errors.category && (
-            <span
-              id="category-error"
-              className="absolute -bottom-5 left-1 text-xs text-destructive font-medium"
-              role="alert"
-            >
+            <span className="absolute -bottom-6 left-0 text-xs text-red-400 font-medium animate-pulse">
               {errors.category}
             </span>
           )}
         </div>
 
-        <div className="form-item-wrapper relative group">
+        <div className="relative group">
           <input
             ref={subjectInputRef}
             type="text"
             name="subject"
-            placeholder="Subject"
-            className={getInputClasses(!!errors.subject)}
-            aria-invalid={!!errors.subject}
-            aria-describedby={errors.subject ? "subject-error" : undefined}
+            className={getInputClasses('subject', !!errors.subject)}
+            onFocus={() => setFocusedField('subject')}
+            onBlur={() => setFocusedField(null)}
+            onChange={() => {
+              if (errors.subject) setErrors({ ...errors, subject: '' });
+            }}
             disabled={isSubmitting}
+            style={{ backgroundColor: 'transparent' }}
           />
+          {renderFloatingLabel('subject', 'Subject')}
           {errors.subject && (
-            <span
-              id="subject-error"
-              className="absolute -bottom-5 left-1 text-xs text-destructive font-medium"
-              role="alert"
-            >
+            <span className="absolute -bottom-6 left-0 text-xs text-red-400 font-medium animate-pulse">
               {errors.subject}
             </span>
           )}
         </div>
 
-        <div className="form-item-wrapper relative group">
+        <div className="relative group">
           <textarea
             ref={messageTextareaRef}
             name="message"
-            placeholder="Your Message..."
-            rows={6}
-            className={`${getInputClasses(!!errors.message)} resize-none`}
-            aria-invalid={!!errors.message}
-            aria-describedby={errors.message ? "message-error" : undefined}
+            rows={4}
+            className={`${getInputClasses('message', !!errors.message)} resize-none`}
+            onFocus={() => setFocusedField('message')}
+            onBlur={() => setFocusedField(null)}
+            onChange={() => {
+              if (errors.message) setErrors({ ...errors, message: '' });
+            }}
             disabled={isSubmitting}
+            style={{ backgroundColor: 'transparent' }}
           />
+          {renderFloatingLabel('message', 'Your Message...')}
           {errors.message && (
-            <span
-              id="message-error"
-              className="absolute -bottom-5 left-1 text-xs text-destructive font-medium"
-              role="alert"
-            >
+            <span className="absolute -bottom-6 left-0 text-xs text-red-400 font-medium animate-pulse">
               {errors.message}
             </span>
           )}
         </div>
 
-        <div className="form-item-wrapper pt-2">
+        <div className="pt-4">
           <button
             ref={submitButtonRef}
             type="submit"
             disabled={isSubmitting}
-            className="group/submitbtn w-full bg-gradient-to-r from-primary to-accent text-dark font-bold py-4 px-6 rounded-xl
-                        focus:outline-none focus:ring-4 focus:ring-primary/20 focus:ring-offset-0
-                        flex items-center justify-center gap-x-2 transform transition-all duration-300 ease-out
-                        hover:shadow-lg hover:shadow-primary/25 hover:scale-[1.02] active:scale-[0.98]
-                        disabled:opacity-70 disabled:cursor-not-allowed disabled:shadow-none"
+            className="group/submitbtn relative w-full overflow-hidden bg-white text-black font-bold py-4 px-6 rounded-xl
+                        flex items-center justify-center gap-x-2 transition-all duration-300
+                        hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            <span className="tracking-wide">{isSubmitting ? "Sending..." : "Send Message"}</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary opacity-0 group-hover/submitbtn:opacity-100 transition-opacity duration-300" />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary opacity-0 group-hover/submitbtn:opacity-20 blur-xl transition-opacity duration-300" />
+
+            <span className="relative z-10 tracking-wide group-hover/submitbtn:text-black transition-colors duration-300">
+              {isSubmitting ? "Sending..." : "Send Message"}
+            </span>
             <FiSend
-              className={`w-5 h-5 transition-transform duration-300 ease-out ${isSubmitting
+              className={`relative z-10 w-5 h-5 transition-all duration-300 group-hover/submitbtn:text-black ${isSubmitting
                 ? "animate-spin"
                 : "group-hover/submitbtn:translate-x-1 group-hover/submitbtn:-translate-y-1"
                 }`}

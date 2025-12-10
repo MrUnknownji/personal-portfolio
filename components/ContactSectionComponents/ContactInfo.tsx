@@ -51,28 +51,6 @@ const SOCIAL_LINKS = [
   },
 ] as const;
 
-const ANIMATION_CONFIG = {
-  ENTRANCE: {
-    DURATION: 0.6,
-    EASE: "power2.out",
-    Y_OFFSET: 20,
-    OPACITY: 0,
-    STAGGER: 0.08,
-  },
-  SOCIAL_ENTRANCE: {
-    DURATION: 0.5,
-    STAGGER: 0.05,
-    SCALE: 0.9,
-    OPACITY: 0,
-    EASE: "back.out(1.5)",
-  },
-  SCROLL_TRIGGER: {
-    START: "top 85%",
-    END: "bottom center",
-    TOGGLE_ACTIONS: "play none none none",
-  },
-} as const;
-
 const ContactInfo = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -95,85 +73,98 @@ const ContactInfo = () => {
       )
         return;
 
-      gsap.set([title, socialTitle], {
-        opacity: ANIMATION_CONFIG.ENTRANCE.OPACITY,
-        y: ANIMATION_CONFIG.ENTRANCE.Y_OFFSET,
-      });
-      gsap.set(infoItems, {
-        opacity: ANIMATION_CONFIG.ENTRANCE.OPACITY,
-        y: ANIMATION_CONFIG.ENTRANCE.Y_OFFSET,
-      });
-      gsap.set(socialIcons, {
-        opacity: ANIMATION_CONFIG.SOCIAL_ENTRANCE.OPACITY,
-        scale: ANIMATION_CONFIG.SOCIAL_ENTRANCE.SCALE,
-      });
+      // Initial States
+      gsap.set([title, socialTitle], { opacity: 0, y: 20 });
+      gsap.set(infoItems, { opacity: 0, x: -20 });
+      gsap.set(socialIcons, { opacity: 0, scale: 0 });
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
-          start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
-          end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
-          toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
-          markers: false,
+          start: "top 85%",
+          end: "bottom center",
+          toggleActions: "play none none reverse",
         },
       });
 
       tl.to(title, {
         opacity: 1,
         y: 0,
-        duration: ANIMATION_CONFIG.ENTRANCE.DURATION,
-        ease: ANIMATION_CONFIG.ENTRANCE.EASE,
-        clearProps: "transform, opacity",
+        duration: 0.6,
+        ease: "power2.out",
       })
         .to(
           infoItems,
           {
             opacity: 1,
-            y: 0,
-            duration: ANIMATION_CONFIG.ENTRANCE.DURATION,
-            stagger: ANIMATION_CONFIG.ENTRANCE.STAGGER,
-            ease: ANIMATION_CONFIG.ENTRANCE.EASE,
-            clearProps: "transform, opacity",
+            x: 0,
+            duration: 0.5,
+            stagger: 0.1,
+            ease: "power2.out",
           },
-          "-=0.3",
+          "-=0.3"
         )
         .to(
           socialTitle,
           {
             opacity: 1,
             y: 0,
-            duration: ANIMATION_CONFIG.ENTRANCE.DURATION,
-            ease: ANIMATION_CONFIG.ENTRANCE.EASE,
-            clearProps: "transform, opacity",
+            duration: 0.5,
+            ease: "power2.out",
           },
-          "-=0.4",
+          "-=0.2"
         )
         .to(
           socialIcons,
           {
             opacity: 1,
             scale: 1,
-            duration: ANIMATION_CONFIG.SOCIAL_ENTRANCE.DURATION,
-            stagger: ANIMATION_CONFIG.SOCIAL_ENTRANCE.STAGGER,
-            ease: ANIMATION_CONFIG.SOCIAL_ENTRANCE.EASE,
-            clearProps: "transform, opacity, scale",
+            duration: 0.5,
+            stagger: 0.1,
+            ease: "back.out(1.7)",
           },
-          "-=0.3",
+          "-=0.3"
         );
+
+      // Magnetic Effect for Social Icons
+      socialIcons.forEach((icon) => {
+        icon.addEventListener("mousemove", (e: MouseEvent) => {
+          const rect = icon.getBoundingClientRect();
+          const x = e.clientX - rect.left - rect.width / 2;
+          const y = e.clientY - rect.top - rect.height / 2;
+
+          gsap.to(icon, {
+            x: x * 0.3,
+            y: y * 0.3,
+            duration: 0.3,
+            ease: "power2.out",
+          });
+        });
+
+        icon.addEventListener("mouseleave", () => {
+          gsap.to(icon, {
+            x: 0,
+            y: 0,
+            duration: 0.5,
+            ease: "elastic.out(1, 0.3)",
+          });
+        });
+      });
     },
-    { scope: containerRef },
+    { scope: containerRef }
   );
 
   return (
-    <div ref={containerRef} className="w-full relative h-full flex flex-col justify-between">
+    <div ref={containerRef} className="w-full relative h-full flex flex-col justify-between gap-10">
       <div className="space-y-8 relative z-10">
         <div>
-          <h3 className="contact-title text-3xl font-bold text-light mb-8 tracking-tight">
+          <h3 className="contact-title text-3xl font-bold text-white mb-8 tracking-tight flex items-center gap-3">
+            <span className="w-1 h-8 bg-primary rounded-full"></span>
             Contact Information
           </h3>
           <div className="space-y-6">
             {CONTACT_INFO.map((info) => (
-              <div key={info.label} className="info-item">
+              <div key={info.label} className="info-item group">
                 <InfoItem {...info} />
               </div>
             ))}
@@ -181,7 +172,8 @@ const ContactInfo = () => {
         </div>
 
         <div>
-          <h4 className="social-title text-lg font-semibold text-light/90 mb-5 tracking-wide">
+          <h4 className="social-title text-lg font-semibold text-neutral-300 mb-6 tracking-wide flex items-center gap-3">
+            <span className="w-1 h-6 bg-accent rounded-full"></span>
             Connect With Me
           </h4>
           <div className="flex gap-4 relative z-20">
@@ -191,22 +183,21 @@ const ContactInfo = () => {
                 href={social.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-link group w-12 h-12 flex items-center justify-center rounded-xl bg-neutral/10 text-muted
-                           border border-neutral/20 backdrop-blur-sm
-                           transition-all duration-300 ease-out transform-gpu
-                           hover:border-primary/40 hover:bg-primary/10 hover:text-primary hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10"
+                className="social-link group relative w-14 h-14 flex items-center justify-center rounded-2xl 
+                           bg-white/5 text-neutral-400 border border-white/10 backdrop-blur-md
+                           transition-all duration-300 ease-out
+                           hover:border-primary/50 hover:text-white hover:shadow-[0_0_20px_rgba(0,255,159,0.3)]"
                 aria-label={social.label}
               >
-                {social.icon}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300" />
+                <span className="relative z-10 transform transition-transform duration-300 group-hover:scale-110">
+                  {social.icon}
+                </span>
               </a>
             ))}
           </div>
         </div>
       </div>
-
-      {/* Reduced blur radius for performance */}
-      <div className="absolute -left-8 -bottom-8 w-48 h-48 bg-primary/10 rounded-full filter blur-[40px] pointer-events-none -z-10 opacity-40" />
-      <div className="absolute -right-8 -top-8 w-48 h-48 bg-accent/10 rounded-full filter blur-[40px] pointer-events-none -z-10 opacity-40" />
     </div>
   );
 };

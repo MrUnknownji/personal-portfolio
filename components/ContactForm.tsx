@@ -10,52 +10,86 @@ import Title from "./ui/Title";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ANIMATION_CONFIG = {
-  SECTION_ENTRANCE: {
-    DURATION: 1,
-    EASE: "power3.out",
-    Y_OFFSET: 40,
-    OPACITY: 0,
-    DELAY: 0.1,
-  },
-  SCROLL_TRIGGER: {
-    START: "top 80%",
-    END: "bottom center",
-    TOGGLE_ACTIONS: "play none none none",
-  },
-} as const;
-
 const ContactForm: React.FC = () => {
   const [isThankYouOpen, setIsThankYouOpen] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const glowRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      if (!containerRef.current) return;
+      if (!containerRef.current || !glowRef.current) return;
 
-      gsap.set(containerRef.current, {
-        opacity: ANIMATION_CONFIG.SECTION_ENTRANCE.OPACITY,
-        y: ANIMATION_CONFIG.SECTION_ENTRANCE.Y_OFFSET,
-      });
-
-      gsap.to(containerRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: ANIMATION_CONFIG.SECTION_ENTRANCE.DURATION,
-        ease: ANIMATION_CONFIG.SECTION_ENTRANCE.EASE,
-        delay: ANIMATION_CONFIG.SECTION_ENTRANCE.DELAY,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: ANIMATION_CONFIG.SCROLL_TRIGGER.START,
-          end: ANIMATION_CONFIG.SCROLL_TRIGGER.END,
-          toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
-          markers: false,
+      // Initial Entrance Animation
+      gsap.fromTo(
+        containerRef.current,
+        {
+          y: 100,
+          opacity: 0,
+          rotateX: 10,
         },
-        clearProps: "all",
-      });
+        {
+          y: 0,
+          opacity: 1,
+          rotateX: 0,
+          duration: 1.2,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top 70%",
+            end: "bottom center",
+            toggleActions: "play none none reverse",
+          },
+        }
+      );
+
+      // 3D Tilt Effect
+      const container = containerRef.current;
+      const handleMouseMove = (e: MouseEvent) => {
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((y - centerY) / centerY) * -2; // Max rotation deg
+        const rotateY = ((x - centerX) / centerX) * 2;
+
+        gsap.to(container, {
+          rotateX: rotateX,
+          rotateY: rotateY,
+          duration: 0.5,
+          ease: "power2.out",
+          transformPerspective: 1000,
+        });
+
+        // Move glow
+        gsap.to(glowRef.current, {
+          x: x,
+          y: y,
+          duration: 0.4, // Lag for smoothness
+          ease: "power2.out",
+        });
+      };
+
+      const handleMouseLeave = () => {
+        gsap.to(container, {
+          rotateX: 0,
+          rotateY: 0,
+          duration: 0.5,
+          ease: "power2.out",
+        });
+      };
+
+      container.addEventListener("mousemove", handleMouseMove);
+      container.addEventListener("mouseleave", handleMouseLeave);
+
+      return () => {
+        container.removeEventListener("mousemove", handleMouseMove);
+        container.removeEventListener("mouseleave", handleMouseLeave);
+      };
     },
-    { scope: sectionRef },
+    { scope: sectionRef }
   );
 
   const handleFormSubmitSuccess = () => {
@@ -67,8 +101,11 @@ const ContactForm: React.FC = () => {
   };
 
   return (
-    <section ref={sectionRef} id="contact" className="relative py-24 md:py-32">
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section ref={sectionRef} id="contact" className="relative py-24 md:py-32 overflow-hidden">
+      {/* Background Ambient Light */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] pointer-events-none opacity-20" />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 perspective-1000">
         <Title
           title="Get in Touch"
           subtitle={
@@ -77,18 +114,9 @@ const ContactForm: React.FC = () => {
                 &quot;Information flow is what the Internet is about.
               </span>
               <span className="inline-block">
-                Information sharing is power.
+                Information sharing is power.&quot;
               </span>
-              <span className="inline-block">
-                If you don&apos;t share your ideas,
-              </span>
-              <span className="inline-block">
-                smart people can&apos;t do anything about them,
-              </span>
-              <span className="inline-block">
-                and you&apos;ll remain anonymous and powerless.&quot;
-              </span>
-              <span className="inline-block">
+              <span className="block mt-2 text-sm text-neutral-500 font-medium">
                 - Vint Cerf
               </span>
             </>
@@ -100,14 +128,20 @@ const ContactForm: React.FC = () => {
         <div
           ref={containerRef}
           className="group/container relative rounded-3xl overflow-hidden
-                     bg-white/[0.02] backdrop-blur-xl
-                     shadow-[0_0_50px_-20px_rgba(0,0,0,0.5)] border border-white/[0.05]"
+                     bg-white/[0.02] backdrop-blur-2xl
+                     border border-white/[0.08]
+                     shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)]"
+          style={{ transformStyle: "preserve-3d" }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-30 pointer-events-none" />
+          {/* Mouse Follow Glow */}
+          <div
+            ref={glowRef}
+            className="absolute w-[500px] h-[500px] bg-primary/10 rounded-full blur-[80px] pointer-events-none -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover/container:opacity-100 transition-opacity duration-500"
+            style={{ top: 0, left: 0 }}
+          />
 
-          {/* Decorative background elements - Reduced blur and opacity for performance */}
-          <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full filter blur-[60px] pointer-events-none -translate-y-1/2 translate-x-1/2 opacity-50" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-accent/5 rounded-full filter blur-[60px] pointer-events-none translate-y-1/2 -translate-x-1/2 opacity-50" />
+          {/* Grid Pattern Overlay */}
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-[0.03] pointer-events-none" />
 
           <div className="relative px-6 py-10 sm:px-10 sm:py-12 md:p-16 z-10">
             <div className="grid md:grid-cols-2 gap-12 md:gap-16 lg:gap-24">
@@ -116,23 +150,9 @@ const ContactForm: React.FC = () => {
             </div>
           </div>
 
-          {/* Corner accents - Reduced complexity */}
-          <div
-            className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-white/10 rounded-tl-3xl pointer-events-none
-                                   transition-all duration-500 ease-out group-hover/container:border-primary/30"
-          />
-          <div
-            className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-white/10 rounded-tr-3xl pointer-events-none
-                                   transition-all duration-500 ease-out group-hover/container:border-primary/30"
-          />
-          <div
-            className="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-white/10 rounded-bl-3xl pointer-events-none
-                                   transition-all duration-500 ease-out group-hover/container:border-primary/30"
-          />
-          <div
-            className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-white/10 rounded-br-3xl pointer-events-none
-                                   transition-all duration-500 ease-out group-hover/container:border-primary/30"
-          />
+          {/* Premium Borders */}
+          <div className="absolute inset-0 border border-white/5 rounded-3xl pointer-events-none" />
+          <div className="absolute inset-0 border border-white/5 rounded-3xl pointer-events-none scale-[0.99]" />
         </div>
       </div>
 
