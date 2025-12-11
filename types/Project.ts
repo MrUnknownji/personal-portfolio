@@ -18,4 +18,5 @@ export interface Project {
   githubLink?: string;
   category: string;
   gallery?: MediaItem[];
+  featured?: boolean;
 }
