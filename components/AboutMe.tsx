@@ -18,19 +18,33 @@ const AboutMe = () => {
   useGSAP(() => {
     if (!gridRef.current || !pinContainerRef.current) return;
 
-    // Create a timeline for pinning to ensure it works with ScrollSmoother
-    const st = ScrollTrigger.create({
-      trigger: gridRef.current,
-      start: "top top+=120", // Start pinning when grid top hits 120px from viewport top
-      end: "bottom bottom", // End when grid bottom hits viewport bottom
-      pin: pinContainerRef.current,
-      pinSpacing: false, // Important for grid layouts to avoid breaking structure
-      scrub: true,
-      markers: false,
+    const mm = gsap.matchMedia();
+
+    // Only enable pinning on large screens (lg breakpoint is 1024px)
+    mm.add("(min-width: 1024px)", () => {
+      const pinImage = () => {
+        const gridHeight = gridRef.current?.offsetHeight || 0;
+        const imageContainerHeight = pinContainerRef.current?.offsetHeight || 0;
+
+        // Only pin if content is taller than image
+        if (gridHeight > imageContainerHeight) {
+          ScrollTrigger.create({
+            trigger: gridRef.current,
+            start: "top top+=120",
+            end: () => `+=${gridHeight - imageContainerHeight}`,
+            pin: pinContainerRef.current,
+            pinSpacing: false,
+            scrub: true,
+            invalidateOnRefresh: true,
+          });
+        }
+      };
+
+      pinImage();
     });
 
     return () => {
-      st.kill();
+      mm.revert();
     };
   }, { scope: containerRef });
 
@@ -60,7 +74,7 @@ const AboutMe = () => {
         </div>
 
         <div ref={gridRef} className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start relative">
-          <div ref={pinContainerRef} className="lg:col-span-5 h-fit z-10">
+          <div ref={pinContainerRef} className="lg:col-span-5 h-fit z-10 will-change-transform">
             {/* Enhanced Image Container */}
             <div className="relative">
               <div className="absolute -inset-4 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-3xl blur-lg opacity-50" />

@@ -75,8 +75,9 @@ const SkillsSection = () => {
           "-=0.2"
         );
 
-      // Mouse Move Glow Effect for Core Skills
+      // Mouse Move Glow Effect and Hover Animation for Core Skills
       coreSkillCards.forEach((card) => {
+        // Mouse Move Glow
         card.addEventListener("mousemove", (e: MouseEvent) => {
           const rect = card.getBoundingClientRect();
           const x = e.clientX - rect.left;
@@ -84,6 +85,47 @@ const SkillsSection = () => {
 
           card.style.setProperty("--mouse-x", `${x}px`);
           card.style.setProperty("--mouse-y", `${y}px`);
+        });
+
+        // Hover Animation
+        card.addEventListener("mouseenter", () => {
+          gsap.to(card, {
+            y: -5,
+            scale: 1.02,
+            borderColor: "rgba(0, 255, 159, 0.3)",
+            boxShadow: "0 10px 30px -10px rgba(0, 255, 159, 0.15)",
+            duration: 0.3,
+            ease: "power2.out",
+          });
+
+          const icon = card.querySelector(".skill-icon-wrapper");
+          if (icon) {
+            gsap.to(icon, {
+              scale: 1.1,
+              backgroundColor: "rgba(0, 255, 159, 0.2)",
+              duration: 0.3,
+            });
+          }
+        });
+
+        card.addEventListener("mouseleave", () => {
+          gsap.to(card, {
+            y: 0,
+            scale: 1,
+            borderColor: "rgba(255, 255, 255, 0.05)",
+            boxShadow: "none",
+            duration: 0.3,
+            ease: "power2.out",
+          });
+
+          const icon = card.querySelector(".skill-icon-wrapper");
+          if (icon) {
+            gsap.to(icon, {
+              scale: 1,
+              backgroundColor: "rgba(0, 255, 159, 0.1)",
+              duration: 0.3,
+            });
+          }
         });
       });
 
@@ -129,7 +171,7 @@ const SkillsSection = () => {
           {HeroSectionSkills.map((skill, index) => (
             <div
               key={index}
-              className="core-skill-card group relative bg-white/[0.03] backdrop-blur-xl border border-white/[0.05] rounded-2xl p-6 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5"
+              className="core-skill-card group relative bg-white/[0.03] backdrop-blur-xl border border-white/[0.05] rounded-2xl p-6 overflow-hidden"
               style={
                 {
                   "--mouse-x": "0px",
@@ -147,7 +189,7 @@ const SkillsSection = () => {
               />
 
               <div className="relative z-10 flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-primary/10 text-primary border border-primary/20 group-hover:scale-110 transition-transform duration-300">
+                <div className="skill-icon-wrapper p-3 rounded-xl bg-primary/10 text-primary border border-primary/20 transition-colors duration-300">
                   {skill.icon}
                 </div>
                 <span className="text-lg font-medium text-neutral-200 group-hover:text-white transition-colors">

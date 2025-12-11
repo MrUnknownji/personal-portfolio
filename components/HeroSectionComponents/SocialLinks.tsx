@@ -150,21 +150,28 @@ const SocialLinks = () => {
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="group relative flex items-center justify-center w-10 h-10 rounded-full
-                       bg-white/5 border border-white/10
+            className="group relative flex items-center justify-center w-12 h-12 rounded-full
+                       bg-white/[0.03] backdrop-blur-md border border-white/[0.08]
                        transition-all duration-300 ease-out
-                       hover:bg-white/10 hover:scale-110 hover:border-white/20"
+                       hover:scale-110 hover:bg-white/[0.08]
+                       shadow-[0_0_0_1px_rgba(255,255,255,0.02)]"
             style={{
-              boxShadow: activeLink === index ? `0 0 15px ${link.color}40` : 'none',
-              borderColor: activeLink === index ? `${link.color}60` : ''
+              boxShadow: activeLink === index ? `0 0 20px ${link.color}30` : 'none',
+              borderColor: activeLink === index ? `${link.color}50` : ''
             }}
             onMouseEnter={() => handleMouseEnter(index)}
             onMouseLeave={handleMouseLeave}
           >
-            <div className="text-neutral-400 transition-colors duration-300 group-hover:text-white"
+            <div className="text-neutral-400 transition-colors duration-300 group-hover:text-white relative z-10"
               style={{ color: activeLink === index ? link.color : undefined }}>
-              {link.icon}
+              {React.cloneElement(link.icon as React.ReactElement<{ className?: string }>, { className: "w-5 h-5" })}
             </div>
+
+            {/* Hover Gradient Background */}
+            <div
+              className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              style={{ background: `radial-gradient(circle at center, ${link.color}15, transparent 70%)` }}
+            />
           </a>
         ))
       )}

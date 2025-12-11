@@ -10,26 +10,13 @@ const HireBadge = () => {
   useGSAP(
     () => {
       gsap.to(pulseRef.current, {
-        scale: 2,
+        scale: 3,
         opacity: 0,
-        duration: 1.5,
+        duration: 2,
         repeat: -1,
         ease: "power1.out",
+        transformOrigin: "center",
       });
-
-      const hoverAnimation = gsap.to(badgeRef.current, {
-        scale: 1.02,
-        duration: 0.2,
-        ease: "power2.out",
-        paused: true,
-      });
-
-      badgeRef.current?.addEventListener("mouseenter", () =>
-        hoverAnimation.play(),
-      );
-      badgeRef.current?.addEventListener("mouseleave", () =>
-        hoverAnimation.reverse(),
-      );
     },
     { scope: badgeRef },
   );
@@ -37,18 +24,30 @@ const HireBadge = () => {
   return (
     <div
       ref={badgeRef}
-      className="relative inline-flex items-center gap-2 px-3 py-1 rounded-full
-                 bg-emerald-500/10 text-emerald-400 text-[11px] font-medium tracking-wide border border-emerald-500/20
-                 hover:bg-emerald-500/20 transition-colors duration-300 cursor-default backdrop-blur-sm"
+      className="group relative inline-flex items-center gap-2.5 px-4 py-2 rounded-full
+                 bg-zinc-900/40 backdrop-blur-md border border-emerald-500/20
+                 shadow-[0_4px_20px_-4px_rgba(16,185,129,0.1)]
+                 hover:border-emerald-500/40 hover:bg-zinc-900/60 hover:shadow-[0_4px_25px_-4px_rgba(16,185,129,0.2)]
+                 transition-all duration-300 cursor-default overflow-hidden"
     >
-      <span className="relative flex h-2 w-2">
+      {/* Subtle Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/5 to-emerald-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+      {/* Status Dot Container */}
+      <div className="relative flex items-center justify-center w-2.5 h-2.5 flex-shrink-0">
+        {/* Pulse Ring */}
         <span
           ref={pulseRef}
-          className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50"
+          className="absolute inset-0 rounded-full bg-emerald-400 opacity-40"
         />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+        {/* Core Dot */}
+        <span className="relative w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+      </div>
+
+      {/* Text */}
+      <span className="relative text-emerald-100/90 text-xs font-medium tracking-wide">
+        Available for hire
       </span>
-      Available for hire
     </div>
   );
 };
