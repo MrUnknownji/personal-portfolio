@@ -143,18 +143,18 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
           opacity: 1,
           duration: 0.4
         })
-        .to(contentRef.current, {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.5,
-        }, "<+=0.05")
-        .to(staggerElements, {
-          opacity: 1,
-          y: 0,
-          duration: 0.4,
-          stagger: 0.05,
-        }, "-=0.2");
+          .to(contentRef.current, {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.5,
+          }, "<+=0.05")
+          .to(staggerElements, {
+            opacity: 1,
+            y: 0,
+            duration: 0.4,
+            stagger: 0.05,
+          }, "-=0.2");
 
       } else if (!isOpen && !isAnimatingOut && isMounted) {
         if (contentRef.current && overlayRef.current) {
@@ -237,16 +237,24 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                   sizes="(max-width: 768px) 90vw, 45vw"
                   priority
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+
+                {/* Decorative corner accent */}
+                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-transparent opacity-60" />
               </div>
 
-              <div className="flex-shrink-0 space-y-3">
-                <h2 ref={titleRef} className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary via-white to-accent bg-clip-text text-transparent">
-                  {project.title}
-                </h2>
-                <p ref={descRef} className="text-light/80 text-base md:text-lg leading-relaxed font-light">
-                  {project.shortDescription}
-                </p>
+              <div className="flex-shrink-0 space-y-4 relative">
+                {/* Decorative vertical line */}
+                <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-gradient-to-b from-primary/50 to-transparent rounded-full" />
+
+                <div className="pl-5 space-y-3">
+                  <h2 ref={titleRef} className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-white to-accent bg-clip-text text-transparent tracking-tight">
+                    {project.title}
+                  </h2>
+                  <p ref={descRef} className="text-lg md:text-xl text-light/70 leading-relaxed font-light border-l-2 border-white/5 pl-4">
+                    {project.shortDescription}
+                  </p>
+                </div>
               </div>
 
               <div ref={galleryRef} className="flex-grow min-h-0">
@@ -282,13 +290,15 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                       href={project.demoLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-black shadow-[0_0_20px_-5px_rgba(0,255,159,0.4)] font-semibold overflow-hidden transition-transform active:scale-95"
+                      className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-dark font-bold overflow-hidden transition-all duration-300 hover:shadow-[0_0_25px_-5px_rgba(0,255,159,0.5)] active:scale-95"
                     >
-                      <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                      <span className="relative z-10 flex items-center gap-2">
-                        <FiExternalLink className="w-5 h-5" />
+                      {/* Shine effect */}
+                      <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent z-10" />
+
+                      <span className="relative z-20 flex items-center gap-2.5">
+                        <FiExternalLink className="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                         <span>Live Demo</span>
-                        <FiChevronRight className="w-5 h-5 transform transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                        <FiChevronRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
                       </span>
                     </Link>
                   )}
@@ -297,12 +307,12 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                       href={project.githubLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-white/20 font-medium overflow-hidden transition-all active:scale-95"
+                      className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-white/5 text-white border border-white/10 font-medium overflow-hidden transition-all duration-300 hover:bg-white/10 hover:border-white/30 hover:shadow-lg active:scale-95"
                     >
-                      <span className="relative z-10 flex items-center gap-2">
-                        <FiGithub className="w-5 h-5" />
+                      <span className="relative z-10 flex items-center gap-2.5">
+                        <FiGithub className="w-5 h-5 transition-transform duration-300 group-hover:rotate-12" />
                         <span>Source Code</span>
-                        <FiChevronRight className="w-5 h-5 transform transition-transform duration-300 ease-out group-hover:translate-x-1" />
+                        <FiChevronRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 opacity-0 group-hover:opacity-100 -ml-2 group-hover:ml-0" />
                       </span>
                     </Link>
                   )}

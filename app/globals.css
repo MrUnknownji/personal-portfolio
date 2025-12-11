@@ -81,14 +81,17 @@ html {
 ::-webkit-scrollbar {
     width: 8px;
 }
+
 ::-webkit-scrollbar-track {
     background: var(--scrollbar-track);
 }
+
 ::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb);
     border-radius: 4px;
     border: 1px solid var(--scrollbar-track);
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: #666;
 }
@@ -97,6 +100,7 @@ html {
     background-color: var(--color-primary);
     color: var(--color-dark);
 }
+
 ::-moz-selection {
     background-color: var(--color-primary);
     color: var(--color-dark);
@@ -105,16 +109,12 @@ html {
 @layer utilities {
     .bg-frosted-dark {
         background-image:
-            radial-gradient(
-                circle at center,
+            radial-gradient(circle at center,
                 rgba(200, 200, 200, 0.06) 0%,
-                transparent 75%
-            ),
-            linear-gradient(
-                140deg,
+                transparent 75%),
+            linear-gradient(140deg,
                 rgba(39, 39, 42, 0.75) 0%,
-                rgba(24, 24, 27, 0.85) 100%
-            );
+                rgba(24, 24, 27, 0.85) 100%);
 
         background-size: 100% 100%, 100% 100%;
         background-position: center, 0 0;
@@ -129,24 +129,27 @@ html {
     .skill-chip {
         @apply px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium cursor-default transition-colors border border-primary/20;
     }
+
     .skill-chip:hover {
         @apply bg-primary text-dark border-primary;
     }
+
     .bg-noise {
         background-image: repeating-conic-gradient(#000 0% 0.0001%, transparent 0.0001% 0.0002%),
-                          repeating-conic-gradient(#fff 0% 0.0001%, transparent 0.0001% 0.0002%);
+            repeating-conic-gradient(#fff 0% 0.0001%, transparent 0.0001% 0.0002%);
         background-size: 100px 100px;
         background-position: 0 0, 50px 50px;
     }
 
-      .bg-gradient-radial {
-         background-image: radial-gradient(circle, var(--tw-gradient-stops));
-      }
+    .bg-gradient-radial {
+        background-image: radial-gradient(circle, var(--tw-gradient-stops));
+    }
 }
 
 .page-content {
     opacity: 0;
 }
+
 .transition-overlay {
     opacity: 1;
     display: flex;
@@ -156,12 +159,15 @@ html {
 .perspective-1000 {
     perspective: 1000px;
 }
+
 .animation-delay-2000 {
     animation-delay: 2s;
 }
+
 .animation-delay-4000 {
     animation-delay: 4s;
 }
+
 .header-hidden {
     transform: translateY(-100%);
 }
@@ -170,6 +176,7 @@ html {
     0% {
         transform: translateX(-150%) skewX(12deg);
     }
+
     100% {
         transform: translateX(150%) skewX(12deg);
     }
@@ -177,4 +184,54 @@ html {
 
 .animate-shimmer {
     animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes pulse-subtle {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.animate-pulse-subtle {
+    animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+@keyframes pulse-scale {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.2);
+        opacity: 0.6;
+    }
+}
+
+.animate-pulse-scale {
+    animation: pulse-scale 2s ease-in-out infinite;
 }
