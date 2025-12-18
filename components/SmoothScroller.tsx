@@ -29,7 +29,6 @@ export default function SmoothScroller({
     };
   }, { dependencies: [] });
 
-  // Refresh ScrollTrigger on route change
   useEffect(() => {
     const smoother = ScrollSmoother.get();
     if (smoother) {

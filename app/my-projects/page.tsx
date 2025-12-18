@@ -428,7 +428,7 @@ export default function MyProjects() {
   };
 
   return (
-    <div ref={pageRef} className="min-h-screen pt-24 pb-20 md:pb-28 lg:pb-32 bg-dark relative overflow-hidden">
+    <div ref={pageRef} className="min-h-screen pt-24 pb-20 md:pb-28 lg:pb-32 relative overflow-hidden">
       {/* Refined ambient background effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-[120px]" />
@@ -501,7 +501,7 @@ export default function MyProjects() {
             ref={controlsRef}
             className="relative"
           >
-            <div className="relative bg-gradient-to-br from-secondary/95 to-secondary/85 backdrop-blur-2xl border border-white/[0.08] rounded-2xl p-3 md:p-4 shadow-2xl flex flex-col md:flex-row gap-3.5 overflow-hidden">
+            <div className="relative bg-secondary/95 border border-white/[0.08] rounded-2xl p-3 md:p-4 shadow-2xl flex flex-col md:flex-row gap-3.5 overflow-hidden">
               {/* Refined gradient overlay with depth */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] via-transparent to-primary/[0.02] pointer-events-none" />
 
@@ -510,7 +510,7 @@ export default function MyProjects() {
 
               <div
                 ref={searchContainerRef}
-                className="relative flex-1 group rounded-xl border border-white/[0.06] bg-white/[0.04]"
+                className="relative flex-1 group rounded-xl border border-border bg-card/50"
               >
                 {/* Search icon glow on focus */}
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none z-10">
@@ -524,7 +524,7 @@ export default function MyProjects() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={handleSearchFocus}
                   onBlur={handleSearchBlur}
-                  className="w-full pl-10 pr-10 py-3 md:py-3.5 bg-transparent text-light placeholder-muted/50 focus:outline-none text-sm md:text-base rounded-xl relative z-10 font-medium"
+                  className="w-full pl-10 pr-10 py-3 md:py-3.5 bg-transparent text-foreground placeholder-muted-foreground focus:outline-none text-sm md:text-base rounded-xl relative z-10 font-medium"
                 />
                 {searchQuery && (
                   <button
@@ -575,8 +575,8 @@ export default function MyProjects() {
                     className={`
                     relative whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 overflow-hidden flex-shrink-0
                     ${filter === category
-                        ? "text-dark bg-primary shadow-lg shadow-primary/[0.15] scale-105 border border-primary/20"
-                        : "text-muted/80 hover:text-light bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-primary/20 hover:scale-105"
+                        ? "text-primary-foreground bg-primary shadow-lg shadow-primary/[0.15] scale-105 border border-primary/20"
+                        : "text-muted-foreground hover:text-foreground bg-card/50 hover:bg-card border border-border hover:border-primary/20 hover:scale-105"
                       }
                   `}
                   >

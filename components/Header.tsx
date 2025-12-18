@@ -2,78 +2,138 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useRef, useEffect } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { cn } from "@/lib/utils";
+import { FiMenu, FiX, FiArrowRight } from "react-icons/fi";
+import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import { useGSAP } from "@gsap/react";
 
-gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+gsap.registerPlugin(ScrollToPlugin);
 
-const ANIMATION_CONFIG = {
-  HEADER: { DURATION: 0.4, EASE: "power3.inOut" },
-  LOGO: {
-    DURATION: 0.8,
-    EASE: "elastic.out(1, 0.8)",
-    HOVER_DURATION: 0.3,
-    HOVER_EASE: "power2.out",
-    HOVER_SCALE: 1.05,
-  },
-  CONTACT: {
-    DURATION: 0.6,
-    EASE: "power2.out",
-    HOVER_DURATION: 0.3,
-    HOVER_EASE: "power3.out",
-    HOVER_SCALE: 1.02,
-    HOVER_BG: "rgba(255, 255, 255, 0.1)",
-    INITIAL_BG: "rgba(255, 255, 255, 0.05)",
-  },
-  PARTICLES: {
-    POOL_SIZE: 40,
-    INTERVAL: 50,
-    DURATION_MIN: 1.2,
-    DURATION_MAX: 2.2,
-    TRAVEL_DISTANCE: 70,
-    SCALE_MIN: 0.2,
-    SCALE_MAX: 0.5,
-  },
-} as const;
-
-const ArrowIcon = () => (
-  <svg
-    stroke="currentColor"
-    fill="none"
-    strokeWidth="2"
-    viewBox="0 0 24 24"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-4 h-4"
-    height="1em"
-    width="1em"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <line x1="5" y1="12" x2="19" y2="12"></line>
-    <polyline points="12 5 19 12 12 19"></polyline>
-  </svg>
-);
+const NAV_ITEMS = [
+  { name: "Home", link: "/" },
+  { name: "About", link: "/#about" },
+  { name: "Projects", link: "/my-projects" },
+  { name: "Skills", link: "/#skills" },
+];
 
 const Header = () => {
-  const headerRef = useRef<HTMLElement>(null);
-  const logoLinkRef = useRef<HTMLAnchorElement>(null);
-  const contactButtonRef = useRef<HTMLButtonElement>(null);
-  const particlesContainerRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const desktopNavRef = useRef<HTMLElement>(null);
+  const mobileNavRef = useRef<HTMLElement>(null);
+  const logoTextRef = useRef<HTMLSpanElement>(null);
+  const hoverBgRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const navItemsRef = useRef<(HTMLAnchorElement | null)[]>([]);
 
-  const particlePoolRef = useRef<HTMLDivElement[]>([]);
-  const particleIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  let particleIndex = 0;
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const pathname = usePathname();
   const router = useRouter();
 
-  const { contextSafe } = useGSAP({ scope: headerRef });
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  const handleContactClick = (e: React.MouseEvent) => {
+  useGSAP(() => {
+    if (desktopNavRef.current) {
+      gsap.to(desktopNavRef.current, {
+        width: isScrolled ? "60%" : "100%",
+        y: isScrolled ? 8 : 0,
+        duration: 0.4,
+        ease: "power2.out",
+      });
+    }
+    if (mobileNavRef.current) {
+      gsap.to(mobileNavRef.current, {
+        width: isScrolled ? "92%" : "100%",
+        y: isScrolled ? 8 : 0,
+        duration: 0.4,
+        ease: "power2.out",
+      });
+    }
+    if (logoTextRef.current) {
+      gsap.to(logoTextRef.current, {
+        opacity: isScrolled ? 0 : 1,
+        x: isScrolled ? -10 : 0,
+        duration: 0.2,
+      });
+    }
+  }, [isScrolled]);
+
+  useGSAP(() => {
+    if (hoveredIndex !== null && hoverBgRef.current && navItemsRef.current[hoveredIndex]) {
+      const navItem = navItemsRef.current[hoveredIndex];
+      const navContainer = navItem?.parentElement;
+      if (navItem && navContainer) {
+        const itemRect = navItem.getBoundingClientRect();
+        const containerRect = navContainer.getBoundingClientRect();
+        gsap.to(hoverBgRef.current, {
+          x: itemRect.left - containerRect.left,
+          width: itemRect.width,
+          opacity: 1,
+          duration: 0.25,
+          ease: "power2.out",
+        });
+      }
+    } else if (hoverBgRef.current) {
+      gsap.to(hoverBgRef.current, { opacity: 0, duration: 0.2 });
+    }
+  }, [hoveredIndex]);
+
+  useGSAP(() => {
+    if (mobileMenuRef.current) {
+      if (isMobileMenuOpen) {
+        gsap.to(mobileMenuRef.current, {
+          height: "auto",
+          opacity: 1,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+        const items = mobileMenuRef.current.querySelectorAll(".mobile-nav-item");
+        gsap.fromTo(items,
+          { opacity: 0, x: -20 },
+          { opacity: 1, x: 0, duration: 0.3, stagger: 0.05, ease: "power2.out" }
+        );
+      } else {
+        gsap.to(mobileMenuRef.current, {
+          height: 0,
+          opacity: 0,
+          duration: 0.2,
+          ease: "power2.in",
+        });
+      }
+    }
+  }, [isMobileMenuOpen]);
+
+  const handleNavClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+    if (link.startsWith("/#")) {
+      e.preventDefault();
+      const sectionId = link.replace("/#", "");
+      const element = document.getElementById(sectionId);
+
+      if (pathname === "/" && element) {
+        gsap.to(window, {
+          scrollTo: { y: element, offsetY: 100 },
+          duration: 1,
+          ease: "power2.inOut",
+        });
+      } else {
+        router.push(link);
+      }
+    }
+    setIsMobileMenuOpen(false);
+  }, [pathname, router]);
+
+  const handleContactClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     const element = document.getElementById("contact");
     if (pathname === "/" && element) {
@@ -85,234 +145,165 @@ const Header = () => {
     } else {
       router.push("/#contact");
     }
-  };
+    setIsMobileMenuOpen(false);
+  }, [pathname, router]);
 
-  const createParticlePool = contextSafe(() => {
-    if (!particlesContainerRef.current || particlePoolRef.current.length > 0)
-      return;
-    const container = particlesContainerRef.current;
-    for (let i = 0; i < ANIMATION_CONFIG.PARTICLES.POOL_SIZE; i++) {
-      const particle = document.createElement("div");
-      particle.className =
-        "absolute w-1.5 h-1.5 rounded-full pointer-events-none mix-blend-lighten";
-      gsap.set(particle, { opacity: 0, scale: 0, x: -9999, y: -9999 });
-      container.appendChild(particle);
-      particlePoolRef.current.push(particle);
-    }
-  });
+  const handleLogoHover = useCallback((e: React.MouseEvent, enter: boolean) => {
+    gsap.to(e.currentTarget, {
+      scale: enter ? 1.05 : 1,
+      duration: 0.2,
+      ease: "power2.out",
+    });
+  }, []);
 
-  const animateParticle = contextSafe(
-    (originElement: HTMLElement, color: string) => {
-      if (
-        !particlesContainerRef.current ||
-        particlePoolRef.current.length === 0
-      )
-        return;
-
-      particleIndex =
-        (particleIndex + 1) % ANIMATION_CONFIG.PARTICLES.POOL_SIZE;
-      const particle = particlePoolRef.current[particleIndex];
-      gsap.killTweensOf(particle);
-
-      const originRect = originElement.getBoundingClientRect();
-      const containerRect =
-        particlesContainerRef.current.getBoundingClientRect();
-      const startX =
-        originRect.left - containerRect.left + originRect.width / 2;
-      const startY = originRect.top - containerRect.top + originRect.height / 2;
-
-      const duration = gsap.utils.random(
-        ANIMATION_CONFIG.PARTICLES.DURATION_MIN,
-        ANIMATION_CONFIG.PARTICLES.DURATION_MAX,
-      );
-      const angle = Math.random() * Math.PI * 2;
-      const travelDistance =
-        ANIMATION_CONFIG.PARTICLES.TRAVEL_DISTANCE *
-        (Math.random() * 0.5 + 0.75);
-      const endX = Math.cos(angle) * travelDistance;
-      const endY = Math.sin(angle) * travelDistance;
-      const peakScale = gsap.utils.random(
-        ANIMATION_CONFIG.PARTICLES.SCALE_MIN,
-        ANIMATION_CONFIG.PARTICLES.SCALE_MAX,
-      );
-
-      gsap.set(particle, {
-        x: startX,
-        y: startY,
-        scale: 0,
-        opacity: 0,
-        backgroundColor: color,
-      });
-
-      gsap.to(particle, {
-        x: `+=${endX}`,
-        y: `+=${endY}`,
-        duration: duration,
-        ease: "none",
-      });
-
-      gsap.to(particle, {
-        scale: peakScale,
-        opacity: gsap.utils.random(0.7, 1.0),
-        duration: duration * 0.3,
-        ease: "power2.out",
-        yoyo: true,
-        repeat: 1,
-        onComplete: () => {
-          gsap.set(particle, { opacity: 0, scale: 0, x: -9999, y: -9999 });
-        },
-      });
-    },
-  );
-
-  useEffect(() => {
-    createParticlePool();
-  }, [createParticlePool]);
-
-  useGSAP(
-    () => {
-      // Entrance animation
-      gsap.fromTo(
-        [logoLinkRef.current, contactButtonRef.current],
-        { opacity: 0, y: -30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: ANIMATION_CONFIG.LOGO.DURATION,
-          ease: ANIMATION_CONFIG.LOGO.EASE,
-          stagger: 0.15,
-          delay: 0.2,
-        },
-      );
-
-      // Scroll behavior (hide/show)
-      const hideAnim = gsap.to(headerRef.current, {
-        yPercent: -100,
-        paused: true,
-        duration: ANIMATION_CONFIG.HEADER.DURATION,
-        ease: ANIMATION_CONFIG.HEADER.EASE,
-      });
-
-      ScrollTrigger.create({
-        start: "top top",
-        end: 99999,
-        onUpdate: (self) => {
-          if (self.direction === 1) {
-            hideAnim.play();
-          } else {
-            hideAnim.reverse();
-          }
-        },
-      });
-
-      const logo = logoLinkRef.current;
-      const contact = contactButtonRef.current;
-
-      if (logo) {
-        logo.addEventListener("mouseenter", () => {
-          gsap.to(logo, {
-            scale: ANIMATION_CONFIG.LOGO.HOVER_SCALE,
-            duration: ANIMATION_CONFIG.LOGO.HOVER_DURATION,
-            ease: ANIMATION_CONFIG.LOGO.HOVER_EASE,
-          });
-          if (particleIntervalRef.current)
-            clearInterval(particleIntervalRef.current);
-          particleIntervalRef.current = setInterval(
-            () => animateParticle(logo, "var(--color-accent)"),
-            ANIMATION_CONFIG.PARTICLES.INTERVAL,
-          );
-        });
-        logo.addEventListener("mouseleave", () => {
-          gsap.to(logo, {
-            scale: 1,
-            duration: ANIMATION_CONFIG.LOGO.HOVER_DURATION,
-          });
-          if (particleIntervalRef.current)
-            clearInterval(particleIntervalRef.current);
-        });
-      }
-
-      if (contact) {
-        contact.addEventListener("mouseenter", () => {
-          gsap.to(contact, {
-            scale: ANIMATION_CONFIG.CONTACT.HOVER_SCALE,
-            backgroundColor: ANIMATION_CONFIG.CONTACT.HOVER_BG,
-            duration: ANIMATION_CONFIG.CONTACT.HOVER_DURATION,
-            ease: ANIMATION_CONFIG.CONTACT.HOVER_EASE,
-          });
-          gsap.to(".contact-arrow", { x: 4, duration: 0.2 });
-          if (particleIntervalRef.current)
-            clearInterval(particleIntervalRef.current);
-          particleIntervalRef.current = setInterval(
-            () => animateParticle(contact, "var(--color-primary)"),
-            ANIMATION_CONFIG.PARTICLES.INTERVAL,
-          );
-        });
-        contact.addEventListener("mouseleave", () => {
-          gsap.to(contact, {
-            scale: 1,
-            backgroundColor: ANIMATION_CONFIG.CONTACT.INITIAL_BG,
-            duration: ANIMATION_CONFIG.CONTACT.HOVER_DURATION,
-          });
-          gsap.to(".contact-arrow", { x: 0, duration: 0.2 });
-          if (particleIntervalRef.current)
-            clearInterval(particleIntervalRef.current);
-        });
-      }
-    },
-    { scope: headerRef },
-  );
+  const handleButtonHover = useCallback((e: React.MouseEvent, enter: boolean) => {
+    gsap.to(e.currentTarget, {
+      scale: enter ? 1.02 : 1,
+      duration: 0.15,
+      ease: "power2.out",
+    });
+  }, []);
 
   return (
-    <header
-      ref={headerRef}
-      className="fixed top-0 left-0 right-0 z-40 transform-gpu
-                 bg-dark/70 backdrop-blur-xl
-                 border-b border-white/5"
-      style={{ willChange: "transform" }}
-    >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <nav className="relative flex items-center justify-between h-18 md:h-20">
-          <div
-            ref={particlesContainerRef}
-            className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
-            aria-hidden="true"
+    <header ref={headerRef} className="fixed top-0 inset-x-0 z-50 pt-4">
+      <nav
+        ref={desktopNavRef}
+        style={{ minWidth: isScrolled ? "700px" : "auto" }}
+        className={cn(
+          "hidden lg:flex mx-auto max-w-7xl items-center justify-between px-6 py-3 rounded-full transition-colors duration-300",
+          isScrolled
+            ? "bg-background/95 border border-border/50 shadow-lg shadow-black/10"
+            : "bg-transparent"
+        )}
+      >
+        <Link
+          href="/"
+          className="relative z-20 flex items-center gap-2 group"
+          aria-label="Homepage"
+          onMouseEnter={(e) => handleLogoHover(e, true)}
+          onMouseLeave={(e) => handleLogoHover(e, false)}
+        >
+          <Image
+            src="/images/logo.svg"
+            alt="Logo"
+            width={40}
+            height={40}
+            priority
+            className="w-9 h-9"
           />
-
-          <Link
-            ref={logoLinkRef}
-            href="/"
-            className="relative z-10 flex items-center group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-full"
-            aria-label="Homepage"
+          <span
+            ref={logoTextRef}
+            className="text-foreground font-semibold text-lg tracking-tight"
           >
+            Sandeep
+          </span>
+        </Link>
+
+        <div
+          onMouseLeave={() => setHoveredIndex(null)}
+          className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1"
+        >
+          <div
+            ref={hoverBgRef}
+            className="absolute h-full bg-foreground/5 rounded-full pointer-events-none"
+            style={{ opacity: 0, left: 0 }}
+          />
+          {NAV_ITEMS.map((item, idx) => (
+            <Link
+              key={item.name}
+              href={item.link}
+              ref={(el) => { navItemsRef.current[idx] = el; }}
+              onClick={(e) => handleNavClick(e, item.link)}
+              onMouseEnter={() => setHoveredIndex(idx)}
+              className="relative px-4 py-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors z-10"
+            >
+              {item.name}
+            </Link>
+          ))}
+        </div>
+
+        <button
+          onClick={handleContactClick}
+          onMouseEnter={(e) => handleButtonHover(e, true)}
+          onMouseLeave={(e) => handleButtonHover(e, false)}
+          onMouseDown={(e) => gsap.to(e.currentTarget, { scale: 0.98, duration: 0.1 })}
+          onMouseUp={(e) => gsap.to(e.currentTarget, { scale: 1.02, duration: 0.1 })}
+          className="relative z-20 group flex items-center gap-2 px-5 py-2.5 rounded-full
+                     bg-primary text-dark font-medium text-sm
+                     shadow-lg shadow-primary/20
+                     transition-shadow duration-300"
+        >
+          <span>Contact Me</span>
+          <FiArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+        </button>
+      </nav>
+
+      <nav
+        ref={mobileNavRef}
+        className={cn(
+          "lg:hidden mx-auto flex flex-col px-4 py-3 rounded-2xl transition-colors duration-300",
+          isScrolled
+            ? "bg-background/95 border border-border/50 shadow-lg shadow-black/10"
+            : "bg-transparent"
+        )}
+      >
+        <div className="flex items-center justify-between w-full">
+          <Link href="/" className="flex items-center gap-2" aria-label="Homepage">
             <Image
               src="/images/logo.svg"
               alt="Logo"
-              width={44}
-              height={44}
+              width={36}
+              height={36}
               priority
-              className="w-10 h-10 md:w-12 md:h-12"
+              className="w-9 h-9"
             />
+            <span className="text-foreground font-semibold tracking-tight">Sandeep</span>
           </Link>
 
-          <div className="relative z-10">
-            <button
-              ref={contactButtonRef}
-              onClick={handleContactClick}
-              className="relative inline-flex items-center justify-center px-5 py-2 md:px-7 md:py-2.5 rounded-full
-                         bg-white/5 border border-white/10 text-primary
-                         font-medium tracking-wide text-sm md:text-base
-                         group
-                         focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 overflow-hidden"
-            >
-              <span className="relative z-10">Contact Me</span>
-              <span className="contact-arrow inline-block ml-2">
-                <ArrowIcon />
-              </span>
-            </button>
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            onMouseDown={(e) => gsap.to(e.currentTarget, { scale: 0.9, duration: 0.1 })}
+            onMouseUp={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.1 })}
+            className="p-2 rounded-lg text-foreground hover:bg-foreground/5 transition-colors"
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        <div
+          ref={mobileMenuRef}
+          className="overflow-hidden"
+          style={{ height: 0, opacity: 0 }}
+        >
+          <div className="pt-4 pb-2 flex flex-col gap-1">
+            {NAV_ITEMS.map((item) => (
+              <div key={item.name} className="mobile-nav-item">
+                <Link
+                  href={item.link}
+                  onClick={(e) => handleNavClick(e, item.link)}
+                  className="block px-4 py-3 text-foreground/80 hover:text-foreground
+                             hover:bg-foreground/5 rounded-lg transition-colors font-medium"
+                >
+                  {item.name}
+                </Link>
+              </div>
+            ))}
+
+            <div className="mobile-nav-item pt-2 mt-2 border-t border-border/30">
+              <button
+                onClick={handleContactClick}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3
+                           bg-primary text-dark font-medium rounded-lg
+                           shadow-[0_0_15px_rgba(0,255,159,0.3)]"
+              >
+                <span>Contact Me</span>
+                <FiArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-        </nav>
-      </div>
+        </div>
+      </nav>
     </header>
   );
 };

@@ -35,17 +35,17 @@ const CONTACT_INFO = [
 
 const SOCIAL_LINKS = [
   {
-    icon: <FiGithub className="w-6 h-6" />,
+    icon: <FiGithub className="w-5 h-5" />,
     label: "GitHub",
     link: "https://github.com/MrUnknownji",
   },
   {
-    icon: <FiLinkedin className="w-6 h-6" />,
+    icon: <FiLinkedin className="w-5 h-5" />,
     label: "LinkedIn",
     link: "https://linkedin.com/in/sandeep-kumar-sk1707",
   },
   {
-    icon: <FaXTwitter className="w-6 h-6" />,
+    icon: <FaXTwitter className="w-5 h-5" />,
     label: "X",
     link: "https://twitter.com/MrUnknownG786",
   },
@@ -76,13 +76,12 @@ const ContactInfo = () => {
       // Initial States
       gsap.set([title, socialTitle], { opacity: 0, y: 20 });
       gsap.set(infoItems, { opacity: 0, x: -20 });
-      gsap.set(socialIcons, { opacity: 0, scale: 0 });
+      gsap.set(socialIcons, { opacity: 0, scale: 0.8 });
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top 85%",
-          end: "bottom center",
           toggleActions: "play none none reverse",
         },
       });
@@ -90,7 +89,7 @@ const ContactInfo = () => {
       tl.to(title, {
         opacity: 1,
         y: 0,
-        duration: 0.6,
+        duration: 0.5,
         ease: "power2.out",
       })
         .to(
@@ -98,18 +97,18 @@ const ContactInfo = () => {
           {
             opacity: 1,
             x: 0,
-            duration: 0.5,
-            stagger: 0.1,
+            duration: 0.4,
+            stagger: 0.08,
             ease: "power2.out",
           },
-          "-=0.3"
+          "-=0.2"
         )
         .to(
           socialTitle,
           {
             opacity: 1,
             y: 0,
-            duration: 0.5,
+            duration: 0.4,
             ease: "power2.out",
           },
           "-=0.2"
@@ -119,52 +118,27 @@ const ContactInfo = () => {
           {
             opacity: 1,
             scale: 1,
-            duration: 0.5,
-            stagger: 0.1,
-            ease: "back.out(1.7)",
+            duration: 0.4,
+            stagger: 0.08,
+            ease: "back.out(1.5)",
           },
-          "-=0.3"
+          "-=0.2"
         );
-
-      // Magnetic Effect for Social Icons
-      socialIcons.forEach((icon) => {
-        icon.addEventListener("mousemove", (e: MouseEvent) => {
-          const rect = icon.getBoundingClientRect();
-          const x = e.clientX - rect.left - rect.width / 2;
-          const y = e.clientY - rect.top - rect.height / 2;
-
-          gsap.to(icon, {
-            x: x * 0.3,
-            y: y * 0.3,
-            duration: 0.3,
-            ease: "power2.out",
-          });
-        });
-
-        icon.addEventListener("mouseleave", () => {
-          gsap.to(icon, {
-            x: 0,
-            y: 0,
-            duration: 0.5,
-            ease: "elastic.out(1, 0.3)",
-          });
-        });
-      });
     },
     { scope: containerRef }
   );
 
   return (
     <div ref={containerRef} className="w-full relative h-full flex flex-col justify-between gap-10">
-      <div className="space-y-8 relative z-10">
+      <div className="space-y-8">
         <div>
-          <h3 className="contact-title text-3xl font-bold text-white mb-8 tracking-tight flex items-center gap-3">
-            <span className="w-1 h-8 bg-primary rounded-full"></span>
+          <h3 className="contact-title text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
+            <span className="w-1 h-6 bg-primary rounded-full"></span>
             Contact Information
           </h3>
-          <div className="space-y-6">
+          <div className="space-y-5">
             {CONTACT_INFO.map((info) => (
-              <div key={info.label} className="info-item group">
+              <div key={info.label} className="info-item">
                 <InfoItem {...info} />
               </div>
             ))}
@@ -172,27 +146,23 @@ const ContactInfo = () => {
         </div>
 
         <div>
-          <h4 className="social-title text-lg font-semibold text-neutral-300 mb-6 tracking-wide flex items-center gap-3">
-            <span className="w-1 h-6 bg-accent rounded-full"></span>
+          <h4 className="social-title text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wider">
             Connect With Me
           </h4>
-          <div className="flex gap-4 relative z-20">
+          <div className="flex gap-3">
             {SOCIAL_LINKS.map((social) => (
               <a
                 key={social.label}
                 href={social.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-link group relative w-14 h-14 flex items-center justify-center rounded-2xl 
-                           bg-white/5 text-neutral-400 border border-white/10 backdrop-blur-md
-                           transition-all duration-300 ease-out
-                           hover:border-primary/50 hover:text-white hover:shadow-[0_0_20px_rgba(0,255,159,0.3)]"
+                className="social-link w-11 h-11 flex items-center justify-center rounded-xl 
+                           bg-foreground/5 text-muted-foreground border border-border
+                           transition-all duration-200 ease-out
+                           hover:border-primary/50 hover:text-primary hover:bg-primary/5"
                 aria-label={social.label}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300" />
-                <span className="relative z-10 transform transition-transform duration-300 group-hover:scale-110">
-                  {social.icon}
-                </span>
+                {social.icon}
               </a>
             ))}
           </div>

@@ -1,29 +1,19 @@
+"use client";
+
 import React, { useRef } from "react";
-import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import ScrollTrigger from "gsap/ScrollTrigger";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { HyperText } from "@/components/ui/HyperText";
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface TitleProps {
-  title: string | React.ReactNode;
+  title: string;
   subtitle?: string | React.ReactNode;
   showGlowBar?: boolean;
   className?: string;
 }
-
-const ANIMATION_CONFIG = {
-  DURATION: 0.8,
-  STAGGER: 0.1,
-  EASE: "power3.out",
-  Y_OFFSET: 30,
-  SCALE: {
-    START: 0.9,
-    END: 1,
-  },
-  GLOW: {
-    DURATION: 1.5,
-    EASE: "sine.inOut",
-  },
-} as const;
 
 const Title: React.FC<TitleProps> = ({
   title,
@@ -36,132 +26,88 @@ const Title: React.FC<TitleProps> = ({
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const glowBarRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-    () => {
-      if (!containerRef.current || !titleRef.current) return;
+  const subtitleWords = typeof subtitle === "string" ? subtitle.split(" ") : [];
+  const isStringSubtitle = typeof subtitle === "string";
 
-      const mainTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      const words = titleRef.current.querySelectorAll("span");
-
-      gsap.set(words, {
-        opacity: 0,
-        y: ANIMATION_CONFIG.Y_OFFSET,
-        scale: ANIMATION_CONFIG.SCALE.START,
-      });
-
-      mainTl.to(words, {
-        opacity: 1,
-        y: 0,
-        scale: ANIMATION_CONFIG.SCALE.END,
-        duration: ANIMATION_CONFIG.DURATION,
-        stagger: ANIMATION_CONFIG.STAGGER,
-        ease: ANIMATION_CONFIG.EASE,
-      });
-
-      if (subtitleRef.current) {
-        const subtitleLines = subtitleRef.current.querySelectorAll("span");
-
-        gsap.set(subtitleLines, {
-          opacity: 0,
-          y: ANIMATION_CONFIG.Y_OFFSET,
-          scale: ANIMATION_CONFIG.SCALE.START,
-        });
-
-        mainTl.to(
-          subtitleLines,
+  useGSAP(() => {
+    const ctx = gsap.context(() => {
+      if (titleRef.current) {
+        gsap.fromTo(titleRef.current,
+          { opacity: 0, y: 30, scale: 0.95 },
           {
-            opacity: 1,
-            y: 0,
-            scale: ANIMATION_CONFIG.SCALE.END,
-            duration: ANIMATION_CONFIG.DURATION,
-            stagger: ANIMATION_CONFIG.STAGGER,
-            ease: ANIMATION_CONFIG.EASE,
-          },
-          "-=0.4",
+            opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power2.out",
+            scrollTrigger: { trigger: titleRef.current, start: "top 80%", toggleActions: "play none none reverse" }
+          }
         );
       }
 
-      if (glowBarRef.current && showGlowBar) {
-        gsap.set(glowBarRef.current, {
-          opacity: 0,
-          scaleX: 0,
-        });
-
-        mainTl.to(
-          glowBarRef.current,
+      if (subtitleRef.current && isStringSubtitle) {
+        const words = subtitleRef.current.querySelectorAll(".subtitle-word");
+        gsap.fromTo(words,
+          { opacity: 0, y: 20 },
           {
-            opacity: 1,
-            scaleX: 1,
-            duration: ANIMATION_CONFIG.DURATION,
-            ease: ANIMATION_CONFIG.EASE,
-          },
-          "-=0.3",
+            opacity: 1, y: 0, duration: 0.4, stagger: 0.08, ease: "power2.out",
+            scrollTrigger: { trigger: subtitleRef.current, start: "top 80%", toggleActions: "play none none reverse" }
+          }
         );
-
-        const pulseTl = gsap.timeline({ paused: true });
-
-        pulseTl.to(glowBarRef.current, {
-          opacity: 1,
-          duration: ANIMATION_CONFIG.GLOW.DURATION,
-          ease: ANIMATION_CONFIG.GLOW.EASE,
-          repeat: -1,
-          yoyo: true,
-        });
-
-        ScrollTrigger.create({
-          trigger: containerRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          toggleActions: "play none none reverse",
-          animation: pulseTl,
-        });
+      } else if (subtitleRef.current) {
+        gsap.fromTo(subtitleRef.current,
+          { opacity: 0 },
+          {
+            opacity: 1, duration: 0.3,
+            scrollTrigger: { trigger: subtitleRef.current, start: "top 80%", toggleActions: "play none none reverse" }
+          }
+        );
       }
-    },
-    { scope: containerRef },
-  );
 
-  const wrapInSpans = (text: string | React.ReactNode): React.ReactNode => {
-    if (typeof text === "string") {
-      return text.split(" ").map((word, index) => (
-        <span
-          key={index}
-          className="inline-block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent px-1 pb-1"
-        >
-          {word}
-        </span>
-      ));
-    }
-    return text;
-  };
+      if (glowBarRef.current) {
+        gsap.fromTo(glowBarRef.current,
+          { opacity: 0, scaleX: 0 },
+          {
+            opacity: 1, scaleX: 1, duration: 0.6, delay: 0.3, ease: "power2.out",
+            scrollTrigger: { trigger: glowBarRef.current, start: "top 80%", toggleActions: "play none none reverse" }
+          }
+        );
+      }
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, { scope: containerRef });
 
   return (
     <div ref={containerRef} className={`text-center space-y-4 ${className}`}>
       <h2
         ref={titleRef}
         className="text-3xl sm:text-4xl lg:text-5xl font-bold"
-        style={{ willChange: "transform" }}
+        style={{ opacity: 0 }}
       >
-        {wrapInSpans(title)}
+        <HyperText
+          duration={1000}
+          delay={200}
+          animateOnHover={true}
+          startOnView={true}
+          className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+        >
+          {title}
+        </HyperText>
       </h2>
 
       {subtitle && (
         <p
           ref={subtitleRef}
-          className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base lg:text-lg"
-          style={{ willChange: "transform" }}
+          className="text-gray-400 max-w-2xl mx-auto text-sm sm:text-base lg:text-lg overflow-hidden"
+          style={{ opacity: isStringSubtitle ? 1 : 0 }}
         >
-          {typeof subtitle === "string" ? (
-            <>
-              <span className="inline-block">{subtitle}</span>
-            </>
+          {isStringSubtitle ? (
+            subtitleWords.map((word, i) => (
+              <span
+                key={i}
+                className="subtitle-word inline-block"
+                style={{ opacity: 0 }}
+              >
+                {word}{i < subtitleWords.length - 1 ? "\u00A0" : ""}
+              </span>
+            ))
           ) : (
             subtitle
           )}
@@ -171,8 +117,8 @@ const Title: React.FC<TitleProps> = ({
       {showGlowBar && (
         <div
           ref={glowBarRef}
-          className="h-1 w-24 mx-auto bg-gradient-to-r from-transparent via-primary to-transparent"
-          style={{ willChange: "transform" }}
+          className="h-1 w-24 mx-auto bg-gradient-to-r from-transparent via-primary to-transparent origin-center"
+          style={{ opacity: 0, transform: "scaleX(0)" }}
         />
       )}
     </div>

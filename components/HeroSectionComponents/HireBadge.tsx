@@ -25,9 +25,8 @@ const HireBadge = () => {
     <div
       ref={badgeRef}
       className="group relative inline-flex items-center gap-2.5 px-4 py-2 rounded-full
-                 bg-zinc-900/40 backdrop-blur-md border border-emerald-500/20
-                 shadow-[0_4px_20px_-4px_rgba(16,185,129,0.1)]
-                 hover:border-emerald-500/40 hover:bg-zinc-900/60 hover:shadow-[0_4px_25px_-4px_rgba(16,185,129,0.2)]
+                 bg-zinc-900/90 border border-emerald-500/20
+                 hover:border-emerald-500/40 hover:bg-zinc-900
                  transition-all duration-300 cursor-default overflow-hidden"
     >
       {/* Subtle Gradient Overlay */}

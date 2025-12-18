@@ -151,10 +151,9 @@ const SocialLinks = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="group relative flex items-center justify-center w-12 h-12 rounded-full
-                       bg-white/[0.03] backdrop-blur-md border border-white/[0.08]
+                       bg-white/[0.05] border border-white/[0.08]
                        transition-all duration-300 ease-out
-                       hover:scale-110 hover:bg-white/[0.08]
-                       shadow-[0_0_0_1px_rgba(255,255,255,0.02)]"
+                       hover:scale-110 hover:bg-white/[0.1]"
             style={{
               boxShadow: activeLink === index ? `0 0 20px ${link.color}30` : 'none',
               borderColor: activeLink === index ? `${link.color}50` : ''

@@ -33,7 +33,6 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const isActuallyOpen = isOpen || isAnimatingOut;
 
-  // Refs for staggered entrance animations
   const imageRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const descRef = useRef<HTMLParagraphElement>(null);
@@ -48,7 +47,6 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     const smoother = ScrollSmoother.get();
 
     if (isActuallyOpen) {
-      // Prevent body scroll and pause smoother
       document.body.style.overflow = "hidden";
       if (smoother) smoother.paused(true);
     } else {
@@ -110,7 +108,6 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       ) {
         gsap.killTweensOf([overlayRef.current, contentRef.current]);
 
-        // Reset elements for animation
         gsap.set(overlayRef.current, { opacity: 0 });
         gsap.set(contentRef.current, {
           opacity: 0,
@@ -180,7 +177,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     >
       <div
         ref={overlayRef}
-        className="fixed inset-0 bg-dark/80 backdrop-blur-xl z-40 transition-colors"
+        className="fixed inset-0 bg-background/95 z-40 transition-colors"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -188,7 +185,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       <div
         ref={contentRef}
         className="relative z-50 flex flex-col transform-gpu
-                     bg-secondary/95 shadow-2xl border border-white/10
+                     bg-card/95 shadow-2xl border border-border
                      h-[100dvh] w-full
                      md:max-w-6xl md:h-[85vh] md:max-h-[800px]
                      md:rounded-2xl overflow-hidden"
@@ -201,8 +198,8 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
           onClick={onClose}
           aria-label="Close project details"
           className="group absolute top-4 right-4 p-2 rounded-full z-[51]
-                     bg-black/20 text-white/70 border border-white/5
-                     hover:bg-white/10 hover:text-white
+                     bg-background/20 text-foreground/70 border border-border
+                     hover:bg-foreground/10 hover:text-foreground
                      transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
         >
           <FiX className="w-5 h-5 transition-transform duration-300 group-hover:rotate-90" />
@@ -228,7 +225,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                          md:scrollbar-track-transparent md:pr-4"
               data-lenis-prevent
             >
-              <div ref={imageRef} className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-white/10 flex-shrink-0 group">
+              <div ref={imageRef} className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-border flex-shrink-0 group">
                 <Image
                   src={project.image}
                   alt={project.title}
@@ -251,7 +248,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                   <h2 ref={titleRef} className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-white to-accent bg-clip-text text-transparent tracking-tight">
                     {project.title}
                   </h2>
-                  <p ref={descRef} className="text-lg md:text-xl text-light/70 leading-relaxed font-light border-l-2 border-white/5 pl-4">
+                  <p ref={descRef} className="text-lg md:text-xl text-muted-foreground leading-relaxed font-light border-l-2 border-border pl-4">
                     {project.shortDescription}
                   </p>
                 </div>
@@ -281,7 +278,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                 />
               </div>
 
-              <div className="mt-auto pt-8 space-y-6 flex-shrink-0 border-t border-white/10">
+              <div className="mt-auto pt-8 space-y-6 flex-shrink-0 border-t border-border">
                 <TechStack technologies={project.technologies} />
 
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -307,7 +304,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                       href={project.githubLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-white/5 text-white border border-white/10 font-medium overflow-hidden transition-all duration-300 hover:bg-white/10 hover:border-white/30 hover:shadow-lg active:scale-95"
+                      className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-secondary/50 text-foreground border border-border font-medium overflow-hidden transition-all duration-300 hover:bg-secondary/80 hover:border-border/80 hover:shadow-lg active:scale-95"
                     >
                       <span className="relative z-10 flex items-center gap-2.5">
                         <FiGithub className="w-5 h-5 transition-transform duration-300 group-hover:rotate-12" />

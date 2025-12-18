@@ -165,7 +165,7 @@ const JourneySection = () => {
 
               {/* Card */}
               <div
-                className="journey-card relative bg-white/[0.02] backdrop-blur-md border border-white/[0.05] rounded-2xl p-6 md:p-8 transition-colors duration-300 overflow-hidden"
+                className="journey-card relative bg-white/[0.04] border border-white/[0.05] rounded-2xl p-6 md:p-8 transition-colors duration-300 overflow-hidden"
                 style={{
                   // @ts-ignore
                   "--mouse-x": "0px",

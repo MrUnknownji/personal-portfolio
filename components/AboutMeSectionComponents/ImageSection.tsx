@@ -41,11 +41,11 @@ const ImageSection = () => {
         duration: ANIMATION_CONFIG.REVEAL_DURATION,
         ease: ANIMATION_CONFIG.REVEAL_EASE,
       })
-      .to(imageRef.current, {
-        scale: 1,
-        duration: ANIMATION_CONFIG.IMAGE_DURATION,
-        ease: ANIMATION_CONFIG.IMAGE_EASE,
-      }, "<");
+        .to(imageRef.current, {
+          scale: 1,
+          duration: ANIMATION_CONFIG.IMAGE_DURATION,
+          ease: ANIMATION_CONFIG.IMAGE_EASE,
+        }, "<");
 
     },
     { scope: containerRef }
@@ -81,10 +81,6 @@ const ImageSection = () => {
         {/* Overlay Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-60" />
       </div>
-
-      {/* Floating Accents */}
-      <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary/10 rounded-full blur-2xl -z-10" />
-      <div className="absolute -top-6 -left-6 w-32 h-32 bg-secondary/10 rounded-full blur-2xl -z-10" />
     </div>
   );
 };

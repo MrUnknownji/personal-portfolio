@@ -110,7 +110,7 @@ const ThankYouDialog = ({
       {/* Backdrop */}
       <div
         ref={overlayRef}
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-3xl"
+        className="absolute inset-0 bg-black/90 rounded-3xl"
         onClick={startCloseProcess}
       />
 

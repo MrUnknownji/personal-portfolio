@@ -42,7 +42,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     try {
       if (submitButtonRef.current) {
         gsap.to(submitButtonRef.current, {
-          scale: 0.95,
+          scale: 0.98,
           duration: 0.1,
           yoyo: true,
           repeat: 1,
@@ -85,18 +85,13 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     const isFocused = focusedField === fieldName;
 
     return `
-      w-full bg-transparent rounded-none border-b-2 text-white px-0 py-4
-      outline-none placeholder:text-transparent transition-all duration-300
-      [&:-webkit-autofill]:bg-transparent
-      [&:-webkit-autofill]:[-webkit-text-fill-color:white]
-      [&:-webkit-autofill]:transition-[background-color]
-      [&:-webkit-autofill]:duration-[5000s]
-      [&:-webkit-autofill]:ease-in-out
+      w-full bg-transparent rounded-none border-b text-foreground px-0 py-3
+      outline-none transition-colors duration-200
       ${hasError
-        ? "border-red-500/80"
+        ? "border-red-500/70"
         : isFocused
           ? "border-primary"
-          : "border-white/20 hover:border-white/40"
+          : "border-border hover:border-muted-foreground"
       }
     `;
   };
@@ -109,10 +104,10 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
     return (
       <label
-        className={`absolute left-0 transition-all duration-300 pointer-events-none
+        className={`absolute left-0 transition-all duration-200 pointer-events-none
           ${(isFocused || hasValue)
-            ? "-top-2 text-xs text-primary font-medium"
-            : "top-4 text-neutral-400"
+            ? "-top-2 text-xs text-primary"
+            : "top-3 text-muted-foreground"
           }
         `}
       >
@@ -129,7 +124,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         className="space-y-8"
         noValidate
       >
-        <div className="relative group">
+        <div className="relative">
           <input
             ref={categoryInputRef}
             type="text"
@@ -141,17 +136,16 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
               if (errors.category) setErrors({ ...errors, category: '' });
             }}
             disabled={isSubmitting}
-            style={{ backgroundColor: 'transparent' }}
           />
           {renderFloatingLabel('category', 'Category (e.g., Project Inquiry)')}
           {errors.category && (
-            <span className="absolute -bottom-6 left-0 text-xs text-red-400 font-medium animate-pulse">
+            <span className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.category}
             </span>
           )}
         </div>
 
-        <div className="relative group">
+        <div className="relative">
           <input
             ref={subjectInputRef}
             type="text"
@@ -163,17 +157,16 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
               if (errors.subject) setErrors({ ...errors, subject: '' });
             }}
             disabled={isSubmitting}
-            style={{ backgroundColor: 'transparent' }}
           />
           {renderFloatingLabel('subject', 'Subject')}
           {errors.subject && (
-            <span className="absolute -bottom-6 left-0 text-xs text-red-400 font-medium animate-pulse">
+            <span className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.subject}
             </span>
           )}
         </div>
 
-        <div className="relative group">
+        <div className="relative">
           <textarea
             ref={messageTextareaRef}
             name="message"
@@ -185,11 +178,10 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
               if (errors.message) setErrors({ ...errors, message: '' });
             }}
             disabled={isSubmitting}
-            style={{ backgroundColor: 'transparent' }}
           />
           {renderFloatingLabel('message', 'Your Message...')}
           {errors.message && (
-            <span className="absolute -bottom-6 left-0 text-xs text-red-400 font-medium animate-pulse">
+            <span className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.message}
             </span>
           )}
@@ -200,20 +192,13 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
             ref={submitButtonRef}
             type="submit"
             disabled={isSubmitting}
-            className="group/submitbtn relative w-full overflow-hidden bg-white text-black font-bold py-4 px-6 rounded-xl
-                        flex items-center justify-center gap-x-2 transition-all duration-300
-                        hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full bg-primary text-dark font-semibold py-3.5 px-6 rounded-xl
+                       flex items-center justify-center gap-2 transition-all duration-200
+                       hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary opacity-0 group-hover/submitbtn:opacity-100 transition-opacity duration-300" />
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary opacity-0 group-hover/submitbtn:opacity-20 blur-xl transition-opacity duration-300" />
-
-            <span className="relative z-10 tracking-wide group-hover/submitbtn:text-black transition-colors duration-300">
-              {isSubmitting ? "Sending..." : "Send Message"}
-            </span>
+            <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
             <FiSend
-              className={`relative z-10 w-5 h-5 transition-all duration-300 group-hover/submitbtn:text-black ${isSubmitting
-                ? "animate-spin"
-                : "group-hover/submitbtn:translate-x-1 group-hover/submitbtn:-translate-y-1"
+              className={`w-4 h-4 transition-transform duration-200 ${isSubmitting ? "" : "group-hover:translate-x-0.5"
                 }`}
             />
           </button>

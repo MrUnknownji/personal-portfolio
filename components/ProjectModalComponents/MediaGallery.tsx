@@ -46,7 +46,6 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
     setIsVideoError(false);
   }, [items.length]);
 
-  // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isPreviewOpen) return;
@@ -59,7 +58,6 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isPreviewOpen, handleNext, handlePrev]);
 
-  // Scroll active thumbnail into view
   useEffect(() => {
     if (isPreviewOpen && thumbnailStripRef.current && selectedIndex >= 0) {
       const activeThumb = thumbnailStripRef.current.children[selectedIndex] as HTMLElement;
@@ -180,7 +178,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
 
             {/* Hover Overlay */}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-              <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl">
+              <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 p-3 rounded-full bg-white/20 border border-white/20 text-white shadow-xl">
                 {item.type === "video" ? (
                   <FiPlay className="w-6 h-6 fill-white" />
                 ) : (
@@ -191,7 +189,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
 
             {/* Type Indicator Badge (always visible) */}
             {item.type === "video" && (
-              <div className="absolute top-3 right-3 px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm border border-white/10 text-xs font-medium text-white/90 flex items-center gap-1.5 pointer-events-none">
+              <div className="absolute top-3 right-3 px-2 py-1 rounded-md bg-black/80 border border-white/10 text-xs font-medium text-white/90 flex items-center gap-1.5 pointer-events-none">
                 <FiPlay className="w-3 h-3 fill-white" />
                 <span>Video</span>
               </div>
@@ -204,7 +202,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 md:p-10">
           <div
             ref={previewOverlayRef}
-            className="fixed inset-0 bg-dark/90 backdrop-blur-xl"
+            className="fixed inset-0 bg-dark/95"
             onClick={handleClosePreviewAnimation}
           />
           {/*
@@ -218,7 +216,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
           >
             <button
               onClick={handleClosePreviewAnimation}
-              className="absolute top-4 right-4 p-2.5 text-white/70 hover:text-white bg-black/20 hover:bg-white/10 rounded-full z-20 transition-colors backdrop-blur-md border border-white/5"
+              className="absolute top-4 right-4 p-2.5 text-white/70 hover:text-white bg-black/40 hover:bg-white/10 rounded-full z-20 transition-colors border border-white/5"
               aria-label="Close media preview"
             >
               <FiX className="w-5 h-5" />
@@ -228,13 +226,13 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
               {/* Navigation Arrows */}
               <button
                 onClick={(e) => { e.stopPropagation(); handlePrev(); }}
-                className="absolute left-4 z-30 p-3 rounded-full bg-black/20 hover:bg-white/10 text-white/70 hover:text-white backdrop-blur-md border border-white/5 transition-all duration-200 hover:scale-110"
+                className="absolute left-4 z-30 p-3 rounded-full bg-black/40 hover:bg-white/10 text-white/70 hover:text-white border border-white/5 transition-all duration-200 hover:scale-110"
               >
                 <FiChevronLeft className="w-6 h-6" />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); handleNext(); }}
-                className="absolute right-4 z-30 p-3 rounded-full bg-black/20 hover:bg-white/10 text-white/70 hover:text-white backdrop-blur-md border border-white/5 transition-all duration-200 hover:scale-110"
+                className="absolute right-4 z-30 p-3 rounded-full bg-black/40 hover:bg-white/10 text-white/70 hover:text-white border border-white/5 transition-all duration-200 hover:scale-110"
               >
                 <FiChevronRight className="w-6 h-6" />
               </button>
@@ -275,7 +273,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
             </div>
 
             {/* Footer with Counter and Thumbnails */}
-            <div className="flex-shrink-0 w-full bg-black/40 backdrop-blur-xl border-t border-white/10 p-4 flex flex-col gap-4">
+            <div className="flex-shrink-0 w-full bg-black/60 border-t border-white/10 p-4 flex flex-col gap-4">
               {/* Counter */}
               <div className="flex items-center justify-between px-2">
                 <span className="text-sm font-medium text-white/90">

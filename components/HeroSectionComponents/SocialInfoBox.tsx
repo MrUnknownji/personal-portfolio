@@ -61,8 +61,7 @@ const SocialInfoBox = ({
     >
       <div
         className="relative w-80 p-5 rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)]
-                   bg-[#0a0a0a]/95 backdrop-blur-xl
-                   border border-white/10 overflow-hidden group"
+                   bg-[#0a0a0a] border border-white/10 overflow-hidden group"
       >
         {/* Dynamic Gradient Glow */}
         <div
@@ -128,7 +127,7 @@ const SocialInfoBox = ({
         {/* Arrow */}
         <div
           className="absolute left-1/2 w-4 h-4 border-white/10
-                     bg-[#0a0a0a]/95 backdrop-blur-xl"
+                     bg-[#0a0a0a]"
           style={{
             bottom: "-8px",
             transform: "translateX(-50%) rotate(45deg)",

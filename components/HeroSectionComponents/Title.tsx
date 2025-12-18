@@ -2,8 +2,10 @@
 import { useRef } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
+import { HyperText } from "@/components/ui/HyperText";
 
 export const Title = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
 
   useGSAP(
@@ -25,18 +27,27 @@ export const Title = () => {
         ease: "none",
       });
     },
-    { scope: titleRef },
+    { scope: containerRef },
   );
 
   return (
-    <div className="overflow-visible py-2 cursor-default">
+    <div ref={containerRef} className="overflow-visible py-2 cursor-default">
       <h1
         ref={titleRef}
         className="hero-title font-bold text-4xl md:text-5xl lg:text-7xl tracking-tight
                    bg-[size:200%_auto] bg-clip-text text-transparent
                    bg-gradient-to-r from-primary via-accent to-primary"
       >
-        Sandeep Kumar
+        <HyperText
+          duration={1200}
+          delay={500}
+          animateOnHover={true}
+          startOnView={false}
+          className="bg-[size:200%_auto] bg-clip-text text-transparent
+                     bg-gradient-to-r from-primary via-accent to-primary"
+        >
+          Sandeep Kumar
+        </HyperText>
       </h1>
     </div>
   );

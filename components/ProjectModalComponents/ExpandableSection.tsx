@@ -49,7 +49,6 @@ export const ExpandableSection = ({
       overwrite: true,
     });
 
-    // Animate content wrapper
     gsap.to(contentWrapperRef.current, {
       height: isExpanded ? 0 : "auto",
       opacity: targetOpacity,
@@ -58,7 +57,6 @@ export const ExpandableSection = ({
       overwrite: true,
     });
 
-    // Animate chevron
     gsap.to(headerRef.current?.querySelector(".chevron-icon") || null, {
       rotation: targetRotation,
       duration: ANIMATION_CONFIG.DURATION,

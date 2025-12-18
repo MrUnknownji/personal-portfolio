@@ -43,7 +43,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
 
   const { contextSafe } = useGSAP({ scope: cardRef });
 
-  // 3D Tilt effect based on mouse position
   const handleMouseMove = contextSafe((e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || !isHovered) return;
 
@@ -54,15 +53,12 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    // Calculate rotation
     const rotateX = ((y - centerY) / centerY) * -ANIMATION_CONFIG.TILT_MAX;
     const rotateY = ((x - centerX) / centerX) * ANIMATION_CONFIG.TILT_MAX;
 
-    // Magnetic effect - subtle card movement towards cursor
     const magneticX = ((x - centerX) / centerX) * ANIMATION_CONFIG.MAGNETIC_FORCE * 10;
     const magneticY = ((y - centerY) / centerY) * ANIMATION_CONFIG.MAGNETIC_FORCE * 10;
 
-    // Shine effect position
     const shineX = (x / rect.width) * 100;
     const shineY = (y / rect.height) * 100;
 
@@ -77,7 +73,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       transformPerspective: 1000,
     });
 
-    // Parallax image movement
     gsap.to(imageRef.current, {
       x: -rotateY * 1.5,
       y: -rotateX * 1.5,
@@ -86,7 +81,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       overwrite: true,
     });
 
-    // Shine effect
     if (shineRef.current) {
       gsap.to(shineRef.current, {
         background: `radial-gradient(circle 150px at ${shineX}% ${shineY}%, rgba(0, 255, 159, 0.15), transparent)`,
@@ -99,10 +93,8 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
   const handleMouseEnter = contextSafe(() => {
     setIsHovered(true);
 
-    // Entrance Timeline
     const tl = gsap.timeline({ defaults: { ease: ANIMATION_CONFIG.HOVER_EASE } });
 
-    // Card expansion and elevation
     tl.to(cardRef.current, {
       scale: ANIMATION_CONFIG.CARD_SCALE,
       boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
@@ -111,7 +103,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       overwrite: true,
     }, 0);
 
-    // Image zoom with slight rotation
     tl.to(imageRef.current, {
       scale: ANIMATION_CONFIG.IMAGE_SCALE,
       rotation: 2,
@@ -120,14 +111,12 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       overwrite: true,
     }, 0);
 
-    // Overlay fade in
     tl.to(overlayRef.current, {
       opacity: 1,
       duration: 0.3,
       overwrite: true,
     }, 0.1);
 
-    // View Details button with elastic bounce
     tl.fromTo(
       viewDetailsRef.current,
       { scale: 0.8, y: 30, opacity: 0, rotation: -5 },
@@ -143,7 +132,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       0.15
     );
 
-    // Accent line expansion
     tl.to(accentLineRef.current, {
       scaleX: 1,
       opacity: 1,
@@ -152,7 +140,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       overwrite: true,
     }, 0);
 
-    // Staggered content reveal
     tl.fromTo(
       titleRef.current,
       { y: 10, opacity: 0.7 },
@@ -166,7 +153,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       0.15
     );
 
-    // Tags stagger with bounce
     if (tagsContainerRef.current) {
       const tags = tagsContainerRef.current.querySelectorAll(".tech-tag");
       tl.fromTo(
@@ -189,7 +175,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
   const handleMouseLeave = contextSafe(() => {
     setIsHovered(false);
 
-    // Reset all transformations
     const tl = gsap.timeline({ defaults: { ease: ANIMATION_CONFIG.EASE_IN } });
 
     tl.to(cardRef.current, {
@@ -235,7 +220,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       overwrite: true,
     }, 0);
 
-    // Reset content
     tl.to([titleRef.current, descRef.current], {
       y: 0,
       opacity: 1,
@@ -256,7 +240,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
 
   useGSAP(
     () => {
-      // Initial states
       gsap.set(overlayRef.current, { opacity: 0 });
       gsap.set(viewDetailsRef.current, { opacity: 0, y: 30, scale: 0.8 });
       gsap.set(accentLineRef.current, { scaleX: 0, opacity: 0, transformOrigin: "left center" });
@@ -271,7 +254,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
   return (
     <div
       ref={cardRef}
-      className="relative bg-secondary/40 backdrop-blur-md border border-white/5 rounded-2xl overflow-hidden shadow-lg cursor-pointer transform-gpu"
+      className="relative bg-card/95 border border-border rounded-2xl overflow-hidden shadow-lg cursor-pointer transform-gpu"
       onClick={onClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -299,7 +282,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       />
 
       {/* Image Container */}
-      <div className="relative h-52 md:h-64 overflow-hidden border-b border-white/5">
+      <div className="relative h-52 md:h-64 overflow-hidden border-b border-border">
         <div
           ref={imageRef}
           className="absolute inset-0 transform-gpu"
@@ -321,17 +304,17 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
           />
 
           {/* Gradient overlay on image */}
-          <div className="absolute inset-0 bg-gradient-to-t from-dark/80 via-dark/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
         </div>
 
         <div
           ref={overlayRef}
-          className="absolute inset-0 bg-dark/70 backdrop-blur-[3px] flex items-center justify-center"
+          className="absolute inset-0 bg-background/90 flex items-center justify-center"
           style={{ willChange: "opacity" }}
         >
           <span
             ref={viewDetailsRef}
-            className="flex items-center gap-2 text-base font-bold text-white px-6 py-3 rounded-full bg-primary/15 border-2 border-primary/60 backdrop-blur-md shadow-lg"
+            className="flex items-center gap-2 text-base font-bold text-white px-6 py-3 rounded-full bg-primary/20 border-2 border-primary/60 shadow-lg"
             style={{ willChange: "transform, opacity" }}
           >
             View Project <FiArrowUpRight className="w-5 h-5 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
@@ -343,7 +326,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       <div ref={contentRef} className="p-6 flex flex-col h-full relative">
         <h3
           ref={titleRef}
-          className="text-2xl font-bold text-light mb-3 tracking-tight flex items-start justify-between gap-2"
+          className="text-2xl font-bold text-foreground mb-3 tracking-tight flex items-start justify-between gap-2"
         >
           <span className="flex-1">{project.title}</span>
           {project.featured && (
@@ -352,7 +335,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
         </h3>
         <p
           ref={descRef}
-          className="text-muted/90 text-sm leading-relaxed mb-6 line-clamp-3"
+          className="text-muted-foreground text-sm leading-relaxed mb-6 line-clamp-3"
         >
           {project.shortDescription}
         </p>
@@ -373,7 +356,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
             ))}
           {project.technologies.length >
             ANIMATION_CONFIG.TECH_TAGS.MAX_DISPLAY && (
-              <span className="tech-tag px-3 py-1.5 rounded-full text-xs font-medium bg-white/5 text-muted/70 border border-white/10 hover:border-white/20 transition-colors duration-300">
+              <span className="tech-tag px-3 py-1.5 rounded-full text-xs font-medium bg-foreground/5 text-muted-foreground border border-border hover:border-border/80 transition-colors duration-300">
                 +{project.technologies.length -
                   ANIMATION_CONFIG.TECH_TAGS.MAX_DISPLAY}
               </span>

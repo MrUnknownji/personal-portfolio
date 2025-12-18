@@ -47,9 +47,9 @@ const Footer = () => {
 
     // Use GSAP ScrollTo for elements
     gsap.to(window, {
-        scrollTo: { y: `#${elementId}`, offsetY: 50 },
-        duration: 1.2,
-        ease: "power2.inOut"
+      scrollTo: { y: `#${elementId}`, offsetY: 50 },
+      duration: 1.2,
+      ease: "power2.inOut"
     });
   }, []);
 
@@ -76,11 +76,11 @@ const Footer = () => {
   );
 
   const shouldShowArrow = (linkHref: string) => {
-     // Strip hash to get the base path
-     const targetPath = linkHref.split('#')[0] || '/';
-     // Current path logic. If pathname is '/', targetPath '/' is the same.
-     // If pathname is '/my-projects', targetPath '/' is different.
-     return targetPath !== pathname;
+    // Strip hash to get the base path
+    const targetPath = linkHref.split('#')[0] || '/';
+    // Current path logic. If pathname is '/', targetPath '/' is the same.
+    // If pathname is '/my-projects', targetPath '/' is different.
+    return targetPath !== pathname;
   };
 
   useGSAP(
@@ -123,7 +123,7 @@ const Footer = () => {
   return (
     <footer
       ref={footerRef}
-      className="w-full bg-dark border-t border-white/5 py-12 md:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
+      className="w-full bg-background border-t border-border py-12 md:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
     >
       {/* Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
@@ -145,14 +145,14 @@ const Footer = () => {
                   >
                     <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-gradient-to-r from-primary via-accent to-primary transition-all duration-300 ease-out group-hover:w-full"></span>
 
-                    <span className="relative z-10 text-muted group-hover:text-white transition-colors duration-300">
+                    <span className="relative z-10 text-muted-foreground group-hover:text-foreground transition-colors duration-300">
                       {link.text}
                     </span>
 
                     {showArrow && (
-                        <span className="relative z-10 w-0 overflow-hidden opacity-0 -translate-x-2 group-hover:w-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary flex items-center justify-center">
+                      <span className="relative z-10 w-0 overflow-hidden opacity-0 -translate-x-2 group-hover:w-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary flex items-center justify-center">
                         <FiArrowUpRight className="w-3 h-3 flex-shrink-0" />
-                        </span>
+                      </span>
                     )}
                   </a>
                 </li>
@@ -163,11 +163,11 @@ const Footer = () => {
 
         {/* Tech Stack */}
         <div className="animate-built-with flex flex-col items-center gap-3">
-          <p className="text-xs font-medium text-muted/50 uppercase tracking-widest">Crafted with</p>
+          <p className="text-xs font-medium text-muted-foreground/50 uppercase tracking-widest">Crafted with</p>
           <div className="flex flex-wrap justify-center items-center gap-3">
             {BUILT_WITH.map((tech, index) => (
               <div key={tech} className="flex items-center">
-                <span className="text-xs font-medium text-light/40 hover:text-primary/80 transition-colors duration-300 cursor-default">
+                <span className="text-xs font-medium text-muted-foreground/40 hover:text-primary/80 transition-colors duration-300 cursor-default">
                   {tech}
                 </span>
                 {index < BUILT_WITH.length - 1 && (
@@ -179,8 +179,8 @@ const Footer = () => {
         </div>
 
         {/* Copyright */}
-        <div className="animate-copyright text-center pt-4 border-t border-white/5 w-full max-w-xs">
-          <p className="text-xs text-muted/40">
+        <div className="animate-copyright text-center pt-4 border-t border-border w-full max-w-xs">
+          <p className="text-xs text-muted-foreground/40">
             © {currentYear} Sandeep Kumar. All rights reserved.
           </p>
         </div>

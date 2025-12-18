@@ -6,6 +6,8 @@ import Footer from "@/components/Footer";
 import SmoothScroller from "@/components/SmoothScroller";
 import Template from "./template";
 import Bot from "@/components/Bot";
+import CustomCursor from "@/components/ui/CustomCursor";
+import ClickSpark from "@/components/ui/ClickSpark";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -36,6 +38,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { Meteors } from "@/components/ui/Meteors";
+
 export default function RootLayout({
   children,
 }: {
@@ -43,27 +47,11 @@ export default function RootLayout({
 }) {
   return (
     <html className={`${outfit.variable} ${poppins.variable}`} lang="en">
-      <body className="bg-[#09090b] text-light" suppressHydrationWarning>
+      <body className="bg-background text-foreground" suppressHydrationWarning>
         <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
-          <div className="absolute inset-0 bg-[#09090b]"></div>
-          <div
-            className="absolute inset-0 opacity-[0.15]"
-            style={{
-              backgroundImage: `
-                radial-gradient(at 20% 30%, hsla(160, 80%, 40%, 0.3) 0px, transparent 50%),
-                radial-gradient(at 80% 10%, hsla(197, 70%, 50%, 0.25) 0px, transparent 50%),
-                radial-gradient(at 70% 80%, hsla(210, 60%, 35%, 0.2) 0px, transparent 50%),
-                radial-gradient(at 30% 90%, hsla(160, 50%, 25%, 0.15) 0px, transparent 60%),
-                radial-gradient(at 90% 60%, hsla(197, 40%, 30%, 0.2) 0px, transparent 50%)
-              `,
-            }}
-          />
-          <div
-            className="absolute inset-0 opacity-15 mix-blend-soft-light"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-            }}
-          />
+          <div className="absolute inset-0 bg-background"></div>
+          {/* Meteor Shower Background */}
+          <Meteors number={30} />
         </div>
         <Header />
 
@@ -74,6 +62,8 @@ export default function RootLayout({
           <Footer />
         </SmoothScroller>
         <Bot />
+        <CustomCursor />
+        <ClickSpark />
       </body>
     </html>
   );
