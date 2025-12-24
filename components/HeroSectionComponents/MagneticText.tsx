@@ -46,18 +46,25 @@ export const MagneticText = ({
           const charCenterY = charRect.top + charRect.height / 2;
 
           const dist = Math.hypot(mouseX - charCenterX, mouseY - charCenterY);
-          const maxDist = 150; // Adjusted interaction radius
+          // Use offset relative to the char's own center, but we can't trust getBoundingClientRect if it moves.
+          // Instead, we damp the movement or use a stable reference? 
+          // Actually, simply scaling the distance calculation by the INVERSE of the movement might help,
+          // but the easiest fix for "flickering" is to NOT move the element under the cursor so much it leaves the cursor.
+          // Or, use a proxy element for the hit area. 
+          // For now, I'll reduce the intensity and maxDist to minimize "escaping".
 
+          const maxDist = 80; // Reduced from 150 to keep interaction tighter
           if (dist < maxDist) {
             const intensity = 1 - dist / maxDist;
-            const moveX = (mouseX - charCenterX) * intensity * 0.3;
-            const moveY = (mouseY - charCenterY) * intensity * 0.3;
+            // Dampen movement significantly so the element stays "under" the cursor primarily
+            const moveX = (mouseX - charCenterX) * intensity * 0.1;
+            const moveY = (mouseY - charCenterY) * intensity * 0.1;
 
             gsap.to(char, {
               x: moveX,
               y: moveY,
               scale: 1 + intensity * 0.1,
-              color: "#00ff9f", // Accent color
+              color: "#00ff9f",
               duration: 0.3,
               ease: "power2.out",
               overwrite: "auto",

@@ -197,8 +197,8 @@ const CodeCompare = ({
       >
         <div
           ref={sliderRef}
-          className={cn("w-full h-full overflow-hidden rounded-xl border border-primary/20 shadow-2xl shadow-primary/10", className)}
-          style={{ position: "relative", cursor: slideMode === "drag" ? "grab" : "col-resize" }}
+          className={cn("code-resizer-handle w-full h-full overflow-hidden rounded-xl border border-primary/20 shadow-2xl shadow-primary/10", className)}
+          style={{ position: "relative" }}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           onMouseEnter={handleMouseEnter}

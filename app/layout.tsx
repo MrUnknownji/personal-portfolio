@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import SmoothScroller from "@/components/SmoothScroller";
 import Template from "./template";
 import Bot from "@/components/Bot";
-import CustomCursor from "@/components/ui/CustomCursor";
+
 import ClickSpark from "@/components/ui/ClickSpark";
 
 export const viewport: Viewport = {
@@ -62,7 +62,7 @@ export default function RootLayout({
           <Footer />
         </SmoothScroller>
         <Bot />
-        <CustomCursor />
+
         <ClickSpark />
       </body>
     </html>

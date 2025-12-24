@@ -125,13 +125,13 @@ const Footer = () => {
       ref={footerRef}
       className="w-full bg-background border-t border-border py-12 md:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
     >
-      {/* Background Glow */}
+
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-primary/5 blur-[100px] rounded-full pointer-events-none"></div>
 
       <div className="container mx-auto relative z-10 flex flex-col items-center space-y-10">
 
-        {/* Navigation Links */}
+
         <nav className="animate-links">
           <ul className="flex flex-wrap justify-center items-center gap-x-8 gap-y-4">
             {QUICK_LINKS.map((link) => {
@@ -161,7 +161,7 @@ const Footer = () => {
           </ul>
         </nav>
 
-        {/* Tech Stack */}
+
         <div className="animate-built-with flex flex-col items-center gap-3">
           <p className="text-xs font-medium text-muted-foreground/50 uppercase tracking-widest">Crafted with</p>
           <div className="flex flex-wrap justify-center items-center gap-3">
@@ -178,7 +178,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Copyright */}
+
         <div className="animate-copyright text-center pt-4 border-t border-border w-full max-w-xs">
           <p className="text-xs text-muted-foreground/40">
             © {currentYear} Sandeep Kumar. All rights reserved.

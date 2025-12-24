@@ -177,7 +177,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     >
       <div
         ref={overlayRef}
-        className="fixed inset-0 bg-background/95 z-40 transition-colors"
+        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 transition-colors"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -185,13 +185,12 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       <div
         ref={contentRef}
         className="relative z-50 flex flex-col transform-gpu
-                     bg-card/95 shadow-2xl border border-border
+                     bg-card/90 backdrop-blur-md shadow-2xl border border-border
                      h-[100dvh] w-full
                      md:max-w-6xl md:h-[85vh] md:max-h-[800px]
                      md:rounded-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Glassmorphism background effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
 
         <button

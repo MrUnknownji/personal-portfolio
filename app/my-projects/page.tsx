@@ -89,7 +89,7 @@ export default function MyProjects() {
           defaults: { ease: ANIMATION_CONFIG.EASE, overwrite: "auto" },
         });
 
-        // Animate title section with elegant entrance
+
         if (titleSectionRef.current) {
           initialTl.fromTo(
             titleSectionRef.current,
@@ -109,7 +109,7 @@ export default function MyProjects() {
           );
         }
 
-        // Animate controls with a bounce effect
+
         if (controlsRef.current) {
           initialTl.fromTo(
             controlsRef.current,
@@ -131,7 +131,7 @@ export default function MyProjects() {
           );
         }
 
-        // Creative wave-pattern entrance for project cards
+
         const cards = projectsRef.current?.querySelectorAll(".project-card-container");
         if (cards && cards.length > 0) {
           // Immediately set initial state to prevent flicker
@@ -429,7 +429,7 @@ export default function MyProjects() {
 
   return (
     <div ref={pageRef} className="min-h-screen pt-24 pb-20 md:pb-28 lg:pb-32 relative overflow-hidden">
-      {/* Refined ambient background effects */}
+
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-[120px]" />
         <div className="absolute top-60 right-1/3 w-[400px] h-[400px] bg-primary/[0.02] rounded-full blur-[100px]" />
@@ -437,7 +437,7 @@ export default function MyProjects() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Enhanced Title Section */}
+
         <div
           ref={titleSectionRef}
           className="mb-16 md:mb-20 text-center relative"

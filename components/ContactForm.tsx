@@ -19,7 +19,7 @@ const ContactForm: React.FC = () => {
     () => {
       if (!containerRef.current) return;
 
-      // Simple entrance animation
+
       gsap.fromTo(
         containerRef.current,
         {
@@ -67,7 +67,7 @@ const ContactForm: React.FC = () => {
                      border border-border
                      shadow-xl"
         >
-          {/* Subtle top gradient accent */}
+
           <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
           <div className="relative px-6 py-10 sm:px-10 sm:py-12 md:p-16">

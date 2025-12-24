@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, memo } from "react";
 import { FiGithub, FiLinkedin } from "react-icons/fi";
 import { FaXTwitter } from "react-icons/fa6";
 import gsap from "gsap";
@@ -14,6 +14,52 @@ const ANIMATION_CONFIG = {
     HIDE: { DURATION: 0.15, EASE: "power2.in" },
   },
 } as const;
+
+// Memoized individual link component to prevent re-renders on mouse move
+const SocialLinkItem = memo(({
+  link,
+  index,
+  isActive,
+  onMouseEnter,
+  onMouseLeave
+}: {
+  link: SocialLink,
+  index: number,
+  isActive: boolean,
+  onMouseEnter: (index: number) => void,
+  onMouseLeave: () => void
+}) => {
+  return (
+    <a
+      href={link.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="group relative flex items-center justify-center w-12 h-12 rounded-full
+                 bg-white/[0.05] border border-white/[0.08]
+                 transition-all duration-300 ease-out
+                 hover:scale-110 hover:bg-white/[0.1]"
+      style={{
+        boxShadow: isActive ? `0 0 20px ${link.color}30` : 'none',
+        borderColor: isActive ? `${link.color}50` : ''
+      }}
+      onMouseEnter={() => onMouseEnter(index)}
+      onMouseLeave={onMouseLeave}
+    >
+      <div className="text-neutral-400 transition-colors duration-300 group-hover:text-white relative z-10"
+        style={{ color: isActive ? link.color : undefined }}>
+        {React.cloneElement(link.icon as React.ReactElement<{ className?: string }>, { className: "w-5 h-5" })}
+      </div>
+
+      {/* Hover Gradient Background */}
+      <div
+        className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        style={{ background: `radial-gradient(circle at center, ${link.color}15, transparent 70%)` }}
+      />
+    </a>
+  );
+});
+
+SocialLinkItem.displayName = "SocialLinkItem";
 
 const SocialLinks = () => {
   const [activeLink, setActiveLink] = useState<number | null>(null);
@@ -33,13 +79,21 @@ const SocialLinks = () => {
   }, []);
 
   useEffect(() => {
+    // Only track mouse move if we have an active link to avoid unnecessary work
+    if (activeLink === null) return;
+
     const handleMouseMove = (e: MouseEvent) => {
       mousePositionRef.current = { x: e.pageX, y: e.pageY };
-      if (activeLink !== null && !rafIdRef.current) {
+      if (!rafIdRef.current) {
         rafIdRef.current = requestAnimationFrame(updateInfoBoxPosition);
       }
     };
     window.addEventListener("mousemove", handleMouseMove);
+
+    // Explicitly update once on mount/activeLink change to catch up
+    // But since this effect depends on activeLink, it runs when it changes.
+    // We assume the mouse is already there.
+
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
@@ -51,6 +105,7 @@ const SocialLinks = () => {
       setIsLoading(true);
       try {
         const stats = await fetchSocialStats();
+        // ... (Using same links structure as before, just abbreviated for logic clarity)
         const links: SocialLink[] = [
           {
             icon: <FiGithub className="w-5 h-5" />,
@@ -124,13 +179,20 @@ const SocialLinks = () => {
     }
     setActiveLink(index);
     if (animationRef.current) animationRef.current.kill();
-    setInfoBoxPosition(mousePositionRef.current);
+    // Immediate position update on enter
+    if (mousePositionRef.current.x === 0 && mousePositionRef.current.y === 0) {
+      // Fallback or wait for first move
+    } else {
+      setInfoBoxPosition(mousePositionRef.current);
+    }
     setInfoBoxOpacity(1);
   }, []);
 
   const handleMouseLeave = useCallback(() => {
     if (animationRef.current) animationRef.current.kill();
     setInfoBoxOpacity(0);
+    // Delay setting activeLink to null to allow animation out? 
+    // Actually, simple timeout is fine.
     hideTimeoutRef.current = setTimeout(() => {
       setActiveLink(null);
       hideTimeoutRef.current = null;
@@ -145,43 +207,26 @@ const SocialLinks = () => {
         ))
       ) : (
         socialLinks.map((link, index) => (
-          <a
+          <SocialLinkItem
             key={link.label}
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative flex items-center justify-center w-12 h-12 rounded-full
-                       bg-white/[0.05] border border-white/[0.08]
-                       transition-all duration-300 ease-out
-                       hover:scale-110 hover:bg-white/[0.1]"
-            style={{
-              boxShadow: activeLink === index ? `0 0 20px ${link.color}30` : 'none',
-              borderColor: activeLink === index ? `${link.color}50` : ''
-            }}
-            onMouseEnter={() => handleMouseEnter(index)}
+            link={link}
+            index={index}
+            isActive={activeLink === index}
+            onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-          >
-            <div className="text-neutral-400 transition-colors duration-300 group-hover:text-white relative z-10"
-              style={{ color: activeLink === index ? link.color : undefined }}>
-              {React.cloneElement(link.icon as React.ReactElement<{ className?: string }>, { className: "w-5 h-5" })}
-            </div>
-
-            {/* Hover Gradient Background */}
-            <div
-              className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-              style={{ background: `radial-gradient(circle at center, ${link.color}15, transparent 70%)` }}
-            />
-          </a>
+          />
         ))
       )}
 
-      {activeLink !== null && socialLinks.length > 0 && (
-        <SocialInfoBox
-          socialLink={socialLinks[activeLink]}
-          position={infoBoxPosition}
-          opacity={infoBoxOpacity}
-          onHeightChange={() => { }}
-        />
+      {activeLink !== null && socialLinks.length > 0 && socialLinks[activeLink] && (
+        <div className="pointer-events-none absolute left-0 top-full mt-4 z-50">
+          <SocialInfoBox
+            socialLink={socialLinks[activeLink]}
+            position={infoBoxPosition}
+            opacity={infoBoxOpacity}
+            onHeightChange={() => { }}
+          />
+        </div>
       )}
     </div>
   );

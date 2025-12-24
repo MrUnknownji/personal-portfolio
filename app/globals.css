@@ -196,11 +196,85 @@ body {
 
 /* Hide native cursor on desktop for custom cursor */
 @media (hover: hover) and (pointer: fine) {
+  /* 
+     Aggressive Cursor Overrides 
+     Using !important to defeat any inline styles or specific library defaults.
+  */
 
+  /* 1. Default & Auto */
+  html,
   body,
-  body * {
-    cursor: none !important;
+  .cursor-auto,
+  .cursor-default {
+    cursor: url('/cursors/normal.svg') 4 4, auto !important;
   }
+
+  /* 2. Pointer */
+  a,
+  button,
+  [role="button"],
+  label,
+  input[type="submit"],
+  input[type="button"],
+  .cursor-pointer,
+  .skill-chip,
+  .card,
+  .bot-trigger,
+  [onClick] {
+    cursor: url('/cursors/pointer.svg') 10 2, pointer !important;
+  }
+
+  /* 3. Text (Inputs & Contenteditable Only) 
+     Removed h1-h6, p, and generic spans to prevent cursor conflicts
+     with interactive elements that have transforms/animations.
+  */
+  .cursor-text,
+  input:not([type="button"]):not([type="submit"]):not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  [contenteditable="true"],
+  .prose p:not(.cursor-pointer):not([onclick]),
+  .prose span:not(.cursor-pointer):not([onclick]) {
+    cursor: url('/cursors/text.svg') 16 16, text !important;
+  }
+
+  /* 4. Resizing */
+  .cursor-col-resize,
+  .react-resizable-handle-e,
+  .react-resizable-handle-w,
+  .code-resizer-handle {
+    cursor: url('/cursors/resize-h.svg') 16 16, col-resize !important;
+  }
+
+  .cursor-row-resize,
+  .react-resizable-handle-s,
+  .react-resizable-handle-n {
+    cursor: url('/cursors/resize-v.svg') 16 16, row-resize !important;
+  }
+
+  /* 5. Special States */
+  .cursor-not-allowed,
+  :disabled,
+  [aria-disabled="true"],
+  fieldset:disabled * {
+    cursor: url('/cursors/disabled.svg') 16 16, not-allowed !important;
+  }
+
+  .cursor-wait,
+  [aria-busy="true"] {
+    cursor: url('/cursors/loading.svg') 16 16, wait !important;
+  }
+
+  /* 6. Fallbacks */
+  .cursor-move,
+  .cursor-all-scroll {
+    cursor: move !important;
+  }
+}
+
+/* Ensure global scope inherits if not overridden, but !important above typically handles it. */
+html,
+body {
+  cursor: url('/cursors/normal.svg') 4 4, auto;
 }
 
 html {
@@ -257,7 +331,7 @@ html {
   }
 
   .skill-chip:hover {
-    @apply bg-primary text-black border-primary;
+    @apply border-primary;
   }
 
   .bg-noise {
@@ -344,6 +418,37 @@ html {
 
 .animate-pulse-scale {
   animation: pulse-scale 2s ease-in-out infinite;
+}
+
+@keyframes liquid-drop {
+  0% {
+    transform: translateY(0) scaleY(1);
+    opacity: 0.8;
+  }
+
+  20% {
+    transform: translateY(20px) scaleY(1.2);
+    opacity: 1;
+  }
+
+  50% {
+    transform: translateY(80px) scaleY(1.5);
+    opacity: 0.6;
+  }
+
+  80% {
+    transform: translateY(120px) scaleY(1.8);
+    opacity: 0.3;
+  }
+
+  100% {
+    transform: translateY(150px) scaleY(2);
+    opacity: 0;
+  }
+}
+
+.animate-liquid-drop {
+  animation: liquid-drop 3s ease-in infinite;
 }
 
 /* -------------------------------------------------------------------------- */

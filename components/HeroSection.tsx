@@ -11,36 +11,20 @@ const HeroSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current || !contentWrapperRef.current) return;
 
-    const { clientX, clientY } = e;
-    const { innerWidth, innerHeight } = window;
-
-    const xPos = (clientX / innerWidth - 0.5);
-    const yPos = (clientY / innerHeight - 0.5);
-
-    // Subtle 3D Tilt for Content Wrapper
-    gsap.to(contentWrapperRef.current, {
-      rotateY: xPos * 2, // Very subtle rotation
-      rotateX: -yPos * 2,
-      duration: 1,
-      ease: "power2.out",
-    });
-  };
 
   return (
     <div
       ref={containerRef}
       className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 relative pt-20 overflow-hidden"
       style={{ perspective: "2000px" }}
-      onMouseMove={handleMouseMove}
     >
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[url('/grid.svg')]" />
-
-      {/* Radial Gradient Removed to prevent banding artifacts */}
-      <div className="absolute inset-0 bg-background/50 z-0 pointer-events-none" />
+      {/* Ambient Background Effects (Synced with Projects Page) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-[120px]" />
+        <div className="absolute top-60 right-1/3 w-[400px] h-[400px] bg-primary/[0.02] rounded-full blur-[100px]" />
+        <div className="absolute bottom-40 left-1/3 w-[300px] h-[300px] bg-accent/[0.02] rounded-full blur-[80px]" />
+      </div>
 
       {/* Main Content Card */}
       <div

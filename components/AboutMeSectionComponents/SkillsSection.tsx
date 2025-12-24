@@ -139,7 +139,7 @@ const SkillsSection = () => {
                     key={skill}
                     className="skill-chip group/chip relative px-3 py-1.5 text-sm font-medium rounded-md
                                bg-foreground/5 text-foreground/70 border border-border
-                               hover:text-primary hover:border-primary/50 hover:bg-primary/5
+                               hover:text-primary hover:border-primary/50
                                transition-colors duration-200 cursor-default overflow-hidden"
                   >
                     <span className="relative z-10">{skill}</span>
