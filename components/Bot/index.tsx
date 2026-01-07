@@ -42,7 +42,6 @@ export default function Bot() {
         isCooldownRef.current = isCooldown;
     }, [isCooldown]);
 
-    // Scene & Robot
     const {
         eyeContextRef,
         eyeCanvasRef,
@@ -58,7 +57,6 @@ export default function Bot() {
         chatOpenRef
     });
 
-    // Eyes
     const { eyeStateRef } = useBotEyes({
         eyeContextRef,
         eyeCanvasRef,
@@ -67,7 +65,6 @@ export default function Bot() {
         clockRef
     });
 
-    // Interactions
     const { handleMouseEnter: interactionMouseEnter, handleMouseLeave: interactionMouseLeave, isRightClickingRef } = useBotInteractions({
         containerRef,
         mouseRef,
@@ -162,17 +159,18 @@ export default function Bot() {
         }
     };
 
+    const isMinimized = !chatOpen && !isHoveredRef.current;
+
     return (
         <div
             className={`fixed z-50 transition-all duration-300 ease-in-out w-[280px] h-[280px] sm:w-[450px] sm:h-[450px] ${chatOpen
                 ? 'bottom-0 right-0 sm:bottom-10'
-                : '-bottom-10 -right-10 sm:-right-30'
+                : '-bottom-12 -right-20 sm:-bottom-20 sm:-right-36'
                 }`
             }
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            onDoubleClick={handleDoubleClick}
-            onClick={handleContainerClick}
+            style={{ pointerEvents: isMinimized ? 'none' : 'auto' }}
+            onMouseEnter={!isMinimized ? handleMouseEnter : undefined}
+            onMouseLeave={!isMinimized ? handleMouseLeave : undefined}
         >
             {chatOpen && <div className="absolute -bottom-[200px] -right-[200px] w-[150%] h-[150%] bg-transparent -z-10" />}
 
@@ -186,7 +184,23 @@ export default function Bot() {
                 isProcessing={isProcessing}
             />
 
-            <div ref={containerRef} className="w-full h-full cursor-pointer" />
+            <div
+                ref={containerRef}
+                className="w-full h-full"
+                onDoubleClick={handleDoubleClick}
+                onClick={!chatOpen ? handleContainerClick : undefined}
+            />
+
+            {isMinimized && (
+                <div
+                    className="absolute bottom-16 right-16 sm:bottom-28 sm:right-32 w-24 h-24 sm:w-32 sm:h-32 cursor-pointer"
+                    style={{ pointerEvents: 'auto' }}
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
+                    onDoubleClick={handleDoubleClick}
+                    onClick={handleContainerClick}
+                />
+            )}
         </div>
     );
 }

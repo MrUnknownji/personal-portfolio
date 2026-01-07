@@ -45,7 +45,6 @@ const Footer = () => {
       return;
     }
 
-    // Use GSAP ScrollTo for elements
     gsap.to(window, {
       scrollTo: { y: `#${elementId}`, offsetY: 50 },
       duration: 1.2,
@@ -76,10 +75,7 @@ const Footer = () => {
   );
 
   const shouldShowArrow = (linkHref: string) => {
-    // Strip hash to get the base path
     const targetPath = linkHref.split('#')[0] || '/';
-    // Current path logic. If pathname is '/', targetPath '/' is the same.
-    // If pathname is '/my-projects', targetPath '/' is different.
     return targetPath !== pathname;
   };
 

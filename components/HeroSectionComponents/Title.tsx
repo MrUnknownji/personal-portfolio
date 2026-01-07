@@ -9,12 +9,12 @@ interface GradientTheme {
 }
 
 const GRADIENT_THEMES: GradientTheme[] = [
-  { name: "aesthetic", colors: ["#ffafcc", "#bde0fe", "#a2d2ff"] },
-  { name: "funky", colors: ["#ff006e", "#ffbe0b", "#8338ec"] },
-  { name: "punchy", colors: ["#ff5400", "#ff9e00", "#ffdd00"] },
-  { name: "modern", colors: ["#00ff9f", "#00d1ff", "#b388ff"] },
-  { name: "cyberpunk", colors: ["#ff00ff", "#00ffff", "#ffff00"] },
-  { name: "cold", colors: ["#4cc9f0", "#4361ee", "#7209b7"] },
+  { name: "snow", colors: ["#e8e8e8", "#ffffff", "#d4e5ff"] },
+  { name: "rose", colors: ["#ffecd2", "#fcb69f", "#ffecd2"] },
+  { name: "lavender", colors: ["#e0c3fc", "#d5b4e0", "#c9a7eb"] },
+  { name: "mint", colors: ["#a8edea", "#d4eeee", "#e8f5e9"] },
+  { name: "peach", colors: ["#ffeaa7", "#fdcb6e", "#ffe0b2"] },
+  { name: "aurora", colors: ["#c3fae8", "#96f2d7", "#a7f3d0"] },
 ];
 
 const COOLDOWN_MS = 1000;
@@ -32,14 +32,12 @@ export const Title = () => {
 
     const tl = gsap.timeline();
 
-    // Entrance animation
     tl.from(containerRef.current, {
       opacity: 0,
       y: 20,
       duration: 1,
       ease: "power3.out",
     })
-      // Initial Gradient fill animation
       .to(
         {},
         {
@@ -57,10 +55,8 @@ export const Title = () => {
   const handleHover = useCallback(() => {
     if (isOnCooldown) return;
 
-    // Set previous theme to current before changing
     setPrevTheme(currentTheme);
 
-    // Select new theme
     const nextTheme = (currentTheme + 1) % GRADIENT_THEMES.length;
     setCurrentTheme(nextTheme);
 
@@ -91,7 +87,6 @@ export const Title = () => {
       onMouseEnter={handleHover}
     >
       <div className="relative">
-        {/* Title with gradient fill */}
         <h1 className="hero-title relative font-bold text-4xl md:text-5xl lg:text-7xl tracking-tight cursor-pointer select-none">
 
           <span className="text-neutral-700">
@@ -132,7 +127,6 @@ export const Title = () => {
         </h1>
       </div>
 
-      {/* Wavy underline SVG */}
       <svg
         className="absolute left-0 w-full mt-1 overflow-visible"
         height="10"

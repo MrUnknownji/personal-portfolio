@@ -98,7 +98,6 @@
   --scrollbar-track: #1e1e1e;
 }
 
-/* Meteor animation keyframes */
 @keyframes meteor {
   0% {
     transform: rotate(215deg) translateX(0);
@@ -115,21 +114,21 @@
   }
 }
 
-html,
+html {
+  overflow-x: hidden;
+}
+
 body {
   background-color: #09090b;
   color: var(--foreground);
   font-family: var(--font-outfit), sans-serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
 }
 
-/* Hide native cursor on desktop for custom cursor */
 @media (hover: hover) and (pointer: fine) {
-  /* 
-     Aggressive Cursor Overrides 
-     Using !important to defeat any inline styles or specific library defaults.
-  */
 
-  /* 1. Default & Auto */
   html,
   body,
   .cursor-auto,
@@ -137,7 +136,6 @@ body {
     cursor: url('/cursors/normal.svg') 4 4, auto !important;
   }
 
-  /* 2. Pointer */
   a,
   button,
   [role="button"],
@@ -152,10 +150,6 @@ body {
     cursor: url('/cursors/pointer.svg') 10 2, pointer !important;
   }
 
-  /* 3. Text (Inputs & Contenteditable Only) 
-     Removed h1-h6, p, and generic spans to prevent cursor conflicts
-     with interactive elements that have transforms/animations.
-  */
   .cursor-text,
   input:not([type="button"]):not([type="submit"]):not([type="range"]):not([type="checkbox"]):not([type="radio"]),
   textarea,
@@ -165,7 +159,6 @@ body {
     cursor: url('/cursors/text.svg') 16 16, text !important;
   }
 
-  /* 4. Resizing */
   .cursor-col-resize,
   .react-resizable-handle-e,
   .react-resizable-handle-w,
@@ -179,7 +172,6 @@ body {
     cursor: url('/cursors/resize-v.svg') 16 16, row-resize !important;
   }
 
-  /* 5. Special States */
   .cursor-not-allowed,
   :disabled,
   [aria-disabled="true"],
@@ -192,14 +184,12 @@ body {
     cursor: url('/cursors/loading.svg') 16 16, wait !important;
   }
 
-  /* 6. Fallbacks */
   .cursor-move,
   .cursor-all-scroll {
     cursor: move !important;
   }
 }
 
-/* Ensure global scope inherits if not overridden, but !important above typically handles it. */
 html,
 body {
   cursor: url('/cursors/normal.svg') 4 4, auto;
@@ -269,7 +259,6 @@ html {
     background-position: 0 0, 50px 50px;
   }
 
-  /* GSAP Utilities */
   .page-content {
     opacity: 0;
   }
@@ -283,7 +272,6 @@ html {
   }
 }
 
-/* Animations */
 @keyframes shimmer {
   0% {
     transform: translateX(-150%) skewX(12deg);
@@ -379,10 +367,6 @@ html {
   animation: liquid-drop 3s ease-in infinite;
 }
 
-/* -------------------------------------------------------------------------- */
-/* Visual Fixes & Enhancements                                                */
-/* -------------------------------------------------------------------------- */
-
 .antialiased-transform {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -391,7 +375,6 @@ html {
   will-change: transform;
 }
 
-/* Fix blur on GSAP transformed elements */
 .project-card-container,
 .core-skill-card,
 .tech-category,
@@ -404,16 +387,11 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Ensure sharp rendering during GSAP animations */
 * {
   -webkit-transform-style: preserve-3d;
   transform-style: flat;
 }
 
-
-
-/* 3. Smoother Gradients */
-/* Ensure gradients use proper color interpolation where supported */
 * {
   text-rendering: optimizeLegibility;
 }

@@ -68,7 +68,7 @@ const ImageSection = () => {
         <Image
           ref={imageRef}
           src={
-            "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062501/MyImageUncropped-transformed-transparent2_osyd7d.png"
+            "https://res.cloudinary.com/dfwgprzxo/image/upload/v1767790586/sandeep_bgqjpb.png"
           }
           alt="Profile"
           fill

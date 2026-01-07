@@ -20,13 +20,11 @@ const AboutMe = () => {
 
     const mm = gsap.matchMedia();
 
-    // Only enable pinning on large screens (lg breakpoint is 1024px)
     mm.add("(min-width: 1024px)", () => {
       const pinImage = () => {
         const gridHeight = gridRef.current?.offsetHeight || 0;
         const imageContainerHeight = pinContainerRef.current?.offsetHeight || 0;
 
-        // Only pin if content is taller than image
         if (gridHeight > imageContainerHeight) {
           ScrollTrigger.create({
             trigger: gridRef.current,

@@ -86,7 +86,7 @@ const Title: React.FC<TitleProps> = ({
           delay={200}
           animateOnHover={true}
           startOnView={true}
-          className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"
+          className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent pb-2"
         >
           {title}
         </HyperText>

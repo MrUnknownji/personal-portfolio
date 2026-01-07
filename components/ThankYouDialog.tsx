@@ -107,24 +107,19 @@ const ThankYouDialog = ({
       role="dialog"
       aria-modal="true"
     >
-      {/* Backdrop */}
       <div
         ref={overlayRef}
         className="absolute inset-0 bg-black/90 rounded-3xl"
         onClick={startCloseProcess}
       />
 
-      {/* Dialog */}
       <div
         ref={dialogRef}
         className="relative w-full max-w-lg bg-[#0a0a0a] rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
       >
-        {/* Decorative Top Gradient */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
 
-        {/* Content */}
         <div className="p-8 sm:p-10 text-center space-y-8">
-          {/* Success Icon */}
           <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 relative group">
             <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping opacity-20" />
             <FiCheck className="w-10 h-10 text-primary" />
@@ -139,7 +134,6 @@ const ThankYouDialog = ({
             </p>
           </div>
 
-          {/* Email Copy Section */}
           <div className="bg-white/5 rounded-xl p-4 flex items-center justify-between gap-4 border border-white/5 hover:border-white/10 transition-colors">
             <span className="text-neutral-300 font-mono text-sm truncate">
               {email}
@@ -156,7 +150,6 @@ const ThankYouDialog = ({
             </button>
           </div>
 
-          {/* Actions */}
           <div className="grid grid-cols-2 gap-4 pt-2">
             <button
               onClick={startCloseProcess}
@@ -175,7 +168,6 @@ const ThankYouDialog = ({
           </div>
         </div>
 
-        {/* Close Button */}
         <button
           onClick={startCloseProcess}
           className="absolute top-4 right-4 p-2 text-neutral-500 hover:text-white transition-colors rounded-full hover:bg-white/10"

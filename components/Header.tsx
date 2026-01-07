@@ -55,7 +55,7 @@ const Header = () => {
     }
     if (mobileNavRef.current) {
       gsap.to(mobileNavRef.current, {
-        width: isScrolled ? "92%" : "100%",
+        width: (isScrolled || isMobileMenuOpen) ? "92%" : "100%",
         y: isScrolled ? 8 : 0,
         duration: 0.4,
         ease: "power2.out",
@@ -68,7 +68,7 @@ const Header = () => {
         duration: 0.2,
       });
     }
-  }, [isScrolled]);
+  }, [isScrolled, isMobileMenuOpen]);
 
   useGSAP(() => {
     if (hoveredIndex !== null && hoverBgRef.current && navItemsRef.current[hoveredIndex]) {
@@ -244,7 +244,7 @@ const Header = () => {
           "lg:hidden mx-auto flex flex-col px-4 py-3 rounded-2xl transition-colors duration-300",
           isScrolled
             ? "bg-background/80 backdrop-blur-md border border-border/50 shadow-lg shadow-black/10"
-            : "bg-transparent"
+            : isMobileMenuOpen ? "bg-background/80 backdrop-blur-md border border-border/50 shadow-lg shadow-black/10" : "bg-transparent"
         )}
       >
         <div className="flex items-center justify-between w-full">

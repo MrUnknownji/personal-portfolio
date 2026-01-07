@@ -40,38 +40,32 @@ export default function Template({ children }: { children: React.ReactNode }) {
       const tl = gsap.timeline({
         onStart: () => {
           bodyStyle.cursor = "wait";
-          bodyStyle.overflow = "hidden"; // Lock scroll
+          bodyStyle.overflow = "hidden";
           overlayRef.current?.classList.remove("pointer-events-none");
 
-          // Ensure scroll is at top when transition starts
           if ("scrollRestoration" in history) {
             history.scrollRestoration = "manual";
           }
 
-          // Use GSAP ScrollTo for robust resetting
           window.scrollTo(0, 0);
           gsap.set(window, { scrollTo: { y: 0, autoKill: false } });
 
-          // Force ScrollTrigger refresh slightly later to ensure layout is settled
           gsap.delayedCall(0.1, () => {
-             ScrollTrigger.refresh();
+            ScrollTrigger.refresh();
           });
         },
         onComplete: () => {
-          // Ensure scroll is still at 0 if no hash, before restoring overflow
           if (!window.location.hash) {
-              window.scrollTo(0, 0);
+            window.scrollTo(0, 0);
           }
 
           bodyStyle.cursor = "";
-          bodyStyle.overflow = ""; // Restore scroll
+          bodyStyle.overflow = "";
           gsap.set(overlayRef.current, { display: "none" });
           overlayRef.current?.classList.add("pointer-events-none");
 
-          // Handle hash navigation after transition
           if (window.location.hash) {
             const id = window.location.hash.substring(1);
-            // Use GSAP to scroll to the element if it exists
             gsap.to(window, {
               scrollTo: { y: `#${id}`, offsetY: 20, autoKill: false },
               duration: 1,

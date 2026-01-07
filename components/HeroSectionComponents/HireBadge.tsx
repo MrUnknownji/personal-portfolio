@@ -40,7 +40,7 @@ const HireBadge = () => {
           className="absolute inset-0 rounded-full bg-emerald-400 opacity-40"
         />
         {/* Core Dot */}
-        <span className="relative w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+        <span className="relative w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
       </div>
 
       {/* Text */}

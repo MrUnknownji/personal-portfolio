@@ -8,7 +8,7 @@ import { Project } from "@/types/Project";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { FiSearch, FiX, FiFilter } from "react-icons/fi";
+import { FiSearch, FiX } from "react-icons/fi";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,7 +17,6 @@ const ANIMATION_CONFIG = {
   DURATION: 0.8,
   EASE: "power3.out",
   FILTER: {
-    // Extraordinary exit animation - 3D scatter with magnetic dispersion
     OUT_DURATION: 0.65,
     OUT_STAGGER: 0.05,
     OUT_EASE: "power3.in",
@@ -28,7 +27,6 @@ const ANIMATION_CONFIG = {
     OUT_ROTATION_X: -45,
     OUT_BLUR: 10,
 
-    // Extraordinary entrance animation - magnetic gather with 3D flip
     IN_DURATION: 0.85,
     IN_STAGGER: 0.08,
     IN_EASE: "elastic.out(1, 0.75)",
@@ -64,19 +62,6 @@ export default function MyProjects() {
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<HTMLDivElement>(null);
 
-  const filteredProjects = projects.filter((project) => {
-    const lowerQuery = searchQuery.toLowerCase();
-    const matchesCategory = filter === "All" || project.category === filter;
-    const matchesSearch =
-      searchQuery === "" ||
-      project.title.toLowerCase().includes(lowerQuery) ||
-      project.shortDescription.toLowerCase().includes(lowerQuery) ||
-      project.technologies.some((tech) =>
-        tech.toLowerCase().includes(lowerQuery),
-      );
-    return matchesCategory && matchesSearch;
-  });
-
   const categories = [
     "All",
     ...Array.from(new Set(projects.map((project) => project.category))),
@@ -88,7 +73,6 @@ export default function MyProjects() {
         const initialTl = gsap.timeline({
           defaults: { ease: ANIMATION_CONFIG.EASE, overwrite: "auto" },
         });
-
 
         if (titleSectionRef.current) {
           initialTl.fromTo(
@@ -108,7 +92,6 @@ export default function MyProjects() {
             0
           );
         }
-
 
         if (controlsRef.current) {
           initialTl.fromTo(
@@ -131,10 +114,8 @@ export default function MyProjects() {
           );
         }
 
-
         const cards = projectsRef.current?.querySelectorAll(".project-card-container");
         if (cards && cards.length > 0) {
-          // Immediately set initial state to prevent flicker
           gsap.set(cards, {
             opacity: 0,
             y: 80,
@@ -142,12 +123,9 @@ export default function MyProjects() {
             scale: 0.85,
           });
 
-          // Calculate position-based delays for wave effect
           cards.forEach((card, index) => {
-            const row = Math.floor(index / 3); // Assuming 3 columns on desktop
+            const row = Math.floor(index / 3);
             const col = index % 3;
-
-            // Create wave pattern: diagonal wave from top-left to bottom-right
             const diagonalDelay = (row + col) * 0.1;
 
             gsap.to(
@@ -164,8 +142,6 @@ export default function MyProjects() {
               }
             );
           });
-
-
         }
       });
 
@@ -206,19 +182,17 @@ export default function MyProjects() {
       if (!particlesRef.current) return;
 
       const particles = particlesRef.current.children;
-      // Calculate relative to center of screen
       const x = (e.clientX - window.innerWidth / 2);
       const y = (e.clientY - window.innerHeight / 2);
 
       Array.from(particles).forEach((particle) => {
         const speed = Number(particle.getAttribute("data-speed")) || 0.1;
-        // Apply dampening factor to reduce speed significantly
         const dampening = 0.4;
 
         gsap.to(particle, {
           x: x * speed * dampening,
           y: y * speed * dampening,
-          duration: 1.5, // Slower duration for smoother "floating" feel
+          duration: 1.5,
           ease: "power2.out",
           overwrite: "auto"
         });
@@ -232,7 +206,6 @@ export default function MyProjects() {
   const animateFilterChange = useCallback(() => {
     if (!projectsRef.current || isAnimating) return;
 
-    // Kill any existing animations
     if (filterTimelineRef.current) {
       filterTimelineRef.current.kill();
       filterTimelineRef.current = null;
@@ -242,7 +215,6 @@ export default function MyProjects() {
       projectsRef.current.querySelectorAll(".project-card-container")
     );
 
-    // Check if filter actually changed
     const newFilteredProjects = projects.filter((project) => {
       const lowerQuery = searchQuery.toLowerCase();
       const matchesCategory = filter === "All" || project.category === filter;
@@ -256,17 +228,14 @@ export default function MyProjects() {
       return matchesCategory && matchesSearch;
     });
 
-    // If same projects, don't animate
     if (JSON.stringify(newFilteredProjects.map(p => p.id)) === JSON.stringify(displayedProjects.map(p => p.id))) {
       return;
     }
 
     setIsAnimating(true);
 
-    // Exit animation with extraordinary 3D scatter effect
     if (existingCards.length > 0) {
       existingCards.forEach((card, index) => {
-        // Calculate random scatter directions for magnetic dispersion
         const angle = (index * 360) / existingCards.length;
         const scatterX = Math.cos(angle * Math.PI / 180) * 150;
         const scatterY = Math.sin(angle * Math.PI / 180) * 100;
@@ -285,18 +254,15 @@ export default function MyProjects() {
           ease: ANIMATION_CONFIG.FILTER.OUT_EASE,
           delay: index * ANIMATION_CONFIG.FILTER.OUT_STAGGER,
           onComplete: index === existingCards.length - 1 ? () => {
-            // Update displayed projects after exit animation
             setIsRegeneratingGrid(true);
             setDisplayedProjects(newFilteredProjects);
 
-            // Wait for React to render new cards, then animate them in
             setTimeout(() => {
               const newCards = Array.from(
                 projectsRef.current?.querySelectorAll(".project-card-container") || []
               );
 
               if (newCards.length > 0) {
-                // Set initial state with 3D position
                 newCards.forEach((card, idx) => {
                   const angle = (idx * 360) / newCards.length;
                   const gatherX = Math.cos(angle * Math.PI / 180) * 200;
@@ -315,7 +281,6 @@ export default function MyProjects() {
                   });
                 });
 
-                // Animate in with magnetic gather and 3D flip
                 newCards.forEach((card, idx) => {
                   gsap.to(card, {
                     opacity: 1,
@@ -331,7 +296,6 @@ export default function MyProjects() {
                     ease: ANIMATION_CONFIG.FILTER.IN_EASE,
                     delay: idx * ANIMATION_CONFIG.FILTER.IN_STAGGER,
                     onComplete: idx === newCards.length - 1 ? () => {
-                      // Ensure filter is cleared but keep transforms to match initial state
                       newCards.forEach((c) => {
                         gsap.set(c, { clearProps: "filter" });
                       });
@@ -350,7 +314,6 @@ export default function MyProjects() {
         });
       });
     } else {
-      // No existing cards, just update and animate in new ones
       setIsRegeneratingGrid(true);
       setDisplayedProjects(newFilteredProjects);
 
@@ -393,7 +356,6 @@ export default function MyProjects() {
               ease: ANIMATION_CONFIG.FILTER.IN_EASE,
               delay: idx * ANIMATION_CONFIG.FILTER.IN_STAGGER,
               onComplete: idx === newCards.length - 1 ? () => {
-                // Ensure filter is cleared but keep transforms to match initial state
                 newCards.forEach((c) => {
                   gsap.set(c, { clearProps: "filter" });
                 });
@@ -429,7 +391,6 @@ export default function MyProjects() {
 
   return (
     <div ref={pageRef} className="min-h-screen pt-24 pb-20 md:pb-28 lg:pb-32 relative overflow-hidden">
-
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-[120px]" />
         <div className="absolute top-60 right-1/3 w-[400px] h-[400px] bg-primary/[0.02] rounded-full blur-[100px]" />
@@ -437,21 +398,16 @@ export default function MyProjects() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
         <div
           ref={titleSectionRef}
           className="mb-16 md:mb-20 text-center relative"
         >
-          {/* Refined decorative elements */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 flex items-center gap-3">
-            {/* Left accent line */}
             <div className="w-16 md:w-24 h-px bg-gradient-to-r from-transparent via-primary/50 to-primary" />
-            {/* Center diamond */}
             <div className="relative">
               <div className="w-2 h-2 rotate-45 bg-primary/60" />
               <div className="absolute inset-0 w-2 h-2 rotate-45 bg-primary/30 blur-sm" />
             </div>
-            {/* Right accent line */}
             <div className="w-16 md:w-24 h-px bg-gradient-to-l from-transparent via-primary/50 to-primary" />
           </div>
 
@@ -463,7 +419,6 @@ export default function MyProjects() {
             />
           </div>
 
-          {/* Enhanced decorative dots with sophisticated animation */}
           <div className="flex items-center justify-center gap-2.5 mt-8">
             {[0, 0.15, 0.3, 0.15, 0].map((opacity, idx) => (
               <div key={idx} className="relative">
@@ -481,7 +436,6 @@ export default function MyProjects() {
             ))}
           </div>
 
-          {/* Floating accent particles */}
           <div ref={particlesRef} className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/2 left-1/4" data-speed="0.15">
               <div className="w-1 h-1 rounded-full bg-primary/30 animate-float" style={{ animationDelay: '0.5s' }} />
@@ -495,26 +449,21 @@ export default function MyProjects() {
           </div>
         </div>
 
-        {/* Enhanced Controls Section */}
         <div className="sticky top-24 z-30 mb-12 md:mb-16 mx-auto max-w-4xl">
           <div
             ref={controlsRef}
             className="relative"
           >
             <div className="relative bg-secondary/95 border border-white/[0.08] rounded-2xl p-3 md:p-4 shadow-2xl flex flex-col md:flex-row gap-3.5 overflow-hidden">
-              {/* Refined gradient overlay with depth */}
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] via-transparent to-primary/[0.02] pointer-events-none" />
-
-              {/* Subtle top highlight */}
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
               <div
                 ref={searchContainerRef}
                 className="relative flex-1 group rounded-xl border border-border bg-card/50"
               >
-                {/* Search icon glow on focus */}
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none z-10">
-                  <FiSearch className="text-muted group-focus-within:text-primary transition-all duration-300 w-4 h-4 md:w-5 md:h-5" />
+                  <FiSearch className="text-white group-focus-within:text-primary transition-all duration-300 w-4 h-4 md:w-5 md:h-5" />
                 </div>
                 <input
                   ref={searchRef}
@@ -530,7 +479,6 @@ export default function MyProjects() {
                   <button
                     onClick={(e) => {
                       clearSearch();
-                      // Animate the button
                       gsap.fromTo(e.currentTarget,
                         { scale: 1, rotation: 0 },
                         {
@@ -561,7 +509,6 @@ export default function MyProjects() {
                     key={category}
                     onClick={(e) => {
                       setFilter(category);
-                      // Ripple effect on click
                       const button = e.currentTarget;
                       gsap.fromTo(button,
                         { scale: 0.95 },
@@ -575,22 +522,19 @@ export default function MyProjects() {
                     className={`
                     relative whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 overflow-hidden flex-shrink-0
                     ${filter === category
-                        ? "text-primary-foreground bg-primary shadow-lg shadow-primary/[0.15] scale-105 border border-primary/20"
+                        ? "text-primary-foreground bg-primary scale-105 border border-primary/20"
                         : "text-muted-foreground hover:text-foreground bg-card/50 hover:bg-card border border-border hover:border-primary/20 hover:scale-105"
                       }
                   `}
                   >
-                    {/* Active shimmer effect */}
                     {filter === category && (
                       <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
                     )}
 
-                    {/* Refined active state glow */}
                     {filter === category && (
                       <span className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-full" />
                     )}
 
-                    {/* Button text */}
                     <span className="relative z-10">{category}</span>
                   </button>
                 ))}

@@ -104,7 +104,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
         ease: "none",
       });
     }
-  }, [isHovered]);
+  }, [isHovered, isMobile]);
 
   const handleMouseMove = throttle(mouseMoveHandler, 16);
 
@@ -283,7 +283,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
         transformStyle: "preserve-3d",
       }}
     >
-      {/* Shine overlay */}
       <div
         ref={shineRef}
         className="absolute inset-0 pointer-events-none z-10 opacity-0 transition-opacity duration-300"
@@ -293,13 +292,11 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
         }}
       />
 
-      {/* Accent line at top */}
       <div
         ref={accentLineRef}
         className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/0 via-primary to-primary/0 z-20"
       />
 
-      {/* Image Container */}
       <div className="relative h-52 md:h-64 overflow-hidden border-b border-border">
         <div
           ref={imageRef}
@@ -321,7 +318,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
 
-          {/* Gradient overlay on image */}
           <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
         </div>
 
@@ -340,7 +336,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
         </div>
       </div>
 
-      {/* Content */}
       <div ref={contentRef} className="p-6 flex flex-col h-full relative">
         <h3
           ref={titleRef}

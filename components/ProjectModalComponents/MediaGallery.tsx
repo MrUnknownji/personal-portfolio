@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, useCallback, useEffect, memo } from "react";
 import Image from "next/image";
 import { FiPlay, FiX, FiVideoOff, FiChevronLeft, FiChevronRight, FiZoomIn } from "react-icons/fi";
 import { Dialog } from "@/components/ui/Dialog";
@@ -17,8 +17,6 @@ const PREVIEW_ANIMATION_CONFIG = {
   EASE_OUT: "power3.out",
   SCALE_CLOSE: 0.9,
   SCALE_OPEN: 0.95,
-  THUMB_HOVER_SCALE: 1.05,
-  THUMB_HOVER_DURATION: 0.3,
 } as const;
 
 export const MediaGallery = ({ items }: MediaGalleryProps) => {
@@ -28,7 +26,6 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
   const previewOverlayRef = useRef<HTMLDivElement>(null);
   const previewContentRef = useRef<HTMLDivElement>(null);
   const thumbnailStripRef = useRef<HTMLDivElement>(null);
-  const { contextSafe } = useGSAP();
 
   const openPreview = (index: number) => {
     setSelectedIndex(index);
@@ -126,20 +123,6 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
     { dependencies: [isPreviewOpen] },
   );
 
-  const handleThumbHover = contextSafe(
-    (target: HTMLElement, isEnter: boolean) => {
-      gsap.to(target, {
-        boxShadow: isEnter
-          ? "0 10px 25px rgba(0, 255, 159, 0.15)"
-          : "0 2px 4px rgba(0, 0, 0, 0.1)",
-        borderColor: isEnter ? "var(--color-primary)" : "rgba(255, 255, 255, 0.1)",
-        y: isEnter ? -4 : 0,
-        duration: PREVIEW_ANIMATION_CONFIG.THUMB_HOVER_DURATION,
-        ease: PREVIEW_ANIMATION_CONFIG.EASE_OUT,
-        overwrite: true,
-      });
-    },
-  );
 
   if (!items || items.length === 0) {
     return null;
@@ -158,11 +141,10 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
             onClick={() => openPreview(index)}
             className={`
               relative rounded-xl overflow-hidden border border-white/10 bg-white/5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50
+              transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(0,255,159,0.15)] hover:border-primary
               ${index === 0 ? 'col-span-2 aspect-[21/9]' : 'col-span-1 aspect-video'}
             `}
             aria-label={`View ${item.type} ${index + 1}`}
-            onMouseEnter={(e) => handleThumbHover(e.currentTarget, true)}
-            onMouseLeave={(e) => handleThumbHover(e.currentTarget, false)}
           >
             <Image
               src={
@@ -247,7 +229,6 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
                       alt={items[selectedIndex].alt || "Preview Image"}
                       fill
                       className="object-contain"
-                      priority
                     />
                   </div>
                 ) : selectedIndex >= 0 && items[selectedIndex]?.type === "video" ? (
@@ -261,7 +242,6 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
                       key={items[selectedIndex].src}
                       src={items[selectedIndex].src}
                       controls
-                      autoPlay
                       onError={() => setIsVideoError(true)}
                       className="w-full h-full object-contain outline-none max-w-5xl mx-auto"
                     >
