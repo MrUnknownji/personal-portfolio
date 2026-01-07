@@ -41,8 +41,7 @@ export const useBotScene = ({
         cameraRef.current = camera;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true;
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
         rendererRef.current = renderer;
 
         const container = containerRef.current;
@@ -72,7 +71,7 @@ export const useBotScene = ({
         scene.add(new THREE.AmbientLight(0xffffff, 0.3));
         const mainLight = new THREE.DirectionalLight(0xffffff, 1);
         mainLight.position.set(5, 10, 7);
-        mainLight.castShadow = true;
+
         scene.add(mainLight);
         const rimLight = new THREE.DirectionalLight(0x00ff99, 3.0);
         rimLight.position.set(-5, 5, -8);
@@ -108,7 +107,7 @@ export const useBotScene = ({
         const body = new THREE.Mesh(new THREE.SphereGeometry(1.6, 48, 48), matBody);
         body.scale.set(1, 1.3, 0.9);
         body.position.y = 1.8;
-        body.castShadow = true;
+
         robot.add(body);
 
         const chest = new THREE.Mesh(new THREE.SphereGeometry(0.7, 32, 32), matAccent);
@@ -124,7 +123,7 @@ export const useBotScene = ({
         const head = new THREE.Mesh(new THREE.SphereGeometry(1.7, 48, 48), matBody);
         head.scale.set(1.2, 1, 1.1);
         head.position.y = 0.8;
-        head.castShadow = true;
+
         headPivot.add(head);
 
         const visor = new THREE.Mesh(new THREE.SphereGeometry(1.45, 48, 32), matScreen);
@@ -150,16 +149,22 @@ export const useBotScene = ({
         rightEarGlow.position.set(2.16, 0.8, 0);
         headPivot.add(rightEarGlow);
 
-        // Animation Loop
+        let frameCount = 0;
+
         const animate = () => {
             requestRef.current = requestAnimationFrame(animate);
             const t = clockRef.current.getElapsedTime();
 
-            // Base floating animation
+            const isActive = isHoveredRef.current || isProcessingRef.current || isCooldownRef.current || chatOpenRef.current;
+
+            frameCount++;
+            if (!isActive && frameCount % 2 !== 0) {
+                return;
+            }
+
             robot.position.y = Math.sin(t * 1.2) * 0.1 - 0.2;
             robot.rotation.z = Math.sin(t * 0.8) * 0.02;
 
-            // Mouse tracking
             targetRotationRef.current.x = -mouseRef.current.y * 0.4;
             targetRotationRef.current.y = mouseRef.current.x * 0.6;
 
@@ -167,8 +172,7 @@ export const useBotScene = ({
             headPivot.rotation.y += (targetRotationRef.current.y - headPivot.rotation.y) * 0.05;
             robot.rotation.y += (targetRotationRef.current.y * 0.2 - robot.rotation.y) * 0.05;
 
-            // Scale animation
-            const targetScale = (isHoveredRef.current || isProcessingRef.current || isCooldownRef.current || chatOpenRef.current) ? 1.0 : 0.5;
+            const targetScale = isActive ? 1.0 : 0.5;
             robot.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
 
             renderer.render(scene, camera);

@@ -8,6 +8,8 @@ import { SocialLink } from "../../types/social";
 import { fetchSocialStats } from "../../utils/social";
 import SocialInfoBox from "./SocialInfoBox";
 
+let cachedStats: Awaited<ReturnType<typeof fetchSocialStats>> | null = null;
+
 const ANIMATION_CONFIG = {
   INFO_BOX: {
     SHOW: { DURATION: 0.2, EASE: "back.out(1.7)" },
@@ -104,7 +106,8 @@ const SocialLinks = () => {
     const initializeSocialLinks = async () => {
       setIsLoading(true);
       try {
-        const stats = await fetchSocialStats();
+        const stats = cachedStats ?? await fetchSocialStats();
+        cachedStats = stats;
         // ... (Using same links structure as before, just abbreviated for logic clarity)
         const links: SocialLink[] = [
           {

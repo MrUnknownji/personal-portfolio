@@ -71,21 +71,14 @@ export const Title = () => {
     }, COOLDOWN_MS);
 
 
-    gsap.fromTo({},
-      { progress: 0 },
-      {
-        progress: 1,
-        duration: 0.8,
-        ease: "power2.out",
-        onUpdate: function () {
-          const progress = this.progress() * 100;
-          setFillProgress(progress);
-        },
-        onComplete: () => {
-
-        }
-      }
-    );
+    gsap.to({ val: 0 }, {
+      val: 100,
+      duration: 0.8,
+      ease: "power2.out",
+      onUpdate: function () {
+        setFillProgress(this.targets()[0].val);
+      },
+    });
   }, [currentTheme, isOnCooldown]);
 
   const theme = GRADIENT_THEMES[currentTheme];

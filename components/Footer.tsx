@@ -113,7 +113,6 @@ const Footer = () => {
           toggleActions: ANIMATION_CONFIG.SCROLL_TRIGGER.TOGGLE_ACTIONS,
           markers: false,
         },
-        clearProps: "all",
         force3D: true,
       });
     },

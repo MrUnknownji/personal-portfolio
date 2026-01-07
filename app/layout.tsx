@@ -5,9 +5,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SmoothScroller from "@/components/SmoothScroller";
 import Template from "./template";
-import Bot from "@/components/Bot";
-
+import LazyBot from "@/components/LazyBot";
 import ClickSpark from "@/components/ui/ClickSpark";
+import ResponsiveMeteors from "@/components/ui/ResponsiveMeteors";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -38,8 +38,6 @@ export const metadata: Metadata = {
   },
 };
 
-import { Meteors } from "@/components/ui/Meteors";
-
 export default function RootLayout({
   children,
 }: {
@@ -48,23 +46,20 @@ export default function RootLayout({
   return (
     <html className={`${outfit.variable} ${poppins.variable}`} lang="en">
       <body className="bg-background text-foreground" suppressHydrationWarning>
-        <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
-          <div className="absolute inset-0 bg-background"></div>
-          {/* Meteor Shower Background */}
-          <Meteors number={30} />
-        </div>
+        <ResponsiveMeteors />
         <Header />
 
         <SmoothScroller>
-          <main className="relative z-10 min-h-screen">
+          <main className="relative min-h-screen">
             <Template>{children}</Template>
           </main>
           <Footer />
         </SmoothScroller>
-        <Bot />
+        <LazyBot />
 
         <ClickSpark />
       </body>
     </html>
   );
 }
+

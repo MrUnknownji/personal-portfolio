@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import gsap from 'gsap';
 import { chatWithBot } from '@/app/actions/chat';
 import { useBotScene } from './useBotScene';
 import { useBotEyes, EyeState } from './useBotEyes';
@@ -79,21 +80,22 @@ export default function Bot() {
         setBubbleText
     });
 
-    // Blinking Logic
     useEffect(() => {
-        const blinkInterval = setInterval(() => {
+        const checkBlink = () => {
             const t = clockRef.current.getElapsedTime();
             if (eyeState === 'open' && !isRightClickingRef.current && !isProcessing && !isCooldown && t > nextBlinkTimeRef.current) {
                 setEyeState('closed');
-                setTimeout(() => {
+                gsap.delayedCall(0.15, () => {
                     if (eyeStateRef.current === 'closed' && !isRightClickingRef.current && !isProcessing && !isCooldown) {
                         setEyeState('open');
                     }
                     nextBlinkTimeRef.current = t + 3 + Math.random() * 4;
-                }, 150);
+                });
             }
-        }, 100);
-        return () => clearInterval(blinkInterval);
+        };
+
+        gsap.ticker.add(checkBlink);
+        return () => gsap.ticker.remove(checkBlink);
     }, [eyeState, isProcessing, isCooldown]);
 
     const handleMouseEnter = () => {

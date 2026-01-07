@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRef, useState, useCallback, useEffect } from "react";
@@ -88,7 +89,6 @@ const Header = () => {
       gsap.to(hoverBgRef.current, { opacity: 0, duration: 0.2 });
     }
   }, [hoveredIndex]);
-
   useGSAP(() => {
     if (mobileMenuRef.current) {
       if (isMobileMenuOpen) {
@@ -308,4 +308,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default React.memo(Header);

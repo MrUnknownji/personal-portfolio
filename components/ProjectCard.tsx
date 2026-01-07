@@ -1,9 +1,20 @@
-import React, { memo, useRef, useState } from "react";
+import React, { memo, useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { Project } from "@/types/Project";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { FiArrowUpRight, FiStar } from "react-icons/fi";
+
+const throttle = <T extends (...args: never[]) => void>(fn: T, ms: number) => {
+  let lastCall = 0;
+  return (...args: Parameters<T>) => {
+    const now = Date.now();
+    if (now - lastCall >= ms) {
+      lastCall = now;
+      fn(...args);
+    }
+  };
+};
 
 interface ProjectCardProps {
   project: Project;
@@ -40,11 +51,16 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
   const accentLineRef = useRef<HTMLDivElement>(null);
 
   const [isHovered, setIsHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.matchMedia('(max-width: 768px)').matches);
+  }, []);
 
   const { contextSafe } = useGSAP({ scope: cardRef });
 
-  const handleMouseMove = contextSafe((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current || !isHovered) return;
+  const mouseMoveHandler = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (isMobile || !cardRef.current || !isHovered) return;
 
     const card = cardRef.current;
     const rect = card.getBoundingClientRect();
@@ -69,7 +85,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       y: magneticY - 8,
       duration: 0.3,
       ease: "power2.out",
-      overwrite: true,
+      overwrite: "auto",
       transformPerspective: 1000,
     });
 
@@ -78,7 +94,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       y: -rotateX * 1.5,
       duration: 0.4,
       ease: "power2.out",
-      overwrite: true,
+      overwrite: "auto",
     });
 
     if (shineRef.current) {
@@ -88,7 +104,9 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
         ease: "none",
       });
     }
-  });
+  }, [isHovered]);
+
+  const handleMouseMove = throttle(mouseMoveHandler, 16);
 
   const handleMouseEnter = contextSafe(() => {
     setIsHovered(true);
@@ -100,7 +118,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
       borderColor: "rgba(0, 255, 159, 0.4)",
       duration: ANIMATION_CONFIG.HOVER_DURATION,
-      overwrite: true,
+      overwrite: "auto",
     }, 0);
 
     tl.to(imageRef.current, {
@@ -108,13 +126,13 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       rotation: 2,
       duration: ANIMATION_CONFIG.HOVER_DURATION * 1.2,
       ease: "power2.out",
-      overwrite: true,
+      overwrite: "auto",
     }, 0);
 
     tl.to(overlayRef.current, {
       opacity: 1,
       duration: 0.3,
-      overwrite: true,
+      overwrite: "auto",
     }, 0.1);
 
     tl.fromTo(
@@ -127,7 +145,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
         rotation: 0,
         duration: 0.6,
         ease: ANIMATION_CONFIG.EASE_ELASTIC,
-        overwrite: true,
+        overwrite: "auto",
       },
       0.15
     );
@@ -137,7 +155,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       opacity: 1,
       duration: 0.4,
       ease: "power2.out",
-      overwrite: true,
+      overwrite: "auto",
     }, 0);
 
     tl.fromTo(
@@ -165,7 +183,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
           duration: 0.3,
           stagger: 0.05,
           ease: "back.out(1.7)",
-          overwrite: true,
+          overwrite: "auto",
         },
         0.2
       );
@@ -186,7 +204,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
       borderColor: "rgba(255, 255, 255, 0.05)",
       duration: ANIMATION_CONFIG.HOVER_DURATION,
-      overwrite: true,
+      overwrite: "auto",
     }, 0);
 
     tl.to(imageRef.current, {
@@ -195,13 +213,13 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       x: 0,
       y: 0,
       duration: ANIMATION_CONFIG.HOVER_DURATION * 1.2,
-      overwrite: true,
+      overwrite: "auto",
     }, 0);
 
     tl.to(overlayRef.current, {
       opacity: 0,
       duration: 0.25,
-      overwrite: true,
+      overwrite: "auto",
     }, 0);
 
     tl.to(viewDetailsRef.current, {
@@ -210,14 +228,14 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       opacity: 0,
       rotation: 5,
       duration: 0.3,
-      overwrite: true,
+      overwrite: "auto",
     }, 0);
 
     tl.to(accentLineRef.current, {
       scaleX: 0,
       opacity: 0,
       duration: 0.3,
-      overwrite: true,
+      overwrite: "auto",
     }, 0);
 
     tl.to([titleRef.current, descRef.current], {
@@ -233,7 +251,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
         opacity: 1,
         y: 0,
         duration: 0.2,
-        overwrite: true,
+        overwrite: "auto",
       }, 0);
     }
   });

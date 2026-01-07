@@ -2,7 +2,6 @@
 import { cn } from "@/lib/utils";
 import React, { useMemo, useState, useEffect } from "react";
 
-// Seeded random number generator for consistent values between SSR and client
 function seededRandom(seed: number) {
     const x = Math.sin(seed) * 10000;
     return x - Math.floor(x);
@@ -21,7 +20,6 @@ export const Meteors = ({
         setMounted(true);
     }, []);
 
-    // Generate deterministic meteor data based on index (seed)
     const meteorData = useMemo(() => {
         return Array.from({ length: number }, (_, idx) => {
             const positionPercent = (idx / number) * 120 - 10;
@@ -31,12 +29,13 @@ export const Meteors = ({
         });
     }, [number]);
 
-    if (!mounted) {
-        return null; // Don't render anything on server to avoid hydration mismatch
-    }
+    if (!mounted) return null;
 
     return (
-        <div className={cn("absolute inset-0 overflow-hidden pointer-events-none", className)}>
+        <div
+            className={cn("fixed inset-0 overflow-hidden pointer-events-none", className)}
+            style={{ zIndex: 0 }}
+        >
             {meteorData.map((meteor, idx) => (
                 <span
                     key={"meteor" + idx}
