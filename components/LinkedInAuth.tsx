@@ -6,16 +6,14 @@ interface LinkedInAuthProps {
 
 const LinkedInAuth: React.FC<LinkedInAuthProps> = ({ className }) => {
 	const handleAuth = () => {
-		// Redirect to our LinkedIn auth endpoint
 		window.location.href = "/api/auth/linkedin";
 	};
 
 	return (
 		<button
 			onClick={handleAuth}
-			className={`flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors ${
-				className || ""
-			}`}
+			className={`flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors ${className || ""
+				}`}
 		>
 			<svg
 				className="w-5 h-5 mr-2"

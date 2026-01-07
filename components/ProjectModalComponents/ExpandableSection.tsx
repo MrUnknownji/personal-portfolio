@@ -39,7 +39,6 @@ export const ExpandableSection = ({
     const targetOpacity = isExpanded ? 0 : 1;
     const targetRotation = isExpanded ? 0 : 180;
 
-    // Animate container height
     gsap.to(containerRef.current, {
       height: targetHeight,
       backgroundColor: isExpanded ? "rgba(255, 255, 255, 0.03)" : "rgba(255, 255, 255, 0.06)",

@@ -30,7 +30,6 @@ const SkillsSection = () => {
         techSkillsRef.current
       );
 
-      // Initial States
       gsap.set(coreSkillCards, { opacity: 0, y: 30 });
       gsap.set(categories, { opacity: 0, y: 40 });
 

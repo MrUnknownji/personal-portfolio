@@ -35,13 +35,11 @@ export const useBotInteractions = ({
     const hoverCountRef = useRef(0);
     const lastHoverTimeRef = useRef(0);
 
-    // Page Change Interaction
     useEffect(() => {
         if (isProcessing || isCooldown) return;
 
         setEyeState('happy');
 
-        // Jump animation
         if (robotRef.current) {
             const startY = robotRef.current.position.y;
             let jumpTime = 0;
@@ -53,7 +51,6 @@ export const useBotInteractions = ({
                     clearInterval(jumpInterval);
                     return;
                 }
-                // Simple parabolic jump
                 const progress = jumpTime / jumpDuration;
                 const jumpHeight = Math.sin(progress * Math.PI) * 0.5;
                 if (robotRef.current) {
@@ -68,7 +65,6 @@ export const useBotInteractions = ({
         return () => clearTimeout(timer);
     }, [pathname]);
 
-    // Extend Window interface for custom properties
     interface CustomWindow extends Window {
         lastMouseDirection?: number;
         lastShakeTime?: number;
@@ -77,12 +73,9 @@ export const useBotInteractions = ({
         scrollTimeout?: NodeJS.Timeout;
     }
 
-    // Mouse & Scroll Interactions
     useEffect(() => {
         const handleWindowMouseMove = (e: MouseEvent | TouchEvent) => {
             if (!containerRef.current) return;
-
-            // Calculate Mouse Shake
             const now = Date.now();
             const dt = now - lastMouseTime.current;
 
@@ -100,17 +93,13 @@ export const useBotInteractions = ({
 
                 const dx = clientX - lastMousePos.current.x;
 
-                // Shake detection logic
-                if (Math.abs(dx) > 5) { // Minimum movement threshold
+                if (Math.abs(dx) > 5) {
                     const currentDirection = Math.sign(dx);
                     const win = window as unknown as CustomWindow;
-
-                    // If direction changed
                     if (currentDirection !== win.lastMouseDirection) {
                         const shakeTime = now;
                         const lastShakeTime = win.lastShakeTime || 0;
 
-                        // Check if this reversal happened quickly enough
                         if (shakeTime - lastShakeTime < 300) {
                             win.shakeCount = (win.shakeCount || 0) + 1;
                         } else {
@@ -123,7 +112,6 @@ export const useBotInteractions = ({
                         if ((win.shakeCount || 0) > 4 && !isProcessing && !isCooldown && !isRightClickingRef.current) {
                             setEyeState('dizzy');
 
-                            // Random funny message
                             const messages = [
                                 "Hey! What are you doing? 😵‍💫",
                                 "I'm feeling dizzy... 🌀",
@@ -135,7 +123,6 @@ export const useBotInteractions = ({
                             setBubbleText(randomMsg);
                             setChatOpen(true);
 
-                            // Reset
                             win.shakeCount = 0;
 
                             clearTimeout(win.dizzyTimeout);
@@ -152,7 +139,6 @@ export const useBotInteractions = ({
                 lastMouseTime.current = now;
             }
 
-            // Standard Mouse Tracking Logic
             const rect = containerRef.current.getBoundingClientRect();
             const botCenterX = rect.left + rect.width / 2;
             const botCenterY = rect.top + rect.height / 2;
@@ -263,9 +249,6 @@ export const useBotInteractions = ({
 
     const handleMouseLeave = () => {
         isHoveredRef.current = false;
-        // Only close if not typing or processing
-        // This check is done in the parent usually, but we can expose a checker or just let parent handle closing logic
-        // For now, we just update the ref.
     };
 
     return {

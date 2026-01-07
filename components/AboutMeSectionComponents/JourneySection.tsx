@@ -45,11 +45,9 @@ const JourneySection = () => {
       const items = gsap.utils.toArray(".journey-item") as HTMLElement[];
       const dots = gsap.utils.toArray(".journey-dot") as HTMLElement[];
 
-      // Initial states
       gsap.set(items, { opacity: 0, x: 50 });
       gsap.set(dots, { scale: 0, opacity: 0 });
 
-      // Main Timeline Animation
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
@@ -59,7 +57,6 @@ const JourneySection = () => {
         },
       });
 
-      // Animate Items and Dots
       items.forEach((item, index) => {
         const dot = dots[index];
 
@@ -77,7 +74,6 @@ const JourneySection = () => {
           }, "-=0.2");
       });
 
-      // Progress Line Scroll Animation
       gsap.fromTo(
         progressLineRef.current,
         { scaleY: 0 },
@@ -94,12 +90,9 @@ const JourneySection = () => {
         }
       );
 
-      // Hover Effects for Cards with Mouse Following Glow
       items.forEach((item) => {
         const card = item.querySelector(".journey-card") as HTMLElement;
         if (!card) return;
-
-        // Mouse move for glow effect
         card.addEventListener("mousemove", (e) => {
           const rect = card.getBoundingClientRect();
           const x = e.clientX - rect.left;
@@ -109,14 +102,13 @@ const JourneySection = () => {
           card.style.setProperty("--mouse-y", `${y}px`);
         });
 
-        // Hover animations - Snappier
         item.addEventListener("mouseenter", () => {
           gsap.to(card, {
             y: -4,
             scale: 1.01,
             borderColor: "rgba(0, 255, 159, 0.3)",
             boxShadow: "0 10px 30px -10px rgba(0, 255, 159, 0.15)",
-            duration: 0.2, // Faster duration
+            duration: 0.2,
             ease: "power2.out",
           });
         });

@@ -73,12 +73,7 @@ export default function FadeIn({
           scrollTrigger: {
             trigger: el,
             start,
-            toggleActions: "play none none reverse", // Reverse on scroll up for better feel? Or "play none none none" for once? User said "reverse scroll" handling.
-            // "play none none reverse" means:
-            // onEnter: play
-            // onLeave: none
-            // onEnterBack: none
-            // onLeaveBack: reverse (fade out when scrolling back up past the start)
+            toggleActions: "play none none reverse",
           },
         }
       );

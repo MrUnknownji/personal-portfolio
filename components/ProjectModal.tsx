@@ -28,7 +28,6 @@ const ANIMATION_CONFIG = {
 const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const scrollableContentRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isAnimatingOut, setIsAnimatingOut] = useState(false);
   const isActuallyOpen = isOpen || isAnimatingOut;
@@ -205,7 +204,6 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         </button>
 
         <div
-          ref={scrollableContentRef}
           className="flex-grow min-h-0 relative z-10
                      overflow-y-auto md:overflow-y-hidden
                      overscroll-behavior-y-contain

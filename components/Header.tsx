@@ -21,7 +21,6 @@ const NAV_ITEMS = [
 ];
 
 const Header = () => {
-  const headerRef = useRef<HTMLDivElement>(null);
   const desktopNavRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
   const logoTextRef = useRef<HTMLSpanElement>(null);
@@ -165,7 +164,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header ref={headerRef} className="fixed top-0 inset-x-0 z-50 pt-4">
+    <header className="fixed top-0 inset-x-0 z-50 pt-4">
       <nav
         ref={desktopNavRef}
         style={{ minWidth: isScrolled ? "700px" : "auto" }}

@@ -28,7 +28,6 @@ const ANIMATION_CONFIG = {
 const DialogContent = ({ email, onCopy, isCopied }: DialogContentProps) => {
   const contentWrapperRef = useRef<HTMLDivElement>(null);
   const iconWrapperRef = useRef<HTMLDivElement>(null);
-  const mailIconRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleCopyClick = useCallback(() => {
@@ -127,7 +126,6 @@ const DialogContent = ({ email, onCopy, isCopied }: DialogContentProps) => {
           className="group p-4 bg-primary/10 rounded-2xl inline-block"
         >
           <div
-            ref={mailIconRef}
             className="inline-flex transform-gpu transition-transform duration-300 ease-out
                                  group-hover:rotate-12"
           >

@@ -17,7 +17,6 @@ const ANIMATION_CONFIG = {
   },
 } as const;
 
-// Memoized individual link component to prevent re-renders on mouse move
 const SocialLinkItem = memo(({
   link,
   index,
@@ -81,7 +80,6 @@ const SocialLinks = () => {
   }, []);
 
   useEffect(() => {
-    // Only track mouse move if we have an active link to avoid unnecessary work
     if (activeLink === null) return;
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -91,10 +89,6 @@ const SocialLinks = () => {
       }
     };
     window.addEventListener("mousemove", handleMouseMove);
-
-    // Explicitly update once on mount/activeLink change to catch up
-    // But since this effect depends on activeLink, it runs when it changes.
-    // We assume the mouse is already there.
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
@@ -108,7 +102,6 @@ const SocialLinks = () => {
       try {
         const stats = cachedStats ?? await fetchSocialStats();
         cachedStats = stats;
-        // ... (Using same links structure as before, just abbreviated for logic clarity)
         const links: SocialLink[] = [
           {
             icon: <FiGithub className="w-5 h-5" />,
@@ -182,9 +175,7 @@ const SocialLinks = () => {
     }
     setActiveLink(index);
     if (animationRef.current) animationRef.current.kill();
-    // Immediate position update on enter
     if (mousePositionRef.current.x === 0 && mousePositionRef.current.y === 0) {
-      // Fallback or wait for first move
     } else {
       setInfoBoxPosition(mousePositionRef.current);
     }
@@ -194,8 +185,6 @@ const SocialLinks = () => {
   const handleMouseLeave = useCallback(() => {
     if (animationRef.current) animationRef.current.kill();
     setInfoBoxOpacity(0);
-    // Delay setting activeLink to null to allow animation out? 
-    // Actually, simple timeout is fine.
     hideTimeoutRef.current = setTimeout(() => {
       setActiveLink(null);
       hideTimeoutRef.current = null;
