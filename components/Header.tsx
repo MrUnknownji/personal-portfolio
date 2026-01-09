@@ -31,9 +31,17 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1200);
+    return () => clearTimeout(loadingTimer);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -164,7 +172,7 @@ const Header = () => {
   }, []);
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 pt-4">
+    <header className={cn("fixed top-0 inset-x-0 z-50 pt-4 transition-opacity duration-300", isLoading && "header-loading")}>
       <nav
         ref={desktopNavRef}
         style={{ minWidth: isScrolled ? "700px" : "auto" }}

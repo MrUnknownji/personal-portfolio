@@ -1,6 +1,8 @@
 "use client";
 import React, { useRef, useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import gsap from "gsap";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { useGSAP } from "@gsap/react";
 import { FiCheck, FiCopy, FiX, FiArrowRight } from "react-icons/fi";
 import Link from "next/link";
@@ -20,6 +22,11 @@ const ThankYouDialog = ({
   const dialogRef = useRef<HTMLDivElement>(null);
   const [isEmailCopied, setIsEmailCopied] = useState(false);
   const [isVisible, setIsVisible] = useState(isOpen);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleCopyEmail = useCallback(() => {
     navigator.clipboard
@@ -71,6 +78,24 @@ const ThankYouDialog = ({
     else if (isVisible) startCloseProcess();
   }, [isOpen, isVisible, startCloseProcess]);
 
+  useEffect(() => {
+    const smoother = ScrollSmoother.get();
+    if (isVisible) {
+      if (smoother) {
+        smoother.paused(true);
+      }
+    } else {
+      if (smoother) {
+        smoother.paused(false);
+      }
+    }
+    return () => {
+      if (smoother) {
+        smoother.paused(false);
+      }
+    };
+  }, [isVisible]);
+
   useGSAP(() => {
     if (!isVisible || !overlayRef.current || !dialogRef.current) return;
 
@@ -100,22 +125,23 @@ const ThankYouDialog = ({
   }, [isVisible]);
 
   if (!isVisible && !isOpen) return null;
+  if (!mounted) return null;
 
-  return (
+  const dialogContent = (
     <div
-      className="absolute inset-0 z-[50] flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
     >
       <div
         ref={overlayRef}
-        className="absolute inset-0 bg-black/90 rounded-3xl"
+        className="fixed inset-0 bg-black/90"
         onClick={startCloseProcess}
       />
 
       <div
         ref={dialogRef}
-        className="relative w-full max-w-lg bg-[#0a0a0a] rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
+        className="relative z-[101] w-full max-w-lg bg-[#0a0a0a] rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
       >
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
 
@@ -150,17 +176,11 @@ const ThankYouDialog = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 pt-2">
-            <button
-              onClick={startCloseProcess}
-              className="px-6 py-3 rounded-xl border border-white/10 text-neutral-300 font-medium hover:bg-white/5 hover:text-white transition-all duration-300"
-            >
-              Close
-            </button>
+          <div className="pt-2">
             <Link
               href="#projects"
               onClick={startCloseProcess}
-              className="px-6 py-3 rounded-xl bg-primary text-black font-bold hover:bg-primary/90 transition-all duration-300 flex items-center justify-center gap-2 group"
+              className="w-full px-6 py-3 rounded-xl bg-primary text-black font-bold hover:bg-primary/90 transition-all duration-300 flex items-center justify-center gap-2 group"
             >
               View Work
               <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
@@ -177,6 +197,8 @@ const ThankYouDialog = ({
       </div>
     </div>
   );
+
+  return createPortal(dialogContent, document.body);
 };
 
 export default ThankYouDialog;
