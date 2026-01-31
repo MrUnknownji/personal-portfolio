@@ -1,0 +1,13 @@
+
+> personal-portfolio@0.1.0 dev /app
+> next dev --turbopack
+
+   ▲ Next.js 16.0.10 (Turbopack)
+   - Local:         http://localhost:3000
+   - Network:       http://192.168.0.2:3000
+
+ ✓ Starting...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Ready in 725ms
+ ○ Compiling /my-projects ...
+ GET /my-projects 200 in 5.0s (compile: 4.3s, render: 691ms)
