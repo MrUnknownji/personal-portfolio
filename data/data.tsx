@@ -2,6 +2,111 @@ import { Project } from "@/types/Project";
 
 export const projects: Project[] = [
   {
+    id: 6,
+    title: "BidStrike",
+    shortDescription:
+      "BidStrike is a feature-rich, real-time online auction platform with premium aesthetics and robust functionality.",
+    longDescription:
+      "BidStrike is a feature-rich, real-time online auction platform with premium aesthetics and robust functionality. It features real-time bidding via WebSocket, auto-bidding, dynamic auctions with image uploads, an admin dashboard, in-app notifications, and a user reputation system.",
+    image:
+      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855178/Screenshot_20260131_154810_qwc2vp.png",
+    technologies: [
+      "Next.js 15",
+      "React",
+      "Tailwind CSS",
+      "Shadcn UI",
+      "MongoDB",
+      "Socket.io",
+      "Stripe",
+      "Resend",
+    ],
+    features: [
+      "Real-Time Bidding via WebSocket",
+      "Auto-Bidding System",
+      "Dynamic Auction Management",
+      "Admin Dashboard",
+      "In-app Notification System",
+      "User Reputation (Reviews & Ratings)",
+      "Advanced Search & Filtering",
+      "Secure Authentication with JWT",
+    ],
+    demoLink: "https://bid-strike.vercel.app",
+    githubLink: "https://github.com/MrUnknownji/bid-strike",
+    category: "Full Stack",
+    gallery: [
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855178/Screenshot_20260131_154810_qwc2vp.png",
+        alt: "BidStrike Home Page",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855178/Screenshot_20260131_154831_aunsms.png",
+        alt: "BidStrike Auction List",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855179/Screenshot_20260131_154903_idgbav.png",
+        alt: "BidStrike Auction Details",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855183/Screenshot_20260131_154921_zsnccj.png",
+        alt: "BidStrike User Dashboard",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855185/Screenshot_20260131_155134_ravf5s.png",
+        alt: "BidStrike Admin Dashboard",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855178/Screenshot_20260131_154142_ynpbb3.png",
+        alt: "BidStrike Login Page",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855176/Screenshot_20260131_154342_wwcxgf.png",
+        alt: "BidStrike Signup Page",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855177/Screenshot_20260131_154435_rq8icf.png",
+        alt: "BidStrike Profile Settings",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855177/Screenshot_20260131_154546_ea4ofg.png",
+        alt: "BidStrike Create Auction",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855177/Screenshot_20260131_154613_crtbom.png",
+        alt: "BidStrike Notifications",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855179/Screenshot_20260131_154730_oohzyp.png",
+        alt: "BidStrike Search Results",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855184/Screenshot_20260131_155009_zycmip.png",
+        alt: "BidStrike Payments",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855185/Screenshot_20260131_155027_qdilgy.png",
+        alt: "BidStrike Settings",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855185/Screenshot_20260131_155249_qo8gxh.png",
+        alt: "BidStrike Mobile View",
+      },
+    ],
+  },
+  {
     id: 1,
     title: "AudioVibes",
     shortDescription:
@@ -336,6 +441,7 @@ export const projects: Project[] = [
       },
     ],
   },
+  /*
   {
     id: 6,
     title: "SpaceX Website Clone",
@@ -391,6 +497,7 @@ export const projects: Project[] = [
       },
     ],
   },
+  */
 ];
 
 import { FiCpu, FiTrendingUp, FiUsers, FiClock, FiZap, FiSearch } from "react-icons/fi";
