@@ -185,6 +185,26 @@ export const useBotScene = ({
             if (container && renderer.domElement) {
                 container.removeChild(renderer.domElement);
             }
+
+            // Dispose of scene resources
+            scene.traverse((object) => {
+                if (object instanceof THREE.Mesh) {
+                    if (object.geometry) {
+                        object.geometry.dispose();
+                    }
+
+                    if (object.material) {
+                        if (Array.isArray(object.material)) {
+                            object.material.forEach((material: THREE.Material) => material.dispose());
+                        } else {
+                            object.material.dispose();
+                        }
+                    }
+                }
+            });
+
+            eyeTexture.dispose();
+
             renderer.dispose();
         };
     }, [containerRef, chatOpenRef, isCooldownRef, isHoveredRef, isProcessingRef, mouseRef]); // Dependencies
