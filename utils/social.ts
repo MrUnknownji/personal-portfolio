@@ -75,7 +75,7 @@ export async function fetchSocialStats(): Promise<SocialStats> {
   const currentTime = Date.now();
 
   // Return cached data if it's still fresh
-  if (cachedStats && currentTime - lastFetchTime < CACHE_DURATION) {
+  if (cachedStats && currentTime - lastFetchTime < CACHE_DURATION * 1000) {
     return cachedStats;
   }
 
