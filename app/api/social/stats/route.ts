@@ -4,35 +4,41 @@ import { FALLBACK_DATA, createCacheHeaders } from "../../../../utils/social";
 
 export async function GET() {
   try {
-    // Fetch GitHub data directly
-    const github =
-      (await fetchGitHubStats("MrUnknownji")) || FALLBACK_DATA.github;
+    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+
+    const githubPromise = fetchGitHubStats("MrUnknownji").then(
+      (data) => data || FALLBACK_DATA.github,
+    );
 
     // Fetch Twitter data from our API
-    const twitterRes = await fetch(
-      `${
-        process.env.NEXTAUTH_URL || "http://localhost:3000"
-      }/api/social/twitter?username=MrUnknownG786`,
-    );
-    let twitter = FALLBACK_DATA.twitter;
-
-    if (twitterRes.ok) {
-      twitter = await twitterRes.json();
-      console.log("Twitter User Data: ", twitter);
-    }
+    const twitterPromise = fetch(
+      `${baseUrl}/api/social/twitter?username=MrUnknownG786`,
+    ).then(async (res) => {
+      if (res.ok) {
+        const data = await res.json();
+        console.log("Twitter User Data: ", data);
+        return data;
+      }
+      return FALLBACK_DATA.twitter;
+    });
 
     // Fetch LinkedIn data from our API
-    const linkedinRes = await fetch(
-      `${
-        process.env.NEXTAUTH_URL || "http://localhost:3000"
-      }/api/social/linkedin?username=sandeep-kumar-sk1707`,
-    );
-    let linkedin = FALLBACK_DATA.linkedin;
+    const linkedinPromise = fetch(
+      `${baseUrl}/api/social/linkedin?username=sandeep-kumar-sk1707`,
+    ).then(async (res) => {
+      if (res.ok) {
+        const data = await res.json();
+        console.log("LinkedIn User Data: ", data);
+        return data;
+      }
+      return FALLBACK_DATA.linkedin;
+    });
 
-    if (linkedinRes.ok) {
-      linkedin = await linkedinRes.json();
-      console.log("LinkedIn User Data: ", linkedin);
-    }
+    const [github, twitter, linkedin] = await Promise.all([
+      githubPromise,
+      twitterPromise,
+      linkedinPromise,
+    ]);
 
     // Return combined data with cache headers
     return NextResponse.json(
