@@ -8,6 +8,8 @@
 
  ✓ Starting...
 [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
- ✓ Ready in 725ms
+ ✓ Ready in 765ms
  ○ Compiling /my-projects ...
- GET /my-projects 200 in 5.0s (compile: 4.3s, render: 691ms)
+ GET /my-projects 200 in 7.2s (compile: 6.4s, render: 713ms)
+ ELIFECYCLE  Command failed.
+[?25h

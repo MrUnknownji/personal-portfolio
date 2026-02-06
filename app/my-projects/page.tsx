@@ -177,31 +177,34 @@ export default function MyProjects() {
     }
   });
 
-  useEffect(() => {
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (!particlesRef.current) return;
+  useGSAP(() => {
+    if (!particlesRef.current) return;
 
-      const particles = particlesRef.current.children;
+    const particles = Array.from(particlesRef.current.children);
+    const particleAnims = particles.map((particle) => {
+      const speed = Number(particle.getAttribute("data-speed")) || 0.1;
+      const dampening = 0.4;
+
+      return {
+        xTo: gsap.quickTo(particle, "x", { duration: 1.5, ease: "power2.out" }),
+        yTo: gsap.quickTo(particle, "y", { duration: 1.5, ease: "power2.out" }),
+        factor: speed * dampening
+      };
+    });
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
       const x = (e.clientX - window.innerWidth / 2);
       const y = (e.clientY - window.innerHeight / 2);
 
-      Array.from(particles).forEach((particle) => {
-        const speed = Number(particle.getAttribute("data-speed")) || 0.1;
-        const dampening = 0.4;
-
-        gsap.to(particle, {
-          x: x * speed * dampening,
-          y: y * speed * dampening,
-          duration: 1.5,
-          ease: "power2.out",
-          overwrite: "auto"
-        });
+      particleAnims.forEach(({ xTo, yTo, factor }) => {
+        xTo(x * factor);
+        yTo(y * factor);
       });
     };
 
     window.addEventListener("mousemove", handleGlobalMouseMove);
     return () => window.removeEventListener("mousemove", handleGlobalMouseMove);
-  }, []);
+  }, { scope: particlesRef });
 
   const animateFilterChange = useCallback(() => {
     if (!projectsRef.current || isAnimating) return;
