@@ -59,7 +59,7 @@ export const useBotScene = ({
                 const width = container.clientWidth;
                 const height = container.clientHeight;
                 renderer.setSize(width, height);
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
                 camera.aspect = width / height;
                 camera.updateProjectionMatrix();
             }
