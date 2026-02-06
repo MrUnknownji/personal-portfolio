@@ -16,6 +16,7 @@ interface ClickSparkProps {
 const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const sparksRef = useRef<Spark[]>([]);
+    const animationIdRef = useRef<number | null>(null);
 
     const sparkColor = "#00ff9f";
     const sparkSize = 12;
@@ -40,52 +41,49 @@ const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
 
     const easeOut = useCallback((t: number) => t * (2 - t), []);
 
-    useEffect(() => {
+    const draw = useCallback((timestamp: number) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
 
-        let animationId: number;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        const draw = (timestamp: number) => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        sparksRef.current = sparksRef.current.filter((spark) => {
+            const elapsed = timestamp - spark.startTime;
+            if (elapsed >= duration) return false;
 
-            sparksRef.current = sparksRef.current.filter((spark) => {
-                const elapsed = timestamp - spark.startTime;
-                if (elapsed >= duration) return false;
+            const progress = elapsed / duration;
+            const eased = easeOut(progress);
+            const opacity = 1 - eased;
 
-                const progress = elapsed / duration;
-                const eased = easeOut(progress);
-                const opacity = 1 - eased;
+            const distance = eased * sparkRadius;
+            const lineLength = sparkSize * (1 - eased * 0.7);
 
-                const distance = eased * sparkRadius;
-                const lineLength = sparkSize * (1 - eased * 0.7);
+            const x1 = spark.x + distance * Math.cos(spark.angle);
+            const y1 = spark.y + distance * Math.sin(spark.angle);
+            const x2 = spark.x + (distance + lineLength) * Math.cos(spark.angle);
+            const y2 = spark.y + (distance + lineLength) * Math.sin(spark.angle);
 
-                const x1 = spark.x + distance * Math.cos(spark.angle);
-                const y1 = spark.y + distance * Math.sin(spark.angle);
-                const x2 = spark.x + (distance + lineLength) * Math.cos(spark.angle);
-                const y2 = spark.y + (distance + lineLength) * Math.sin(spark.angle);
+            ctx.strokeStyle = sparkColor;
+            ctx.globalAlpha = opacity;
+            ctx.lineWidth = 2;
+            ctx.lineCap = "round";
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
 
-                ctx.strokeStyle = sparkColor;
-                ctx.globalAlpha = opacity;
-                ctx.lineWidth = 2;
-                ctx.lineCap = "round";
-                ctx.beginPath();
-                ctx.moveTo(x1, y1);
-                ctx.lineTo(x2, y2);
-                ctx.stroke();
+            return true;
+        });
 
-                return true;
-            });
+        ctx.globalAlpha = 1;
 
-            ctx.globalAlpha = 1;
-            animationId = requestAnimationFrame(draw);
-        };
-
-        animationId = requestAnimationFrame(draw);
-
-        return () => cancelAnimationFrame(animationId);
+        if (sparksRef.current.length > 0) {
+            animationIdRef.current = requestAnimationFrame(draw);
+        } else {
+            animationIdRef.current = null;
+        }
     }, [easeOut]);
 
     const handleClick = useCallback((e: MouseEvent) => {
@@ -98,11 +96,20 @@ const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
         }));
 
         sparksRef.current.push(...newSparks);
-    }, []);
+
+        if (!animationIdRef.current) {
+            animationIdRef.current = requestAnimationFrame(draw);
+        }
+    }, [draw]);
 
     useEffect(() => {
         window.addEventListener("click", handleClick);
-        return () => window.removeEventListener("click", handleClick);
+        return () => {
+            window.removeEventListener("click", handleClick);
+            if (animationIdRef.current) {
+                cancelAnimationFrame(animationIdRef.current);
+            }
+        };
     }, [handleClick]);
 
     return (
