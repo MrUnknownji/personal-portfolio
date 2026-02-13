@@ -1,24 +1,26 @@
 'use server';
 
 import { projects, SkillsData } from '@/data/data';
+import { unstable_cache } from 'next/cache';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-export async function chatWithBot(prompt: string) {
-    if (!GEMINI_API_KEY) {
-        throw new Error("API Key is missing");
-    }
+const getCachedGeminiResponse = unstable_cache(
+    async (prompt: string) => {
+        if (!GEMINI_API_KEY) {
+            throw new Error("API Key is missing");
+        }
 
-    const portfolioData = {
-        owner: "Sandeep",
-        role: "Full Stack Developer",
-        skills: [...SkillsData.frontend, ...SkillsData.backend, ...SkillsData.tools],
-        exp: "3 years building immersive web experiences",
-        projects: projects.map(p => `${p.title}: ${p.shortDescription}`),
-        funFact: "Once debugged a single line of CSS for 6 hours."
-    };
+        const portfolioData = {
+            owner: "Sandeep",
+            role: "Full Stack Developer",
+            skills: [...SkillsData.frontend, ...SkillsData.backend, ...SkillsData.tools],
+            exp: "3 years building immersive web experiences",
+            projects: projects.map(p => `${p.title}: ${p.shortDescription}`),
+            funFact: "Once debugged a single line of CSS for 6 hours."
+        };
 
-    const systemInstructionText = `
+        const systemInstructionText = `
     IDENTITY: You are Krypton, a playful, witty robot assistant living on Sandeep's portfolio website.
 
     THE CAST:
@@ -37,19 +39,18 @@ export async function chatWithBot(prompt: string) {
     - Keep answers short (under 35 words).
     `;
 
-    const payload = {
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        systemInstruction: { parts: [{ text: systemInstructionText }] },
-        generationConfig: { temperature: 1.1, maxOutputTokens: 200, topP: 0.95 },
-        safetySettings: [
-            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" }
-        ]
-    };
+        const payload = {
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            systemInstruction: { parts: [{ text: systemInstructionText }] },
+            generationConfig: { temperature: 1.1, maxOutputTokens: 200, topP: 0.95 },
+            safetySettings: [
+                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" }
+            ]
+        };
 
-    try {
         const endpoint = `https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-2.5-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
 
         const response = await fetch(endpoint, {
@@ -65,7 +66,14 @@ export async function chatWithBot(prompt: string) {
 
         const data = await response.json();
         return data.candidates?.[0]?.content?.parts?.[0]?.text || "System malfunction. Try again.";
+    },
+    ['gemini-response'],
+    { revalidate: 3600 }
+);
 
+export async function chatWithBot(prompt: string) {
+    try {
+        return await getCachedGeminiResponse(prompt);
     } catch (error: unknown) {
         console.error('Gemini Error:', error);
         const errorMessage = error instanceof Error ? error.message : "Unknown error";
