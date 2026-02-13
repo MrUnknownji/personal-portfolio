@@ -35,8 +35,24 @@ export const useBotInteractions = ({
     const hoverCountRef = useRef(0);
     const lastHoverTimeRef = useRef(0);
 
+    // Use refs for unstable dependencies to prevent re-binding event listeners
+    const isProcessingRef = useRef(isProcessing);
+    const isCooldownRef = useRef(isCooldown);
+    const setEyeStateRef = useRef(setEyeState);
+    const setChatOpenRef = useRef(setChatOpen);
+    const setBubbleTextRef = useRef(setBubbleText);
+
     useEffect(() => {
-        if (isProcessing || isCooldown) return;
+        isProcessingRef.current = isProcessing;
+        isCooldownRef.current = isCooldown;
+        setEyeStateRef.current = setEyeState;
+        setChatOpenRef.current = setChatOpen;
+        setBubbleTextRef.current = setBubbleText;
+    }, [isProcessing, isCooldown, setEyeState, setChatOpen, setBubbleText]);
+
+    useEffect(() => {
+        // Removed early return to ensure listeners are always attached.
+        // Interaction logic inside handlers checks refs to skip processing if needed.
 
         setEyeState('happy');
 
@@ -109,8 +125,8 @@ export const useBotInteractions = ({
                         win.lastShakeTime = shakeTime;
                         win.lastMouseDirection = currentDirection;
 
-                        if ((win.shakeCount || 0) > 4 && !isProcessing && !isCooldown && !isRightClickingRef.current) {
-                            setEyeState('dizzy');
+                        if ((win.shakeCount || 0) > 4 && !isProcessingRef.current && !isCooldownRef.current && !isRightClickingRef.current) {
+                            setEyeStateRef.current('dizzy');
 
                             const messages = [
                                 "Hey! What are you doing? 😵‍💫",
@@ -120,16 +136,16 @@ export const useBotInteractions = ({
                                 "Whoa whoa whoa! 🎢"
                             ];
                             const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-                            setBubbleText(randomMsg);
-                            setChatOpen(true);
+                            setBubbleTextRef.current(randomMsg);
+                            setChatOpenRef.current(true);
 
                             win.shakeCount = 0;
 
                             clearTimeout(win.dizzyTimeout);
                             win.dizzyTimeout = setTimeout(() => {
-                                setEyeState('open');
-                                setBubbleText(null);
-                                if (!isHoveredRef.current) setChatOpen(false);
+                                setEyeStateRef.current('open');
+                                setBubbleTextRef.current(null);
+                                if (!isHoveredRef.current) setChatOpenRef.current(false);
                             }, 2000);
                         }
                     }
@@ -175,11 +191,11 @@ export const useBotInteractions = ({
 
             if (dt > 0) {
                 const speed = delta / dt;
-                if (speed > 2.0 && !isProcessing && !isCooldown) {
-                    setEyeState('surprised');
+                if (speed > 2.0 && !isProcessingRef.current && !isCooldownRef.current) {
+                    setEyeStateRef.current('surprised');
                     clearTimeout(win.scrollTimeout);
                     win.scrollTimeout = setTimeout(() => {
-                        setEyeState('open');
+                        setEyeStateRef.current('open');
                     }, 500);
                 }
             }
@@ -194,18 +210,18 @@ export const useBotInteractions = ({
         const handleWindowMouseDown = (e: MouseEvent) => {
             if (e.button === 2) {
                 isRightClickingRef.current = true;
-                setEyeState('closed');
+                setEyeStateRef.current('closed');
             }
             if (e.button === 0 && isRightClickingRef.current) {
                 isRightClickingRef.current = false;
-                setEyeState('open');
+                setEyeStateRef.current('open');
             }
         };
 
         const handleWindowMouseUp = () => {
             if (isRightClickingRef.current) {
                 isRightClickingRef.current = false;
-                setEyeState('open');
+                setEyeStateRef.current('open');
             }
         };
 
@@ -224,7 +240,7 @@ export const useBotInteractions = ({
             window.removeEventListener('mousedown', handleWindowMouseDown);
             window.removeEventListener('mouseup', handleWindowMouseUp);
         };
-    }, [isProcessing, isCooldown, containerRef, isHoveredRef, mouseRef, setBubbleText, setChatOpen, setEyeState]);
+    }, [containerRef, isHoveredRef, mouseRef]);
 
     const handleMouseEnter = () => {
         setChatOpen(true);
