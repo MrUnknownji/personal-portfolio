@@ -54,7 +54,10 @@ export default function Bot() {
         isHoveredRef,
         isProcessingRef,
         isCooldownRef,
-        chatOpenRef
+        chatOpenRef,
+        chatOpen,
+        isProcessing,
+        isCooldown
     });
 
     const { eyeStateRef } = useBotEyes({

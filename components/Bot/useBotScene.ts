@@ -8,6 +8,9 @@ interface UseBotSceneProps {
     isProcessingRef: React.MutableRefObject<boolean>;
     isCooldownRef: React.MutableRefObject<boolean>;
     chatOpenRef: React.MutableRefObject<boolean>;
+    chatOpen: boolean;
+    isProcessing: boolean;
+    isCooldown: boolean;
 }
 
 export const useBotScene = ({
@@ -17,6 +20,9 @@ export const useBotScene = ({
     isProcessingRef,
     isCooldownRef,
     chatOpenRef,
+    chatOpen,
+    isProcessing,
+    isCooldown,
 }: UseBotSceneProps) => {
     const sceneRef = useRef<THREE.Scene | null>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -29,6 +35,7 @@ export const useBotScene = ({
     const requestRef = useRef<number | null>(null);
     const targetRotationRef = useRef(new THREE.Vector2());
     const clockRef = useRef(new THREE.Clock());
+    const timeRef = useRef(0);
 
     useEffect(() => {
         if (!containerRef.current) return;
@@ -149,38 +156,10 @@ export const useBotScene = ({
         rightEarGlow.position.set(2.16, 0.8, 0);
         headPivot.add(rightEarGlow);
 
-        let frameCount = 0;
-
-        const animate = () => {
-            requestRef.current = requestAnimationFrame(animate);
-            const t = clockRef.current.getElapsedTime();
-
-            const isActive = isHoveredRef.current || isProcessingRef.current || isCooldownRef.current || chatOpenRef.current;
-
-            frameCount++;
-            if (!isActive && frameCount % 2 !== 0) {
-                return;
-            }
-
-            robot.position.y = Math.sin(t * 1.2) * 0.1 - 0.2;
-            robot.rotation.z = Math.sin(t * 0.8) * 0.02;
-
-            targetRotationRef.current.x = -mouseRef.current.y * 0.4;
-            targetRotationRef.current.y = mouseRef.current.x * 0.6;
-
-            headPivot.rotation.x += (targetRotationRef.current.x - headPivot.rotation.x) * 0.05;
-            headPivot.rotation.y += (targetRotationRef.current.y - headPivot.rotation.y) * 0.05;
-            robot.rotation.y += (targetRotationRef.current.y * 0.2 - robot.rotation.y) * 0.05;
-
-            const targetScale = isActive ? 1.0 : 0.5;
-            robot.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
-
-            renderer.render(scene, camera);
-        };
-        animate();
-
         return () => {
             window.removeEventListener('resize', updateSize);
+            // Cleanup on unmount is handled here.
+            // requestRef.current refers to the same ref used in the other useEffect.
             if (requestRef.current) cancelAnimationFrame(requestRef.current);
             if (container && renderer.domElement) {
                 container.removeChild(renderer.domElement);
@@ -207,7 +186,81 @@ export const useBotScene = ({
 
             renderer.dispose();
         };
-    }, [containerRef, chatOpenRef, isCooldownRef, isHoveredRef, isProcessingRef, mouseRef]); // Dependencies
+    }, [containerRef]);
+
+    useEffect(() => {
+        let frameCount = 0;
+        const animate = () => {
+            const scene = sceneRef.current;
+            const camera = cameraRef.current;
+            const renderer = rendererRef.current;
+            const robot = robotRef.current;
+            const headPivot = headPivotRef.current;
+
+            if (!scene || !camera || !renderer || !robot || !headPivot) return;
+
+            // Use incremental time to prevent jumps when resuming loop
+            const dt = Math.min(clockRef.current.getDelta(), 0.1);
+            timeRef.current += dt;
+            const t = timeRef.current;
+
+            const isActive = isHoveredRef.current || isProcessingRef.current || isCooldownRef.current || chatOpenRef.current;
+
+            // Stop loop if inactive and settled
+            if (!isActive) {
+                const isSettled = Math.abs(robot.scale.x - 0.5) < 0.01;
+                if (isSettled) {
+                    requestRef.current = null;
+                    return;
+                }
+            }
+
+            requestRef.current = requestAnimationFrame(animate);
+
+            frameCount++;
+            if (!isActive && frameCount % 2 !== 0) {
+                return;
+            }
+
+            robot.position.y = Math.sin(t * 1.2) * 0.1 - 0.2;
+            robot.rotation.z = Math.sin(t * 0.8) * 0.02;
+
+            targetRotationRef.current.x = -mouseRef.current.y * 0.4;
+            targetRotationRef.current.y = mouseRef.current.x * 0.6;
+
+            headPivot.rotation.x += (targetRotationRef.current.x - headPivot.rotation.x) * 0.05;
+            headPivot.rotation.y += (targetRotationRef.current.y - headPivot.rotation.y) * 0.05;
+            robot.rotation.y += (targetRotationRef.current.y * 0.2 - robot.rotation.y) * 0.05;
+
+            const targetScale = isActive ? 1.0 : 0.5;
+            robot.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+
+            renderer.render(scene, camera);
+        };
+
+        const handleWakeUp = () => {
+            if (!requestRef.current) {
+                animate();
+            }
+        };
+
+        const container = containerRef.current;
+        if (container) {
+            container.addEventListener('mouseenter', handleWakeUp);
+            container.addEventListener('touchstart', handleWakeUp);
+        }
+
+        if (chatOpen || isProcessing || isCooldown) {
+            handleWakeUp();
+        }
+
+        return () => {
+            if (container) {
+                container.removeEventListener('mouseenter', handleWakeUp);
+                container.removeEventListener('touchstart', handleWakeUp);
+            }
+        };
+    }, [chatOpen, isProcessing, isCooldown, chatOpenRef, isHoveredRef, isProcessingRef, isCooldownRef, mouseRef, containerRef]);
 
     return {
         sceneRef,
