@@ -5,22 +5,16 @@ import { unstable_cache } from 'next/cache';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-const getCachedGeminiResponse = unstable_cache(
-    async (prompt: string) => {
-        if (!GEMINI_API_KEY) {
-            throw new Error("API Key is missing");
-        }
+const portfolioData = {
+    owner: "Sandeep",
+    role: "Full Stack Developer",
+    skills: [...SkillsData.frontend, ...SkillsData.backend, ...SkillsData.tools],
+    exp: "3 years building immersive web experiences",
+    projects: projects.map(p => `${p.title}: ${p.shortDescription}`),
+    funFact: "Once debugged a single line of CSS for 6 hours."
+};
 
-        const portfolioData = {
-            owner: "Sandeep",
-            role: "Full Stack Developer",
-            skills: [...SkillsData.frontend, ...SkillsData.backend, ...SkillsData.tools],
-            exp: "3 years building immersive web experiences",
-            projects: projects.map(p => `${p.title}: ${p.shortDescription}`),
-            funFact: "Once debugged a single line of CSS for 6 hours."
-        };
-
-        const systemInstructionText = `
+const systemInstructionText = `
     IDENTITY: You are Krypton, a playful, witty robot assistant living on Sandeep's portfolio website.
 
     THE CAST:
@@ -38,6 +32,12 @@ const getCachedGeminiResponse = unstable_cache(
     - If the user asks "Who am I?", tell them they are a welcome guest/visitor.
     - Keep answers short (under 35 words).
     `;
+
+const getCachedGeminiResponse = unstable_cache(
+    async (prompt: string) => {
+        if (!GEMINI_API_KEY) {
+            throw new Error("API Key is missing");
+        }
 
         const payload = {
             contents: [{ role: "user", parts: [{ text: prompt }] }],
