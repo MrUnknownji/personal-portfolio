@@ -12,6 +12,11 @@ import { FiSearch, FiX } from "react-icons/fi";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const categories = [
+  "All",
+  ...Array.from(new Set(projects.map((project) => project.category))),
+];
+
 const ANIMATION_CONFIG = {
   STAGGER: 0.12,
   DURATION: 0.8,
@@ -61,11 +66,6 @@ export default function MyProjects() {
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<HTMLDivElement>(null);
-
-  const categories = [
-    "All",
-    ...Array.from(new Set(projects.map((project) => project.category))),
-  ];
 
   const { contextSafe } = useGSAP(
     () => {
