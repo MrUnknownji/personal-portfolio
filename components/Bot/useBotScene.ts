@@ -8,6 +8,7 @@ interface UseBotSceneProps {
     isProcessingRef: React.MutableRefObject<boolean>;
     isCooldownRef: React.MutableRefObject<boolean>;
     chatOpenRef: React.MutableRefObject<boolean>;
+    isGlobalModalOpenRef: React.MutableRefObject<boolean>;
 }
 
 export const useBotScene = ({
@@ -17,6 +18,7 @@ export const useBotScene = ({
     isProcessingRef,
     isCooldownRef,
     chatOpenRef,
+    isGlobalModalOpenRef,
 }: UseBotSceneProps) => {
     const sceneRef = useRef<THREE.Scene | null>(null);
     const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -104,13 +106,13 @@ export const useBotScene = ({
         scene.add(robot);
         robot.scale.set(0.5, 0.5, 0.5);
 
-        const body = new THREE.Mesh(new THREE.SphereGeometry(1.6, 48, 48), matBody);
+        const body = new THREE.Mesh(new THREE.SphereGeometry(1.6, 32, 32), matBody);
         body.scale.set(1, 1.3, 0.9);
         body.position.y = 1.8;
 
         robot.add(body);
 
-        const chest = new THREE.Mesh(new THREE.SphereGeometry(0.7, 32, 32), matAccent);
+        const chest = new THREE.Mesh(new THREE.SphereGeometry(0.7, 16, 16), matAccent);
         chest.scale.set(1, 0.5, 0.5);
         chest.position.set(0, 1.8, 1.31);
         robot.add(chest);
@@ -120,23 +122,23 @@ export const useBotScene = ({
         robot.add(headPivot);
         headPivotRef.current = headPivot;
 
-        const head = new THREE.Mesh(new THREE.SphereGeometry(1.7, 48, 48), matBody);
+        const head = new THREE.Mesh(new THREE.SphereGeometry(1.7, 32, 32), matBody);
         head.scale.set(1.2, 1, 1.1);
         head.position.y = 0.8;
 
         headPivot.add(head);
 
-        const visor = new THREE.Mesh(new THREE.SphereGeometry(1.45, 48, 32), matScreen);
+        const visor = new THREE.Mesh(new THREE.SphereGeometry(1.45, 32, 24), matScreen);
         visor.scale.set(1.1, 0.8, 0.5);
         visor.position.set(0, 0.8, 1.26);
         headPivot.add(visor);
 
-        const earGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 32);
+        const earGeo = new THREE.CylinderGeometry(0.5, 0.5, 0.5, 16);
         earGeo.rotateZ(Math.PI / 2);
         const leftEar = new THREE.Mesh(earGeo, matBody);
         leftEar.position.set(-1.9, 0.8, 0);
         headPivot.add(leftEar);
-        const leftEarGlow = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.1, 32), matAccent);
+        const leftEarGlow = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.1, 16), matAccent);
         leftEarGlow.rotateZ(Math.PI / 2);
         leftEarGlow.position.set(-2.16, 0.8, 0);
         headPivot.add(leftEarGlow);
@@ -144,7 +146,7 @@ export const useBotScene = ({
         const rightEar = new THREE.Mesh(earGeo, matBody);
         rightEar.position.set(1.9, 0.8, 0);
         headPivot.add(rightEar);
-        const rightEarGlow = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.1, 32), matAccent);
+        const rightEarGlow = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.1, 16), matAccent);
         rightEarGlow.rotateZ(Math.PI / 2);
         rightEarGlow.position.set(2.16, 0.8, 0);
         headPivot.add(rightEarGlow);
@@ -153,26 +155,31 @@ export const useBotScene = ({
 
         const animate = () => {
             requestRef.current = requestAnimationFrame(animate);
+
+            if (isGlobalModalOpenRef.current) {
+                return; // Early return disables ALL rendering/calculations
+            }
+
             const t = clockRef.current.getElapsedTime();
 
             const isActive = isHoveredRef.current || isProcessingRef.current || isCooldownRef.current || chatOpenRef.current;
 
-            frameCount++;
-            if (!isActive && frameCount % 2 !== 0) {
-                return;
-            }
-
             robot.position.y = Math.sin(t * 1.2) * 0.1 - 0.2;
             robot.rotation.z = Math.sin(t * 0.8) * 0.02;
 
-            targetRotationRef.current.x = -mouseRef.current.y * 0.4;
-            targetRotationRef.current.y = mouseRef.current.x * 0.6;
+            if (isActive) {
+                targetRotationRef.current.x = -mouseRef.current.y * 0.4;
+                targetRotationRef.current.y = mouseRef.current.x * 0.6;
+            } else {
+                targetRotationRef.current.x = 0;
+                targetRotationRef.current.y = 0;
+            }
 
             headPivot.rotation.x += (targetRotationRef.current.x - headPivot.rotation.x) * 0.05;
             headPivot.rotation.y += (targetRotationRef.current.y - headPivot.rotation.y) * 0.05;
             robot.rotation.y += (targetRotationRef.current.y * 0.2 - robot.rotation.y) * 0.05;
 
-            const targetScale = isActive ? 1.0 : 0.5;
+            const targetScale = isActive ? 1.0 : 0.6;
             robot.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
 
             renderer.render(scene, camera);
@@ -187,7 +194,7 @@ export const useBotScene = ({
             }
             renderer.dispose();
         };
-    }, [containerRef, chatOpenRef, isCooldownRef, isHoveredRef, isProcessingRef, mouseRef]); // Dependencies
+    }, [containerRef, chatOpenRef, isCooldownRef, isHoveredRef, isProcessingRef, mouseRef, isGlobalModalOpenRef]); // Dependencies
 
     return {
         sceneRef,

@@ -61,7 +61,7 @@ const ThankYouDialog = ({
         duration: 0.3,
         ease: "power2.in",
       },
-      "<"
+      "<",
     );
   }, [onClose, isVisible]);
 
@@ -81,15 +81,18 @@ const ThankYouDialog = ({
   useEffect(() => {
     const smoother = ScrollSmoother.get();
     if (isVisible) {
+      document.body.style.overflow = "hidden";
       if (smoother) {
         smoother.paused(true);
       }
     } else {
+      document.body.style.overflow = "";
       if (smoother) {
         smoother.paused(false);
       }
     }
     return () => {
+      document.body.style.overflow = "";
       if (smoother) {
         smoother.paused(false);
       }
@@ -117,7 +120,7 @@ const ThankYouDialog = ({
           duration: 0.5,
           ease: "back.out(1.2)",
         },
-        "-=0.2"
+        "-=0.2",
       );
     }, dialogRef);
 
@@ -156,7 +159,8 @@ const ThankYouDialog = ({
               Message Sent!
             </h3>
             <p className="text-neutral-400 text-lg leading-relaxed">
-              Thanks for reaching out. I&apos;ll get back to you as soon as possible.
+              Thanks for reaching out. I&apos;ll get back to you as soon as
+              possible.
             </p>
           </div>
 
