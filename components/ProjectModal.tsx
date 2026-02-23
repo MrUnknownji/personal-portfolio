@@ -92,7 +92,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       {
         opacity: 0,
       },
-      "<"
+      "<",
     );
   }, [onClose]);
 
@@ -120,7 +120,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
           titleRef.current,
           descRef.current,
           galleryRef.current,
-          rightColRef.current
+          rightColRef.current,
         ].filter(Boolean);
 
         gsap.set(staggerElements, {
@@ -137,21 +137,28 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
 
         tl.to(overlayRef.current, {
           opacity: 1,
-          duration: 0.4
+          duration: 0.4,
         })
-          .to(contentRef.current, {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            duration: 0.5,
-          }, "<+=0.05")
-          .to(staggerElements, {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-            stagger: 0.05,
-          }, "-=0.2");
-
+          .to(
+            contentRef.current,
+            {
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              duration: 0.5,
+            },
+            "<+=0.05",
+          )
+          .to(
+            staggerElements,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.4,
+              stagger: 0.05,
+            },
+            "-=0.2",
+          );
       } else if (!isOpen && !isAnimatingOut && isMounted) {
         if (contentRef.current && overlayRef.current) {
           setIsAnimatingOut(true);
@@ -161,7 +168,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         }
       }
     },
-    { dependencies: [isOpen, isAnimatingOut, isMounted], scope: contentRef }
+    { dependencies: [isOpen, isAnimatingOut, isMounted], scope: contentRef },
   );
 
   if (!isMounted) {
@@ -184,13 +191,13 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       <div
         ref={contentRef}
         className="relative z-50 flex flex-col transform-gpu
-                     bg-card/90 backdrop-blur-md shadow-2xl border border-border
+                     bg-card/95 backdrop-blur-xl border border-border/40
                      h-[100dvh] w-full
                      md:max-w-6xl md:h-[85vh] md:max-h-[800px]
-                     md:rounded-2xl overflow-hidden"
+                     md:rounded-3xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 pointer-events-none" />
 
         <button
           onClick={onClose}
@@ -222,29 +229,34 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                          md:scrollbar-track-transparent md:pr-4"
               data-lenis-prevent
             >
-              <div ref={imageRef} className="relative w-full aspect-video rounded-xl overflow-hidden shadow-2xl border border-border flex-shrink-0 group">
+              <div
+                ref={imageRef}
+                className="relative w-full aspect-video rounded-xl overflow-hidden border border-border/50 flex-shrink-0 group"
+              >
                 <Image
                   src={project.image}
                   alt={project.title}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
                   sizes="(max-width: 768px) 90vw, 45vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-
-                {/* Decorative corner accent */}
-                <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-transparent opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
               </div>
 
               <div className="flex-shrink-0 space-y-4 relative">
-                {/* Decorative vertical line */}
-                <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-gradient-to-b from-primary/50 to-transparent rounded-full" />
+                <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-primary/80 rounded-full" />
 
-                <div className="pl-5 space-y-3">
-                  <h2 ref={titleRef} className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary via-white to-accent bg-clip-text text-transparent tracking-tight">
+                <div className="pl-6 space-y-3">
+                  <h2
+                    ref={titleRef}
+                    className="text-4xl md:text-5xl font-bold tracking-tight text-foreground"
+                  >
                     {project.title}
                   </h2>
-                  <p ref={descRef} className="text-lg md:text-xl text-muted-foreground leading-relaxed font-light border-l-2 border-border pl-4">
+                  <p
+                    ref={descRef}
+                    className="text-lg md:text-xl text-muted-foreground leading-relaxed font-light"
+                  >
                     {project.shortDescription}
                   </p>
                 </div>
@@ -256,7 +268,10 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
             </div>
 
             {/* Right Column */}
-            <div ref={rightColRef} className="w-full md:w-[55%] flex flex-col md:h-full">
+            <div
+              ref={rightColRef}
+              className="w-full md:w-[55%] flex flex-col md:h-full"
+            >
               <div
                 className="space-y-4 flex-grow min-h-0
                            md:overflow-y-auto md:scrollbar-thin md:scrollbar-thumb-white/10
@@ -283,11 +298,8 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                       href={project.demoLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-dark font-bold overflow-hidden transition-all duration-300 hover:shadow-[0_0_25px_-5px_rgba(0,255,159,0.5)] active:scale-95"
+                      className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-dark font-bold overflow-hidden transition-all duration-300 active:scale-95 hover:bg-primary/90"
                     >
-                      {/* Shine effect */}
-                      <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent z-10" />
-
                       <span className="relative z-20 flex items-center gap-2.5">
                         <FiExternalLink className="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                         <span>Live Demo</span>
