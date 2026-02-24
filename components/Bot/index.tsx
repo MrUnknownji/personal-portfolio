@@ -149,8 +149,14 @@ export default function Bot() {
 
   const handleCloseChat = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setChatOpen(false);
-    isHoveredRef.current = false;
+    setEyeState("sad");
+    setBubbleText("Oh... okay. 😢");
+    setTimeout(() => {
+      setChatOpen(false);
+      isHoveredRef.current = false;
+      setBubbleText(null);
+      if (eyeStateRef.current === "sad") setEyeState("open");
+    }, 1500);
   };
 
   const handleDoubleClick = () => {
@@ -174,7 +180,33 @@ export default function Bot() {
     try {
       const response = await chatWithBot(userMsg);
       setBubbleText(response);
-      setEyeState("happy");
+
+      const lowerResp = response.toLowerCase();
+      if (
+        lowerResp.includes("sorry") ||
+        lowerResp.includes("unfortunately") ||
+        lowerResp.includes("sad") ||
+        lowerResp.includes("apologize") ||
+        lowerResp.includes("can't") ||
+        lowerResp.includes("cannot")
+      ) {
+        setEyeState("sad");
+      } else if (
+        lowerResp.includes("wow") ||
+        lowerResp.includes("awesome") ||
+        lowerResp.includes("great") ||
+        lowerResp.includes("cool")
+      ) {
+        setEyeState("surprised");
+      } else if (
+        lowerResp.includes("love") ||
+        lowerResp.includes("happy") ||
+        lowerResp.includes("glad")
+      ) {
+        setEyeState("happy");
+      } else {
+        setEyeState("open");
+      }
     } catch (error) {
       setBubbleText("Error connecting to brain.");
       setEyeState("error");
@@ -183,13 +215,13 @@ export default function Bot() {
       setIsCooldown(true);
       setTimeout(() => {
         setIsCooldown(false);
-        if (eyeStateRef.current === "happy") {
+        if (["happy", "sad", "surprised"].includes(eyeStateRef.current)) {
           setEyeState("open");
         }
         if (!isHoveredRef.current && !inputRef.current) {
           setChatOpen(false);
         }
-      }, 2000);
+      }, 3000);
     }
   };
 

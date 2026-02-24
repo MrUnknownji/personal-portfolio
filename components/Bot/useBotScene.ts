@@ -75,7 +75,7 @@ export const useBotScene = ({
         mainLight.position.set(5, 10, 7);
 
         scene.add(mainLight);
-        const rimLight = new THREE.DirectionalLight(0xff9233, 3.0);
+        const rimLight = new THREE.DirectionalLight(0xff8c00, 3.0);
         rimLight.position.set(-5, 5, -8);
         scene.add(rimLight);
 
@@ -94,7 +94,8 @@ export const useBotScene = ({
 
         // Materials
         const matBody = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.7, metalness: 0.5 });
-        const matAccent = new THREE.MeshStandardMaterial({ color: 0xff9233, emissive: 0xff9233, emissiveIntensity: 0.8, roughness: 0.2 });
+        const matAccent = new THREE.MeshStandardMaterial({ color: 0xff8c00, emissive: 0xff8c00, emissiveIntensity: 0.8, roughness: 0.2 });
+        const matGold = new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.3, metalness: 0.8 });
         const matScreen = new THREE.MeshStandardMaterial({
             color: 0x000000, roughness: 0.1, map: eyeTexture,
             emissive: 0xffffff, emissiveMap: eyeTexture, emissiveIntensity: 1.5
@@ -112,10 +113,22 @@ export const useBotScene = ({
 
         robot.add(body);
 
-        const chest = new THREE.Mesh(new THREE.SphereGeometry(0.7, 16, 16), matAccent);
-        chest.scale.set(1, 0.5, 0.5);
-        chest.position.set(0, 1.8, 1.31);
-        robot.add(chest);
+        const loadEmblemLayer = (path: string, zOffset: number, name: string) => {
+            const tex = new THREE.TextureLoader().load(path);
+            tex.colorSpace = THREE.SRGBColorSpace;
+            const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, side: THREE.DoubleSide });
+            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(0.85, 0.85), mat);
+            // Slight step forward in Z to prevent z-fighting
+            mesh.position.set(0, 1.75, 1.46 + zOffset);
+            mesh.rotation.x = -0.1; // Follow the curvature slightly
+            mesh.name = name;
+            robot.add(mesh);
+            return mesh;
+        };
+
+        loadEmblemLayer('/bot-mark-outer.svg', 0, "chestOuter");
+        loadEmblemLayer('/bot-mark-middle.svg', 0.005, "chestMiddle");
+        loadEmblemLayer('/bot-mark-center.svg', 0.010, "chestCenter");
 
         const headPivot = new THREE.Group();
         headPivot.position.y = 3.5;
@@ -151,6 +164,70 @@ export const useBotScene = ({
         rightEarGlow.position.set(2.16, 0.8, 0);
         headPivot.add(rightEarGlow);
 
+        // High-Tech Energy Cloak
+        const matCloak = new THREE.MeshPhysicalMaterial({ 
+            color: 0xff8c00, 
+            emissive: 0xff4500,
+            emissiveIntensity: 0.3,
+            transmission: 0.8, // Glass-like transparency
+            opacity: 1,
+            transparent: true,
+            roughness: 0.1, 
+            side: THREE.DoubleSide
+        });
+
+        const cloakGroup = new THREE.Group();
+        // Center of the torso (base of the neck area)
+        cloakGroup.position.set(0, 1.4, 0); 
+        cloakGroup.name = "cloakGroup";
+        robot.add(cloakGroup);
+
+        // Cylinder covering exactly the back 180 degrees 
+        // sweeps perfectly from the right over the back (-Z axis) to the left
+        const capeGeo = new THREE.CylinderGeometry(
+            1.5,   // radius top (around neck width)
+            2.0,   // radius bottom (flare out)
+            2.6,   // height (drops down to base)
+            32,    // radial segments
+            8,     // height segments
+            true,  // open ended
+            Math.PI / 2, // start at +X
+            Math.PI      // sweep 180 degrees to -X
+        );
+        
+        const cape = new THREE.Mesh(capeGeo, matCloak);
+        // Tilt slightly backward so it flares away from the body
+        cape.rotation.x = -0.15; 
+        cloakGroup.add(cape);
+
+        // A sleek, structured dark-metal collar holding the top of the cape
+        // Distinguishes it from the simple glowing base ring and adds rigid structure
+        const collarGeo = new THREE.CylinderGeometry(1.53, 1.53, 0.2, 32);
+        const capeCollar = new THREE.Mesh(collarGeo, matBody);
+        capeCollar.position.set(0, 1.3, 0); // Position exactly at the top edge of cape
+        cape.add(capeCollar);
+        
+        // Add minimal gold accents to the collar to distinguish it
+        const collarTrim1 = new THREE.Mesh(new THREE.TorusGeometry(1.53, 0.02, 16, 32), matGold);
+        collarTrim1.rotation.x = Math.PI / 2;
+        collarTrim1.position.y = 0.1;
+        capeCollar.add(collarTrim1);
+        
+        const collarTrim2 = new THREE.Mesh(new THREE.TorusGeometry(1.53, 0.02, 16, 32), matGold);
+        collarTrim2.rotation.x = Math.PI / 2;
+        collarTrim2.position.y = -0.1;
+        capeCollar.add(collarTrim2);
+
+        // Subtle Hovering Ring (Base)
+        const baseRingGroup = new THREE.Group();
+        baseRingGroup.position.set(0, -0.6, 0);
+        baseRingGroup.name = "baseRing";
+        robot.add(baseRingGroup);
+
+        const baseRing = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.04, 16, 64), matAccent);
+        baseRing.rotation.x = Math.PI / 2;
+        baseRingGroup.add(baseRing);
+
         let frameCount = 0;
 
         const animate = () => {
@@ -167,6 +244,26 @@ export const useBotScene = ({
             robot.position.y = Math.sin(t * 1.2) * 0.1 - 0.2;
             robot.rotation.z = Math.sin(t * 0.8) * 0.02;
 
+            const baseRing = robot.getObjectByName("baseRing");
+            if (baseRing) {
+                baseRing.rotation.y = t * 0.5; // Slowly spin
+                baseRing.position.y = -0.6 + Math.sin(t * 2) * 0.05; // Gentle float independent of breathing
+            }
+
+            // Animate SVG chest emblem layers independently
+            const chestOuter = robot.getObjectByName("chestOuter");
+            if (chestOuter) chestOuter.rotation.z = -t * 0.2; // Counter-clockwise, slow
+
+            const chestMiddle = robot.getObjectByName("chestMiddle");
+            if (chestMiddle) chestMiddle.rotation.z = t * 0.6; // Clockwise, faster
+
+            const chestCenter = robot.getObjectByName("chestCenter");
+            if (chestCenter) {
+                chestCenter.rotation.z = -t * 0.8; // Continuous counter-clockwise rotation
+                const scaleWobble = 1 + Math.sin(t * 3) * 0.03; // Slight pulsing
+                chestCenter.scale.set(scaleWobble, scaleWobble, scaleWobble);
+            }
+
             if (isActive) {
                 targetRotationRef.current.x = -mouseRef.current.y * 0.4;
                 targetRotationRef.current.y = mouseRef.current.x * 0.6;
@@ -179,7 +276,18 @@ export const useBotScene = ({
             headPivot.rotation.y += (targetRotationRef.current.y - headPivot.rotation.y) * 0.05;
             robot.rotation.y += (targetRotationRef.current.y * 0.2 - robot.rotation.y) * 0.05;
 
-            const targetScale = isActive ? 1.0 : 0.6;
+            // Animate Cloak Billowing effect
+            const cloakGrp = robot.getObjectByName("cloakGroup");
+            if (cloakGrp) {
+                // Subtle flow like cloth in air
+                const billowZ = Math.sin(t * 1.5) * 0.02;
+                const billowX = Math.cos(t * 1.2) * 0.01;
+                cloakGrp.scale.z = 1 + billowZ;
+                cloakGrp.scale.x = 1 + billowX;
+            }
+
+            const baseScale = isActive ? 1.0 : 0.6;
+            const targetScale = baseScale + Math.sin(t * 2) * 0.02;
             robot.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
 
             renderer.render(scene, camera);
@@ -194,7 +302,7 @@ export const useBotScene = ({
             }
             renderer.dispose();
         };
-    }, [containerRef, chatOpenRef, isCooldownRef, isHoveredRef, isProcessingRef, mouseRef, isGlobalModalOpenRef]); // Dependencies
+    }, [containerRef, chatOpenRef, isCooldownRef, isHoveredRef, isProcessingRef, mouseRef, isGlobalModalOpenRef]);
 
     return {
         sceneRef,

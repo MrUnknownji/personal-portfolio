@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
-export type EyeState = 'open' | 'closed' | 'happy' | 'angry' | 'surprised' | 'thinking' | 'error' | 'dizzy' | 'confused';
+export type EyeState = 'open' | 'closed' | 'happy' | 'angry' | 'surprised' | 'thinking' | 'error' | 'dizzy' | 'confused' | 'sad';
 
 interface UseBotEyesProps {
     eyeContextRef: React.MutableRefObject<CanvasRenderingContext2D | null>;
@@ -100,7 +100,7 @@ export const useBotEyes = ({
                 ctx.fillStyle = '#000000';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                const neonColor = '#ff9233';
+                const neonColor = '#ff8c00';
                 ctx.strokeStyle = neonColor;
                 ctx.lineWidth = 5;
                 ctx.lineCap = 'round';
@@ -111,6 +111,7 @@ export const useBotEyes = ({
                 const centerY = canvas.height / 2;
                 const spacing = 40;
 
+
                 if (eyeState === 'open') {
                     const ringRadius = 20;
                     ctx.beginPath(); ctx.arc(centerX - spacing, centerY, ringRadius, 0, Math.PI * 2); ctx.stroke();
@@ -120,8 +121,11 @@ export const useBotEyes = ({
                     ctx.beginPath(); ctx.moveTo(centerX - spacing - w / 2, centerY); ctx.lineTo(centerX - spacing + w / 2, centerY); ctx.stroke();
                     ctx.beginPath(); ctx.moveTo(centerX + spacing - w / 2, centerY); ctx.lineTo(centerX + spacing + w / 2, centerY); ctx.stroke();
                 } else if (eyeState === 'happy') {
-                    ctx.beginPath(); ctx.arc(centerX - spacing, centerY + 10, 20, 0, Math.PI); ctx.stroke();
-                    ctx.beginPath(); ctx.arc(centerX + spacing, centerY + 10, 20, 0, Math.PI); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(centerX - spacing, centerY + 5, 20, Math.PI, Math.PI * 2); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(centerX + spacing, centerY + 5, 20, Math.PI, Math.PI * 2); ctx.stroke();
+                } else if (eyeState === 'sad') {
+                    ctx.beginPath(); ctx.moveTo(centerX - spacing - 20, centerY + 5); ctx.lineTo(centerX - spacing + 15, centerY - 10); ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(centerX + spacing + 20, centerY + 5); ctx.lineTo(centerX + spacing - 15, centerY - 10); ctx.stroke();
                 } else if (eyeState === 'angry') {
                     ctx.beginPath(); ctx.moveTo(centerX - spacing - 20, centerY - 20); ctx.lineTo(centerX - spacing + 20, centerY + 10); ctx.stroke();
                     ctx.beginPath(); ctx.moveTo(centerX + spacing + 20, centerY - 20); ctx.lineTo(centerX + spacing - 20, centerY + 10); ctx.stroke();

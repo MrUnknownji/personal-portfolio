@@ -24,7 +24,7 @@ export const BotChat: React.FC<BotChatProps> = ({
     <>
       {/* Bubble */}
       <div
-        className={`absolute top-[20px] sm:top-[0px] left-1/2 -translate-x-1/2 -translate-y-full mb-4 w-max max-w-[200px] bg-primary/10 border-2 border-primary text-primary px-4 py-2 rounded-xl text-center font-mono text-sm font-bold shadow-[0_0_15px_hsl(var(--primary))] pointer-events-none transition-opacity duration-200 ${bubbleText && chatOpen ? "opacity-100" : "opacity-0"}`}
+        className={`absolute top-[20px] sm:top-[0px] left-1/2 -translate-x-1/2 -translate-y-full mb-4 w-max max-w-[200px] bg-primary/10 border-2 border-primary text-primary px-4 py-2 rounded-xl text-center font-mono text-sm font-bold shadow-[0_0_15px_hsl(var(--primary))] pointer-events-none transition-opacity duration-200 ${bubbleText ? "opacity-100" : "opacity-0"}`}
       >
         {bubbleText}
         <div className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] border-t-primary">
