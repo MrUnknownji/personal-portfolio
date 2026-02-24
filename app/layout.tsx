@@ -10,6 +10,7 @@ import ClickSpark from "@/components/ui/ClickSpark";
 import DynamicCursor from "@/components/ui/DynamicCursor";
 import ResponsiveMeteors from "@/components/ui/ResponsiveMeteors";
 import GlobalBackground from "@/components/GlobalBackground";
+import ScrollMandala from "@/components/ui/ScrollMandala";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -59,6 +60,7 @@ export default function RootLayout({
           <Footer />
         </SmoothScroller>
         <LazyBot />
+        <ScrollMandala />
 
         <ClickSpark />
         <DynamicCursor />
