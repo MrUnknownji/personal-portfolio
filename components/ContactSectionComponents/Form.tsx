@@ -87,27 +87,32 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     return `
       w-full bg-transparent rounded-none border-b text-foreground px-0 py-3
       outline-none transition-colors duration-200
-      ${hasError
-        ? "border-red-500/70"
-        : isFocused
-          ? "border-primary"
-          : "border-border hover:border-muted-foreground"
+      ${
+        hasError
+          ? "border-red-500/70 shadow-[0_1px_10px_rgba(239,68,68,0.2)]"
+          : isFocused
+            ? "border-primary shadow-[0_1px_15px_hsl(var(--primary)/0.2)]"
+            : "border-white/10 hover:border-white/30"
       }
     `;
   };
 
   const renderFloatingLabel = (fieldName: string, label: string) => {
     const isFocused = focusedField === fieldName;
-    const hasValue = fieldName === 'category' ? categoryInputRef.current?.value :
-      fieldName === 'subject' ? subjectInputRef.current?.value :
-        messageTextareaRef.current?.value;
+    const hasValue =
+      fieldName === "category"
+        ? categoryInputRef.current?.value
+        : fieldName === "subject"
+          ? subjectInputRef.current?.value
+          : messageTextareaRef.current?.value;
 
     return (
       <label
         className={`absolute left-0 transition-all duration-200 pointer-events-none
-          ${(isFocused || hasValue)
-            ? "-top-2 text-xs text-primary"
-            : "top-3 text-muted-foreground"
+          ${
+            isFocused || hasValue
+              ? "-top-2 text-xs text-primary"
+              : "top-3 text-muted-foreground"
           }
         `}
       >
@@ -129,15 +134,15 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
             ref={categoryInputRef}
             type="text"
             name="category"
-            className={getInputClasses('category', !!errors.category)}
-            onFocus={() => setFocusedField('category')}
+            className={getInputClasses("category", !!errors.category)}
+            onFocus={() => setFocusedField("category")}
             onBlur={() => setFocusedField(null)}
             onChange={() => {
-              if (errors.category) setErrors({ ...errors, category: '' });
+              if (errors.category) setErrors({ ...errors, category: "" });
             }}
             disabled={isSubmitting}
           />
-          {renderFloatingLabel('category', 'Category (e.g., Project Inquiry)')}
+          {renderFloatingLabel("category", "Category (e.g., Project Inquiry)")}
           {errors.category && (
             <span className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.category}
@@ -150,15 +155,15 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
             ref={subjectInputRef}
             type="text"
             name="subject"
-            className={getInputClasses('subject', !!errors.subject)}
-            onFocus={() => setFocusedField('subject')}
+            className={getInputClasses("subject", !!errors.subject)}
+            onFocus={() => setFocusedField("subject")}
             onBlur={() => setFocusedField(null)}
             onChange={() => {
-              if (errors.subject) setErrors({ ...errors, subject: '' });
+              if (errors.subject) setErrors({ ...errors, subject: "" });
             }}
             disabled={isSubmitting}
           />
-          {renderFloatingLabel('subject', 'Subject')}
+          {renderFloatingLabel("subject", "Subject")}
           {errors.subject && (
             <span className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.subject}
@@ -171,15 +176,15 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
             ref={messageTextareaRef}
             name="message"
             rows={4}
-            className={`${getInputClasses('message', !!errors.message)} resize-none`}
-            onFocus={() => setFocusedField('message')}
+            className={`${getInputClasses("message", !!errors.message)} resize-none`}
+            onFocus={() => setFocusedField("message")}
             onBlur={() => setFocusedField(null)}
             onChange={() => {
-              if (errors.message) setErrors({ ...errors, message: '' });
+              if (errors.message) setErrors({ ...errors, message: "" });
             }}
             disabled={isSubmitting}
           />
-          {renderFloatingLabel('message', 'Your Message...')}
+          {renderFloatingLabel("message", "Your Message...")}
           {errors.message && (
             <span className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.message}
@@ -187,19 +192,31 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           )}
         </div>
 
-        <div className="pt-4">
+        <div className="pt-6">
           <button
             ref={submitButtonRef}
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-primary text-dark font-semibold py-3.5 px-6 rounded-xl
-                       flex items-center justify-center gap-2 transition-all duration-200
-                       hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="group relative w-full bg-primary text-[#0a0a0a] font-bold tracking-widest uppercase py-4 px-6 rounded-xl
+                       flex items-center justify-center gap-3 transition-all duration-500 overflow-hidden
+                       hover:shadow-[0_0_30px_hsl(var(--primary)/0.4)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
+            {/* Shimmer Sweep Effect */}
+            <div
+              className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_2s_infinite]
+                         bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
+              style={{ width: "200%" }}
+            />
+
+            <span className="relative z-10">
+              {isSubmitting ? "Sending..." : "Send Message"}
+            </span>
             <FiSend
-              className={`w-4 h-4 transition-transform duration-200 ${isSubmitting ? "" : "group-hover:translate-x-0.5"
-                }`}
+              className={`relative z-10 w-4 h-4 transition-transform duration-300 ${
+                isSubmitting
+                  ? ""
+                  : "group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              }`}
             />
           </button>
         </div>

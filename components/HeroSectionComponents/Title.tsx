@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useCallback, useState } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
@@ -77,6 +77,20 @@ export const Title = () => {
     );
   }, [currentTheme, isOnCooldown]);
 
+  useEffect(() => {
+    // Only auto-play if on a touch device (no hover capability)
+    const isTouchDevice = window.matchMedia(
+      "(hover: none) and (pointer: coarse)",
+    ).matches;
+    if (!isTouchDevice) return;
+
+    const intervalId = setInterval(() => {
+      handleHover();
+    }, 4500); // Trigger slightly longer than the cooldown
+
+    return () => clearInterval(intervalId);
+  }, [handleHover]);
+
   const theme = GRADIENT_THEMES[currentTheme];
   const oldTheme = prevTheme !== null ? GRADIENT_THEMES[prevTheme] : null;
 
@@ -123,9 +137,9 @@ export const Title = () => {
       </div>
 
       <svg
-        className="absolute left-0 w-full mt-1 overflow-visible"
-        height="10"
-        viewBox="0 0 400 10"
+        className="absolute left-0 w-full mt-1 overflow-visible pointer-events-none"
+        height="36"
+        viewBox="0 0 400 36"
         preserveAspectRatio="none"
         style={{ top: "100%", transform: "translateY(-24px)" }}
       >
@@ -157,27 +171,127 @@ export const Title = () => {
           )}
         </defs>
 
+        {/* --- PREVIOUS THEME STATE (FULLY DRAWN / FADING OUT) --- */}
         {oldTheme && prevTheme !== null && (
-          <path
-            className="wave-path"
-            d="M 0 5 Q 20 0, 40 5 T 80 5 T 120 5 T 160 5 T 200 5 T 240 5 T 280 5 T 320 5 T 360 5 T 400 5"
-            stroke={`url(#wave-gradient-${prevTheme})`}
-            strokeWidth="3"
-            fill="none"
-            strokeLinecap="round"
-          />
+          <g>
+            {/* Elegant Main Swash */}
+            <path
+              d="M 0 8 C 80 8 130 8 160 18 C 175 23 185 28 200 28 C 215 28 225 23 240 18 C 270 8 320 8 400 8"
+              stroke={`url(#wave-gradient-${prevTheme})`}
+              strokeWidth="2.5"
+              fill="none"
+              strokeLinecap="round"
+            />
+            {/* Blooming Lotus Core */}
+            <g
+              style={{
+                transformOrigin: "200px 16px",
+                transform: "scale(1)",
+                opacity: 1,
+              }}
+            >
+              <path
+                d="M 200 4 C 196 14 196 22 200 34 C 204 22 204 14 200 4 Z"
+                fill={`url(#wave-gradient-${prevTheme})`}
+              />
+              <path
+                d="M 200 26 C 185 26 176 16 178 8 C 184 16 192 22 200 26 Z"
+                fill={`url(#wave-gradient-${prevTheme})`}
+              />
+              <path
+                d="M 200 26 C 215 26 224 16 222 8 C 216 16 208 22 200 26 Z"
+                fill={`url(#wave-gradient-${prevTheme})`}
+              />
+              <circle
+                cx="165"
+                cy="18"
+                r="2.5"
+                fill={`url(#wave-gradient-${prevTheme})`}
+              />
+              <circle
+                cx="235"
+                cy="18"
+                r="2.5"
+                fill={`url(#wave-gradient-${prevTheme})`}
+              />
+              <circle
+                cx="150"
+                cy="12"
+                r="1.5"
+                fill={`url(#wave-gradient-${prevTheme})`}
+              />
+              <circle
+                cx="250"
+                cy="12"
+                r="1.5"
+                fill={`url(#wave-gradient-${prevTheme})`}
+              />
+            </g>
+          </g>
         )}
 
+        {/* --- CURRENT THEME STATE (ANIMATING IN) --- */}
+        {/* Animated Sweep Line */}
         <path
-          className="wave-path"
-          d="M 0 5 Q 20 0, 40 5 T 80 5 T 120 5 T 160 5 T 200 5 T 240 5 T 280 5 T 320 5 T 360 5 T 400 5"
+          d="M 0 8 C 80 8 130 8 160 18 C 175 23 185 28 200 28 C 215 28 225 23 240 18 C 270 8 320 8 400 8"
           stroke={`url(#wave-gradient-${currentTheme})`}
-          strokeWidth="3"
+          strokeWidth="2.5"
           fill="none"
           strokeLinecap="round"
-          strokeDasharray="450"
-          strokeDashoffset={450 - (fillProgress / 100) * 450}
+          strokeDasharray="500"
+          strokeDashoffset={500 - (fillProgress / 100) * 500}
         />
+
+        {/* Animated Lotus Bloom Motif */}
+        <g
+          style={{
+            transformOrigin: "200px 16px",
+            transform: `scale(${0.3 + (fillProgress / 100) * 0.7})`,
+            opacity: fillProgress / 100,
+          }}
+        >
+          {/* Vertical Drop Diamond/Petal */}
+          <path
+            d="M 200 4 C 196 14 196 22 200 34 C 204 22 204 14 200 4 Z"
+            fill={`url(#wave-gradient-${currentTheme})`}
+          />
+
+          {/* Sweeping Side Petals */}
+          <path
+            d="M 200 26 C 185 26 176 16 178 8 C 184 16 192 22 200 26 Z"
+            fill={`url(#wave-gradient-${currentTheme})`}
+          />
+          <path
+            d="M 200 26 C 215 26 224 16 222 8 C 216 16 208 22 200 26 Z"
+            fill={`url(#wave-gradient-${currentTheme})`}
+          />
+
+          {/* Orbiting Bindis (Dots) */}
+          <circle
+            cx="165"
+            cy="18"
+            r="2.5"
+            fill={`url(#wave-gradient-${currentTheme})`}
+          />
+          <circle
+            cx="235"
+            cy="18"
+            r="2.5"
+            fill={`url(#wave-gradient-${currentTheme})`}
+          />
+          <circle
+            cx="150"
+            cy="12"
+            r="1.5"
+            fill={`url(#wave-gradient-${currentTheme})`}
+          />
+          <circle
+            cx="250"
+            cy="12"
+            r="1.5"
+            fill={`url(#wave-gradient-${currentTheme})`}
+          />
+        </g>
       </svg>
     </div>
   );

@@ -169,24 +169,30 @@ const CodePanel = memo(
     label: string;
     icon: React.ElementType;
   }) => (
-    <div className="w-full h-full bg-[#1e1e1e] rounded-xl overflow-hidden">
-      <div className="h-10 bg-[#252526] flex items-center px-4 border-b border-white/5 justify-between">
-        <div className="flex space-x-2 pointer-events-none">
+    <div className="w-full h-full bg-[#0a0a0a] rounded-xl overflow-hidden border border-white/5 shadow-[0_0_30px_hsl(var(--primary)/0.05)]">
+      {/* Code Editor Header */}
+      <div className="h-10 bg-[#111] flex items-center px-4 border-b border-white/5 justify-between relative overflow-hidden">
+        {/* Subtle top sweeping accent */}
+        <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+
+        <div className="flex space-x-2 pointer-events-none z-10">
           {["#FF5F56", "#FFBD2E", "#27C93F"].map((color, index) => (
             <div
               key={index}
-              className="w-3 h-3 rounded-full opacity-80"
+              className="w-3 h-3 rounded-full opacity-80 shadow-sm"
               style={{ backgroundColor: color }}
             />
           ))}
         </div>
-        <div className="flex items-center gap-2 px-3 py-1 bg-[#1e1e1e] rounded-md text-xs text-muted-foreground font-sans border border-white/5">
-          <Icon className="w-3 h-3 text-primary" />
-          {label}
+        <div className="flex items-center gap-2 px-4 py-1.5 bg-[#0a0a0a] rounded-md text-xs text-muted-foreground font-sans border border-white/5 shadow-inner z-10">
+          <Icon className="w-3.5 h-3.5 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.8)]" />
+          <span className="tracking-wide">{label}</span>
         </div>
-        <div className="w-12" />
+        <div className="w-12 z-10" />
       </div>
-      <div className="p-5 font-mono text-sm leading-relaxed h-[calc(100%-2.5rem)]">
+      <div className="p-6 font-mono text-[13px] md:text-sm leading-relaxed h-[calc(100%-2.5rem)] relative">
+        {/* Ambient code background glow */}
+        <div className="absolute top-10 left-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="flex flex-col gap-0.5">
           {lines.map((item) => (
             <div key={item.line} className="flex gap-4">
@@ -377,7 +383,7 @@ const CodeCompare = ({
         <div
           ref={sliderRef}
           className={cn(
-            "code-resizer-handle w-full h-full overflow-hidden rounded-xl border border-primary/20 shadow-2xl shadow-primary/10",
+            "code-resizer-handle w-full h-full overflow-hidden rounded-xl border border-white/10 shadow-[0_20px_50px_hsl(var(--primary)/0.15)]",
             className,
           )}
           style={{ position: "relative" }}
@@ -392,29 +398,30 @@ const CodeCompare = ({
         >
           <div
             ref={sliderLineRef}
-            className="h-full w-px absolute top-0 m-auto z-30 bg-gradient-to-b from-transparent from-[5%] to-[95%] via-primary to-transparent"
+            className="h-full w-[2px] absolute top-0 m-auto z-30 bg-gradient-to-b from-transparent via-primary to-transparent shadow-[0_0_15px_hsl(var(--primary)/1)]"
             style={{
               left: `${initialSliderPercentage}%`,
               top: "0",
               zIndex: 40,
             }}
           >
-            <div className="w-32 h-full [mask-image:radial-gradient(80px_at_left,white,transparent)] absolute top-1/2 -translate-y-1/2 left-0 bg-gradient-to-r from-primary/40 via-transparent to-transparent z-20" />
-            <div className="w-16 h-1/2 [mask-image:radial-gradient(40px_at_left,white,transparent)] absolute top-1/2 -translate-y-1/2 left-0 bg-gradient-to-r from-accent/60 via-transparent to-transparent z-10" />
+            <div className="w-32 h-full [mask-image:radial-gradient(80px_at_left,white,transparent)] absolute top-1/2 -translate-y-1/2 left-0 bg-gradient-to-r from-primary/60 via-transparent to-transparent z-20" />
+            <div className="w-16 h-1/2 [mask-image:radial-gradient(40px_at_left,white,transparent)] absolute top-1/2 -translate-y-1/2 left-0 bg-gradient-to-r from-accent/80 via-transparent to-transparent z-10" />
             <div className="w-12 h-3/4 top-1/2 -translate-y-1/2 absolute -right-6 [mask-image:radial-gradient(60px_at_left,white,transparent)]">
               <SparklesCore
                 background="transparent"
-                minSize={0.4}
-                maxSize={1.2}
-                particleDensity={200}
+                minSize={0.6}
+                maxSize={1.5}
+                particleDensity={300}
                 className="w-full h-full"
                 particleColor="#ff9233"
               />
             </div>
             {showHandlebar && (
-              <div className="h-8 w-5 rounded-md top-1/2 -translate-y-1/2 bg-primary z-30 -right-2.5 absolute flex items-center justify-center">
-                <div className="flex flex-col gap-0.5">
-                  <div className="w-0.5 h-3 bg-dark/60 rounded-full" />
+              <div className="h-10 w-6 rounded-lg top-1/2 -translate-y-1/2 bg-[#111] border border-primary/50 shadow-[0_0_20px_hsl(var(--primary)/0.5)] z-30 -right-3 absolute flex items-center justify-center">
+                <div className="flex gap-1">
+                  <div className="w-[1.5px] h-4 bg-primary/80 rounded-full" />
+                  <div className="w-[1.5px] h-4 bg-primary/80 rounded-full" />
                 </div>
               </div>
             )}

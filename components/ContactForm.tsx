@@ -65,10 +65,11 @@ const ContactForm: React.FC = () => {
 
         <div
           ref={containerRef}
-          className="relative rounded-2xl overflow-hidden
-                     bg-card/95 backdrop-blur-sm border border-border shadow-xl z-10"
+          className="relative rounded-[2rem] overflow-hidden
+                     bg-[#0a0a0a] backdrop-blur-md border border-white/5 shadow-2xl z-10"
         >
-          <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+          {/* Subtle top sweeping accent */}
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent shadow-[0_0_20px_hsl(var(--primary)/0.5)]" />
 
           <div className="relative px-6 py-10 sm:px-10 sm:py-12 md:p-16">
             <div className="grid md:grid-cols-2 gap-12 md:gap-16 lg:gap-24">

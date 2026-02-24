@@ -101,7 +101,7 @@ const ContactInfo = () => {
             stagger: 0.08,
             ease: "power2.out",
           },
-          "-=0.2"
+          "-=0.2",
         )
         .to(
           socialTitle,
@@ -111,7 +111,7 @@ const ContactInfo = () => {
             duration: 0.4,
             ease: "power2.out",
           },
-          "-=0.2"
+          "-=0.2",
         )
         .to(
           socialIcons,
@@ -122,14 +122,17 @@ const ContactInfo = () => {
             stagger: 0.08,
             ease: "back.out(1.5)",
           },
-          "-=0.2"
+          "-=0.2",
         );
     },
-    { scope: containerRef }
+    { scope: containerRef },
   );
 
   return (
-    <div ref={containerRef} className="w-full relative h-full flex flex-col justify-between gap-10">
+    <div
+      ref={containerRef}
+      className="w-full relative h-full flex flex-col justify-between gap-10"
+    >
       <div className="space-y-8">
         <div>
           <h3 className="contact-title text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
@@ -156,13 +159,15 @@ const ContactInfo = () => {
                 href={social.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-link w-11 h-11 flex items-center justify-center rounded-xl 
-                           bg-foreground/5 text-muted-foreground border border-border
-                           transition-all duration-200 ease-out
-                           hover:border-primary/50 hover:text-primary hover:bg-primary/5"
+                className="social-link w-12 h-12 flex items-center justify-center rounded-xl 
+                           bg-[#111] text-muted-foreground border border-white/10 shadow-md
+                           transition-all duration-300 ease-out
+                           hover:border-primary hover:text-primary hover:bg-primary/10 hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)] hover:-translate-y-1 group"
                 aria-label={social.label}
               >
-                {social.icon}
+                <div className="transition-transform duration-300 group-hover:scale-110">
+                  {social.icon}
+                </div>
               </a>
             ))}
           </div>

@@ -18,12 +18,19 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, link }) => {
           ? undefined
           : "noopener noreferrer"
       }
-      className="group/infoitem relative flex items-center gap-5 p-5 rounded-2xl bg-white/5 border border-white/10
-                 transition-all duration-300 ease-out overflow-hidden
-                 hover:bg-white/10 hover:border-primary/30 hover:shadow-[0_0_30px_-10px_rgba(0,255,159,0.2)] hover:-translate-y-1"
+      className="group/infoitem relative flex items-center gap-5 p-5 rounded-2xl bg-[#0a0a0a] border border-white/5 shadow-md
+                 transition-all duration-500 ease-out overflow-hidden
+                 hover:bg-[#111] hover:border-primary/40 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.3)] hover:-translate-y-1"
     >
-      {/* Hover Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover/infoitem:opacity-100 transition-opacity duration-500" />
+      {/* Inner Hover Glow */}
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-0 group-hover/infoitem:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+      {/* Shimmer Sweep Effect */}
+      <div
+        className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover/infoitem:animate-[shimmer_2s_infinite]
+                   bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none"
+        style={{ width: "200%" }}
+      />
 
       <div
         className="relative z-10 flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl bg-black/20 text-primary border border-white/5

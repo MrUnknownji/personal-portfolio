@@ -24,28 +24,36 @@ const HireBadge = () => {
   return (
     <div
       ref={badgeRef}
-      className="group relative inline-flex items-center gap-2.5 px-4 py-2 rounded-full
-                 bg-zinc-900/90 border border-primary/20
-                 hover:border-primary/40 hover:bg-zinc-900
-                 transition-all duration-300 cursor-default overflow-hidden"
+      className="group relative inline-flex items-center gap-3 px-5 py-2.5 rounded-full
+                 bg-[#111] border border-white/10 shadow-md
+                 transition-all duration-500 ease-out hover:border-primary/50 hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)]
+                 cursor-pointer overflow-hidden"
     >
-      {/* Subtle Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      {/* Subtle Inner Glow */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+      {/* Continuous Shimmer on Hover */}
+      <div
+        className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_2s_infinite]
+                   bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none"
+        style={{ width: "200%" }}
+      />
+
+      {/* Decorative left accent */}
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/0 group-hover:bg-primary/80 transition-colors duration-500" />
 
       {/* Status Dot Container */}
-      <div className="relative flex items-center justify-center w-2.5 h-2.5 flex-shrink-0">
-        {/* Pulse Ring */}
+      <div className="relative flex items-center justify-center w-2 h-2 flex-shrink-0">
         <span
           ref={pulseRef}
-          className="absolute inset-0 rounded-full bg-primary opacity-40"
+          className="absolute inset-0 rounded-full bg-primary opacity-80"
         />
-        {/* Core Dot */}
-        <span className="relative w-2.5 h-2.5 rounded-full bg-primary shadow-none" />
+        <span className="relative w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.8)]" />
       </div>
 
       {/* Text */}
-      <span className="relative text-primary font-medium text-xs tracking-wide">
-        Available for hire
+      <span className="relative text-[11px] font-bold tracking-[0.2em] uppercase text-foreground/80 group-hover:text-primary transition-colors duration-300">
+        Available For Hire
       </span>
     </div>
   );

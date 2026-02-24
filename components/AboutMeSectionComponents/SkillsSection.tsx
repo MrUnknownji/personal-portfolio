@@ -82,33 +82,38 @@ const SkillsSection = () => {
           {HeroSectionSkills.map((skill, index) => (
             <div key={index} className="core-skill-card-wrapper">
               <div
-                className="core-skill-card group relative h-full rounded-xl p-5 overflow-hidden
-                           bg-card border border-border/50
-                           hover:border-primary/40 hover:bg-accent/10
-                           hover:-translate-y-1 transition-all duration-300 ease-out z-10"
+                className="core-skill-card group relative h-full rounded-2xl p-5 overflow-hidden
+                           bg-[#0f0f0f] border border-white/5 shadow-md
+                           hover:border-primary/40 hover:shadow-[0_0_30px_hsl(var(--primary)/0.15)]
+                           hover:-translate-y-2 transition-all duration-500 ease-out z-10"
               >
-                <div className="flex flex-col items-center gap-4 text-center relative z-10">
+                {/* Background Ambient Glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                {/* Animated shimmer sweep */}
+                <div
+                  className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_2s_infinite]
+                             bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none"
+                  style={{ width: "200%" }}
+                />
+
+                <div className="flex flex-col items-center gap-5 text-center relative z-10">
                   <div
-                    className="p-4 rounded-xl bg-primary/5 text-muted-foreground border border-primary/10
-                                  group-hover:bg-primary/20 group-hover:text-primary group-hover:border-primary/30
-                                  group-hover:scale-110 group-hover:rotate-3
-                                  transition-all duration-300 ease-out"
+                    className="p-4 rounded-full bg-white/5 text-muted-foreground border border-white/10
+                                  group-hover:bg-primary/20 group-hover:text-primary group-hover:border-primary/40
+                                  group-hover:scale-110 group-hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)]
+                                  transition-all duration-500 ease-out flex items-center justify-center"
                   >
                     {skill.icon}
                   </div>
                   <span
-                    className="text-sm font-semibold text-foreground/80
-                                   group-hover:text-primary
-                                   transition-colors duration-300"
+                    className="text-sm font-bold tracking-wide text-foreground/80
+                                   group-hover:text-white group-hover:tracking-[0.05em]
+                                   transition-all duration-300"
                   >
                     {skill.text}
                   </span>
                 </div>
-
-                <div
-                  className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent opacity-0
-                                group-hover:opacity-100 transition-opacity duration-300 ease-out"
-                />
               </div>
             </div>
           ))}
@@ -122,37 +127,39 @@ const SkillsSection = () => {
           Technical Stack
           <span className="w-8 h-px bg-border"></span>
         </h4>
-        <div className="grid gap-5 sm:grid-cols-2 max-w-5xl mx-auto px-4">
+        <div className="grid gap-6 sm:grid-cols-2 max-w-5xl mx-auto px-4">
           {Object.entries(SkillsData).map(([category, skills]) => (
             <div key={category} className="tech-category-wrapper">
-              <div className="tech-category group/cat relative h-full bg-card border border-border/50 rounded-2xl p-6 overflow-hidden transition-all duration-300 hover:border-primary/30 hover:bg-accent/10">
-                {/* Subtle top accent */}
-                <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-hover/cat:opacity-100 transition-opacity duration-500" />
+              <div className="tech-category group/cat relative h-full bg-[#0a0a0a] border border-white/5 rounded-2xl p-7 shadow-lg overflow-hidden transition-all duration-500 hover:border-primary/40 hover:shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.2)] hover:-translate-y-1">
+                {/* Subtle top sweeping accent */}
+                <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover/cat:opacity-100 transition-all duration-700 ease-out group-hover/cat:scale-x-100 scale-x-0 origin-left" />
 
-                <h5 className="text-lg font-bold capitalize text-foreground mb-5 flex items-center gap-3 group-hover/cat:text-primary transition-colors duration-300">
-                  <span className="w-1.5 h-6 bg-gradient-to-b from-primary to-primary/40 rounded-full"></span>
+                <h5 className="text-xl font-bold capitalize text-foreground/90 mb-6 flex items-center gap-3 group-hover/cat:text-white transition-colors duration-300">
+                  <span className="w-1.5 h-6 bg-gradient-to-b from-primary to-primary/40 rounded-full shadow-[0_0_10px_hsl(var(--primary)/0.5)]"></span>
                   {category.replace(/([A-Z])/g, " $1").trim()}
                 </h5>
 
-                <div className="flex flex-wrap gap-2.5">
+                <div className="flex flex-wrap gap-3">
                   {skills.map((skill) => (
                     <div
                       key={skill}
-                      className="skill-chip group/chip relative px-4 py-2 text-sm font-semibold rounded-lg
-                                 bg-background/50 text-foreground/80 border border-border/60
-                                 hover:text-primary hover:bg-primary/10 hover:border-primary/50
-                                 transition-all duration-200 cursor-default overflow-hidden"
+                      className="skill-chip group/chip relative px-4 py-2 text-sm font-medium tracking-wide rounded-lg
+                                 bg-white/5 text-foreground/70 border border-white/5
+                                 hover:scale-105 hover:bg-primary/20 hover:text-white hover:border-primary/50 hover:shadow-[0_0_15px_hsl(var(--primary)/0.3)]
+                                 transition-all duration-300 cursor-default overflow-hidden"
                     >
                       <span className="relative z-10">{skill}</span>
-                      {/* Shine sweep effect */}
+                      {/* Inner Shine sweep effect */}
                       <div
-                        className="absolute inset-0 -translate-x-full group-hover/chip:translate-x-full 
-                                   transition-transform duration-700 ease-in-out
+                        className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover/chip:animate-[shimmer_1.5s_infinite]
                                    bg-gradient-to-r from-transparent via-white/20 to-transparent"
                       />
                     </div>
                   ))}
                 </div>
+
+                {/* Background decorative blob */}
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl opacity-0 group-hover/cat:opacity-100 transition-opacity duration-700 pointer-events-none" />
               </div>
             </div>
           ))}

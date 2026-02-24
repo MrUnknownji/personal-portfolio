@@ -6,32 +6,32 @@ const ViewProjectsButton = () => {
   return (
     <Link href="/my-projects" className="group relative inline-block">
       <div
-        className="relative overflow-hidden rounded-full
-                   bg-gradient-to-br from-[#1a1a1a] via-[#2a2a2a] to-[#1a1a1a]
-                   p-[1px]" // This p-[1px] acts as the border container
+        className="relative overflow-hidden rounded-full bg-card border border-white/5
+                   transition-all duration-300 ease-out group-hover:border-primary/40 group-hover:shadow-[0_0_25px_hsl(var(--primary)/0.2)]"
       >
-        {/* Gradient Border Effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/20 to-white/10 opacity-50" />
+        {/* Subtle Inner Glow */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         {/* Inner Content */}
         <div
-          className="relative flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#0f0f0f]
-                        transition-all duration-300 ease-out
-                        group-hover:bg-[#151515] group-hover:shadow-lg
-                        group-hover:scale-105"
+          className="relative flex items-center gap-3 px-8 py-3.5 rounded-full bg-[#0a0a0a]
+                        transition-colors duration-300 ease-out
+                        group-hover:bg-[#111]"
         >
           {/* Text */}
-          <span className="text-[15px] font-medium tracking-wide text-gray-200 group-hover:text-white transition-colors">
+          <span className="text-sm font-bold tracking-[0.15em] uppercase text-foreground/80 group-hover:text-primary transition-colors duration-300">
             View Projects
           </span>
 
           {/* Arrow Icon */}
-          <FiArrowRight className="w-4 h-4 text-primary transition-transform duration-300 group-hover:translate-x-1" />
+          <div className="relative flex items-center justify-center w-6 h-6 rounded-full bg-white/5 group-hover:bg-primary/20 transition-colors duration-300">
+            <FiArrowRight className="w-3.5 h-3.5 text-foreground/50 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-primary" />
+          </div>
 
           {/* Shine Effect */}
           <div
-            className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-shimmer
-                       bg-gradient-to-r from-transparent via-white/5 to-transparent"
+            className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_2s_infinite]
+                       bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none"
             style={{ width: "200%" }}
           />
         </div>

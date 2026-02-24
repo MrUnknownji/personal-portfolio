@@ -134,45 +134,43 @@ const JourneySection = () => {
               key={index}
               className="journey-item relative pl-8 md:pl-12 group"
             >
-              {/* Dot */}
-              <div className="journey-dot absolute left-0 md:left-2 top-6 w-6 h-6 rounded-full border-2 border-primary bg-[#0a0a0a] z-10 flex items-center justify-center shadow-none">
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              {/* Timeline Dot */}
+              <div className="journey-dot absolute left-0 md:left-[9px] top-8 w-5 h-5 rounded-full border border-white/20 bg-[#0a0a0a] z-10 flex items-center justify-center group-hover:border-primary group-hover:shadow-[0_0_15px_hsl(var(--primary)/0.6)] transition-all duration-500">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors duration-500" />
               </div>
 
               {/* Card */}
               <div
-                className="journey-card relative bg-card border border-border/50 rounded-xl p-6 md:p-8 transition-all duration-300 overflow-hidden transform-gpu group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:bg-accent/10 z-10"
+                className="journey-card relative bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 md:p-8 shadow-lg transition-all duration-500 overflow-hidden transform-gpu group-hover:-translate-y-2 group-hover:border-primary/40 group-hover:shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.25)] z-10"
                 style={{
                   // @ts-ignore
                   "--mouse-x": "0px",
                   "--mouse-y": "0px",
                 }}
               >
-                {/* Mouse Glow Gradient */}
+                {/* Inner Ambient Glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                {/* Shimmer Sweep Effect */}
                 <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                  style={{
-                    background:
-                      "radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), hsl(var(--primary) / 0.06), transparent 40%)",
-                  }}
+                  className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_2s_infinite]
+                             bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none"
+                  style={{ width: "200%" }}
                 />
 
                 <div className="relative z-10">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-5">
-                    <h4 className="text-xl md:text-2xl font-bold text-foreground tracking-wide group-hover:text-primary transition-colors duration-300">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+                    <h4 className="text-xl md:text-2xl font-bold tracking-wide text-foreground/90 group-hover:text-white transition-colors duration-300">
                       {item.title}
                     </h4>
-                    <span className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-mono font-bold rounded-lg bg-primary/5 text-primary border border-primary/20 group-hover:bg-primary/10 transition-all duration-300">
+                    <span className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-bold tracking-widest uppercase rounded-full bg-white/5 text-primary border border-white/10 shadow-sm group-hover:shadow-[0_0_15px_hsl(var(--primary)/0.3)] group-hover:bg-primary/20 group-hover:border-primary/50 transition-all duration-500">
                       {item.year}
                     </span>
                   </div>
-                  <p className="text-muted-foreground text-base md:text-lg leading-relaxed group-hover:text-foreground/90 transition-colors duration-300 font-light">
+                  <p className="text-muted-foreground text-base md:text-lg leading-relaxed group-hover:text-foreground/80 transition-colors duration-300 font-light">
                     {item.description}
                   </p>
                 </div>
-
-                {/* Decorative corner gradient */}
-                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-primary/5 to-transparent rounded-tr-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
             </div>
           ))}

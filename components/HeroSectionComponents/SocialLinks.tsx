@@ -36,19 +36,25 @@ const SocialLinkItem = memo(
         href={link.href}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative flex items-center justify-center w-12 h-12 rounded-full
-                 bg-white/[0.05] border border-white/[0.08]
-                 transition-all duration-300 ease-out
-                 hover:scale-110 hover:bg-white/[0.1]"
+        className="group relative flex items-center justify-center w-12 h-12 rounded-xl
+                 bg-[#111] border border-white/10 shadow-md
+                 transition-all duration-300 ease-out z-10"
         style={{
-          boxShadow: isActive ? `0 0 20px ${link.color}30` : "none",
-          borderColor: isActive ? `${link.color}50` : "",
+          boxShadow: isActive ? `0 10px 30px -10px ${link.color}90` : "none",
+          borderColor: isActive ? link.color : "",
+          backgroundColor: isActive ? `${link.color}15` : "",
         }}
         onMouseEnter={() => onMouseEnter(index)}
         onMouseLeave={onMouseLeave}
       >
+        {/* Inner abstract glow element */}
         <div
-          className="text-neutral-400 transition-colors duration-300 group-hover:text-white relative z-10"
+          className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md pointer-events-none"
+          style={{ background: link.color, opacity: isActive ? 0.2 : 0 }}
+        />
+
+        <div
+          className="text-muted-foreground transition-transform duration-300 group-hover:scale-110 relative z-10"
           style={{ color: isActive ? link.color : undefined }}
         >
           {React.cloneElement(
@@ -56,14 +62,6 @@ const SocialLinkItem = memo(
             { className: "w-5 h-5" },
           )}
         </div>
-
-        {/* Hover Gradient Background */}
-        <div
-          className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          style={{
-            background: `radial-gradient(circle at center, ${link.color}15, transparent 70%)`,
-          }}
-        />
       </a>
     );
   },
