@@ -4,6 +4,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { usePathname } from "next/navigation";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -15,83 +16,84 @@ export default function ScrollMandala() {
   const middleLotusRef = useRef<SVGGElement>(null);
   const outerRingRef = useRef<SVGGElement>(null);
   const particlesRef = useRef<SVGGElement>(null);
+  const pathname = usePathname();
 
   useGSAP(
     () => {
       if (!containerRef.current) return;
+      const setupTimeout = setTimeout(() => {
+        gsap.set(containerRef.current, { x: "-5vw", y: "5vh" });
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: document.body,
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1.5,
+          },
+        });
 
-      // Reset to starting position (Top Left, partially hidden)
-      gsap.set(containerRef.current, { x: "-5vw", y: "5vh" });
+        tl.to(containerRef.current, {
+          x: "80vw",
+          y: "45vh",
+          scale: 1.3,
+          rotation: 45,
+          ease: "sine.inOut",
+          duration: 1,
+        }).to(containerRef.current, {
+          x: "5vw",
+          y: "85vh",
+          scale: 0.9,
+          rotation: 90,
+          ease: "sine.inOut",
+          duration: 1,
+        });
 
-      // Animate the container moving around the screen gracefully as a background element
-      const tl = gsap.timeline({
-        scrollTrigger: {
+        const scrubConfig = {
           trigger: document.body,
           start: "top top",
           end: "bottom bottom",
-          scrub: 1.5,
-        },
-      });
+          scrub: 2,
+        };
 
-      // Fluid, less erratic movement. Stays mostly out of the primary center view.
-      tl.to(containerRef.current, {
-        x: "80vw", // Move to the right edge
-        y: "45vh", // Move down to middle
-        scale: 1.3,
-        rotation: 45,
-        ease: "sine.inOut",
-        duration: 1,
-      }).to(containerRef.current, {
-        x: "5vw", // Move to left bottom edge
-        y: "85vh",
-        scale: 0.9,
-        rotation: 90,
-        ease: "sine.inOut",
-        duration: 1,
-      });
+        gsap.to(innerStarRef.current, {
+          rotation: 360,
+          transformOrigin: "center center",
+          scrollTrigger: scrubConfig,
+        });
 
-      const scrubConfig = {
-        trigger: document.body,
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 2, // Smooth, slightly lazy scrub
-      };
+        gsap.to(middleLotusRef.current, {
+          rotation: -180,
+          transformOrigin: "center center",
+          scrollTrigger: scrubConfig,
+        });
 
-      // Spin internal layers gracefully (not too fast)
-      gsap.to(innerStarRef.current, {
-        rotation: 360,
-        transformOrigin: "center center",
-        scrollTrigger: scrubConfig,
-      });
+        gsap.to(outerRingRef.current, {
+          rotation: 360,
+          transformOrigin: "center center",
+          scrollTrigger: scrubConfig,
+        });
 
-      gsap.to(middleLotusRef.current, {
-        rotation: -180,
-        transformOrigin: "center center",
-        scrollTrigger: scrubConfig,
-      });
+        gsap.to(particlesRef.current, {
+          rotation: -360,
+          transformOrigin: "center center",
+          scrollTrigger: scrubConfig,
+        });
+      }, 250);
 
-      gsap.to(outerRingRef.current, {
-        rotation: 360,
-        transformOrigin: "center center",
-        scrollTrigger: scrubConfig,
-      });
-
-      gsap.to(particlesRef.current, {
-        rotation: -360,
-        transformOrigin: "center center",
-        scrollTrigger: scrubConfig,
-      });
-
-      // Subtle, slow breathing effect for opacity
-      gsap.to(containerRef.current, {
+      const breathe = gsap.to(containerRef.current, {
         opacity: 0.15,
         duration: 4,
         repeat: -1,
         yoyo: true,
         ease: "power1.inOut",
       });
+
+      return () => {
+        clearTimeout(setupTimeout);
+        breathe.kill();
+      };
     },
-    { scope: containerRef },
+    { scope: containerRef, dependencies: [pathname] },
   );
 
   return (
@@ -99,13 +101,12 @@ export default function ScrollMandala() {
       ref={containerRef}
       className="fixed left-0 top-0 z-[-5] pointer-events-none mix-blend-screen"
       style={{
-        width: "28vw", // Scales with viewport to be a nice large background accent
+        width: "28vw",
         minWidth: "250px",
         height: "28vw",
         minHeight: "250px",
         transformOrigin: "center",
-        opacity: 0.08, // Very subtle base opacity
-        // Removing blur keeps the geometry crisp and professional, but faint
+        opacity: 0.08,
       }}
     >
       <svg
@@ -128,7 +129,6 @@ export default function ScrollMandala() {
             <stop offset="0%" stopColor="#ffcc00" />
             <stop offset="100%" stopColor="#ff0055" />
           </linearGradient>
-          {/* Subtle glow instead of blinding super-glow for a cleaner aesthetic */}
           <filter id="clean-glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="2" result="blur" />
             <feMerge>
@@ -139,7 +139,6 @@ export default function ScrollMandala() {
         </defs>
 
         <g filter="url(#clean-glow)">
-          {/* Outer Geometry */}
           <g ref={outerRingRef}>
             {Array.from({ length: 12 }).map((_, i) => (
               <g key={`outer-${i}`} transform={`rotate(${i * 30})`}>
@@ -191,7 +190,6 @@ export default function ScrollMandala() {
             />
           </g>
 
-          {/* Particles (Floating dots) */}
           <g ref={particlesRef}>
             {Array.from({ length: 24 }).map((_, i) => (
               <circle
@@ -206,7 +204,6 @@ export default function ScrollMandala() {
             ))}
           </g>
 
-          {/* Middle Lotus */}
           <g ref={middleLotusRef}>
             {Array.from({ length: 8 }).map((_, i) => (
               <path
@@ -219,7 +216,6 @@ export default function ScrollMandala() {
                 strokeWidth="1"
               />
             ))}
-            {/* Intermediate smaller lotus */}
             {Array.from({ length: 8 }).map((_, i) => (
               <path
                 key={`middle-sub-${i}`}
@@ -233,7 +229,6 @@ export default function ScrollMandala() {
             ))}
           </g>
 
-          {/* Inner Star / Core */}
           <g ref={innerStarRef}>
             {Array.from({ length: 12 }).map((_, i) => (
               <path
