@@ -23,35 +23,20 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
 
   return (
     <div
-      className="project-card relative bg-card rounded-2xl overflow-hidden cursor-pointer"
+      className="project-card relative bg-card rounded-xl overflow-hidden cursor-pointer border border-border"
       onClick={onClick}
       onMouseEnter={() => !isMobile && setIsHovered(true)}
       onMouseLeave={() => !isMobile && setIsHovered(false)}
       style={{
-        transform: isHovered ? "translateY(-8px)" : "translateY(0)",
-        transition: "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)",
+        transform: isHovered
+          ? "translateY(-4px) translateX(-4px)"
+          : "translateY(0) translateX(0)",
+        boxShadow: isHovered
+          ? "6px 6px 0px var(--primary)"
+          : "0px 0px 0px transparent",
+        transition: "all 0.3s cubic-bezier(0.23, 1, 0.32, 1)",
       }}
     >
-      <div
-        className="absolute inset-0 rounded-2xl pointer-events-none z-20"
-        style={{
-          border: isHovered ? "1px solid rgba(0, 255, 159, 0.6)" : "1px solid transparent",
-          transition: "border-color 0.4s ease",
-        }}
-      />
-
-      <div
-        className="absolute pointer-events-none z-30 rounded-2xl"
-        style={{
-          inset: "-50%",
-          backgroundImage: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.06) 40%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.06) 60%, transparent 70%)",
-          transform: isHovered ? "translateX(100%)" : "translateX(-100%)",
-          transition: "transform 0.8s cubic-bezier(0.23, 1, 0.32, 1)",
-        }}
-      />
-
-      <div className="absolute inset-0 border border-border/30 rounded-2xl pointer-events-none z-10" />
-
       <div className="relative h-52 md:h-64 overflow-hidden">
         <Image
           src={project.image}
@@ -63,7 +48,8 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
               ? "brightness(0.25) contrast(1.1) saturate(0.8) blur(2px)"
               : "brightness(0.9) contrast(1.05) saturate(0.85)",
             transform: isHovered ? "scale(1.08)" : "scale(1)",
-            transition: "filter 0.5s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)",
+            transition:
+              "filter 0.5s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)",
           }}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
@@ -102,13 +88,20 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
           {project.technologies.slice(0, TECH_TAGS_MAX).map((tech) => (
             <span
               key={tech}
-              className="tech-tag px-3 py-1.5 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-dark transition-all duration-300"
+              className="tech-tag flex items-center px-3 py-1 text-xs font-semibold bg-transparent text-primary border border-primary/50 hover:bg-primary hover:text-dark transition-all duration-300"
+              style={{
+                boxShadow: "2px 2px 0px var(--primary)",
+                borderRadius: "2px",
+              }}
             >
               {tech}
             </span>
           ))}
           {project.technologies.length > TECH_TAGS_MAX && (
-            <span className="tech-tag px-3 py-1.5 rounded-full text-xs font-medium bg-foreground/5 text-muted-foreground border border-border hover:border-border/80 transition-colors duration-300">
+            <span
+              className="tech-tag flex items-center px-3 py-1 text-xs font-semibold bg-foreground/5 text-muted-foreground border border-border hover:border-border/80 transition-colors duration-300"
+              style={{ borderRadius: "2px" }}
+            >
               +{project.technologies.length - TECH_TAGS_MAX}
             </span>
           )}

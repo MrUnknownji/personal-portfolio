@@ -9,12 +9,11 @@ interface GradientTheme {
 }
 
 const GRADIENT_THEMES: GradientTheme[] = [
-  { name: "snow", colors: ["#e8e8e8", "#ffffff", "#d4e5ff"] },
-  { name: "rose", colors: ["#ffecd2", "#fcb69f", "#ffecd2"] },
-  { name: "lavender", colors: ["#e0c3fc", "#d5b4e0", "#c9a7eb"] },
-  { name: "mint", colors: ["#a8edea", "#d4eeee", "#e8f5e9"] },
+  { name: "orange-base", colors: ["#ff9233", "#ffc899", "#ff9233"] },
+  { name: "sunset", colors: ["#ff7e5f", "#feb47b", "#ff7e5f"] },
+  { name: "gold", colors: ["#ffd700", "#ffdf00", "#d4af37"] },
   { name: "peach", colors: ["#ffeaa7", "#fdcb6e", "#ffe0b2"] },
-  { name: "aurora", colors: ["#c3fae8", "#96f2d7", "#a7f3d0"] },
+  { name: "sand", colors: ["#e8d1b5", "#f4e0c6", "#e8d1b5"] },
 ];
 
 const COOLDOWN_MS = 1000;
@@ -37,19 +36,18 @@ export const Title = () => {
       y: 20,
       duration: 1,
       ease: "power3.out",
-    })
-      .to(
-        {},
-        {
-          duration: 1.5,
-          ease: "power2.inOut",
-          onUpdate: function () {
-            const progress = this.progress() * 100;
-            setFillProgress(progress);
-          },
+    }).to(
+      {},
+      {
+        duration: 1.5,
+        ease: "power2.inOut",
+        onUpdate: function () {
+          const progress = this.progress() * 100;
+          setFillProgress(progress);
         },
-        "-=0.5"
-      );
+      },
+      "-=0.5",
+    );
   }, []);
 
   const handleHover = useCallback(() => {
@@ -66,15 +64,17 @@ export const Title = () => {
       setIsOnCooldown(false);
     }, COOLDOWN_MS);
 
-
-    gsap.to({ val: 0 }, {
-      val: 100,
-      duration: 0.8,
-      ease: "power2.out",
-      onUpdate: function () {
-        setFillProgress(this.targets()[0].val);
+    gsap.to(
+      { val: 0 },
+      {
+        val: 100,
+        duration: 0.8,
+        ease: "power2.out",
+        onUpdate: function () {
+          setFillProgress(this.targets()[0].val);
+        },
       },
-    });
+    );
   }, [currentTheme, isOnCooldown]);
 
   const theme = GRADIENT_THEMES[currentTheme];
@@ -88,11 +88,7 @@ export const Title = () => {
     >
       <div className="relative">
         <h1 className="hero-title relative font-bold text-4xl md:text-5xl lg:text-7xl tracking-tight cursor-pointer select-none">
-
-          <span className="text-neutral-700">
-            Sandeep Kumar
-          </span>
-
+          <span className="text-neutral-700">Sandeep Kumar</span>
 
           {oldTheme && (
             <span
@@ -109,7 +105,6 @@ export const Title = () => {
               Sandeep Kumar
             </span>
           )}
-
 
           <span
             className="absolute top-0 left-0 w-full -bottom-4"
@@ -135,14 +130,26 @@ export const Title = () => {
         style={{ top: "100%", transform: "translateY(-24px)" }}
       >
         <defs>
-          <linearGradient id={`wave-gradient-${currentTheme}`} x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient
+            id={`wave-gradient-${currentTheme}`}
+            x1="0%"
+            y1="0%"
+            x2="100%"
+            y2="0%"
+          >
             <stop offset="0%" stopColor={theme.colors[0]} />
             <stop offset="50%" stopColor={theme.colors[1]} />
             <stop offset="100%" stopColor={theme.colors[2]} />
           </linearGradient>
 
           {oldTheme && prevTheme !== null && (
-            <linearGradient id={`wave-gradient-${prevTheme}`} x1="0%" y1="0%" x2="100%" y2="0%">
+            <linearGradient
+              id={`wave-gradient-${prevTheme}`}
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
               <stop offset="0%" stopColor={oldTheme.colors[0]} />
               <stop offset="50%" stopColor={oldTheme.colors[1]} />
               <stop offset="100%" stopColor={oldTheme.colors[2]} />

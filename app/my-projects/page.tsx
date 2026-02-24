@@ -383,12 +383,6 @@ export default function MyProjects() {
       ref={pageRef}
       className="min-h-screen pt-24 pb-20 md:pb-28 lg:pb-32 relative overflow-hidden"
     >
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-[120px]" />
-        <div className="absolute top-60 right-1/3 w-[400px] h-[400px] bg-primary/[0.02] rounded-full blur-[100px]" />
-        <div className="absolute bottom-40 left-1/3 w-[300px] h-[300px] bg-accent/[0.02] rounded-full blur-[80px]" />
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div
           ref={titleSectionRef}
@@ -433,7 +427,7 @@ export default function MyProjects() {
 
               <div
                 ref={searchContainerRef}
-                className="relative w-full lg:flex-1 group rounded-full border border-transparent bg-foreground/[0.04] transition-all duration-300 focus-within:border-primary/30 focus-within:bg-foreground/[0.06] focus-within:shadow-[0_0_15px_rgba(0,255,159,0.1)] hover:bg-foreground/[0.06]"
+                className="relative w-full lg:flex-1 group rounded-full border border-border/50 bg-foreground/[0.04] transition-all duration-300 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-foreground/[0.06] hover:bg-foreground/[0.06]"
               >
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
                   <FiSearch className="text-muted-foreground group-focus-within:text-primary transition-colors duration-300 w-4 h-4 md:w-5 md:h-5" />

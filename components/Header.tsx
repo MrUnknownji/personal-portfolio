@@ -62,7 +62,7 @@ const Header = () => {
     }
     if (mobileNavRef.current) {
       gsap.to(mobileNavRef.current, {
-        width: (isScrolled || isMobileMenuOpen) ? "92%" : "100%",
+        width: isScrolled || isMobileMenuOpen ? "92%" : "100%",
         y: isScrolled ? 8 : 0,
         duration: 0.4,
         ease: "power2.out",
@@ -78,7 +78,11 @@ const Header = () => {
   }, [isScrolled, isMobileMenuOpen]);
 
   useGSAP(() => {
-    if (hoveredIndex !== null && hoverBgRef.current && navItemsRef.current[hoveredIndex]) {
+    if (
+      hoveredIndex !== null &&
+      hoverBgRef.current &&
+      navItemsRef.current[hoveredIndex]
+    ) {
       const navItem = navItemsRef.current[hoveredIndex];
       const navContainer = navItem?.parentElement;
       if (navItem && navContainer) {
@@ -105,10 +109,18 @@ const Header = () => {
           duration: 0.3,
           ease: "power2.out",
         });
-        const items = mobileMenuRef.current.querySelectorAll(".mobile-nav-item");
-        gsap.fromTo(items,
+        const items =
+          mobileMenuRef.current.querySelectorAll(".mobile-nav-item");
+        gsap.fromTo(
+          items,
           { opacity: 0, x: -20 },
-          { opacity: 1, x: 0, duration: 0.3, stagger: 0.05, ease: "power2.out" }
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.3,
+            stagger: 0.05,
+            ease: "power2.out",
+          },
         );
       } else {
         gsap.to(mobileMenuRef.current, {
@@ -121,12 +133,32 @@ const Header = () => {
     }
   }, [isMobileMenuOpen]);
 
-  const handleNavClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
-    if (link.startsWith("/#")) {
-      e.preventDefault();
-      const sectionId = link.replace("/#", "");
-      const element = document.getElementById(sectionId);
+  const handleNavClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+      if (link.startsWith("/#")) {
+        e.preventDefault();
+        const sectionId = link.replace("/#", "");
+        const element = document.getElementById(sectionId);
 
+        if (pathname === "/" && element) {
+          gsap.to(window, {
+            scrollTo: { y: element, offsetY: 100 },
+            duration: 1,
+            ease: "power2.inOut",
+          });
+        } else {
+          router.push(link);
+        }
+      }
+      setIsMobileMenuOpen(false);
+    },
+    [pathname, router],
+  );
+
+  const handleContactClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      const element = document.getElementById("contact");
       if (pathname === "/" && element) {
         gsap.to(window, {
           scrollTo: { y: element, offsetY: 100 },
@@ -134,26 +166,12 @@ const Header = () => {
           ease: "power2.inOut",
         });
       } else {
-        router.push(link);
+        router.push("/#contact");
       }
-    }
-    setIsMobileMenuOpen(false);
-  }, [pathname, router]);
-
-  const handleContactClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    const element = document.getElementById("contact");
-    if (pathname === "/" && element) {
-      gsap.to(window, {
-        scrollTo: { y: element, offsetY: 100 },
-        duration: 1,
-        ease: "power2.inOut",
-      });
-    } else {
-      router.push("/#contact");
-    }
-    setIsMobileMenuOpen(false);
-  }, [pathname, router]);
+      setIsMobileMenuOpen(false);
+    },
+    [pathname, router],
+  );
 
   const handleLogoHover = useCallback((e: React.MouseEvent, enter: boolean) => {
     gsap.to(e.currentTarget, {
@@ -163,16 +181,24 @@ const Header = () => {
     });
   }, []);
 
-  const handleButtonHover = useCallback((e: React.MouseEvent, enter: boolean) => {
-    gsap.to(e.currentTarget, {
-      scale: enter ? 1.02 : 1,
-      duration: 0.15,
-      ease: "power2.out",
-    });
-  }, []);
+  const handleButtonHover = useCallback(
+    (e: React.MouseEvent, enter: boolean) => {
+      gsap.to(e.currentTarget, {
+        scale: enter ? 1.02 : 1,
+        duration: 0.15,
+        ease: "power2.out",
+      });
+    },
+    [],
+  );
 
   return (
-    <header className={cn("fixed top-0 inset-x-0 z-50 pt-4 transition-opacity duration-300", isLoading && "header-loading")}>
+    <header
+      className={cn(
+        "fixed top-0 inset-x-0 z-50 pt-4 transition-opacity duration-300",
+        isLoading && "header-loading",
+      )}
+    >
       <nav
         ref={desktopNavRef}
         style={{ minWidth: isScrolled ? "700px" : "auto" }}
@@ -180,7 +206,7 @@ const Header = () => {
           "hidden lg:flex mx-auto max-w-7xl items-center justify-between px-6 py-3 rounded-full transition-colors duration-300",
           isScrolled
             ? "bg-background/80 backdrop-blur-md border border-border/50 shadow-lg shadow-black/10"
-            : "bg-transparent"
+            : "bg-transparent border border-transparent",
         )}
       >
         <Link
@@ -219,7 +245,9 @@ const Header = () => {
             <Link
               key={item.name}
               href={item.link}
-              ref={(el) => { navItemsRef.current[idx] = el; }}
+              ref={(el) => {
+                navItemsRef.current[idx] = el;
+              }}
               onClick={(e) => handleNavClick(e, item.link)}
               onMouseEnter={() => setHoveredIndex(idx)}
               className="relative px-4 py-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors z-10"
@@ -233,12 +261,15 @@ const Header = () => {
           onClick={handleContactClick}
           onMouseEnter={(e) => handleButtonHover(e, true)}
           onMouseLeave={(e) => handleButtonHover(e, false)}
-          onMouseDown={(e) => gsap.to(e.currentTarget, { scale: 0.98, duration: 0.1 })}
-          onMouseUp={(e) => gsap.to(e.currentTarget, { scale: 1.02, duration: 0.1 })}
+          onMouseDown={(e) =>
+            gsap.to(e.currentTarget, { scale: 0.98, duration: 0.1 })
+          }
+          onMouseUp={(e) =>
+            gsap.to(e.currentTarget, { scale: 1.02, duration: 0.1 })
+          }
           className="relative z-20 group flex items-center gap-2 px-5 py-2.5 rounded-full
                      bg-primary text-dark font-medium text-sm
-                     shadow-lg shadow-primary/20
-                     transition-shadow duration-300"
+                     transition-transform duration-300"
         >
           <span>Contact Me</span>
           <FiArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -249,13 +280,17 @@ const Header = () => {
         ref={mobileNavRef}
         className={cn(
           "lg:hidden mx-auto flex flex-col px-4 py-3 rounded-2xl transition-colors duration-300",
-          isScrolled
+          isScrolled || isMobileMenuOpen
             ? "bg-background/80 backdrop-blur-md border border-border/50 shadow-lg shadow-black/10"
-            : isMobileMenuOpen ? "bg-background/80 backdrop-blur-md border border-border/50 shadow-lg shadow-black/10" : "bg-transparent"
+            : "bg-transparent border border-transparent",
         )}
       >
         <div className="flex items-center justify-between w-full">
-          <Link href="/" className="flex items-center gap-2" aria-label="Homepage">
+          <Link
+            href="/"
+            className="flex items-center gap-2"
+            aria-label="Homepage"
+          >
             <Image
               src="/images/logo.svg"
               alt="Logo"
@@ -264,17 +299,27 @@ const Header = () => {
               priority
               className="w-9 h-9"
             />
-            <span className="text-foreground font-semibold tracking-tight">Sandeep</span>
+            <span className="text-foreground font-semibold tracking-tight">
+              Sandeep
+            </span>
           </Link>
 
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            onMouseDown={(e) => gsap.to(e.currentTarget, { scale: 0.9, duration: 0.1 })}
-            onMouseUp={(e) => gsap.to(e.currentTarget, { scale: 1, duration: 0.1 })}
+            onMouseDown={(e) =>
+              gsap.to(e.currentTarget, { scale: 0.9, duration: 0.1 })
+            }
+            onMouseUp={(e) =>
+              gsap.to(e.currentTarget, { scale: 1, duration: 0.1 })
+            }
             className="p-2 rounded-lg text-foreground hover:bg-foreground/5 transition-colors"
             aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
+            {isMobileMenuOpen ? (
+              <FiX className="w-6 h-6" />
+            ) : (
+              <FiMenu className="w-6 h-6" />
+            )}
           </button>
         </div>
 
@@ -301,8 +346,8 @@ const Header = () => {
               <button
                 onClick={handleContactClick}
                 className="w-full flex items-center justify-center gap-2 px-4 py-3
-                           bg-primary text-dark font-medium rounded-lg
-                           shadow-[0_0_15px_rgba(0,255,159,0.3)]"
+                           bg-primary text-dark font-bold rounded-lg
+                           transition-transform active:scale-95"
               >
                 <span>Contact Me</span>
                 <FiArrowRight className="w-4 h-4" />

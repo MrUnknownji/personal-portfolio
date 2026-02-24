@@ -60,26 +60,27 @@ const SocialInfoBox = ({
       }}
     >
       <div
-        className="relative w-80 p-5 rounded-2xl shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)]
-                   bg-[#0a0a0a] border border-white/10 overflow-hidden group"
+        className="relative w-80 p-5 rounded-none shadow-[8px_8px_0px_rgba(0,0,0,0.8)]
+                   bg-[var(--card)] border border-[var(--border)] overflow-hidden group"
       >
-        {/* Dynamic Gradient Glow */}
-        <div
-          className="absolute -top-20 -right-20 w-40 h-40 rounded-full opacity-20 blur-3xl pointer-events-none transition-colors duration-300"
-          style={{ background: socialLink.color }}
-        />
-
         <div className="relative z-10 space-y-5">
           {/* Header */}
           <div className="flex items-center gap-4">
             <div className="relative">
-              <div className="absolute -inset-0.5 rounded-xl opacity-50 blur-sm" style={{ background: socialLink.color }}></div>
+              <div
+                className="absolute inset-0"
+                style={{
+                  boxShadow: `4px 4px 0px ${socialLink.color}`,
+                  transform: "translate(4px, 4px)",
+                  zIndex: -1,
+                }}
+              />
               <Image
                 src={socialLink.profileImage || ""}
                 alt={socialLink.label}
                 width={52}
                 height={52}
-                className="relative rounded-xl object-cover border border-white/10 shadow-lg bg-neutral-900"
+                className="relative rounded-none object-cover border border-white/10 shadow-lg bg-[var(--background)]"
                 onError={(e) => {
                   e.currentTarget.src = `https://placehold.co/52x52/1a1a1a/f1f1f1?text=${socialLink.label.charAt(0)}`;
                 }}
@@ -90,15 +91,23 @@ const SocialInfoBox = ({
                 {socialLink.username}
               </h3>
               <div className="flex items-center gap-2 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: socialLink.color }} />
-                <p className="text-xs text-neutral-400 font-medium uppercase tracking-wider">{socialLink.label}</p>
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: socialLink.color }}
+                />
+                <p className="text-xs text-neutral-400 font-medium uppercase tracking-wider">
+                  {socialLink.label}
+                </p>
               </div>
             </div>
           </div>
 
           {/* Description */}
           <div className="relative pl-3 py-1">
-            <div className="absolute left-0 top-0 bottom-0 w-0.5 rounded-full opacity-50" style={{ background: socialLink.color }} />
+            <div
+              className="absolute left-0 top-0 bottom-0 w-0.5 rounded-full opacity-50"
+              style={{ background: socialLink.color }}
+            />
             <p className="text-sm text-neutral-300 leading-relaxed italic">
               {socialLink.description}
             </p>

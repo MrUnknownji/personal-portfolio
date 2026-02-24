@@ -75,7 +75,7 @@ export const useBotScene = ({
         mainLight.position.set(5, 10, 7);
 
         scene.add(mainLight);
-        const rimLight = new THREE.DirectionalLight(0x00ff99, 3.0);
+        const rimLight = new THREE.DirectionalLight(0xff9233, 3.0);
         rimLight.position.set(-5, 5, -8);
         scene.add(rimLight);
 
@@ -94,7 +94,7 @@ export const useBotScene = ({
 
         // Materials
         const matBody = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.7, metalness: 0.5 });
-        const matAccent = new THREE.MeshStandardMaterial({ color: 0x00ff99, emissive: 0x00ff99, emissiveIntensity: 0.8, roughness: 0.2 });
+        const matAccent = new THREE.MeshStandardMaterial({ color: 0xff9233, emissive: 0xff9233, emissiveIntensity: 0.8, roughness: 0.2 });
         const matScreen = new THREE.MeshStandardMaterial({
             color: 0x000000, roughness: 0.1, map: eyeTexture,
             emissive: 0xffffff, emissiveMap: eyeTexture, emissiveIntensity: 1.5

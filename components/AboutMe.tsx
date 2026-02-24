@@ -15,36 +15,40 @@ const AboutMe = () => {
   const gridRef = useRef<HTMLDivElement>(null);
   const pinContainerRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(() => {
-    if (!gridRef.current || !pinContainerRef.current) return;
+  useGSAP(
+    () => {
+      if (!gridRef.current || !pinContainerRef.current) return;
 
-    const mm = gsap.matchMedia();
+      const mm = gsap.matchMedia();
 
-    mm.add("(min-width: 1024px)", () => {
-      const pinImage = () => {
-        const gridHeight = gridRef.current?.offsetHeight || 0;
-        const imageContainerHeight = pinContainerRef.current?.offsetHeight || 0;
+      mm.add("(min-width: 1024px)", () => {
+        const pinImage = () => {
+          const gridHeight = gridRef.current?.offsetHeight || 0;
+          const imageContainerHeight =
+            pinContainerRef.current?.offsetHeight || 0;
 
-        if (gridHeight > imageContainerHeight) {
-          ScrollTrigger.create({
-            trigger: gridRef.current,
-            start: "top top+=120",
-            end: () => `+=${gridHeight - imageContainerHeight}`,
-            pin: pinContainerRef.current,
-            pinSpacing: false,
-            scrub: true,
-            invalidateOnRefresh: true,
-          });
-        }
+          if (gridHeight > imageContainerHeight) {
+            ScrollTrigger.create({
+              trigger: gridRef.current,
+              start: "top top+=120",
+              end: () => `+=${gridHeight - imageContainerHeight}`,
+              pin: pinContainerRef.current,
+              pinSpacing: false,
+              scrub: true,
+              invalidateOnRefresh: true,
+            });
+          }
+        };
+
+        pinImage();
+      });
+
+      return () => {
+        mm.revert();
       };
-
-      pinImage();
-    });
-
-    return () => {
-      mm.revert();
-    };
-  }, { scope: containerRef });
+    },
+    { scope: containerRef },
+  );
 
   return (
     <div className="">
@@ -53,23 +57,36 @@ const AboutMe = () => {
         ref={containerRef}
         className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 space-y-20 sm:space-y-24"
       >
-
-        <div className="text-center space-y-4 max-w-3xl mx-auto">
+        <div className="relative px-4 text-center">
           <Title
             title="About Me"
-            subtitle=""
+            showGlowBar={true}
+            subtitle={
+              <span className="italic block max-w-2xl mx-auto">
+                &quot;Any fool can write code that a computer can understand.{" "}
+                <br className="hidden sm:block" />
+                <span className="text-foreground tracking-wide font-medium">
+                  Good programmers write code that humans can understand.
+                </span>
+                &quot;
+                <span className="block text-sm text-primary mt-4 not-italic font-bold tracking-widest uppercase flex items-center justify-center gap-3">
+                  <span className="w-8 h-[1px] bg-primary/40"></span>
+                  Martin Fowler
+                  <span className="w-8 h-[1px] bg-primary/40"></span>
+                </span>
+              </span>
+            }
           />
-          <FadeIn direction="up" distance={30} delay={0.2}>
-            <div className="text-lg sm:text-xl text-muted-foreground/80 font-light italic leading-relaxed">
-              &quot;Any fool can write code that a computer can understand. <br className="hidden sm:block" />
-              <span className="text-primary/90 font-normal">Good programmers write code that humans can understand.</span>&quot;
-              <div className="text-sm text-muted-foreground mt-2 not-italic font-medium">- Martin Fowler</div>
-            </div>
-          </FadeIn>
         </div>
 
-        <div ref={gridRef} className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start relative">
-          <div ref={pinContainerRef} className="lg:col-span-5 h-fit z-10 will-change-transform">
+        <div
+          ref={gridRef}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start relative"
+        >
+          <div
+            ref={pinContainerRef}
+            className="lg:col-span-5 h-fit z-10 will-change-transform"
+          >
             <ImageSection />
           </div>
 

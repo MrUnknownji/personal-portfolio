@@ -69,7 +69,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
             gsap.to(window, {
               scrollTo: { y: `#${id}`, offsetY: 20, autoKill: false },
               duration: 1,
-              ease: "power2.inOut"
+              ease: "power2.inOut",
             });
           }
         },
@@ -152,7 +152,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
               "
               style={{
                 textShadow:
-                  "0 0 15px rgba(0, 255, 159, 0.3), 0 0 25px rgba(0, 209, 255, 0.2)",
+                  "0 0 15px hsl(var(--primary) / 0.3), 0 0 25px hsl(var(--primary) / 0.2)",
               }}
             >
               0%

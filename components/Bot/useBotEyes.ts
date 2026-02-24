@@ -40,7 +40,7 @@ export const useBotEyes = ({
                 ctx.fillStyle = '#000000';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                const neonColor = '#00ff99';
+                const neonColor = '#ff9233';
                 ctx.fillStyle = neonColor;
                 ctx.shadowColor = neonColor;
                 ctx.shadowBlur = 20;
@@ -65,7 +65,7 @@ export const useBotEyes = ({
                 ctx.fillStyle = '#000000';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                const neonColor = '#00ff99';
+                const neonColor = '#ff9233';
                 ctx.strokeStyle = neonColor;
                 ctx.lineWidth = 5;
                 ctx.lineCap = 'round';
@@ -100,7 +100,7 @@ export const useBotEyes = ({
                 ctx.fillStyle = '#000000';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                const neonColor = '#00ff99';
+                const neonColor = '#ff9233';
                 ctx.strokeStyle = neonColor;
                 ctx.lineWidth = 5;
                 ctx.lineCap = 'round';

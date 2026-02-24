@@ -19,7 +19,6 @@ const ContactForm: React.FC = () => {
     () => {
       if (!containerRef.current) return;
 
-
       gsap.fromTo(
         containerRef.current,
         {
@@ -36,10 +35,10 @@ const ContactForm: React.FC = () => {
             start: "top 75%",
             toggleActions: "play none none reverse",
           },
-        }
+        },
       );
     },
-    { scope: sectionRef }
+    { scope: sectionRef },
   );
 
   const handleFormSubmitSuccess = () => {
@@ -51,7 +50,11 @@ const ContactForm: React.FC = () => {
   };
 
   return (
-    <section ref={sectionRef} id="contact" className="relative py-24 md:py-32 overflow-hidden">
+    <section
+      ref={sectionRef}
+      id="contact"
+      className="relative py-24 md:py-32 overflow-hidden"
+    >
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Title
           title="Get in Touch"
@@ -63,11 +66,8 @@ const ContactForm: React.FC = () => {
         <div
           ref={containerRef}
           className="relative rounded-2xl overflow-hidden
-                     bg-card/95
-                     border border-border
-                     shadow-xl"
+                     bg-card/95 backdrop-blur-sm border border-border shadow-xl z-10"
         >
-
           <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
 
           <div className="relative px-6 py-10 sm:px-10 sm:py-12 md:p-16">

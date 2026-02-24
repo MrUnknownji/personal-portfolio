@@ -21,7 +21,12 @@ const ImageSection = () => {
 
   useGSAP(
     () => {
-      if (!containerRef.current || !imageWrapperRef.current || !imageRef.current) return;
+      if (
+        !containerRef.current ||
+        !imageWrapperRef.current ||
+        !imageRef.current
+      )
+        return;
 
       gsap.set(imageWrapperRef.current, { opacity: 0, scale: 0.95 });
       gsap.set(imageRef.current, { scale: ANIMATION_CONFIG.IMAGE_SCALE_START });
@@ -40,30 +45,32 @@ const ImageSection = () => {
         scale: 1,
         duration: ANIMATION_CONFIG.REVEAL_DURATION,
         ease: ANIMATION_CONFIG.REVEAL_EASE,
-      })
-        .to(imageRef.current, {
+      }).to(
+        imageRef.current,
+        {
           scale: 1,
           duration: ANIMATION_CONFIG.IMAGE_DURATION,
           ease: ANIMATION_CONFIG.IMAGE_EASE,
-        }, "<");
-
+        },
+        "<",
+      );
     },
-    { scope: containerRef }
+    { scope: containerRef },
   );
 
   return (
     <div
       ref={containerRef}
-      className="relative w-full max-w-md mx-auto lg:max-w-none"
+      className="relative w-full max-w-md mx-auto lg:max-w-none group cursor-pointer"
     >
       {/* Decorative Frame */}
-      <div className="absolute -inset-3 border border-primary/20 rounded-2xl z-0" />
-      <div className="absolute -inset-3 border border-white/5 rounded-2xl z-0 rotate-2 opacity-50" />
+      <div className="absolute -inset-3 border border-border rounded-xl z-0 transition-all duration-300 ease-out group-hover:border-primary/40 group-hover:scale-[1.03]" />
+      <div className="absolute -inset-3 border border-white/5 rounded-xl z-0 rotate-2 opacity-50 transition-all duration-300 ease-out group-hover:rotate-3 group-hover:opacity-100 group-hover:border-primary/20" />
 
       <div
         ref={imageWrapperRef}
-        className="relative aspect-square w-full rounded-xl overflow-hidden bg-[#0a0a0a] z-10
-                   shadow-2xl shadow-black/50 ring-1 ring-white/10 group"
+        className="relative aspect-square w-full rounded-lg overflow-hidden bg-card z-10
+                   ring-1 ring-border"
       >
         <Image
           ref={imageRef}
@@ -73,13 +80,13 @@ const ImageSection = () => {
           alt="Profile"
           fill
           sizes="(max-width: 1023px) 90vw, 30vw"
-          className="object-cover object-top grayscale transition-all duration-500 ease-out
-                     group-hover:grayscale-0 group-hover:scale-105"
+          className="object-cover object-top filter grayscale contrast-125 transition-all duration-500 ease-out
+                     group-hover:grayscale-0 group-hover:scale-105 group-hover:contrast-100"
           priority
         />
 
         {/* Overlay Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent opacity-60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80 group-hover:opacity-40 transition-opacity duration-300" />
       </div>
     </div>
   );

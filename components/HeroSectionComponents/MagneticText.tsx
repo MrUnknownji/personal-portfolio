@@ -55,7 +55,7 @@ export const MagneticText = ({
               x: moveX,
               y: moveY,
               scale: 1 + intensity * 0.1,
-              color: "#00ff9f",
+              color: "#ff9233",
               duration: 0.3,
               ease: "power2.out",
               overwrite: "auto",
@@ -94,7 +94,7 @@ export const MagneticText = ({
         el.removeEventListener("mouseleave", handleMouseLeave);
       };
     },
-    { scope: containerRef }
+    { scope: containerRef },
   );
 
   return (

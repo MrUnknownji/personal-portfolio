@@ -17,48 +17,57 @@ const ANIMATION_CONFIG = {
   },
 } as const;
 
-const SocialLinkItem = memo(({
-  link,
-  index,
-  isActive,
-  onMouseEnter,
-  onMouseLeave
-}: {
-  link: SocialLink,
-  index: number,
-  isActive: boolean,
-  onMouseEnter: (index: number) => void,
-  onMouseLeave: () => void
-}) => {
-  return (
-    <a
-      href={link.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group relative flex items-center justify-center w-12 h-12 rounded-full
+const SocialLinkItem = memo(
+  ({
+    link,
+    index,
+    isActive,
+    onMouseEnter,
+    onMouseLeave,
+  }: {
+    link: SocialLink;
+    index: number;
+    isActive: boolean;
+    onMouseEnter: (index: number) => void;
+    onMouseLeave: () => void;
+  }) => {
+    return (
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group relative flex items-center justify-center w-12 h-12 rounded-full
                  bg-white/[0.05] border border-white/[0.08]
                  transition-all duration-300 ease-out
                  hover:scale-110 hover:bg-white/[0.1]"
-      style={{
-        boxShadow: isActive ? `0 0 20px ${link.color}30` : 'none',
-        borderColor: isActive ? `${link.color}50` : ''
-      }}
-      onMouseEnter={() => onMouseEnter(index)}
-      onMouseLeave={onMouseLeave}
-    >
-      <div className="text-neutral-400 transition-colors duration-300 group-hover:text-white relative z-10"
-        style={{ color: isActive ? link.color : undefined }}>
-        {React.cloneElement(link.icon as React.ReactElement<{ className?: string }>, { className: "w-5 h-5" })}
-      </div>
+        style={{
+          boxShadow: isActive ? `0 0 20px ${link.color}30` : "none",
+          borderColor: isActive ? `${link.color}50` : "",
+        }}
+        onMouseEnter={() => onMouseEnter(index)}
+        onMouseLeave={onMouseLeave}
+      >
+        <div
+          className="text-neutral-400 transition-colors duration-300 group-hover:text-white relative z-10"
+          style={{ color: isActive ? link.color : undefined }}
+        >
+          {React.cloneElement(
+            link.icon as React.ReactElement<{ className?: string }>,
+            { className: "w-5 h-5" },
+          )}
+        </div>
 
-      {/* Hover Gradient Background */}
-      <div
-        className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        style={{ background: `radial-gradient(circle at center, ${link.color}15, transparent 70%)` }}
-      />
-    </a>
-  );
-});
+        {/* Hover Gradient Background */}
+        <div
+          className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{
+            background: `radial-gradient(circle at center, ${link.color}15, transparent 70%)`,
+          }}
+        />
+      </a>
+    );
+  },
+);
 
 SocialLinkItem.displayName = "SocialLinkItem";
 
@@ -100,22 +109,28 @@ const SocialLinks = () => {
     const initializeSocialLinks = async () => {
       setIsLoading(true);
       try {
-        const stats = cachedStats ?? await fetchSocialStats();
+        const stats = cachedStats ?? (await fetchSocialStats());
         cachedStats = stats;
         const links: SocialLink[] = [
           {
             icon: <FiGithub className="w-5 h-5" />,
             label: "GitHub",
             href: "https://github.com/MrUnknownji",
-            bgColor: "rgba(45, 186, 78, 0)",
-            hoverBgColor: "rgba(45, 186, 78, 0.1)",
+            bgColor: "rgba(255, 146, 51, 0)",
+            hoverBgColor: "rgba(255, 146, 51, 0.1)",
             iconColor: "rgb(209, 213, 219)",
-            hoverIconColor: "rgb(45, 186, 78)",
-            color: "rgb(45, 186, 78)",
+            hoverIconColor: "#ff9233",
+            color: "#ff9233",
             description: "Check out my open source projects",
             stats: [
-              { label: "Repos", value: stats.github?.public_repos?.toString() || "20+" },
-              { label: "Followers", value: stats.github?.followers?.toString() || "100+" },
+              {
+                label: "Repos",
+                value: stats.github?.public_repos?.toString() || "20+",
+              },
+              {
+                label: "Followers",
+                value: stats.github?.followers?.toString() || "100+",
+              },
               { label: "Stars", value: "50+" },
             ],
             profileImage: stats.github?.profileImage || "",
@@ -125,15 +140,21 @@ const SocialLinks = () => {
             icon: <FiLinkedin className="w-5 h-5" />,
             label: "LinkedIn",
             href: "https://linkedin.com/in/sandeep-kumar-sk1707",
-            bgColor: "rgba(0, 119, 181, 0)",
-            hoverBgColor: "rgba(0, 119, 181, 0.1)",
+            bgColor: "rgba(255, 146, 51, 0)",
+            hoverBgColor: "rgba(255, 146, 51, 0.1)",
             iconColor: "rgb(209, 213, 219)",
-            hoverIconColor: "rgb(0, 119, 181)",
-            color: "rgb(0, 119, 181)",
+            hoverIconColor: "#ff9233",
+            color: "#ff9233",
             description: "Connect with me professionally",
             stats: [
-              { label: "Connections", value: stats.linkedin?.connections || "500+" },
-              { label: "Posts", value: stats.linkedin?.posts?.toString() || "25+" },
+              {
+                label: "Connections",
+                value: stats.linkedin?.connections || "500+",
+              },
+              {
+                label: "Posts",
+                value: stats.linkedin?.posts?.toString() || "25+",
+              },
               { label: "Views", value: "1k+" },
             ],
             profileImage: stats.linkedin?.profileImage || "",
@@ -143,15 +164,21 @@ const SocialLinks = () => {
             icon: <FaXTwitter className="w-5 h-5" />,
             label: "X",
             href: "https://twitter.com/MrUnknownG786",
-            bgColor: "rgba(0, 0, 0, 0)",
-            hoverBgColor: "rgba(0, 0, 0, 0.1)",
+            bgColor: "rgba(255, 146, 51, 0)",
+            hoverBgColor: "rgba(255, 146, 51, 0.1)",
             iconColor: "rgb(209, 213, 219)",
-            hoverIconColor: "rgb(0, 0, 0)",
-            color: "rgb(0, 0, 0)",
+            hoverIconColor: "#ff9233",
+            color: "#ff9233",
             description: "Tech insights and updates",
             stats: [
-              { label: "Followers", value: stats.twitter?.followers?.toString() || "250+" },
-              { label: "Tweets", value: stats.twitter?.tweets?.toString() || "500+" },
+              {
+                label: "Followers",
+                value: stats.twitter?.followers?.toString() || "250+",
+              },
+              {
+                label: "Tweets",
+                value: stats.twitter?.tweets?.toString() || "500+",
+              },
               { label: "Likes", value: "1k+" },
             ],
             profileImage: stats.twitter?.profileImage || "",
@@ -193,33 +220,36 @@ const SocialLinks = () => {
 
   return (
     <div className="relative flex items-center gap-3">
-      {isLoading ? (
-        [1, 2, 3].map((_, i) => (
-          <div key={i} className="w-10 h-10 rounded-full bg-white/5 animate-pulse" />
-        ))
-      ) : (
-        socialLinks.map((link, index) => (
-          <SocialLinkItem
-            key={link.label}
-            link={link}
-            index={index}
-            isActive={activeLink === index}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          />
-        ))
-      )}
+      {isLoading
+        ? [1, 2, 3].map((_, i) => (
+            <div
+              key={i}
+              className="w-10 h-10 rounded-full bg-white/5 animate-pulse"
+            />
+          ))
+        : socialLinks.map((link, index) => (
+            <SocialLinkItem
+              key={link.label}
+              link={link}
+              index={index}
+              isActive={activeLink === index}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+            />
+          ))}
 
-      {activeLink !== null && socialLinks.length > 0 && socialLinks[activeLink] && (
-        <div className="pointer-events-none absolute left-0 top-full mt-4 z-50">
-          <SocialInfoBox
-            socialLink={socialLinks[activeLink]}
-            position={infoBoxPosition}
-            opacity={infoBoxOpacity}
-            onHeightChange={() => { }}
-          />
-        </div>
-      )}
+      {activeLink !== null &&
+        socialLinks.length > 0 &&
+        socialLinks[activeLink] && (
+          <div className="pointer-events-none absolute left-0 top-full mt-4 z-50">
+            <SocialInfoBox
+              socialLink={socialLinks[activeLink]}
+              position={infoBoxPosition}
+              opacity={infoBoxOpacity}
+              onHeightChange={() => {}}
+            />
+          </div>
+        )}
     </div>
   );
 };

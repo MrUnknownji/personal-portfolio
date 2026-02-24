@@ -7,7 +7,9 @@ import SmoothScroller from "@/components/SmoothScroller";
 import Template from "./template";
 import LazyBot from "@/components/LazyBot";
 import ClickSpark from "@/components/ui/ClickSpark";
+import DynamicCursor from "@/components/ui/DynamicCursor";
 import ResponsiveMeteors from "@/components/ui/ResponsiveMeteors";
+import GlobalBackground from "@/components/GlobalBackground";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -45,7 +47,8 @@ export default function RootLayout({
 }) {
   return (
     <html className={`${outfit.variable} ${poppins.variable}`} lang="en">
-      <body className="bg-background text-foreground" suppressHydrationWarning>
+      <body className="bg-transparent text-foreground" suppressHydrationWarning>
+        <GlobalBackground />
         <ResponsiveMeteors />
         <Header />
 
@@ -58,8 +61,8 @@ export default function RootLayout({
         <LazyBot />
 
         <ClickSpark />
+        <DynamicCursor />
       </body>
     </html>
   );
 }
-

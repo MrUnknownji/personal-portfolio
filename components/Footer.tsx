@@ -41,14 +41,18 @@ const Footer = () => {
 
   const scrollToElement = useCallback((elementId: string) => {
     if (!elementId) {
-      gsap.to(window, { scrollTo: { y: 0 }, duration: 1, ease: "power2.inOut" });
+      gsap.to(window, {
+        scrollTo: { y: 0 },
+        duration: 1,
+        ease: "power2.inOut",
+      });
       return;
     }
 
     gsap.to(window, {
       scrollTo: { y: `#${elementId}`, offsetY: 50 },
       duration: 1.2,
-      ease: "power2.inOut"
+      ease: "power2.inOut",
     });
   }, []);
 
@@ -75,7 +79,7 @@ const Footer = () => {
   );
 
   const shouldShowArrow = (linkHref: string) => {
-    const targetPath = linkHref.split('#')[0] || '/';
+    const targetPath = linkHref.split("#")[0] || "/";
     return targetPath !== pathname;
   };
 
@@ -120,13 +124,9 @@ const Footer = () => {
       ref={footerRef}
       className="w-full bg-background border-t border-border py-12 md:py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden"
     >
-
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[200px] bg-primary/5 blur-[100px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-primary/80"></div>
 
       <div className="container mx-auto relative z-10 flex flex-col items-center space-y-10">
-
-
         <nav className="animate-links">
           <ul className="flex flex-wrap justify-center items-center gap-x-8 gap-y-4">
             {QUICK_LINKS.map((link) => {
@@ -156,9 +156,10 @@ const Footer = () => {
           </ul>
         </nav>
 
-
         <div className="animate-built-with flex flex-col items-center gap-3">
-          <p className="text-xs font-medium text-muted-foreground/50 uppercase tracking-widest">Crafted with</p>
+          <p className="text-xs font-medium text-muted-foreground/50 uppercase tracking-widest">
+            Crafted with
+          </p>
           <div className="flex flex-wrap justify-center items-center gap-3">
             {BUILT_WITH.map((tech, index) => (
               <div key={tech} className="flex items-center">
@@ -166,13 +167,15 @@ const Footer = () => {
                   {tech}
                 </span>
                 {index < BUILT_WITH.length - 1 && (
-                  <span className="mx-3 w-1 h-1 bg-white/10 rounded-full" aria-hidden="true" />
+                  <span
+                    className="mx-3 w-1 h-1 bg-white/10 rounded-full"
+                    aria-hidden="true"
+                  />
                 )}
               </div>
             ))}
           </div>
         </div>
-
 
         <div className="animate-copyright text-center pt-4 border-t border-border w-full max-w-xs">
           <p className="text-xs text-muted-foreground/40">

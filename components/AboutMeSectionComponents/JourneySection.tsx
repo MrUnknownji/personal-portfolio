@@ -65,13 +65,16 @@ const JourneySection = () => {
           opacity: 1,
           duration: 0.4,
           ease: "back.out(1.7)",
-        })
-          .to(item, {
+        }).to(
+          item,
+          {
             opacity: 1,
             x: 0,
             duration: 0.6,
             ease: "power3.out",
-          }, "-=0.2");
+          },
+          "-=0.2",
+        );
       });
 
       gsap.fromTo(
@@ -87,7 +90,7 @@ const JourneySection = () => {
             end: "bottom 60%",
             scrub: 1,
           },
-        }
+        },
       );
 
       items.forEach((item) => {
@@ -101,36 +104,14 @@ const JourneySection = () => {
           card.style.setProperty("--mouse-x", `${x}px`);
           card.style.setProperty("--mouse-y", `${y}px`);
         });
-
-        item.addEventListener("mouseenter", () => {
-          gsap.to(card, {
-            y: -4,
-            scale: 1.01,
-            borderColor: "rgba(0, 255, 159, 0.3)",
-            boxShadow: "0 10px 30px -10px rgba(0, 255, 159, 0.15)",
-            duration: 0.2,
-            ease: "power2.out",
-          });
-        });
-
-        item.addEventListener("mouseleave", () => {
-          gsap.to(card, {
-            y: 0,
-            scale: 1,
-            borderColor: "rgba(255, 255, 255, 0.05)",
-            boxShadow: "none",
-            duration: 0.3,
-            ease: "power2.out",
-          });
-        });
       });
     },
-    { scope: containerRef }
+    { scope: containerRef },
   );
 
   return (
     <div ref={containerRef} className="relative py-10">
-      <h3 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-16 text-left tracking-tight">
+      <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-12 text-left pb-2">
         My Journey
       </h3>
 
@@ -149,15 +130,18 @@ const JourneySection = () => {
 
         <div className="flex flex-col gap-12">
           {journeyData.map((item, index) => (
-            <div key={index} className="journey-item relative pl-8 md:pl-12 group">
+            <div
+              key={index}
+              className="journey-item relative pl-8 md:pl-12 group"
+            >
               {/* Dot */}
-              <div className="journey-dot absolute left-0 md:left-2 top-6 w-6 h-6 rounded-full border-2 border-primary bg-[#0a0a0a] z-10 flex items-center justify-center shadow-[0_0_15px_rgba(0,255,159,0.3)]">
+              <div className="journey-dot absolute left-0 md:left-2 top-6 w-6 h-6 rounded-full border-2 border-primary bg-[#0a0a0a] z-10 flex items-center justify-center shadow-none">
                 <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
               </div>
 
               {/* Card */}
               <div
-                className="journey-card relative bg-white/[0.04] border border-white/[0.05] rounded-2xl p-6 md:p-8 transition-colors duration-300 overflow-hidden"
+                className="journey-card relative bg-card border border-border/50 rounded-xl p-6 md:p-8 transition-all duration-300 overflow-hidden transform-gpu group-hover:-translate-y-1 group-hover:border-primary/40 group-hover:bg-accent/10 z-10"
                 style={{
                   // @ts-ignore
                   "--mouse-x": "0px",
@@ -168,20 +152,21 @@ const JourneySection = () => {
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                   style={{
-                    background: "radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(0, 255, 159, 0.06), transparent 40%)"
+                    background:
+                      "radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), hsl(var(--primary) / 0.06), transparent 40%)",
                   }}
                 />
 
                 <div className="relative z-10">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
-                    <h4 className="text-xl font-semibold text-white tracking-wide group-hover:text-primary transition-colors duration-300">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-5">
+                    <h4 className="text-xl md:text-2xl font-bold text-foreground tracking-wide group-hover:text-primary transition-colors duration-300">
                       {item.title}
                     </h4>
-                    <span className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-mono font-medium rounded-full bg-primary/10 text-primary border border-primary/20 shadow-[0_0_10px_rgba(0,255,159,0.1)]">
+                    <span className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-mono font-bold rounded-lg bg-primary/5 text-primary border border-primary/20 group-hover:bg-primary/10 transition-all duration-300">
                       {item.year}
                     </span>
                   </div>
-                  <p className="text-neutral-400 text-base leading-relaxed group-hover:text-neutral-300 transition-colors duration-300">
+                  <p className="text-muted-foreground text-base md:text-lg leading-relaxed group-hover:text-foreground/90 transition-colors duration-300 font-light">
                     {item.description}
                   </p>
                 </div>

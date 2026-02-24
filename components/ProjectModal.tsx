@@ -183,7 +183,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
     >
       <div
         ref={overlayRef}
-        className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 transition-colors"
+        className="fixed inset-0 bg-background/95 z-40 transition-colors"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -191,10 +191,10 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       <div
         ref={contentRef}
         className="relative z-50 flex flex-col transform-gpu
-                     bg-card/95 backdrop-blur-xl border border-border/40
-                     h-[100dvh] w-full
-                     md:max-w-6xl md:h-[85vh] md:max-h-[800px]
-                     md:rounded-3xl overflow-hidden"
+                     bg-card border-x border-b border-t-[3px] border-t-primary border-x-border border-b-border
+                     h-[100dvh] w-full shadow-2xl
+                     md:max-w-6xl md:h-[85vh] md:max-h-[850px]
+                     md:rounded-xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="absolute inset-0 pointer-events-none" />
@@ -203,9 +203,9 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
           onClick={onClose}
           aria-label="Close project details"
           className="group absolute top-4 right-4 p-2 rounded-full z-[51]
-                     bg-background/20 text-foreground/70 border border-border
-                     hover:bg-foreground/10 hover:text-foreground
-                     transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                     bg-background/50 text-foreground/70 border border-border
+                     hover:bg-primary/10 hover:text-primary hover:border-primary/40
+                     transition-all duration-200 focus:outline-none"
         >
           <FiX className="w-5 h-5 transition-transform duration-300 group-hover:rotate-90" />
         </button>
@@ -214,7 +214,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
           className="flex-grow min-h-0 relative z-10
                      overflow-y-auto md:overflow-y-hidden
                      overscroll-behavior-y-contain
-                     scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+                     scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent"
           style={{ WebkitOverflowScrolling: "touch" }}
           data-lenis-prevent
         >
@@ -225,26 +225,26 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
             {/* Left Column */}
             <div
               className="w-full md:w-[45%] flex flex-col space-y-6 flex-shrink-0
-                         md:h-full md:overflow-y-auto md:scrollbar-thin md:scrollbar-thumb-white/10
+                         md:h-full md:overflow-y-auto md:scrollbar-thin md:scrollbar-thumb-border
                          md:scrollbar-track-transparent md:pr-4"
               data-lenis-prevent
             >
               <div
                 ref={imageRef}
-                className="relative w-full aspect-video rounded-xl overflow-hidden border border-border/50 flex-shrink-0 group"
+                className="relative w-full aspect-[16/9] rounded-xl overflow-hidden border border-border flex-shrink-0 group bg-card"
               >
                 <Image
                   src={project.image}
                   alt={project.title}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                  className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                   sizes="(max-width: 768px) 90vw, 45vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-80 pointer-events-none" />
               </div>
 
               <div className="flex-shrink-0 space-y-4 relative">
-                <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-primary/80 rounded-full" />
+                <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-primary rounded-full" />
 
                 <div className="pl-6 space-y-3">
                   <h2
@@ -274,7 +274,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
             >
               <div
                 className="space-y-4 flex-grow min-h-0
-                           md:overflow-y-auto md:scrollbar-thin md:scrollbar-thumb-white/10
+                           md:overflow-y-auto md:scrollbar-thin md:scrollbar-thumb-border
                            md:scrollbar-track-transparent md:pr-4"
                 data-lenis-prevent
               >
@@ -298,12 +298,12 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                       href={project.demoLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-dark font-bold overflow-hidden transition-all duration-300 active:scale-95 hover:bg-primary/90"
+                      className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-dark font-bold overflow-hidden transition-transform duration-200 active:scale-95 hover:-translate-y-0.5"
                     >
-                      <span className="relative z-20 flex items-center gap-2.5">
+                      <span className="relative z-20 flex items-center gap-2">
                         <FiExternalLink className="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                         <span>Live Demo</span>
-                        <FiChevronRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                        <FiChevronRight className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1" />
                       </span>
                     </Link>
                   )}
@@ -312,12 +312,12 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                       href={project.githubLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-secondary/50 text-foreground border border-border font-medium overflow-hidden transition-all duration-300 hover:bg-secondary/80 hover:border-border/80 hover:shadow-lg active:scale-95"
+                      className="group relative inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-secondary/50 text-foreground border border-border font-medium overflow-hidden transition-all duration-200 hover:bg-primary/10 hover:text-primary hover:border-primary/40 active:scale-95"
                     >
-                      <span className="relative z-10 flex items-center gap-2.5">
-                        <FiGithub className="w-5 h-5 transition-transform duration-300 group-hover:rotate-12" />
+                      <span className="relative z-10 flex items-center gap-2">
+                        <FiGithub className="w-5 h-5 transition-transform duration-200 group-hover:rotate-12" />
                         <span>Source Code</span>
-                        <FiChevronRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1 opacity-0 group-hover:opacity-100 -ml-2 group-hover:ml-0" />
+                        <FiChevronRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1 opacity-0 group-hover:opacity-100 -ml-2 group-hover:ml-0" />
                       </span>
                     </Link>
                   )}
