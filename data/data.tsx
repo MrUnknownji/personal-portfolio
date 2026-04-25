@@ -1,6 +1,7 @@
 import { Project } from "@/types/Project";
 
 export const projects: Project[] = [
+  //AudioVibes
   {
     id: 1,
     title: "AudioVibes",
@@ -66,6 +67,7 @@ export const projects: Project[] = [
       },
     ],
   },
+  //Cryptopedia
   {
     id: 2,
     title: "CryptoPedia",
@@ -121,6 +123,7 @@ export const projects: Project[] = [
       },
     ],
   },
+  //ShopNest
   {
     id: 3,
     title: "ShopNest",
@@ -181,6 +184,7 @@ export const projects: Project[] = [
       },
     ],
   },
+  //SynthTech
   {
     id: 4,
     title: "SynthTech",
@@ -241,6 +245,7 @@ export const projects: Project[] = [
       },
     ],
   },
+  //VideoHub
   {
     id: 5,
     title: "VideoHub",
@@ -336,6 +341,7 @@ export const projects: Project[] = [
       },
     ],
   },
+  //SpaceX Website Clone
   {
     id: 6,
     title: "SpaceX Website Clone",
@@ -388,6 +394,414 @@ export const projects: Project[] = [
         type: "image",
         src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062484/MobHome_xoutxh.png",
         alt: "SpaceX Clone Mobile View",
+      },
+    ],
+  },
+  //AuraEdit(Open Source local image modifier)
+  {
+    id: 7,
+    title: "Aura Edit",
+    shortDescription: "An open-source browser-based image editor with batch processing capabilities.",
+    longDescription: "Aura Edit is a high-performance image editing tool that runs entirely in your browser. It allows users to perform complex modifications, apply filters, and process images in batches without ever uploading files to a server, ensuring maximum privacy and speed.",
+    image: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116565/AuraEdit-ImageUpload-Web-Light.png",
+    technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Canvas API", "Framer Motion"],
+    features: [
+      "Local-first image processing",
+      "Batch image editing and resizing",
+      "Real-time filters and adjustments",
+      "High-quality image exports",
+      "Privacy-focused (no server uploads)",
+      "Modern UI with Dark/Light mode support",
+    ],
+    demoLink: "https://image-modifier-jet.vercel.app/",
+    githubLink: "https://github.com/MrUnknownji/image-modifier",
+    category: "Web App",
+    gallery: [
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116715/AuraEdit-HomePage-Bottom-Mobile-Dark.png",
+        alt: "Aura Edit Mobile Home Page (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116714/AuraEdit-ImageSettings-Mobile-Dark-2.png",
+        alt: "Aura Edit Mobile Image Settings (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116711/AuraEdit-ImagePreview-Mobile-Dark.png",
+        alt: "Aura Edit Mobile Image Preview (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116710/AuraEdit-ImageUpload-Mobile-Dark.png",
+        alt: "Aura Edit Mobile Image Upload (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116709/AuraEdit-ImageSettings-Mobile-Light.png",
+        alt: "Aura Edit Mobile Image Settings (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116687/AuraEdit-ImageUpload-Mobile-Light.png",
+        alt: "Aura Edit Mobile Image Upload (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116686/AuraEdit-ImageUpload-Mobile-Light-2.png",
+        alt: "Aura Edit Mobile Upload Screen",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116664/AuraEdit-ImageSettings-Web-Light-2.png",
+        alt: "Aura Edit Web Settings (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116647/AuraEdit-ImageSettings-Web-Dark.png",
+        alt: "Aura Edit Web Settings (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116645/AuraEdit-ImageSettings-Web-Dark-2.png",
+        alt: "Aura Edit Web Editor View (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116612/AuraEdit-BatchImage-Web-Dark.png",
+        alt: "Aura Edit Batch Image Processing (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116609/AuraEdit-ImageUpload-Web-Dark.png",
+        alt: "Aura Edit Web Image Upload (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116571/AuraEdit-ImageSettings-Web-Light-2.png",
+        alt: "Aura Edit Web Image Settings",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116568/AuraEdit-ImageSettings-Web-Light.png",
+        alt: "Aura Edit Web Image Editor (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116565/AuraEdit-ImageUpload-Web-Light.png",
+        alt: "Aura Edit Web Image Upload (Light)",
+      },
+    ],
+  },
+  //BidStrike (AI Powered Auction Platform)
+  {
+    id: 9,
+    title: "BidStrike",
+    shortDescription: "A real-time AI-powered auction platform for seamless bidding experiences.",
+    longDescription: "BidStrike is a sophisticated auction platform designed for speed and reliability. It features real-time bidding updates, AI-driven price suggestions, and a comprehensive dashboard for tracking active auctions and notifications.",
+    image: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855178/Bid-Strike-Light-Home.png",
+    technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Pusher", "Prisma", "PostgreSQL"],
+    features: [
+      "Real-time bid updates via WebSockets",
+      "AI-powered auction insights and suggestions",
+      "Secure payment and escrow system",
+      "User-friendly bidder and auctioneer dashboards",
+      "Mobile-responsive interface",
+      "Detailed auction management and tracking",
+    ],
+    demoLink: "https://bid-strike.vercel.app/",
+    githubLink: "https://github.com/MrUnknownji/bid-strike",
+    category: "Web App",
+    gallery: [
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855185/Bid-Strike-Dark-Web-Liked-Auctions-Notifications.png",
+        alt: "BidStrike Notifications and Liked Auctions",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855185/Bid-Strike-Dark-Web-FAQ.png",
+        alt: "BidStrike FAQ Page (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855185/Bid-Strike-Dark-Mobile-Dashboard.png",
+        alt: "BidStrike Mobile Dashboard",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855184/Bid-Strike-Dark-Web-Contact.png",
+        alt: "BidStrike Contact Page (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855183/Bid-Strike-Dark-Web-Login.png",
+        alt: "BidStrike Login Page (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855179/Bid-Strike-Dark-Web-Auctions.png",
+        alt: "BidStrike Auctions List (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855179/Bid-Strike-Dark-Web-Sign-Up.png",
+        alt: "BidStrike Sign Up Page (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855178/Bid-Strike-Light-Home.png",
+        alt: "BidStrike Home Page (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855178/Bid-Strike-Dark-Web-Home.png",
+        alt: "BidStrike Home Page (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855178/Bid-Strike-Dark-Web-Create-Auction-1.png",
+        alt: "BidStrike Create Auction Step 1",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855177/Bid-Strike-Dark-Web-Auction-Info.png",
+        alt: "BidStrike Auction Details View",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855177/Bid-Strike-Dark-Web-My-Auctions.png",
+        alt: "BidStrike User Auctions Page",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855177/Bid-Strike-Dark-Web-Dashboard.png",
+        alt: "BidStrike Web Dashboard",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855176/Bid-Strike-Dark-Web-Create-Auction.png",
+        alt: "BidStrike Create Auction Page",
+      },
+    ],
+  },
+  //Youtube Content OS(AI Powered Youtube Content Generation Platform)
+  {
+    id: 8,
+    title: "Youtube Content OS",
+    shortDescription: "An all-in-one AI workspace for YouTube creators to manage scripts, thumbnails, and metadata.",
+    longDescription: "Youtube Content OS streamlines the content creation workflow by integrating AI into every step. From generating scripts and meta titles to creating thumbnails and managing export tasks, it's the ultimate tool for modern creators to scale their channels.",
+    image: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123509/Content-OS-Web-Light-Home.png",
+    technologies: ["Next.js", "TypeScript", "Tailwind CSS", "OpenAI/Gemini API", "Drizzle ORM", "Supabase"],
+    features: [
+      "AI-powered scriptwriting and hooks",
+      "Automated thumbnail generation and ideation",
+      "Metadata optimization for YouTube SEO",
+      "Creator-focused project management dashboard",
+      "Content export to various platforms",
+      "Mobile-friendly design for on-the-go creation",
+    ],
+    demoLink: "https://youtube-content-os-one.vercel.app/",
+    githubLink: "https://github.com/MrUnknownji/youtube-content-os",
+    category: "Web App",
+    gallery: [
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123605/Content-OS-Mobile-Dark-Sidebar.png",
+        alt: "Youtube Content OS Mobile Sidebar (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123603/Content-OS-Mobile-ImageGen.png",
+        alt: "Youtube Content OS Mobile Image Generation",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123601/Content-OS-Mobile-Dark-Settings.png",
+        alt: "Youtube Content OS Mobile Settings (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123600/Content-OS-Web-Dark-Pinned.png",
+        alt: "Youtube Content OS Web Pinned Projects (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123597/Content-OS-Web-Dark-ImageGen.png",
+        alt: "Youtube Content OS Web Image Generation (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123595/Content-OS-Web-Dark-Profile.png",
+        alt: "Youtube Content OS Web User Profile (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123592/Content-OS-Web-Light-ImageGen.png",
+        alt: "Youtube Content OS Web Image Generation (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123590/Content-OS-Web-Light-Export.png",
+        alt: "Youtube Content OS Web Export Section (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123588/Content-OS-Web-Light-Shorts.png",
+        alt: "Youtube Content OS Web Shorts Generator (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123586/Content-OS-Web-Light-Meta-Thumbnail.png",
+        alt: "Youtube Content OS Web Thumbnail Meta",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123583/Content-OS-Web-Light-Meta-Title.png",
+        alt: "Youtube Content OS Web Title Meta",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123581/Content-OS-Web-Light-Visuals.png",
+        alt: "Youtube Content OS Web Visuals Management",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123578/Content-OS-Web-Light-Scripts.png",
+        alt: "Youtube Content OS Web Script Editor",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123509/Content-OS-Web-Light-Home.png",
+        alt: "Youtube Content OS Web Home (Light)",
+      },
+    ],
+  },
+  //OmniMart(AI Powered E-Commerce Platform)
+  {
+    id: 10,
+    title: "OmniMart",
+    shortDescription: "A premium AI-enhanced e-commerce platform with a sophisticated editorial design.",
+    longDescription: "OmniMart redefines the online shopping experience with a focus on high-end aesthetics and AI-driven personalization. It features a robust admin panel, seamless checkout flow, and a dynamic search system designed for luxury retail.",
+    image: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124896/OmniMart-Light-Web-Home.png",
+    technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Redux", "Stripe", "AI Personalization"],
+    features: [
+      "Boutique editorial UI/UX design",
+      "AI-powered product discovery and recommendations",
+      "Comprehensive admin management dashboard",
+      "Secure cart and multi-step checkout flow",
+      "Responsive and fluid motion animations",
+      "Advanced inventory and customer management",
+    ],
+    demoLink: "https://omni-mart-orpin.vercel.app/",
+    githubLink: "https://github.com/MrUnknownji/omni-mart",
+    category: "Web App",
+    gallery: [
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124907/OmniMart-Dark-Mobile-Checkout.png",
+        alt: "OmniMart Mobile Checkout (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124906/OmniMart-Dark-Mobile-Home.png",
+        alt: "OmniMart Mobile Home (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124896/OmniMart-Light-Web-Home.png",
+        alt: "OmniMart Web Home (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124884/OmniMart-Dark-Web-Admin-Customers.png",
+        alt: "OmniMart Admin Customer Management",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124882/OmniMart-Dark-Web-Admin-Orders.png",
+        alt: "OmniMart Admin Order Management",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124880/OmniMart-Dark-Web-Admin-Products.png",
+        alt: "OmniMart Admin Product Management",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124878/OmniMart-Dark-Web-Admin-Dashboard.png",
+        alt: "OmniMart Admin Dashboard",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124876/OmniMart-Dark-Web-Product2.png",
+        alt: "OmniMart Product Detail View",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124875/OmniMart-Dark-Web-Product1.png",
+        alt: "OmniMart Product Listing",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124871/OmniMart-Dark-Web-Checkout.png",
+        alt: "OmniMart Web Checkout (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124869/OmniMart-Dark-Web-Cart.png",
+        alt: "OmniMart Shopping Cart (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124867/OmniMart-Dark-Web-Support2.png",
+        alt: "OmniMart Support Chat (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124866/OmniMart-Dark-Web-Support1.png",
+        alt: "OmniMart Help Center (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124864/OmniMart-Dark-Web-Profile.png",
+        alt: "OmniMart User Profile (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124862/OmniMart-Dark-Web-Home6.png",
+        alt: "OmniMart Landing Page Section 6",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124860/OmniMart-Dark-Web-Home5.png",
+        alt: "OmniMart Landing Page Section 5",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124859/OmniMart-Dark-Web-Home4.png",
+        alt: "OmniMart Landing Page Section 4",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124856/OmniMart-Dark-Web-Home3.png",
+        alt: "OmniMart Landing Page Section 3",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124851/OmniMart-Dark-Web-Home2.png",
+        alt: "OmniMart Landing Page Section 2",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124848/OmniMart-Dark-Web-Home1.png",
+        alt: "OmniMart Landing Page Section 1",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124841/OmniMart-Dark-Web-SignUp.png",
+        alt: "OmniMart Sign Up Page (Dark)",
       },
     ],
   },

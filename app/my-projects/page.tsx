@@ -3,8 +3,23 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import ProjectCard from "@/components/ProjectCard";
 import ProjectModal from "@/components/ProjectModal";
 import Title from "@/components/ui/Title";
-import { projects } from "@/data/data";
+import { projects as allProjects } from "@/data/data";
 import { Project } from "@/types/Project";
+
+const DISPLAY_ORDER = [9, 8, 7, 1, 10];
+const TITLE_OVERRIDES: Record<number, string> = {
+  8: "YouTube Content OS",
+  7: "AuraEdit",
+  10: "Omni Mart",
+};
+
+const projects = DISPLAY_ORDER.map((id) => {
+  const project = allProjects.find((p) => p.id === id);
+  if (project && TITLE_OVERRIDES[id]) {
+    return { ...project, title: TITLE_OVERRIDES[id] };
+  }
+  return project;
+}).filter(Boolean) as Project[];
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
