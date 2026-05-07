@@ -54,15 +54,15 @@ export function getFallbackData<T extends keyof SocialStats>(
   return data as NonNullable<SocialStats[T]>;
 }
 
-// Cache duration in seconds (1 hour)
 export const CACHE_DURATION = 60 * 60;
+const CACHE_DURATION_MS = CACHE_DURATION * 1000;
 
 // Helper function to create cache headers
 export function createCacheHeaders(): Headers {
   const headers = new Headers();
   headers.set(
     "Cache-Control",
-    `s-maxage=${CACHE_DURATION}, stale-while-revalidate`,
+    `s-maxage=${CACHE_DURATION}, stale-while-revalidate=${CACHE_DURATION}`,
   );
   return headers;
 }
@@ -75,7 +75,7 @@ export async function fetchSocialStats(): Promise<SocialStats> {
   const currentTime = Date.now();
 
   // Return cached data if it's still fresh
-  if (cachedStats && currentTime - lastFetchTime < CACHE_DURATION) {
+  if (cachedStats && currentTime - lastFetchTime < CACHE_DURATION_MS) {
     return cachedStats;
   }
 
@@ -99,8 +99,6 @@ export async function fetchSocialStats(): Promise<SocialStats> {
 
     return cachedStats;
   } catch (error) {
-    console.error("Error fetching social stats:", error);
-
     // Return last cached data if available, otherwise fallback data
     return cachedStats || FALLBACK_DATA;
   }

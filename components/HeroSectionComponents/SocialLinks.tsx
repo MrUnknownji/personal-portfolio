@@ -28,7 +28,10 @@ const SocialLinkItem = memo(
     link: SocialLink;
     index: number;
     isActive: boolean;
-    onMouseEnter: (index: number) => void;
+    onMouseEnter: (
+      event: React.MouseEvent<HTMLAnchorElement>,
+      index: number,
+    ) => void;
     onMouseLeave: () => void;
   }) => {
     return (
@@ -44,8 +47,9 @@ const SocialLinkItem = memo(
           borderColor: isActive ? link.color : "",
           backgroundColor: isActive ? `${link.color}15` : "",
         }}
-        onMouseEnter={() => onMouseEnter(index)}
+        onMouseEnter={(event) => onMouseEnter(event, index)}
         onMouseLeave={onMouseLeave}
+        aria-label={`Open ${link.label}`}
       >
         {/* Inner abstract glow element */}
         <div
@@ -90,7 +94,7 @@ const SocialLinks = () => {
     if (activeLink === null) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      mousePositionRef.current = { x: e.pageX, y: e.pageY };
+      mousePositionRef.current = { x: e.clientX, y: e.clientY };
       if (!rafIdRef.current) {
         rafIdRef.current = requestAnimationFrame(updateInfoBoxPosition);
       }
@@ -184,8 +188,8 @@ const SocialLinks = () => {
           },
         ];
         setSocialLinks(links);
-      } catch (error) {
-        console.error("Error loading social links:", error);
+      } catch {
+        setSocialLinks([]);
       } finally {
         setIsLoading(false);
       }
@@ -193,19 +197,24 @@ const SocialLinks = () => {
     initializeSocialLinks();
   }, []);
 
-  const handleMouseEnter = useCallback((index: number) => {
-    if (hideTimeoutRef.current) {
-      clearTimeout(hideTimeoutRef.current);
-      hideTimeoutRef.current = null;
-    }
-    setActiveLink(index);
-    if (animationRef.current) animationRef.current.kill();
-    if (mousePositionRef.current.x === 0 && mousePositionRef.current.y === 0) {
-    } else {
+  const handleMouseEnter = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>, index: number) => {
+      mousePositionRef.current = {
+        x: event.clientX,
+        y: event.clientY,
+      };
       setInfoBoxPosition(mousePositionRef.current);
-    }
-    setInfoBoxOpacity(1);
-  }, []);
+
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+        hideTimeoutRef.current = null;
+      }
+      setActiveLink(index);
+      if (animationRef.current) animationRef.current.kill();
+      setInfoBoxOpacity(1);
+    },
+    [],
+  );
 
   const handleMouseLeave = useCallback(() => {
     if (animationRef.current) animationRef.current.kill();
@@ -214,6 +223,15 @@ const SocialLinks = () => {
       setActiveLink(null);
       hideTimeoutRef.current = null;
     }, ANIMATION_CONFIG.INFO_BOX.HIDE.DURATION * 1000);
+  }, []);
+
+  useEffect(() => {
+    const animation = animationRef.current;
+    return () => {
+      if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
+      animation?.kill();
+    };
   }, []);
 
   return (

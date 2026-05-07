@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRef, useState, useCallback, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { FiMenu, FiX, FiArrowRight } from "react-icons/fi";
@@ -31,22 +30,15 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
-    const loadingTimer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1200);
-    return () => clearTimeout(loadingTimer);
-  }, []);
-
-  useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -75,7 +67,7 @@ const Header = () => {
         duration: 0.2,
       });
     }
-  }, [isScrolled, isMobileMenuOpen]);
+  }, { dependencies: [isScrolled, isMobileMenuOpen] });
 
   useGSAP(() => {
     if (
@@ -99,7 +91,7 @@ const Header = () => {
     } else if (hoverBgRef.current) {
       gsap.to(hoverBgRef.current, { opacity: 0, duration: 0.2 });
     }
-  }, [hoveredIndex]);
+  }, { dependencies: [hoveredIndex] });
   useGSAP(() => {
     if (mobileMenuRef.current) {
       if (isMobileMenuOpen) {
@@ -131,7 +123,7 @@ const Header = () => {
         });
       }
     }
-  }, [isMobileMenuOpen]);
+  }, { dependencies: [isMobileMenuOpen] });
 
   const handleNavClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
@@ -194,10 +186,7 @@ const Header = () => {
 
   return (
     <header
-      className={cn(
-        "fixed top-0 inset-x-0 z-50 pt-4 transition-opacity duration-300",
-        isLoading && "header-loading",
-      )}
+      className="fixed top-0 inset-x-0 z-50 pt-4 transition-opacity duration-300"
     >
       <nav
         ref={desktopNavRef}
@@ -314,6 +303,8 @@ const Header = () => {
             }
             className="p-2 rounded-lg text-foreground hover:bg-foreground/5 transition-colors"
             aria-label="Toggle menu"
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-navigation-menu"
           >
             {isMobileMenuOpen ? (
               <FiX className="w-6 h-6" />
@@ -324,6 +315,7 @@ const Header = () => {
         </div>
 
         <div
+          id="mobile-navigation-menu"
           ref={mobileMenuRef}
           className="overflow-hidden"
           style={{ height: 0, opacity: 0 }}

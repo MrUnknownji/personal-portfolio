@@ -77,12 +77,11 @@ const ImageSection = () => {
           src={
             "https://res.cloudinary.com/dfwgprzxo/image/upload/v1767790586/sandeep_bgqjpb.png"
           }
-          alt="Profile"
+          alt="Portrait of Sandeep Kumar"
           fill
           sizes="(max-width: 1023px) 90vw, 30vw"
           className="object-cover object-top filter grayscale contrast-125 transition-all duration-500 ease-out
                      group-hover:grayscale-0 group-hover:scale-105 group-hover:contrast-100"
-          priority
         />
 
         {/* Overlay Gradient */}

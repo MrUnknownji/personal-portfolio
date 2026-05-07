@@ -78,6 +78,14 @@ export const Title = () => {
   }, [currentTheme, isOnCooldown]);
 
   useEffect(() => {
+    return () => {
+      if (cooldownTimerRef.current) {
+        clearTimeout(cooldownTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     // Only auto-play if on a touch device (no hover capability)
     const isTouchDevice = window.matchMedia(
       "(hover: none) and (pointer: coarse)",

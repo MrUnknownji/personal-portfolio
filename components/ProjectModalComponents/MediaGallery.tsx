@@ -34,12 +34,6 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
   const previewContentRef = useRef<HTMLDivElement>(null);
   const thumbnailStripRef = useRef<HTMLDivElement>(null);
 
-  const openPreview = (index: number) => {
-    setSelectedIndex(index);
-    setIsVideoError(false);
-    setIsPreviewOpen(true);
-  };
-
   const handleNext = useCallback(() => {
     setSelectedIndex((prev) => (prev + 1) % items.length);
     setIsVideoError(false);
@@ -50,34 +44,13 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
     setIsVideoError(false);
   }, [items.length]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isPreviewOpen) return;
-      if (e.key === "ArrowRight") handleNext();
-      if (e.key === "ArrowLeft") handlePrev();
-      if (e.key === "Escape") handleClosePreviewAnimation();
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPreviewOpen, handleNext, handlePrev]);
-
-  useEffect(() => {
-    if (isPreviewOpen && thumbnailStripRef.current && selectedIndex >= 0) {
-      const activeThumb = thumbnailStripRef.current.children[
-        selectedIndex
-      ] as HTMLElement;
-      if (activeThumb) {
-        activeThumb.scrollIntoView({
-          behavior: "smooth",
-          block: "nearest",
-          inline: "center",
-        });
-      }
-    }
-  }, [selectedIndex, isPreviewOpen]);
-
   const handleClosePreviewAnimation = useCallback(() => {
+    if (!previewContentRef.current || !previewOverlayRef.current) {
+      setIsPreviewOpen(false);
+      setSelectedIndex(-1);
+      return;
+    }
+
     const tl = gsap.timeline({
       onComplete: () => {
         setIsPreviewOpen(false);
@@ -100,6 +73,39 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
       "<",
     );
   }, []);
+
+  const openPreview = (index: number) => {
+    setSelectedIndex(index);
+    setIsVideoError(false);
+    setIsPreviewOpen(true);
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isPreviewOpen) return;
+      if (e.key === "ArrowRight") handleNext();
+      if (e.key === "ArrowLeft") handlePrev();
+      if (e.key === "Escape") handleClosePreviewAnimation();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isPreviewOpen, handleNext, handlePrev, handleClosePreviewAnimation]);
+
+  useEffect(() => {
+    if (isPreviewOpen && thumbnailStripRef.current && selectedIndex >= 0) {
+      const activeThumb = thumbnailStripRef.current.children[
+        selectedIndex
+      ] as HTMLElement;
+      if (activeThumb) {
+        activeThumb.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    }
+  }, [selectedIndex, isPreviewOpen]);
 
   useEffect(() => {
     if (isPreviewOpen) {
@@ -229,6 +235,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
                   handlePrev();
                 }}
                 className="absolute left-4 z-30 p-3 rounded-full bg-background/80 hover:bg-card text-foreground/70 hover:text-foreground border border-border transition-all duration-300 hover:scale-110 shadow-md"
+                aria-label="Previous media item"
               >
                 <FiChevronLeft className="w-6 h-6" />
               </button>
@@ -238,6 +245,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
                   handleNext();
                 }}
                 className="absolute right-4 z-30 p-3 rounded-full bg-background/80 hover:bg-card text-foreground/70 hover:text-foreground border border-border transition-all duration-300 hover:scale-110 shadow-md"
+                aria-label="Next media item"
               >
                 <FiChevronRight className="w-6 h-6" />
               </button>
@@ -302,6 +310,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
                       e.stopPropagation();
                       setSelectedIndex(index);
                     }}
+                    aria-label={`Open thumbnail ${index + 1}`}
                     className={`
                       relative flex-shrink-0 w-20 h-14 md:w-24 md:h-16 rounded-lg overflow-hidden border transition-all duration-300 ease-out
                       ${

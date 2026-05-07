@@ -2,41 +2,38 @@ import { GitHubStats } from "../types/social";
 import { getFallbackData } from "./social";
 
 export async function fetchGitHubStats(
-	username: string
+  username: string,
 ): Promise<GitHubStats | null> {
-	try {
-		const token = process.env.GITHUB_TOKEN;
+  try {
+    const token = process.env.GITHUB_TOKEN;
 
-		if (!token) {
-			console.error("GitHub token not configured");
-			return getFallbackData("github", username);
-		}
+    if (!token) {
+      return getFallbackData("github", username);
+    }
 
-		const response = await fetch(`https://api.github.com/users/${username}`, {
-			headers: {
-				Authorization: `token ${token}`,
-				Accept: "application/vnd.github.v3+json",
-			},
-		});
+    const response = await fetch(`https://api.github.com/users/${username}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github.v3+json",
+      },
+      next: { revalidate: 60 * 60 },
+    });
 
-		if (!response.ok) {
-			throw new Error(
-				`GitHub API error: ${response.status} ${response.statusText}`
-			);
-		}
+    if (!response.ok) {
+      return getFallbackData("github", username);
+    }
 
-		const data = await response.json();
+    const data = await response.json();
 
-		return {
-			username: data.login,
-			name: data.name,
-			profileImage: data.avatar_url,
-			public_repos: data.public_repos,
-			followers: data.followers,
-			following: data.following,
-		};
-	} catch (error) {
-		console.error("Error fetching GitHub stats:", error);
-		return getFallbackData("github", username);
-	}
+    return {
+      username: data.login,
+      name: data.name,
+      profileImage: data.avatar_url,
+      public_repos: data.public_repos,
+      followers: data.followers,
+      following: data.following,
+    };
+  } catch {
+    return getFallbackData("github", username);
+  }
 }

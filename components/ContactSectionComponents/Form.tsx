@@ -20,13 +20,13 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
   const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
-    if (!categoryInputRef.current?.value) {
+    if (!categoryInputRef.current?.value.trim()) {
       newErrors.category = "Category is required";
     }
-    if (!subjectInputRef.current?.value) {
+    if (!subjectInputRef.current?.value.trim()) {
       newErrors.subject = "Subject is required";
     }
-    if (!messageTextareaRef.current?.value) {
+    if (!messageTextareaRef.current?.value.trim()) {
       newErrors.message = "Message is required";
     }
     setErrors(newErrors);
@@ -49,33 +49,25 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         });
       }
 
-      const category = categoryInputRef.current?.value || "";
-      const subject = subjectInputRef.current?.value || "";
-      const message = messageTextareaRef.current?.value || "";
+      const category = categoryInputRef.current?.value.trim() || "";
+      const subject = subjectInputRef.current?.value.trim() || "";
+      const message = messageTextareaRef.current?.value.trim() || "";
 
       const mailtoLink = `mailto:sandeepkhati788@gmail.com?subject=${encodeURIComponent(
         `[${category}] ${subject}`,
       )}&body=${encodeURIComponent(message)}`;
 
-      const mailWindow = window.open(mailtoLink, "_blank");
-
+      window.location.href = mailtoLink;
       await new Promise((resolve) => setTimeout(resolve, 500));
-
-      if (
-        !mailWindow ||
-        mailWindow.closed ||
-        typeof mailWindow.closed == "undefined"
-      ) {
-        console.warn(
-          "Mailto link might be blocked. Consider providing manual instructions.",
-        );
-      }
 
       onSubmitSuccess();
       formRef.current?.reset();
       setErrors({});
-    } catch (error) {
-      console.error("Error submitting form:", error);
+    } catch {
+      setErrors({
+        message:
+          "Unable to open your mail app. Please email me directly at sandeepkhati788@gmail.com.",
+      });
     } finally {
       setIsSubmitting(false);
     }

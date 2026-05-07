@@ -1,5 +1,4 @@
 import React from "react";
-import Link from "next/link";
 
 interface InfoItemProps {
   icon: React.ReactNode;
@@ -9,15 +8,13 @@ interface InfoItemProps {
 }
 
 const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, link }) => {
+  const isDirectContact = label === "Email" || label === "Phone";
+
   return (
-    <Link
+    <a
       href={link}
-      target={label === "Email" || label === "Phone" ? "_self" : "_blank"}
-      rel={
-        label === "Email" || label === "Phone"
-          ? undefined
-          : "noopener noreferrer"
-      }
+      target={isDirectContact ? "_self" : "_blank"}
+      rel={isDirectContact ? undefined : "noopener noreferrer"}
       className="group/infoitem relative flex items-center gap-5 p-5 rounded-2xl bg-[#0a0a0a] border border-white/5 shadow-md
                  transition-all duration-500 ease-out overflow-hidden
                  hover:bg-[#111] hover:border-primary/40 hover:shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.3)] hover:-translate-y-1"
@@ -48,7 +45,7 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, link }) => {
           {value}
         </div>
       </div>
-    </Link>
+    </a>
   );
 };
 

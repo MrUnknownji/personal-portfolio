@@ -9,6 +9,8 @@ interface BotChatProps {
   handleSend: () => void;
   handleCloseChat: (e: React.MouseEvent) => void;
   isProcessing: boolean;
+  suggestions: string[];
+  onSuggestionClick: (suggestion: string) => void;
 }
 
 export const BotChat: React.FC<BotChatProps> = ({
@@ -19,6 +21,8 @@ export const BotChat: React.FC<BotChatProps> = ({
   handleSend,
   handleCloseChat,
   isProcessing,
+  suggestions,
+  onSuggestionClick,
 }) => {
   return (
     <>
@@ -36,13 +40,28 @@ export const BotChat: React.FC<BotChatProps> = ({
       <div
         className={`absolute bottom-[60px] sm:bottom-[40px] left-1/2 -translate-x-1/2 translate-y-full w-[90%] sm:w-[300px] transition-all duration-300 ${chatOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible translate-y-4"}`}
       >
+        {suggestions.length > 0 && (
+          <div className="mb-2 flex flex-wrap justify-center gap-2">
+            {suggestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => onSuggestionClick(suggestion)}
+                className="rounded-full border border-primary/30 bg-background/90 px-3 py-1 text-[11px] font-semibold text-primary shadow-sm transition-colors hover:bg-primary hover:text-dark"
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex gap-2 bg-black/80 p-2 rounded-full border border-primary shadow-[0_0_10px_hsl(var(--primary)/0.2)]">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Ask me anything..."
+            placeholder="Ask about projects, skills, hiring..."
             className="flex-1 bg-transparent text-primary placeholder-primary/50 px-3 py-1 outline-none font-mono text-sm min-w-0"
             disabled={isProcessing}
           />
@@ -50,12 +69,14 @@ export const BotChat: React.FC<BotChatProps> = ({
             onClick={handleSend}
             disabled={isProcessing}
             className="bg-primary text-black p-2 rounded-full hover:scale-105 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+            aria-label="Send message"
           >
             <IoSend />
           </button>
           <button
             onClick={handleCloseChat}
-            className="bg-transparent text-primary border border-primary p-2 rounded-full hover:bg-primary/10 active:scale-95 transition-all flex-shrink-0 sm:hidden"
+            className="bg-transparent text-primary border border-primary p-2 rounded-full hover:bg-primary/10 active:scale-95 transition-all flex-shrink-0"
+            aria-label="Close chat"
             title="Close chat"
           >
             <IoClose />

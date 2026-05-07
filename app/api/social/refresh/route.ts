@@ -1,20 +1,18 @@
 import { NextResponse } from "next/server";
 import { fetchGitHubStats } from "../../../../utils/githubApi";
 import { getTwitterUserByUsername } from "../../../../utils/twitterApi";
-import { fetchLinkedInProfile } from "../../../../utils/linkedinApi";
+import { FALLBACK_DATA } from "../../../../utils/social";
 
 export async function GET() {
   try {
     // Force refresh all social media data
     const githubPromise = fetchGitHubStats("MrUnknownji");
     const twitterPromise = getTwitterUserByUsername("MrUnknownG786");
-    const linkedinPromise = fetchLinkedInProfile("mrunknowng786");
 
     // Wait for all promises to resolve
-    const [github, twitter, linkedin] = await Promise.all([
+    const [github, twitter] = await Promise.all([
       githubPromise,
       twitterPromise,
-      linkedinPromise,
     ]);
 
     // Return the refreshed data
@@ -24,11 +22,10 @@ export async function GET() {
       data: {
         github,
         twitter,
-        linkedin,
+        linkedin: FALLBACK_DATA.linkedin,
       },
     });
   } catch (error) {
-    console.error("Error refreshing social stats:", error);
     return NextResponse.json(
       {
         success: false,

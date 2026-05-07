@@ -15,9 +15,9 @@ export default function DynamicCursor() {
 
       let primaryColor = "#ff9233"; // Fallback to orange if not found
       if (primaryVar) {
-        // Extract the numbers from formats like "hsl(28 100% 60%)" or "hsl(28, 100%, 60%)"
+        // Extract numbers from "hsl(28 100% 60%)", "28 100% 60%", or comma syntax.
         const match = primaryVar.match(
-          /hsl\(\s*([\d.]+)[^\d\s]*\s*[, ]\s*([\d.]+)%?\s*[, ]\s*([\d.]+)%?\s*\)/,
+          /(?:hsl\()?[\s,]*([\d.]+)[\s,]+([\d.]+)%[\s,]+([\d.]+)%(?:\s*\/\s*[\d.]+%?)?\s*\)?/,
         );
         if (match) {
           const h = parseFloat(match[1]);

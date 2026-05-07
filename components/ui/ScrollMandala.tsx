@@ -21,7 +21,9 @@ export default function ScrollMandala() {
   useGSAP(
     () => {
       if (!containerRef.current) return;
-      const setupTimeout = setTimeout(() => {
+      const animations: gsap.core.Animation[] = [];
+
+      const setupAnimation = gsap.delayedCall(0.25, () => {
         gsap.set(containerRef.current, { x: "-5vw", y: "5vh" });
         const tl = gsap.timeline({
           scrollTrigger: {
@@ -47,6 +49,7 @@ export default function ScrollMandala() {
           ease: "sine.inOut",
           duration: 1,
         });
+        animations.push(tl);
 
         const scrubConfig = {
           trigger: document.body,
@@ -55,30 +58,29 @@ export default function ScrollMandala() {
           scrub: 2,
         };
 
-        gsap.to(innerStarRef.current, {
-          rotation: 360,
-          transformOrigin: "center center",
-          scrollTrigger: scrubConfig,
-        });
-
-        gsap.to(middleLotusRef.current, {
-          rotation: -180,
-          transformOrigin: "center center",
-          scrollTrigger: scrubConfig,
-        });
-
-        gsap.to(outerRingRef.current, {
-          rotation: 360,
-          transformOrigin: "center center",
-          scrollTrigger: scrubConfig,
-        });
-
-        gsap.to(particlesRef.current, {
-          rotation: -360,
-          transformOrigin: "center center",
-          scrollTrigger: scrubConfig,
-        });
-      }, 250);
+        animations.push(
+          gsap.to(innerStarRef.current, {
+            rotation: 360,
+            transformOrigin: "center center",
+            scrollTrigger: scrubConfig,
+          }),
+          gsap.to(middleLotusRef.current, {
+            rotation: -180,
+            transformOrigin: "center center",
+            scrollTrigger: scrubConfig,
+          }),
+          gsap.to(outerRingRef.current, {
+            rotation: 360,
+            transformOrigin: "center center",
+            scrollTrigger: scrubConfig,
+          }),
+          gsap.to(particlesRef.current, {
+            rotation: -360,
+            transformOrigin: "center center",
+            scrollTrigger: scrubConfig,
+          }),
+        );
+      });
 
       const breathe = gsap.to(containerRef.current, {
         opacity: 0.15,
@@ -89,7 +91,8 @@ export default function ScrollMandala() {
       });
 
       return () => {
-        clearTimeout(setupTimeout);
+        setupAnimation.kill();
+        animations.forEach((animation) => animation.kill());
         breathe.kill();
       };
     },

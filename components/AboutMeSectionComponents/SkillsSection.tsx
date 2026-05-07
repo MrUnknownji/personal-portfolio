@@ -63,7 +63,14 @@ const SkillsSection = () => {
   );
 
   return (
-    <div ref={containerRef} className="space-y-16 relative py-10">
+    <div
+      id="skills"
+      ref={containerRef}
+      data-krypton-context="skills"
+      data-krypton-title="Skills and Technologies"
+      data-krypton-summary="Sandeep works across React, Next.js, TypeScript, Tailwind CSS, Node.js, Express, MongoDB, APIs, and deployment tooling."
+      className="space-y-16 relative py-10"
+    >
       {/* Section Title */}
       <Title
         title="Skills & Technologies"
@@ -143,6 +150,9 @@ const SkillsSection = () => {
                   {skills.map((skill) => (
                     <div
                       key={skill}
+                      data-krypton-context="skill"
+                      data-krypton-title={skill}
+                      data-krypton-summary={`${skill} is part of Sandeep's technical stack.`}
                       className="skill-chip group/chip relative px-4 py-2 text-sm font-medium tracking-wide rounded-lg
                                  bg-white/5 text-foreground/70 border border-white/5
                                  hover:scale-105 hover:bg-primary/20 hover:text-white hover:border-primary/50 hover:shadow-[0_0_15px_hsl(var(--primary)/0.3)]

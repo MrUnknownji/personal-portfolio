@@ -1,10 +1,14 @@
 "use client";
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import ProjectCard from "@/components/ProjectCard";
 import ProjectModal from "@/components/ProjectModal";
 import Title from "@/components/ui/Title";
 import { projects as allProjects } from "@/data/data";
 import { Project } from "@/types/Project";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { FiSearch, FiX } from "react-icons/fi";
 
 const DISPLAY_ORDER = [9, 8, 7, 1, 10];
 const TITLE_OVERRIDES: Record<number, string> = {
@@ -20,148 +24,127 @@ const projects = DISPLAY_ORDER.map((id) => {
   }
   return project;
 }).filter(Boolean) as Project[];
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { FiSearch, FiX } from "react-icons/fi";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const ANIMATION_CONFIG = {
-  STAGGER: 0.12,
-  DURATION: 0.8,
   EASE: "power3.out",
-  FILTER: {
-    OUT_DURATION: 0.65,
-    OUT_STAGGER: 0.05,
-    OUT_EASE: "power3.in",
-    OUT_SCALE: 0.5,
-    OUT_Y: 100,
-    OUT_ROTATION: 180,
-    OUT_ROTATION_Y: 90,
-    OUT_ROTATION_X: -45,
-    OUT_BLUR: 10,
-
-    IN_DURATION: 0.85,
-    IN_STAGGER: 0.08,
-    IN_EASE: "elastic.out(1, 0.75)",
-    IN_SCALE: 0.3,
-    IN_Y: -80,
-    IN_ROTATION: -180,
-    IN_ROTATION_Y: -90,
-    IN_ROTATION_X: 45,
-  },
-  SCROLL: {
-    START: "top 80%",
-    END: "bottom 20%",
-    BATCH_DELAY: 0.15,
-  },
 } as const;
 
 export default function MyProjects() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [filter, setFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [isRegeneratingGrid, setIsRegeneratingGrid] = useState(false);
-  const [displayedProjects, setDisplayedProjects] = useState(projects);
+  const [stableGridMinHeight, setStableGridMinHeight] = useState<number | null>(
+    null,
+  );
 
   const controlsRef = useRef<HTMLDivElement>(null);
   const projectsRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
   const titleSectionRef = useRef<HTMLDivElement>(null);
-  const animationContextRef = useRef<gsap.Context | null>(null);
-  const filterTimelineRef = useRef<gsap.core.Timeline | null>(null);
 
-  const searchContainerRef = useRef<HTMLDivElement>(null);
   const particlesRef = useRef<HTMLDivElement>(null);
 
-  const categories = [
-    "All",
-    ...Array.from(new Set(projects.map((project) => project.category))),
-  ];
+  const categories = useMemo(
+    () => [
+      "All",
+      ...Array.from(new Set(projects.map((project) => project.category))),
+    ],
+    [],
+  );
+
+  const filteredProjects = useMemo(() => {
+    const lowerQuery = searchQuery.trim().toLowerCase();
+
+    return projects.filter((project) => {
+      const matchesCategory = filter === "All" || project.category === filter;
+      const matchesSearch =
+        lowerQuery.length === 0 ||
+        project.title.toLowerCase().includes(lowerQuery) ||
+        project.shortDescription.toLowerCase().includes(lowerQuery) ||
+        project.technologies.some((tech) =>
+          tech.toLowerCase().includes(lowerQuery),
+        );
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [filter, searchQuery]);
+
+  const filteredProjectIds = useMemo(
+    () => new Set(filteredProjects.map((project) => project.id)),
+    [filteredProjects],
+  );
 
   useGSAP(
     () => {
-      animationContextRef.current = gsap.context(() => {
-        const initialTl = gsap.timeline({
-          defaults: { ease: ANIMATION_CONFIG.EASE, overwrite: "auto" },
-        });
-
-        if (titleSectionRef.current) {
-          initialTl.fromTo(
-            titleSectionRef.current,
-            {
-              opacity: 0,
-              y: 50,
-              scale: 0.9,
-            },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 1,
-              ease: "power3.out",
-            },
-            0,
-          );
-        }
-
-        if (controlsRef.current) {
-          initialTl.fromTo(
-            controlsRef.current,
-            {
-              opacity: 0,
-              y: -40,
-              scale: 0.95,
-              rotationX: -15,
-            },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              rotationX: 0,
-              duration: 0.9,
-              ease: "back.out(1.5)",
-            },
-            0.3,
-          );
-        }
-
-        const cards = projectsRef.current?.querySelectorAll(
-          ".project-card-container",
-        );
-        if (cards && cards.length > 0) {
-          gsap.set(cards, {
-            opacity: 0,
-            y: 80,
-            rotationX: 20,
-            scale: 0.85,
-          });
-
-          cards.forEach((card, index) => {
-            const row = Math.floor(index / 3);
-            const col = index % 3;
-            const diagonalDelay = (row + col) * 0.1;
-
-            gsap.to(card, {
-              opacity: 1,
-              y: 0,
-              rotationX: 0,
-              scale: 1,
-              duration: 1,
-              ease: "power3.out",
-              delay: 0.5 + diagonalDelay,
-            });
-          });
-        }
+      const initialTl = gsap.timeline({
+        defaults: { ease: ANIMATION_CONFIG.EASE, overwrite: "auto" },
       });
 
-      return () => {
-        animationContextRef.current?.revert();
-        animationContextRef.current = null;
-      };
+      if (titleSectionRef.current) {
+        initialTl.fromTo(
+          titleSectionRef.current,
+          {
+            opacity: 0,
+            y: 50,
+            scale: 0.9,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 1,
+            ease: "power3.out",
+          },
+          0,
+        );
+      }
+
+      if (controlsRef.current) {
+        initialTl.fromTo(
+          controlsRef.current,
+          {
+            opacity: 0,
+            y: -40,
+            scale: 0.95,
+            rotationX: -15,
+          },
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            rotationX: 0,
+            duration: 0.9,
+            ease: "back.out(1.5)",
+          },
+          0.3,
+        );
+      }
+
+      const cards = projectsRef.current?.querySelectorAll(
+        ".project-card-container",
+      );
+      if (cards && cards.length > 0) {
+        gsap.set(cards, {
+          opacity: 0,
+          y: 32,
+          scale: 0.96,
+        });
+
+        initialTl.to(
+          cards,
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.45,
+            stagger: 0.06,
+            ease: "power2.out",
+            clearProps: "transform,opacity",
+          });
+      }
     },
     { scope: pageRef },
   );
@@ -192,201 +175,49 @@ export default function MyProjects() {
     return () => window.removeEventListener("mousemove", handleGlobalMouseMove);
   }, []);
 
-  const animateFilterChange = useCallback(() => {
-    if (!projectsRef.current || isAnimating) return;
+  useEffect(() => {
+    const projectGrid = projectsRef.current;
+    if (!projectGrid) return;
 
-    if (filterTimelineRef.current) {
-      filterTimelineRef.current.kill();
-      filterTimelineRef.current = null;
-    }
-
-    const existingCards = Array.from(
-      projectsRef.current.querySelectorAll(".project-card-container"),
-    );
-
-    const newFilteredProjects = projects.filter((project) => {
-      const lowerQuery = searchQuery.toLowerCase();
-      const matchesCategory = filter === "All" || project.category === filter;
-      const matchesSearch =
-        searchQuery === "" ||
-        project.title.toLowerCase().includes(lowerQuery) ||
-        project.shortDescription.toLowerCase().includes(lowerQuery) ||
-        project.technologies.some((tech) =>
-          tech.toLowerCase().includes(lowerQuery),
-        );
-      return matchesCategory && matchesSearch;
-    });
-
-    if (
-      JSON.stringify(newFilteredProjects.map((p) => p.id)) ===
-      JSON.stringify(displayedProjects.map((p) => p.id))
-    ) {
-      return;
-    }
-
-    setIsAnimating(true);
-
-    if (existingCards.length > 0) {
-      existingCards.forEach((card, index) => {
-        const angle = (index * 360) / existingCards.length;
-        const scatterX = Math.cos((angle * Math.PI) / 180) * 150;
-        const scatterY = Math.sin((angle * Math.PI) / 180) * 100;
-
-        gsap.to(card, {
-          opacity: 0,
-          scale: ANIMATION_CONFIG.FILTER.OUT_SCALE,
-          x: scatterX,
-          y: scatterY + ANIMATION_CONFIG.FILTER.OUT_Y,
-          rotationZ: ANIMATION_CONFIG.FILTER.OUT_ROTATION,
-          rotationY: ANIMATION_CONFIG.FILTER.OUT_ROTATION_Y,
-          rotationX: ANIMATION_CONFIG.FILTER.OUT_ROTATION_X,
-          filter: `blur(${ANIMATION_CONFIG.FILTER.OUT_BLUR}px)`,
-          transformOrigin: "center center",
-          duration: ANIMATION_CONFIG.FILTER.OUT_DURATION,
-          ease: ANIMATION_CONFIG.FILTER.OUT_EASE,
-          delay: index * ANIMATION_CONFIG.FILTER.OUT_STAGGER,
-          onComplete:
-            index === existingCards.length - 1
-              ? () => {
-                  setIsRegeneratingGrid(true);
-                  setDisplayedProjects(newFilteredProjects);
-
-                  setTimeout(() => {
-                    const newCards = Array.from(
-                      projectsRef.current?.querySelectorAll(
-                        ".project-card-container",
-                      ) || [],
-                    );
-
-                    if (newCards.length > 0) {
-                      newCards.forEach((card, idx) => {
-                        const angle = (idx * 360) / newCards.length;
-                        const gatherX = Math.cos((angle * Math.PI) / 180) * 200;
-                        const gatherY = Math.sin((angle * Math.PI) / 180) * 150;
-
-                        gsap.set(card, {
-                          opacity: 0,
-                          scale: ANIMATION_CONFIG.FILTER.IN_SCALE,
-                          x: gatherX,
-                          y: gatherY + ANIMATION_CONFIG.FILTER.IN_Y,
-                          rotationZ: ANIMATION_CONFIG.FILTER.IN_ROTATION,
-                          rotationY: ANIMATION_CONFIG.FILTER.IN_ROTATION_Y,
-                          rotationX: ANIMATION_CONFIG.FILTER.IN_ROTATION_X,
-                          filter: "blur(15px)",
-                          transformOrigin: "center center",
-                        });
-                      });
-
-                      newCards.forEach((card, idx) => {
-                        gsap.to(card, {
-                          opacity: 1,
-                          scale: 1,
-                          x: 0,
-                          y: 0,
-                          rotationZ: 0,
-                          rotationY: 0,
-                          rotationX: 0,
-                          filter: "blur(0px)",
-                          transformOrigin: "center center",
-                          duration: ANIMATION_CONFIG.FILTER.IN_DURATION,
-                          ease: ANIMATION_CONFIG.FILTER.IN_EASE,
-                          delay: idx * ANIMATION_CONFIG.FILTER.IN_STAGGER,
-                          onComplete:
-                            idx === newCards.length - 1
-                              ? () => {
-                                  newCards.forEach((c) => {
-                                    gsap.set(c, { clearProps: "filter" });
-                                  });
-                                  setIsRegeneratingGrid(false);
-                                  setIsAnimating(false);
-                                  ScrollTrigger.refresh();
-                                }
-                              : undefined,
-                        });
-                      });
-                    } else {
-                      setIsAnimating(false);
-                      ScrollTrigger.refresh();
-                    }
-                  }, 100);
-                }
-              : undefined,
-        });
+    const updateStableHeight = () => {
+      setStableGridMinHeight((currentHeight) => {
+        const nextHeight = projectGrid.offsetHeight;
+        return Math.max(currentHeight || 0, nextHeight);
       });
-    } else {
-      setIsRegeneratingGrid(true);
-      setDisplayedProjects(newFilteredProjects);
+    };
 
-      setTimeout(() => {
-        const newCards = Array.from(
-          projectsRef.current?.querySelectorAll(".project-card-container") ||
-            [],
-        );
+    updateStableHeight();
 
-        if (newCards.length > 0) {
-          newCards.forEach((card, idx) => {
-            const angle = (idx * 360) / newCards.length;
-            const gatherX = Math.cos((angle * Math.PI) / 180) * 200;
-            const gatherY = Math.sin((angle * Math.PI) / 180) * 150;
+    const resizeObserver = new ResizeObserver(updateStableHeight);
+    resizeObserver.observe(projectGrid);
 
-            gsap.set(card, {
-              opacity: 0,
-              scale: ANIMATION_CONFIG.FILTER.IN_SCALE,
-              x: gatherX,
-              y: gatherY + ANIMATION_CONFIG.FILTER.IN_Y,
-              rotationZ: ANIMATION_CONFIG.FILTER.IN_ROTATION,
-              rotationY: ANIMATION_CONFIG.FILTER.IN_ROTATION_Y,
-              rotationX: ANIMATION_CONFIG.FILTER.IN_ROTATION_X,
-              filter: "blur(15px)",
-              transformOrigin: "center center",
-            });
-          });
-
-          newCards.forEach((card, idx) => {
-            gsap.to(card, {
-              opacity: 1,
-              scale: 1,
-              x: 0,
-              y: 0,
-              rotationZ: 0,
-              rotationY: 0,
-              rotationX: 0,
-              filter: "blur(0px)",
-              transformOrigin: "center center",
-              duration: ANIMATION_CONFIG.FILTER.IN_DURATION,
-              ease: ANIMATION_CONFIG.FILTER.IN_EASE,
-              delay: idx * ANIMATION_CONFIG.FILTER.IN_STAGGER,
-              onComplete:
-                idx === newCards.length - 1
-                  ? () => {
-                      newCards.forEach((c) => {
-                        gsap.set(c, { clearProps: "filter" });
-                      });
-                      setIsRegeneratingGrid(false);
-                      setIsAnimating(false);
-                      ScrollTrigger.refresh();
-                    }
-                  : undefined,
-            });
-          });
-        } else {
-          setIsAnimating(false);
-          ScrollTrigger.refresh();
-        }
-      }, 50);
-    }
-  }, [isAnimating, filter, searchQuery, displayedProjects, projects]);
+    window.addEventListener("resize", updateStableHeight);
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", updateStableHeight);
+    };
+  }, []);
 
   useEffect(() => {
-    animateFilterChange();
+    const handleOpenProject = (event: Event) => {
+      const customEvent = event as CustomEvent<{ id?: number; title?: string }>;
+      const requestedProject = projects.find((project) => {
+        if (customEvent.detail?.id) return project.id === customEvent.detail.id;
+        return (
+          customEvent.detail?.title &&
+          project.title.toLowerCase() === customEvent.detail.title.toLowerCase()
+        );
+      });
 
-    return () => {
-      if (filterTimelineRef.current) {
-        filterTimelineRef.current.kill();
-        filterTimelineRef.current = null;
+      if (requestedProject) {
+        setSelectedProject(requestedProject);
       }
     };
-  }, [filter, searchQuery, animateFilterChange]);
+
+    window.addEventListener("portfolio:open-project", handleOpenProject);
+    return () =>
+      window.removeEventListener("portfolio:open-project", handleOpenProject);
+  }, []);
 
   const clearSearch = () => {
     setSearchQuery("");
@@ -441,7 +272,6 @@ export default function MyProjects() {
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] via-transparent to-primary/[0.02] pointer-events-none rounded-[2rem] lg:rounded-full" />
 
               <div
-                ref={searchContainerRef}
                 className="relative w-full lg:flex-1 group rounded-full border border-border/50 bg-foreground/[0.04] transition-all duration-300 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-foreground/[0.06] hover:bg-foreground/[0.06]"
               >
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
@@ -452,11 +282,15 @@ export default function MyProjects() {
                   type="text"
                   placeholder="Search by name, tech..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                  }}
                   className="w-full pl-12 pr-12 py-3 bg-transparent text-foreground placeholder-muted-foreground focus:outline-none text-sm md:text-base rounded-full relative z-10 font-medium"
                 />
                 {searchQuery && (
                   <button
+                    type="button"
+                    aria-label="Clear search"
                     onClick={(e) => {
                       clearSearch();
                       gsap.fromTo(
@@ -491,6 +325,8 @@ export default function MyProjects() {
                 {categories.map((category) => (
                   <button
                     key={category}
+                    type="button"
+                    aria-pressed={filter === category}
                     onClick={(e) => {
                       setFilter(category);
                       const button = e.currentTarget;
@@ -530,12 +366,18 @@ export default function MyProjects() {
           style={{
             perspective: "2000px",
             transformStyle: "preserve-3d",
+            minHeight: stableGridMinHeight
+              ? `${stableGridMinHeight}px`
+              : undefined,
           }}
         >
-          {displayedProjects.map((project) => (
+          {projects.map((project) => (
             <div
               key={project.id}
-              className={`project-card-container ${isRegeneratingGrid ? "opacity-0" : ""}`}
+              className="project-card-container"
+              style={{
+                display: filteredProjectIds.has(project.id) ? "block" : "none",
+              }}
             >
               <ProjectCard
                 project={project}
@@ -545,7 +387,7 @@ export default function MyProjects() {
           ))}
         </div>
 
-        {displayedProjects.length === 0 && !isAnimating && (
+        {filteredProjects.length === 0 && (
           <div className="text-center py-20 px-4">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/5 mb-6 ring-1 ring-white/10 animate-float">
               <FiSearch className="w-10 h-10 text-muted/50 animate-pulse-subtle" />
@@ -558,6 +400,7 @@ export default function MyProjects() {
               adjusting your search terms or selecting a different category.
             </p>
             <button
+              type="button"
               onClick={() => {
                 setFilter("All");
                 setSearchQuery("");

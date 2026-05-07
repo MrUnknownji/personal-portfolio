@@ -18,21 +18,19 @@ const SocialInfoBox = ({
 }: SocialInfoBoxProps) => {
   const boxRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
 
   useEffect(() => {
     setMounted(true);
-    const initialScroll = window.scrollY;
-    setScrollY(initialScroll);
-
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
+    const updateViewport = () => {
+      setViewportWidth(window.innerWidth);
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateViewport);
     };
   }, []);
 
@@ -43,18 +41,29 @@ const SocialInfoBox = ({
     }
   }, [opacity, onHeightChange, socialLink]);
 
-  const offsetY = 30;
-  const adjustedY = position.y - scrollY;
+  const boxWidth = 320;
+  const margin = 16;
+  const offsetY = 18;
+  const clampedX =
+    viewportWidth > 0
+      ? Math.min(
+          Math.max(position.x, boxWidth / 2 + margin),
+          viewportWidth - boxWidth / 2 - margin,
+        )
+      : position.x;
+  const renderAbove = position.y > 180;
 
   const content = (
     <div
       ref={boxRef}
       className="fixed pointer-events-none z-[60] transform-gpu"
       style={{
-        left: `${position.x}px`,
-        top: `${adjustedY - offsetY}px`,
+        left: `${clampedX}px`,
+        top: `${renderAbove ? position.y - offsetY : position.y + offsetY}px`,
         opacity: opacity,
-        transform: `translate(-50%, -100%) scale(${opacity * 0.1 + 0.9})`,
+        transform: `translate(-50%, ${renderAbove ? "-100%" : "0"}) scale(${
+          opacity * 0.1 + 0.9
+        })`,
         transition: "opacity 0.2s ease-out, transform 0.2s ease-out",
         willChange: "opacity, transform",
       }}
@@ -138,10 +147,13 @@ const SocialInfoBox = ({
           className="absolute left-1/2 w-4 h-4 border-white/10
                      bg-[#0a0a0a]"
           style={{
-            bottom: "-8px",
+            bottom: renderAbove ? "-8px" : undefined,
+            top: renderAbove ? undefined : "-8px",
             transform: "translateX(-50%) rotate(45deg)",
-            borderRightWidth: "1px",
-            borderBottomWidth: "1px",
+            borderRightWidth: renderAbove ? "1px" : undefined,
+            borderBottomWidth: renderAbove ? "1px" : undefined,
+            borderLeftWidth: renderAbove ? undefined : "1px",
+            borderTopWidth: renderAbove ? undefined : "1px",
             zIndex: -1,
           }}
         />

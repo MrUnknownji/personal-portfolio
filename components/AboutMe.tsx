@@ -1,9 +1,10 @@
-import React, { useRef } from "react";
+"use client";
+
+import { useRef } from "react";
 import ImageSection from "./AboutMeSectionComponents/ImageSection";
 import JourneySection from "./AboutMeSectionComponents/JourneySection";
 import SkillsSection from "./AboutMeSectionComponents/SkillsSection";
 import Title from "./ui/Title";
-import FadeIn from "./FadeIn";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -55,6 +56,9 @@ const AboutMe = () => {
       <section
         id="about"
         ref={containerRef}
+        data-krypton-context="about"
+        data-krypton-title="About Sandeep"
+        data-krypton-summary="Sandeep is a full stack developer focused on readable code, polished interfaces, and practical product experiences."
         className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 space-y-20 sm:space-y-24"
       >
         <div className="relative px-4 text-center">

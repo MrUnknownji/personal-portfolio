@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useId, useState, useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { FiChevronDown } from "react-icons/fi";
@@ -24,6 +24,7 @@ export const ExpandableSection = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLButtonElement>(null);
   const contentWrapperRef = useRef<HTMLDivElement>(null);
+  const contentId = useId();
   const { contextSafe } = useGSAP({ scope: containerRef });
 
   useGSAP(() => {
@@ -75,6 +76,7 @@ export const ExpandableSection = ({
         onClick={toggleExpand}
         className="w-full px-5 py-4 flex items-center justify-between group focus:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         aria-expanded={isExpanded}
+        aria-controls={contentId}
       >
         <div className="flex items-center gap-3">
           <div
@@ -82,26 +84,26 @@ export const ExpandableSection = ({
           />
           <div className="relative">
             {/* Invisible spacer to maintain width */}
-            <h3
+            <span
               className="text-lg font-medium opacity-0 select-none"
               aria-hidden="true"
             >
               {title}
-            </h3>
+            </span>
 
             {/* Base Layer (Theme Default) */}
-            <h3
+            <span
               className={`absolute inset-0 text-lg font-medium text-foreground/80 group-hover:text-foreground transition-opacity duration-300 ${isExpanded ? "opacity-0" : "opacity-100"}`}
             >
               {title}
-            </h3>
+            </span>
 
             {/* Expanded Layer (Primary Color) */}
-            <h3
+            <span
               className={`absolute inset-0 text-lg font-medium text-primary transition-opacity duration-300 ${isExpanded ? "opacity-100" : "opacity-0"}`}
             >
               {title}
-            </h3>
+            </span>
           </div>
         </div>
         <div
@@ -111,7 +113,7 @@ export const ExpandableSection = ({
         </div>
       </button>
 
-      <div ref={contentWrapperRef} className="overflow-hidden">
+      <div id={contentId} ref={contentWrapperRef} className="overflow-hidden">
         <div ref={contentRef} className="px-5 pb-6 pt-2">
           {isList && Array.isArray(content) ? (
             <ul className="space-y-3">

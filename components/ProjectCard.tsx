@@ -18,13 +18,31 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+    const updateMobileState = () => setIsMobile(mediaQuery.matches);
+
+    updateMobileState();
+    mediaQuery.addEventListener("change", updateMobileState);
+    return () => mediaQuery.removeEventListener("change", updateMobileState);
   }, []);
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onClick();
+    }
+  };
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      data-krypton-context="project"
+      data-krypton-title={project.title}
+      data-krypton-summary={`${project.title}: ${project.shortDescription} Built with ${project.technologies.join(", ")}.`}
       className="project-card relative bg-card rounded-xl overflow-hidden cursor-pointer border border-border"
       onClick={onClick}
+      onKeyDown={handleKeyDown}
       onMouseEnter={() => !isMobile && setIsHovered(true)}
       onMouseLeave={() => !isMobile && setIsHovered(false)}
       style={{

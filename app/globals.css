@@ -95,6 +95,7 @@
   --radius: 0.75rem;
 
   --scrollbar-thumb: #8c7151;
+  --scrollbar-thumb-hover: hsl(28 100% 60%);
   --scrollbar-track: #1a1714;
 }
 
@@ -148,7 +149,7 @@ html {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #666;
+  background: var(--scrollbar-thumb-hover);
 }
 
 input:-webkit-autofill,

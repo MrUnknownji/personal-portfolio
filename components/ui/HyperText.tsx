@@ -38,6 +38,7 @@ export function HyperText({
   const [isAnimating, setIsAnimating] = useState(false);
   const iterationCount = useRef(0);
   const elementRef = useRef<HTMLElement>(null);
+  const startTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleAnimationTrigger = () => {
     if (animateOnHover && !isAnimating) {
@@ -48,16 +49,18 @@ export function HyperText({
 
   useEffect(() => {
     if (!startOnView) {
-      const startTimeout = setTimeout(() => {
+      startTimeoutRef.current = setTimeout(() => {
         setIsAnimating(true);
       }, delay);
-      return () => clearTimeout(startTimeout);
+      return () => {
+        if (startTimeoutRef.current) clearTimeout(startTimeoutRef.current);
+      };
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setTimeout(() => {
+          startTimeoutRef.current = setTimeout(() => {
             setIsAnimating(true);
           }, delay);
           observer.disconnect();
@@ -70,7 +73,10 @@ export function HyperText({
       observer.observe(elementRef.current);
     }
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (startTimeoutRef.current) clearTimeout(startTimeoutRef.current);
+    };
   }, [delay, startOnView]);
 
   useEffect(() => {

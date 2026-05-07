@@ -10,13 +10,10 @@ const ANIMATION_CONFIG = {
   STAGGER: 0.05,
   DURATION: 0.4,
   EASE: "back.out(1.7)",
-  HOVER_DURATION: 0.2,
-  HOVER_EASE: "power1.out",
 } as const;
 
 export const TechStack = ({ technologies }: TechStackProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { contextSafe } = useGSAP({ scope: containerRef });
 
   useGSAP(() => {
     gsap.from(containerRef.current?.children || [], {

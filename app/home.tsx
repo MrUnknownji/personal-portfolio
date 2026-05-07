@@ -1,4 +1,3 @@
-"use client";
 import ContactForm from "@/components/ContactForm";
 import HeroSection from "@/components/HeroSection";
 import AboutMe from "@/components/AboutMe";

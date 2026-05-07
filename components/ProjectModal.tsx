@@ -37,10 +37,25 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   const descRef = useRef<HTMLParagraphElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
   const rightColRef = useRef<HTMLDivElement>(null);
+  const closeTimelineRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    window.dispatchEvent(
+      new CustomEvent("portfolio:project-context", {
+        detail: { id: project.id, title: project.title },
+      }),
+    );
+
+    return () => {
+      window.dispatchEvent(new CustomEvent("portfolio:project-context-clear"));
+    };
+  }, [isOpen, project.id, project.title]);
 
   useEffect(() => {
     const smoother = ScrollSmoother.get();
@@ -60,21 +75,23 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   }, [isActuallyOpen]);
 
   const runCloseAnimation = useCallback(() => {
+    if (isAnimatingOut) return;
+
     if (!contentRef.current || !overlayRef.current) {
       onClose();
       setIsAnimatingOut(false);
       return;
     }
 
+    setIsAnimatingOut(true);
+    closeTimelineRef.current?.kill();
     gsap.killTweensOf([overlayRef.current, contentRef.current]);
 
-    const tl = gsap.timeline({
+    closeTimelineRef.current = gsap.timeline({
       onComplete: () => {
         onClose();
         setIsAnimatingOut(false);
-        gsap.set([overlayRef.current, contentRef.current], {
-          clearProps: "all",
-        });
+        closeTimelineRef.current = null;
       },
       defaults: {
         duration: 0.3,
@@ -83,10 +100,11 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       },
     });
 
-    tl.to(contentRef.current, {
+    closeTimelineRef.current.to(contentRef.current, {
       opacity: 0,
       scale: ANIMATION_CONFIG.SCALE_START,
       y: 20,
+      force3D: true,
     }).to(
       overlayRef.current,
       {
@@ -94,7 +112,30 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
       },
       "<",
     );
-  }, [onClose]);
+  }, [isAnimatingOut, onClose]);
+
+  useEffect(() => {
+    return () => {
+      closeTimelineRef.current?.kill();
+    };
+  }, []);
+
+  const handleRequestClose = useCallback(() => {
+    runCloseAnimation();
+  }, [runCloseAnimation]);
+
+  useEffect(() => {
+    if (!isActuallyOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        handleRequestClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleRequestClose, isActuallyOpen]);
 
   useGSAP(
     () => {
@@ -178,21 +219,24 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
   return (
     <Dialog
       open={isActuallyOpen}
-      onClose={onClose}
+      onClose={handleRequestClose}
       className="w-full h-full md:w-auto md:h-auto"
     >
       <div
         ref={overlayRef}
         className="fixed inset-0 bg-background/95 z-40 transition-colors"
-        onClick={onClose}
+        onClick={handleRequestClose}
         aria-hidden="true"
       />
 
       <div
         ref={contentRef}
+        data-krypton-context="project"
+        data-krypton-title={project.title}
+        data-krypton-summary={`${project.title}: ${project.shortDescription} Features include ${project.features.slice(0, 3).join(", ")}.`}
         className="relative z-50 flex flex-col transform-gpu
                      bg-card border-x border-b border-t-[3px] border-t-primary border-x-border border-b-border
-                     h-[100dvh] w-full shadow-2xl
+                     h-dvh w-full shadow-2xl
                      md:max-w-6xl md:h-[85vh] md:max-h-[850px]
                      md:rounded-xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
@@ -200,9 +244,9 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         <div className="absolute inset-0 pointer-events-none" />
 
         <button
-          onClick={onClose}
+          onClick={handleRequestClose}
           aria-label="Close project details"
-          className="group absolute top-4 right-4 p-2 rounded-full z-[51]
+          className="group absolute top-4 right-4 p-2 rounded-full z-51
                      bg-background/50 text-foreground/70 border border-border
                      hover:bg-primary/10 hover:text-primary hover:border-primary/40
                      transition-all duration-200 focus:outline-none"
@@ -211,12 +255,11 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         </button>
 
         <div
-          className="flex-grow min-h-0 relative z-10
+          className="grow min-h-0 relative z-10
                      overflow-y-auto md:overflow-y-hidden
                      overscroll-behavior-y-contain
                      scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent"
           style={{ WebkitOverflowScrolling: "touch" }}
-          data-lenis-prevent
         >
           <div
             className="flex flex-col md:flex-row gap-8 px-6 pb-8 pt-12 md:p-10
@@ -224,14 +267,13 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
           >
             {/* Left Column */}
             <div
-              className="w-full md:w-[45%] flex flex-col space-y-6 flex-shrink-0
+              className="w-full md:w-[45%] flex flex-col space-y-6 shrink-0
                          md:h-full md:overflow-y-auto md:scrollbar-thin md:scrollbar-thumb-border
                          md:scrollbar-track-transparent md:pr-4"
-              data-lenis-prevent
             >
               <div
                 ref={imageRef}
-                className="relative w-full aspect-[16/9] rounded-xl overflow-hidden border border-border flex-shrink-0 group bg-card"
+                className="relative w-full aspect-video rounded-xl overflow-hidden border border-border shrink-0 group bg-card"
               >
                 <Image
                   src={project.image}
@@ -240,10 +282,10 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                   className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                   sizes="(max-width: 768px) 90vw, 45vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent opacity-80 pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-t from-background/90 via-transparent to-transparent opacity-80 pointer-events-none" />
               </div>
 
-              <div className="flex-shrink-0 space-y-4 relative">
+              <div className="shrink-0 space-y-4 relative">
                 <div className="absolute left-0 top-2 bottom-2 w-[3px] bg-primary rounded-full" />
 
                 <div className="pl-6 space-y-3">
@@ -262,7 +304,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                 </div>
               </div>
 
-              <div ref={galleryRef} className="flex-grow min-h-0">
+              <div ref={galleryRef} className="grow min-h-0">
                 <MediaGallery items={project.gallery || []} />
               </div>
             </div>
@@ -273,10 +315,9 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
               className="w-full md:w-[55%] flex flex-col md:h-full"
             >
               <div
-                className="space-y-4 flex-grow min-h-0
+                className="space-y-4 grow min-h-0
                            md:overflow-y-auto md:scrollbar-thin md:scrollbar-thumb-border
                            md:scrollbar-track-transparent md:pr-4"
-                data-lenis-prevent
               >
                 <ExpandableSection
                   title="About the Project"
@@ -289,7 +330,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                 />
               </div>
 
-              <div className="mt-auto pt-8 space-y-6 flex-shrink-0 border-t border-border">
+              <div className="mt-auto pt-8 space-y-6 shrink-0 border-t border-border">
                 <TechStack technologies={project.technologies} />
 
                 <div className="flex flex-col sm:flex-row gap-4">

@@ -29,26 +29,46 @@ export const useBotInteractions = ({
     const pathname = usePathname();
     const isRightClickingRef = useRef(false);
     const lastMousePos = useRef({ x: 0, y: 0 });
-    const lastMouseTime = useRef(Date.now());
+    const lastMouseTime = useRef(0);
     const lastScrollPos = useRef(0);
-    const lastScrollTime = useRef(Date.now());
+    const lastScrollTime = useRef(0);
     const hoverCountRef = useRef(0);
     const lastHoverTimeRef = useRef(0);
+    const hoverResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const hoverPromptTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (hoverResetTimeoutRef.current) {
+                clearTimeout(hoverResetTimeoutRef.current);
+            }
+            if (hoverPromptTimeoutRef.current) {
+                clearTimeout(hoverPromptTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        const now = Date.now();
+        lastMouseTime.current = now;
+        lastScrollTime.current = now;
+    }, []);
 
     useEffect(() => {
         if (isProcessing || isCooldown) return;
 
         setEyeState('happy');
+        let jumpInterval: ReturnType<typeof setInterval> | null = null;
 
         if (robotRef.current) {
             const startY = robotRef.current.position.y;
             let jumpTime = 0;
             const jumpDuration = 0.5;
 
-            const jumpInterval = setInterval(() => {
+            jumpInterval = setInterval(() => {
                 jumpTime += 0.016;
                 if (jumpTime >= jumpDuration) {
-                    clearInterval(jumpInterval);
+                    if (jumpInterval) clearInterval(jumpInterval);
                     return;
                 }
                 const progress = jumpTime / jumpDuration;
@@ -62,8 +82,11 @@ export const useBotInteractions = ({
         const timer = setTimeout(() => {
             setEyeState('open');
         }, 1500);
-        return () => clearTimeout(timer);
-    }, [pathname]);
+        return () => {
+            clearTimeout(timer);
+            if (jumpInterval) clearInterval(jumpInterval);
+        };
+    }, [isCooldown, isProcessing, pathname, robotRef, setEyeState]);
 
     interface CustomWindow extends Window {
         lastMouseDirection?: number;
@@ -187,11 +210,23 @@ export const useBotInteractions = ({
             lastScrollTime.current = now;
         };
 
+        const isEventInsideBot = (target: EventTarget | null) => {
+            return !!(
+                containerRef.current &&
+                target instanceof Node &&
+                containerRef.current.contains(target)
+            );
+        };
+
         const handleWindowRightClick = (e: MouseEvent) => {
-            e.preventDefault();
+            if (isEventInsideBot(e.target)) {
+                e.preventDefault();
+            }
         };
 
         const handleWindowMouseDown = (e: MouseEvent) => {
+            if (!isEventInsideBot(e.target)) return;
+
             if (e.button === 2) {
                 isRightClickingRef.current = true;
                 setEyeState('closed');
@@ -202,7 +237,9 @@ export const useBotInteractions = ({
             }
         };
 
-        const handleWindowMouseUp = () => {
+        const handleWindowMouseUp = (e: MouseEvent) => {
+            if (!isEventInsideBot(e.target) && !isRightClickingRef.current) return;
+
             if (isRightClickingRef.current) {
                 isRightClickingRef.current = false;
                 setEyeState('open');
@@ -210,8 +247,8 @@ export const useBotInteractions = ({
         };
 
         window.addEventListener('mousemove', handleWindowMouseMove);
-        window.addEventListener('touchmove', handleWindowMouseMove);
-        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('touchmove', handleWindowMouseMove, { passive: true });
+        window.addEventListener('scroll', handleScroll, { passive: true });
         window.addEventListener('contextmenu', handleWindowRightClick);
         window.addEventListener('mousedown', handleWindowMouseDown);
         window.addEventListener('mouseup', handleWindowMouseUp);
@@ -223,12 +260,27 @@ export const useBotInteractions = ({
             window.removeEventListener('contextmenu', handleWindowRightClick);
             window.removeEventListener('mousedown', handleWindowMouseDown);
             window.removeEventListener('mouseup', handleWindowMouseUp);
+            const win = window as unknown as CustomWindow;
+            if (win.dizzyTimeout) clearTimeout(win.dizzyTimeout);
+            if (win.scrollTimeout) clearTimeout(win.scrollTimeout);
         };
     }, [isProcessing, isCooldown, containerRef, isHoveredRef, mouseRef, setBubbleText, setChatOpen, setEyeState]);
 
     const handleMouseEnter = () => {
-        setChatOpen(true);
         isHoveredRef.current = true;
+        if (!isProcessing && !isCooldown) {
+            setEyeState('happy');
+            setBubbleText('Click me to chat.');
+
+            if (hoverPromptTimeoutRef.current) {
+                clearTimeout(hoverPromptTimeoutRef.current);
+            }
+            hoverPromptTimeoutRef.current = setTimeout(() => {
+                if (isHoveredRef.current) return;
+                setBubbleText(null);
+                hoverPromptTimeoutRef.current = null;
+            }, 1800);
+        }
 
         const now = Date.now();
         if (now - lastHoverTimeRef.current < 500) {
@@ -240,9 +292,15 @@ export const useBotInteractions = ({
 
         if (hoverCountRef.current > 3) {
             setEyeState('confused');
-            setTimeout(() => {
+            setBubbleText('You found the hover sensor.');
+            if (hoverResetTimeoutRef.current) {
+                clearTimeout(hoverResetTimeoutRef.current);
+            }
+            hoverResetTimeoutRef.current = setTimeout(() => {
                 setEyeState('open');
                 hoverCountRef.current = 0;
+                setBubbleText(null);
+                hoverResetTimeoutRef.current = null;
             }, 1500);
         }
     };

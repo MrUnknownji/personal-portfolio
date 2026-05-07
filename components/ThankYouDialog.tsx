@@ -20,6 +20,7 @@ const ThankYouDialog = ({
 }: ThankYouDialogProps) => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const copyResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isEmailCopied, setIsEmailCopied] = useState(false);
   const [isVisible, setIsVisible] = useState(isOpen);
   const [mounted, setMounted] = useState(false);
@@ -33,10 +34,26 @@ const ThankYouDialog = ({
       .writeText(email)
       .then(() => {
         setIsEmailCopied(true);
-        setTimeout(() => setIsEmailCopied(false), 2000);
+        if (copyResetTimerRef.current) {
+          clearTimeout(copyResetTimerRef.current);
+        }
+        copyResetTimerRef.current = setTimeout(() => {
+          setIsEmailCopied(false);
+          copyResetTimerRef.current = null;
+        }, 2000);
       })
-      .catch((err) => console.error("Failed to copy email: ", err));
+      .catch(() => {
+        setIsEmailCopied(false);
+      });
   }, [email]);
+
+  useEffect(() => {
+    return () => {
+      if (copyResetTimerRef.current) {
+        clearTimeout(copyResetTimerRef.current);
+      }
+    };
+  }, []);
 
   const startCloseProcess = useCallback(() => {
     if (!overlayRef.current || !dialogRef.current || !isVisible) return;
@@ -156,11 +173,11 @@ const ThankYouDialog = ({
 
           <div className="space-y-3">
             <h3 className="text-3xl font-bold text-white tracking-tight">
-              Message Sent!
+              Email Draft Opened
             </h3>
             <p className="text-neutral-400 text-lg leading-relaxed">
-              Thanks for reaching out. I&apos;ll get back to you as soon as
-              possible.
+              Thanks for reaching out. Send the draft from your mail app, and
+              I&apos;ll get back to you as soon as possible.
             </p>
           </div>
 
@@ -172,6 +189,7 @@ const ThankYouDialog = ({
               onClick={handleCopyEmail}
               className="p-2 hover:bg-white/10 rounded-lg transition-colors text-primary relative group"
               title="Copy Email"
+              aria-label="Copy email address"
             >
               {isEmailCopied ? <FiCheck /> : <FiCopy />}
               <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
@@ -182,7 +200,7 @@ const ThankYouDialog = ({
 
           <div className="pt-2">
             <Link
-              href="#projects"
+              href="/my-projects"
               onClick={startCloseProcess}
               className="w-full px-6 py-3 rounded-xl bg-primary text-black font-bold hover:bg-primary/90 transition-all duration-300 flex items-center justify-center gap-2 group"
             >
@@ -195,6 +213,7 @@ const ThankYouDialog = ({
         <button
           onClick={startCloseProcess}
           className="absolute top-4 right-4 p-2 text-neutral-500 hover:text-white transition-colors rounded-full hover:bg-white/10"
+          aria-label="Close dialog"
         >
           <FiX className="w-5 h-5" />
         </button>

@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { CSSProperties, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -93,18 +93,29 @@ const JourneySection = () => {
         },
       );
 
+      const cleanupMouseListeners: Array<() => void> = [];
+
       items.forEach((item) => {
         const card = item.querySelector(".journey-card") as HTMLElement;
         if (!card) return;
-        card.addEventListener("mousemove", (e) => {
+        const handleMouseMove = (e: MouseEvent) => {
           const rect = card.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
 
           card.style.setProperty("--mouse-x", `${x}px`);
           card.style.setProperty("--mouse-y", `${y}px`);
+        };
+
+        card.addEventListener("mousemove", handleMouseMove);
+        cleanupMouseListeners.push(() => {
+          card.removeEventListener("mousemove", handleMouseMove);
         });
       });
+
+      return () => {
+        cleanupMouseListeners.forEach((cleanup) => cleanup());
+      };
     },
     { scope: containerRef },
   );
@@ -142,11 +153,12 @@ const JourneySection = () => {
               {/* Card */}
               <div
                 className="journey-card relative bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 md:p-8 shadow-lg transition-all duration-500 overflow-hidden transform-gpu group-hover:-translate-y-2 group-hover:border-primary/40 group-hover:shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.25)] z-10"
-                style={{
-                  // @ts-ignore
+                style={
+                  {
                   "--mouse-x": "0px",
                   "--mouse-y": "0px",
-                }}
+                  } as CSSProperties
+                }
               >
                 {/* Inner Ambient Glow */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />

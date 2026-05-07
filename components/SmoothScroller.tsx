@@ -16,18 +16,24 @@ export default function SmoothScroller({
 }) {
   const pathname = usePathname();
 
-  useGSAP(() => {
-    const smoother = ScrollSmoother.create({
-      smooth: 0.8,
-      effects: true,
-      smoothTouch: 0,
-      normalizeScroll: false,
-    });
+  useGSAP(
+    () => {
+      const existingSmoother = ScrollSmoother.get();
+      if (existingSmoother) return;
 
-    return () => {
-      smoother.kill();
-    };
-  }, { dependencies: [] });
+      const smoother = ScrollSmoother.create({
+        smooth: 0.8,
+        effects: true,
+        smoothTouch: 0,
+        normalizeScroll: false,
+      });
+
+      return () => {
+        smoother.kill();
+      };
+    },
+    { dependencies: [] },
+  );
 
   useEffect(() => {
     const smoother = ScrollSmoother.get();

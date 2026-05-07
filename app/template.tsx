@@ -5,10 +5,9 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { useGSAP } from "@gsap/react";
-import { TextPlugin } from "gsap/TextPlugin";
 
 if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, TextPlugin);
+  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 }
 
 function getOrCreateOverlay(): HTMLDivElement {
@@ -19,9 +18,9 @@ function getOrCreateOverlay(): HTMLDivElement {
     overlay = document.createElement("div");
     overlay.id = "page-transition-overlay";
     overlay.className =
-      "fixed top-0 left-0 w-screen h-dvh flex items-center justify-center bg-gray-950 flex-col pointer-events-none";
+      "fixed top-0 left-0 w-screen h-dvh flex items-center justify-center bg-background flex-col pointer-events-none";
     overlay.style.cssText =
-      "position:fixed;top:0;left:0;width:100vw;height:100dvh;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9999;pointer-events:none;opacity:1;background-color:#030712;";
+      "position:fixed;top:0;left:0;width:100vw;height:100dvh;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9999;pointer-events:none;opacity:1;background-color:hsl(25 11% 6%);";
     overlay.innerHTML = `
       <div class="bloom-flower" style="position:relative;width:7rem;height:7rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;pointer-events:none;">
         <svg viewBox="-10 0 120 100" style="width:100%;height:100%;overflow:visible;">
@@ -152,10 +151,10 @@ export default function Template({ children }: { children: React.ReactNode }) {
         defaults: { ease: "power2.inOut" },
       });
 
-      const counterDuration = 2.5;
-      const contentFadeInDelay = 0.5;
+      const counterDuration = 0.9;
+      const contentFadeInDelay = 0.15;
       const overlayFadeOutDelay = counterDuration - 0.1;
-      const overlayFadeOutDuration = 0.6;
+      const overlayFadeOutDuration = 0.3;
 
       tl.set(overlay, { opacity: 1, display: "flex" })
         .set(contentRef.current, { opacity: 0 })
@@ -197,6 +196,14 @@ export default function Template({ children }: { children: React.ReactNode }) {
           },
           `-=${overlayFadeOutDuration * 0.3}`,
         );
+
+      return () => {
+        tl.kill();
+        gsap.killTweensOf([overlay, contentRef.current, counterEl]);
+        bodyStyle.cursor = "";
+        bodyStyle.overflow = "";
+        overlay.style.pointerEvents = "none";
+      };
     },
     { dependencies: [children, mounted] },
   );

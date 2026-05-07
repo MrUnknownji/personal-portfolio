@@ -228,8 +228,6 @@ export const useBotScene = ({
         baseRing.rotation.x = Math.PI / 2;
         baseRingGroup.add(baseRing);
 
-        let frameCount = 0;
-
         const animate = () => {
             requestRef.current = requestAnimationFrame(animate);
 
@@ -300,6 +298,25 @@ export const useBotScene = ({
             if (container && renderer.domElement) {
                 container.removeChild(renderer.domElement);
             }
+            scene.traverse((object) => {
+                if (!(object instanceof THREE.Mesh)) return;
+
+                object.geometry?.dispose();
+                const materials = Array.isArray(object.material)
+                    ? object.material
+                    : [object.material];
+
+                materials.forEach((material) => {
+                    const materialWithMaps = material as THREE.Material & {
+                        map?: THREE.Texture;
+                        emissiveMap?: THREE.Texture;
+                    };
+                    materialWithMaps.map?.dispose();
+                    materialWithMaps.emissiveMap?.dispose();
+                    material.dispose();
+                });
+            });
+            eyeTexture.dispose();
             renderer.dispose();
         };
     }, [containerRef, chatOpenRef, isCooldownRef, isHoveredRef, isProcessingRef, mouseRef, isGlobalModalOpenRef]);

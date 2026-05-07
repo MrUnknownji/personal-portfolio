@@ -158,7 +158,7 @@ export const useBotEyes = ({
         return () => {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
         };
-    }, [eyeState]);
+    }, [clockRef, eyeCanvasRef, eyeContextRef, eyeState, eyeTextureRef]);
 
     return { eyeStateRef };
 };

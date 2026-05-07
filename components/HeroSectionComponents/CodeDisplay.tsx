@@ -151,7 +151,7 @@ const AFTER_CODE = [
     line: 10,
     content: (
       <>
-        <span className="text-[#6a9955]">{"// Let's build! 🚀"}</span>
+        <span className="text-[#6a9955]">{"// Let's build."}</span>
       </>
     ),
   },
@@ -210,6 +210,8 @@ const CodePanel = memo(
   ),
 );
 
+CodePanel.displayName = "CodePanel";
+
 interface CodeCompareProps {
   className?: string;
   initialSliderPercentage?: number;
@@ -235,7 +237,7 @@ const CodeCompare = ({
   const rafRef = useRef<number | null>(null);
   const sliderPositionRef = useRef(initialSliderPercentage);
   const isHoveredRef = useRef(false);
-  const autoplayProgressRef = useRef(0);
+  const autoplayProgressRef = useRef(initialSliderPercentage);
 
   const updateSliderVisual = useCallback((percent: number) => {
     sliderPositionRef.current = percent;
@@ -321,7 +323,7 @@ const CodeCompare = ({
   };
 
   const handleStart = useCallback(
-    (clientX: number) => {
+    () => {
       if (slideMode === "drag") {
         setIsDragging(true);
       }
@@ -349,7 +351,7 @@ const CodeCompare = ({
   );
 
   const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => handleStart(e.clientX),
+    () => handleStart(),
     [handleStart],
   );
   const handleMouseUp = useCallback(() => handleEnd(), [handleEnd]);
@@ -359,7 +361,7 @@ const CodeCompare = ({
   );
   const handleTouchStart = useCallback(
     (e: React.TouchEvent) => {
-      if (!autoplay) handleStart(e.touches[0].clientX);
+      if (!autoplay) handleStart();
     },
     [handleStart, autoplay],
   );

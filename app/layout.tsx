@@ -15,7 +15,7 @@ import ScrollMandala from "@/components/ui/ScrollMandala";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  themeColor: "#0b0908",
 };
 
 const outfit = Outfit({
@@ -32,8 +32,29 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Sandeep's Portfolio",
-  description: "How Bad Possibly It Could Be",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+  ),
+  title: {
+    default: "Sandeep Kumar | Full Stack Developer",
+    template: "%s | Sandeep Kumar",
+  },
+  description:
+    "Portfolio of Sandeep Kumar, a full stack developer building performant web, mobile, and AI-powered product experiences.",
+  openGraph: {
+    title: "Sandeep Kumar | Full Stack Developer",
+    description:
+      "Explore Sandeep Kumar's full stack projects, technical skills, and contact information.",
+    url: "/",
+    siteName: "Sandeep Kumar Portfolio",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sandeep Kumar | Full Stack Developer",
+    description:
+      "Full stack developer portfolio featuring web, mobile, and AI-powered products.",
+  },
   icons: {
     icon: "/favicon.svg",
     apple: "/favicon.svg",
