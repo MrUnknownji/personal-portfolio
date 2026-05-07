@@ -374,7 +374,11 @@ export default function Bot() {
     }
 
     if (/\bgithub\b/.test(normalizedPrompt)) {
-      window.open("https://github.com/MrUnknownji", "_blank", "noopener,noreferrer");
+      window.open(
+        "https://github.com/MrUnknownji",
+        "_blank",
+        "noopener,noreferrer",
+      );
       return "Opening Sandeep's GitHub profile.";
     }
 
@@ -626,7 +630,7 @@ export default function Bot() {
 
       {contextMenu && (
         <div
-          className="fixed z-[60] min-w-48 rounded-lg border border-primary/30 bg-card/95 p-1.5 shadow-xl shadow-black/30 backdrop-blur"
+          className="fixed z-60 min-w-48 rounded-lg border border-primary/30 bg-card/95 p-1.5 shadow-xl shadow-black/30 backdrop-blur"
           style={{
             left: menuLeft,
             top: menuTop,

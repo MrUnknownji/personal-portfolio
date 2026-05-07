@@ -31,10 +31,26 @@ const ANIMATION_CONFIG = {
   EASE: "power3.out",
 } as const;
 
+const orderedProjectIds = (projectIds: number[]) => {
+  const idSet = new Set(projectIds);
+  return projects
+    .filter((project) => idSet.has(project.id))
+    .map((project) => project.id);
+};
+
+const projectIdSetsMatch = (a: number[], b: number[]) => {
+  if (a.length !== b.length) return false;
+  return a.every((id, index) => id === b[index]);
+};
+
 export default function MyProjects() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [filter, setFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [displayedProjectIds, setDisplayedProjectIds] = useState(() =>
+    projects.map((project) => project.id),
+  );
+  const [isGridTransitioning, setIsGridTransitioning] = useState(false);
   const [stableGridMinHeight, setStableGridMinHeight] = useState<number | null>(
     null,
   );
@@ -44,6 +60,8 @@ export default function MyProjects() {
   const searchRef = useRef<HTMLInputElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
   const titleSectionRef = useRef<HTMLDivElement>(null);
+  const activeGridTransitionRef = useRef<gsap.core.Animation | null>(null);
+  const displayedProjectIdsRef = useRef(displayedProjectIds);
 
   const particlesRef = useRef<HTMLDivElement>(null);
 
@@ -72,10 +90,19 @@ export default function MyProjects() {
     });
   }, [filter, searchQuery]);
 
-  const filteredProjectIds = useMemo(
-    () => new Set(filteredProjects.map((project) => project.id)),
+  const targetProjectIds = useMemo(
+    () => filteredProjects.map((project) => project.id),
     [filteredProjects],
   );
+
+  const displayedProjects = useMemo(() => {
+    const displayedIdSet = new Set(displayedProjectIds);
+    return projects.filter((project) => displayedIdSet.has(project.id));
+  }, [displayedProjectIds]);
+
+  useEffect(() => {
+    displayedProjectIdsRef.current = displayedProjectIds;
+  }, [displayedProjectIds]);
 
   useGSAP(
     () => {
@@ -133,21 +160,128 @@ export default function MyProjects() {
           scale: 0.96,
         });
 
-        initialTl.to(
-          cards,
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.45,
-            stagger: 0.06,
-            ease: "power2.out",
-            clearProps: "transform,opacity",
-          });
+        initialTl.to(cards, {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.45,
+          stagger: 0.06,
+          ease: "power2.out",
+          clearProps: "transform,opacity",
+        });
       }
     },
-    { scope: pageRef },
+    { scope: pageRef, dependencies: [] },
   );
+
+  useEffect(() => {
+    const projectGrid = projectsRef.current;
+    if (!projectGrid) return;
+
+    const nextProjectIds = orderedProjectIds(targetProjectIds);
+    if (projectIdSetsMatch(displayedProjectIdsRef.current, nextProjectIds)) {
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    const currentCards = Array.from(
+      projectGrid.querySelectorAll<HTMLElement>(".project-card-container"),
+    );
+
+    activeGridTransitionRef.current?.kill();
+    gsap.killTweensOf([projectGrid, ...currentCards]);
+    gsap.set(projectGrid, {
+      clearProps: "transform,opacity,visibility,filter",
+    });
+    gsap.set(currentCards, {
+      clearProps: "transform,opacity,visibility,filter",
+    });
+
+    if (prefersReducedMotion) {
+      displayedProjectIdsRef.current = nextProjectIds;
+      setDisplayedProjectIds(nextProjectIds);
+      setIsGridTransitioning(false);
+      return;
+    }
+
+    setIsGridTransitioning(true);
+
+    const transition = gsap.timeline({
+      defaults: { overwrite: "auto" },
+      onInterrupt: () => {
+        activeGridTransitionRef.current = null;
+        setIsGridTransitioning(false);
+        gsap.set(projectGrid.querySelectorAll(".project-card-container"), {
+          clearProps: "transform,opacity,visibility,filter",
+        });
+      },
+    });
+
+    activeGridTransitionRef.current = transition;
+
+    transition
+      .to(currentCards, {
+        autoAlpha: 0,
+        scale: 0.96,
+        filter: "blur(6px)",
+        duration: 0.18,
+        ease: "power2.in",
+        stagger: 0.015,
+      })
+      .call(() => {
+        gsap.set(projectGrid, { autoAlpha: 0 });
+        displayedProjectIdsRef.current = nextProjectIds;
+        setDisplayedProjectIds(nextProjectIds);
+
+        requestAnimationFrame(() => {
+          const nextCards = projectsRef.current?.querySelectorAll<HTMLElement>(
+            ".project-card-container",
+          );
+
+          if (!nextCards || nextCards.length === 0) {
+            activeGridTransitionRef.current = null;
+            setIsGridTransitioning(false);
+            gsap.set(projectGrid, {
+              clearProps: "transform,opacity,visibility,filter",
+            });
+            ScrollTrigger.refresh();
+            return;
+          }
+
+          gsap.set(nextCards, {
+            autoAlpha: 0,
+            scale: 0.96,
+            filter: "blur(6px)",
+          });
+          gsap.set(projectGrid, { autoAlpha: 1 });
+
+          const enterTransition = gsap.to(nextCards, {
+            autoAlpha: 1,
+            scale: 1,
+            filter: "blur(0px)",
+            duration: 0.24,
+            ease: "power2.out",
+            stagger: 0.025,
+            clearProps: "transform,opacity,visibility,filter",
+            onComplete: () => {
+              activeGridTransitionRef.current = null;
+              setIsGridTransitioning(false);
+              gsap.set(projectGrid, {
+                clearProps: "transform,opacity,visibility,filter",
+              });
+              ScrollTrigger.refresh();
+            },
+          });
+
+          activeGridTransitionRef.current = enterTransition;
+        });
+      });
+
+    return () => transition.kill();
+  }, [targetProjectIds]);
 
   useEffect(() => {
     const handleGlobalMouseMove = (e: MouseEvent) => {
@@ -268,12 +402,10 @@ export default function MyProjects() {
 
         <div className="sticky top-24 z-30 mb-8 md:mb-16 mx-auto max-w-5xl px-4">
           <div ref={controlsRef} className="relative z-30 flex justify-center">
-            <div className="relative bg-background/80 backdrop-blur-md border border-border/50 rounded-[2rem] lg:rounded-full p-2 shadow-lg shadow-black/10 flex flex-col lg:flex-row gap-3 lg:gap-2 items-center w-full max-w-4xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] via-transparent to-primary/[0.02] pointer-events-none rounded-[2rem] lg:rounded-full" />
+            <div className="relative bg-background/80 backdrop-blur-md border border-border/50 rounded-4xl lg:rounded-full p-2 shadow-lg shadow-black/10 flex flex-col lg:flex-row gap-3 lg:gap-2 items-center w-full max-w-4xl">
+              <div className="absolute inset-0 bg-linear-to-br from-white/2 via-transparent to-primary/2 pointer-events-none rounded-4xl lg:rounded-full" />
 
-              <div
-                className="relative w-full lg:flex-1 group rounded-full border border-border/50 bg-foreground/[0.04] transition-all duration-300 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-foreground/[0.06] hover:bg-foreground/[0.06]"
-              >
+              <div className="relative w-full lg:flex-1 group rounded-full border border-border/50 bg-foreground/4 transition-all duration-300 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-foreground/6 hover:bg-foreground/6">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
                   <FiSearch className="text-muted-foreground group-focus-within:text-primary transition-colors duration-300 w-4 h-4 md:w-5 md:h-5" />
                 </div>
@@ -292,9 +424,10 @@ export default function MyProjects() {
                     type="button"
                     aria-label="Clear search"
                     onClick={(e) => {
+                      const button = e.currentTarget;
                       clearSearch();
                       gsap.fromTo(
-                        e.currentTarget,
+                        button,
                         { scale: 1, rotation: 0 },
                         {
                           scale: 0.8,
@@ -302,7 +435,7 @@ export default function MyProjects() {
                           duration: 0.15,
                           ease: "power2.in",
                           onComplete: () => {
-                            gsap.to(e.currentTarget, {
+                            gsap.to(button, {
                               scale: 1,
                               duration: 0.15,
                               ease: "back.out(2)",
@@ -341,7 +474,7 @@ export default function MyProjects() {
                       );
                     }}
                     className={`
-                    relative whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden flex-shrink-0
+                    relative whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden shrink-0
                     ${
                       filter === category
                         ? "text-dark bg-primary scale-105 font-semibold"
@@ -350,7 +483,7 @@ export default function MyProjects() {
                   `}
                   >
                     {filter === category && (
-                      <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                      <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent" />
                     )}
                     <span className="relative z-10">{category}</span>
                   </button>
@@ -371,14 +504,8 @@ export default function MyProjects() {
               : undefined,
           }}
         >
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className="project-card-container"
-              style={{
-                display: filteredProjectIds.has(project.id) ? "block" : "none",
-              }}
-            >
+          {displayedProjects.map((project) => (
+            <div key={project.id} className="project-card-container">
               <ProjectCard
                 project={project}
                 onClick={() => setSelectedProject(project)}
@@ -387,7 +514,7 @@ export default function MyProjects() {
           ))}
         </div>
 
-        {filteredProjects.length === 0 && (
+        {filteredProjects.length === 0 && !isGridTransitioning && (
           <div className="text-center py-20 px-4">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-white/5 mb-6 ring-1 ring-white/10 animate-float">
               <FiSearch className="w-10 h-10 text-muted/50 animate-pulse-subtle" />

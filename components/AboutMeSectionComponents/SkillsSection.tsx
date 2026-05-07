@@ -95,12 +95,12 @@ const SkillsSection = () => {
                            hover:-translate-y-2 transition-all duration-500 ease-out z-10"
               >
                 {/* Background Ambient Glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                 {/* Animated shimmer sweep */}
                 <div
                   className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_2s_infinite]
-                             bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none"
+                             bg-linear-to-r from-transparent via-white/5 to-transparent pointer-events-none"
                   style={{ width: "200%" }}
                 />
 
@@ -139,10 +139,10 @@ const SkillsSection = () => {
             <div key={category} className="tech-category-wrapper">
               <div className="tech-category group/cat relative h-full bg-[#0a0a0a] border border-white/5 rounded-2xl p-7 shadow-lg overflow-hidden transition-all duration-500 hover:border-primary/40 hover:shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.2)] hover:-translate-y-1">
                 {/* Subtle top sweeping accent */}
-                <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover/cat:opacity-100 transition-all duration-700 ease-out group-hover/cat:scale-x-100 scale-x-0 origin-left" />
+                <div className="absolute top-0 inset-x-0 h-0.5 bg-linear-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover/cat:opacity-100 transition-all duration-700 ease-out group-hover/cat:scale-x-100 scale-x-0 origin-left" />
 
                 <h5 className="text-xl font-bold capitalize text-foreground/90 mb-6 flex items-center gap-3 group-hover/cat:text-white transition-colors duration-300">
-                  <span className="w-1.5 h-6 bg-gradient-to-b from-primary to-primary/40 rounded-full shadow-[0_0_10px_hsl(var(--primary)/0.5)]"></span>
+                  <span className="w-1.5 h-6 bg-linear-to-b from-primary to-primary/40 rounded-full shadow-[0_0_10px_hsl(var(--primary)/0.5)]"></span>
                   {category.replace(/([A-Z])/g, " $1").trim()}
                 </h5>
 
@@ -162,7 +162,7 @@ const SkillsSection = () => {
                       {/* Inner Shine sweep effect */}
                       <div
                         className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover/chip:animate-[shimmer_1.5s_infinite]
-                                   bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                                   bg-linear-to-r from-transparent via-white/20 to-transparent"
                       />
                     </div>
                   ))}
