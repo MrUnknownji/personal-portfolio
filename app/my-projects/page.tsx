@@ -280,7 +280,9 @@ export default function MyProjects() {
         });
       });
 
-    return () => transition.kill();
+    return () => {
+      transition.kill();
+    };
   }, [targetProjectIds]);
 
   useEffect(() => {
