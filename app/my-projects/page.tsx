@@ -3,27 +3,12 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import ProjectCard from "@/components/ProjectCard";
 import ProjectModal from "@/components/ProjectModal";
 import Title from "@/components/ui/Title";
-import { projects as allProjects } from "@/data/data";
+import { selectedProjects as projects } from "@/data/data";
 import { Project } from "@/types/Project";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { FiSearch, FiX } from "react-icons/fi";
-
-const DISPLAY_ORDER = [9, 8, 7, 1, 10];
-const TITLE_OVERRIDES: Record<number, string> = {
-  8: "YouTube Content OS",
-  7: "AuraEdit",
-  10: "Omni Mart",
-};
-
-const projects = DISPLAY_ORDER.map((id) => {
-  const project = allProjects.find((p) => p.id === id);
-  if (project && TITLE_OVERRIDES[id]) {
-    return { ...project, title: TITLE_OVERRIDES[id] };
-  }
-  return project;
-}).filter(Boolean) as Project[];
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -371,8 +356,8 @@ export default function MyProjects() {
           className="mb-12 md:mb-16 text-center relative pt-12"
         >
           <Title
-            title="My Projects"
-            subtitle="A collection of my work, experiments, and open source contributions."
+            title="Selected Work"
+            subtitle="Production-minded web, mobile, and AI product builds with demos, source links, screenshots, and architecture notes."
             showGlowBar={false}
             className="mb-4"
           />

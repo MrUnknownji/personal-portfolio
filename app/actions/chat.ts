@@ -1,6 +1,6 @@
 "use server";
 
-import { projects, SkillsData } from "@/data/data";
+import { projects, selectedProjects, SkillsData } from "@/data/data";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite-preview";
@@ -15,9 +15,10 @@ function getLocalPortfolioAnswer(prompt: string) {
       : contextSummary;
   }
 
-  const requestedProject = projects.find((project) =>
-    normalizedPrompt.includes(project.title.toLowerCase()),
-  );
+  const searchableProjects = [...selectedProjects, ...projects];
+  const requestedProject = searchableProjects.find((project) => {
+    return normalizedPrompt.includes(project.title.toLowerCase());
+  });
 
   if (requestedProject) {
     return `${requestedProject.title} is a ${requestedProject.category.toLowerCase()} project: ${requestedProject.shortDescription} Tech used: ${requestedProject.technologies.slice(0, 4).join(", ")}.`;
@@ -40,7 +41,7 @@ function getLocalPortfolioAnswer(prompt: string) {
   }
 
   if (/\b(project|work|portfolio|built|apps?)\b/.test(normalizedPrompt)) {
-    const featuredProjects = projects
+    const featuredProjects = selectedProjects
       .slice(0, 4)
       .map((project) => project.title)
       .join(", ");
@@ -72,7 +73,7 @@ export async function chatWithBot(prompt: string) {
       ...SkillsData.tools,
     ],
     exp: "3 years building immersive web experiences",
-    projects: projects.map((project) => {
+    projects: selectedProjects.map((project) => {
       return `${project.title}: ${project.shortDescription}`;
     }),
     funFact: "Once debugged a single line of CSS for 6 hours.",
@@ -104,13 +105,22 @@ export async function chatWithBot(prompt: string) {
     systemInstruction: { parts: [{ text: systemInstructionText }] },
     generationConfig: { temperature: 1.1, maxOutputTokens: 200, topP: 0.95 },
     safetySettings: [
-      { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-      { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+      {
+        category: "HARM_CATEGORY_HATE_SPEECH",
+        threshold: "BLOCK_MEDIUM_AND_ABOVE",
+      },
+      {
+        category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+        threshold: "BLOCK_MEDIUM_AND_ABOVE",
+      },
       {
         category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-        threshold: "BLOCK_NONE",
+        threshold: "BLOCK_MEDIUM_AND_ABOVE",
       },
-      { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+      {
+        category: "HARM_CATEGORY_HARASSMENT",
+        threshold: "BLOCK_MEDIUM_AND_ABOVE",
+      },
     ],
   };
 

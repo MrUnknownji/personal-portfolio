@@ -6,6 +6,13 @@ export type MediaItem = {
   alt?: string;
 };
 
+export type ProjectCaseStudy = {
+  problem: string;
+  solution: string;
+  architecture: string[];
+  tradeoffs: string[];
+};
+
 export interface Project {
   id: number;
   title: string;
@@ -19,4 +26,5 @@ export interface Project {
   category: string;
   gallery?: MediaItem[];
   featured?: boolean;
+  caseStudy?: ProjectCaseStudy;
 }

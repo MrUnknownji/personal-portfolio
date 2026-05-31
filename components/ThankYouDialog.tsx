@@ -173,11 +173,11 @@ const ThankYouDialog = ({
 
           <div className="space-y-3">
             <h3 className="text-3xl font-bold text-white tracking-tight">
-              Email Draft Opened
+              Message Sent
             </h3>
             <p className="text-neutral-400 text-lg leading-relaxed">
-              Thanks for reaching out. Send the draft from your mail app, and
-              I&apos;ll get back to you as soon as possible.
+              Thanks for reaching out. I&apos;ll review your message and get
+              back to you as soon as possible.
             </p>
           </div>
 

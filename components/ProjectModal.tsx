@@ -323,6 +323,24 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
                   title="About the Project"
                   content={project.longDescription}
                 />
+                {project.caseStudy && (
+                  <>
+                    <ExpandableSection
+                      title="Problem & Solution"
+                      content={`${project.caseStudy.problem}\n\n${project.caseStudy.solution}`}
+                    />
+                    <ExpandableSection
+                      title="Architecture Notes"
+                      content={project.caseStudy.architecture}
+                      isList={true}
+                    />
+                    <ExpandableSection
+                      title="Tradeoffs"
+                      content={project.caseStudy.tradeoffs}
+                      isList={true}
+                    />
+                  </>
+                )}
                 <ExpandableSection
                   title="Key Features"
                   content={project.features}

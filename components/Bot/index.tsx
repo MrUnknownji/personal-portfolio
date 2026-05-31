@@ -4,14 +4,12 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import * as THREE from "three";
 import gsap from "gsap";
-import { ScrollSmoother } from "gsap/ScrollSmoother";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { chatWithBot } from "@/app/actions/chat";
-import { projects } from "@/data/data";
 import { useBotScene } from "./useBotScene";
 import { useBotEyes, EyeState } from "./useBotEyes";
 import { useBotInteractions } from "./useBotInteractions";
 import { BotChat } from "./BotChat";
+import { useBotCommands } from "./useBotCommands";
 
 type KryptonContextMenu = {
   x: number;
@@ -137,6 +135,12 @@ export default function Bot() {
     setBubbleText,
   });
 
+  const { handleLocalCommand } = useBotCommands({
+    activeProject,
+    pathname,
+    router,
+  });
+
   useEffect(() => {
     const checkBlink = () => {
       if (isGlobalModalOpen) return;
@@ -225,172 +229,6 @@ export default function Bot() {
       setBubbleText(null);
       setEyeState("open");
     }, 2000);
-  };
-
-  const findProject = (prompt: string) => {
-    const normalizedPrompt = prompt.toLowerCase();
-    return projects.find((project) => {
-      return (
-        normalizedPrompt.includes(project.title.toLowerCase()) ||
-        project.technologies.some((tech) =>
-          normalizedPrompt.includes(tech.toLowerCase()),
-        )
-      );
-    });
-  };
-
-  const openProjectDetails = (projectId: number) => {
-    const dispatchOpen = () => {
-      window.dispatchEvent(
-        new CustomEvent("portfolio:open-project", {
-          detail: { id: projectId },
-        }),
-      );
-    };
-
-    if (pathname !== "/my-projects") {
-      router.push("/my-projects");
-      window.setTimeout(dispatchOpen, 900);
-      return;
-    }
-
-    dispatchOpen();
-  };
-
-  const scrollToTarget = (selector: string, hash: string) => {
-    const runScroll = () => {
-      const target = document.querySelector(selector);
-      if (!target) return false;
-
-      const smoother = ScrollSmoother.get();
-      if (smoother) {
-        smoother.paused(false);
-        smoother.scrollTo(target, true, "top 110px");
-      } else {
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-
-      window.history.replaceState(null, "", hash);
-      window.setTimeout(() => ScrollTrigger.refresh(), 350);
-      return true;
-    };
-
-    if (pathname !== "/") {
-      router.push("/");
-
-      let attempts = 0;
-      const retryScroll = () => {
-        attempts += 1;
-        if (!runScroll() && attempts < 20) {
-          window.setTimeout(retryScroll, 100);
-        }
-      };
-
-      window.setTimeout(retryScroll, 350);
-      return;
-    }
-
-    runScroll();
-  };
-
-  const handleLocalCommand = (prompt: string) => {
-    const normalizedPrompt = prompt.toLowerCase();
-    const activeProjectMatch = activeProject
-      ? projects.find((project) => project.id === activeProject.id)
-      : null;
-    const requestedProject = findProject(prompt) || activeProjectMatch;
-
-    if (
-      /\b(summary|summarize|explain|tell me about|what is|give me)\b/.test(
-        normalizedPrompt,
-      )
-    ) {
-      return null;
-    }
-
-    if (
-      /\b(open|show|view)\b/.test(normalizedPrompt) &&
-      requestedProject &&
-      !/\bgithub|source|repo|code|live|demo|website|preview\b/.test(
-        normalizedPrompt,
-      )
-    ) {
-      const project =
-        requestedProject ||
-        projects.find((item) => item.featured) ||
-        projects[0];
-
-      if (project) {
-        openProjectDetails(project.id);
-        return `Opening ${project.title}.`;
-      }
-    }
-
-    if (/\b(home|top|hero)\b/.test(normalizedPrompt)) {
-      const smoother = ScrollSmoother.get();
-      if (pathname !== "/") {
-        router.push("/");
-        window.setTimeout(() => {
-          const currentSmoother = ScrollSmoother.get();
-          if (currentSmoother) currentSmoother.scrollTo(0, true);
-          else window.scrollTo({ top: 0, behavior: "smooth" });
-        }, 350);
-      } else if (smoother) {
-        smoother.scrollTo(0, true);
-      } else {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-      return "Taking you back to the home section.";
-    }
-
-    if (/\bskills?\b/.test(normalizedPrompt)) {
-      scrollToTarget("#skills", "#skills");
-      return "Opening the skills section.";
-    }
-
-    if (/\b(about|bio|background|journey)\b/.test(normalizedPrompt)) {
-      scrollToTarget("#about", "#about");
-      return /\bskills?\b/.test(normalizedPrompt)
-        ? "Opening the skills section."
-        : "Opening the About section.";
-    }
-
-    if (/\b(contact|hire|email|reach)\b/.test(normalizedPrompt)) {
-      scrollToTarget("#contact", "#contact");
-      return "Opening the Contact section.";
-    }
-
-    if (/\b(projects?|work|portfolio)\b/.test(normalizedPrompt)) {
-      router.push("/my-projects");
-      return "Opening the projects page.";
-    }
-
-    if (/\b(source|repo|code)\b/.test(normalizedPrompt)) {
-      const project = requestedProject;
-      if (project?.githubLink) {
-        window.open(project.githubLink, "_blank", "noopener,noreferrer");
-        return `Opening ${project.title} source code.`;
-      }
-    }
-
-    if (/\bgithub\b/.test(normalizedPrompt)) {
-      window.open(
-        "https://github.com/MrUnknownji",
-        "_blank",
-        "noopener,noreferrer",
-      );
-      return "Opening Sandeep's GitHub profile.";
-    }
-
-    if (/\b(live|demo|website|preview)\b/.test(normalizedPrompt)) {
-      const project = findProject(prompt) || requestedProject;
-      if (project?.demoLink) {
-        window.open(project.demoLink, "_blank", "noopener,noreferrer");
-        return `Opening ${project.title} live demo.`;
-      }
-    }
-
-    return null;
   };
 
   const runPrompt = async (prompt: string) => {

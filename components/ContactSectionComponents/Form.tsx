@@ -7,31 +7,76 @@ interface FormProps {
   onSubmitSuccess: () => void;
 }
 
+type ContactFormValues = {
+  name: string;
+  email: string;
+  category: string;
+  subject: string;
+  message: string;
+  company: string;
+};
+
+const initialFormValues: ContactFormValues = {
+  name: "",
+  email: "",
+  category: "",
+  subject: "",
+  message: "",
+  company: "",
+};
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
+  const [formValues, setFormValues] =
+    useState<ContactFormValues>(initialFormValues);
 
   const formRef = useRef<HTMLFormElement>(null);
-  const categoryInputRef = useRef<HTMLInputElement>(null);
-  const subjectInputRef = useRef<HTMLInputElement>(null);
-  const messageTextareaRef = useRef<HTMLTextAreaElement>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
-    if (!categoryInputRef.current?.value.trim()) {
+
+    if (formValues.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters";
+    }
+    if (!EMAIL_PATTERN.test(formValues.email.trim())) {
+      newErrors.email = "Enter a valid email address";
+    }
+    if (formValues.category.trim().length < 2) {
       newErrors.category = "Category is required";
     }
-    if (!subjectInputRef.current?.value.trim()) {
+    if (formValues.subject.trim().length < 3) {
       newErrors.subject = "Subject is required";
     }
-    if (!messageTextareaRef.current?.value.trim()) {
-      newErrors.message = "Message is required";
+    if (formValues.message.trim().length < 10) {
+      newErrors.message = "Message must be at least 10 characters";
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, []);
+  }, [formValues]);
+
+  const handleFieldChange = (
+    fieldName: keyof ContactFormValues,
+    value: string,
+  ) => {
+    setFormValues((currentValues) => ({
+      ...currentValues,
+      [fieldName]: value,
+    }));
+
+    if (errors[fieldName] || errors.form) {
+      setErrors((currentErrors) => ({
+        ...currentErrors,
+        [fieldName]: "",
+        form: "",
+      }));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,24 +94,29 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         });
       }
 
-      const category = categoryInputRef.current?.value.trim() || "";
-      const subject = subjectInputRef.current?.value.trim() || "";
-      const message = messageTextareaRef.current?.value.trim() || "";
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formValues),
+      });
 
-      const mailtoLink = `mailto:sandeepkhati788@gmail.com?subject=${encodeURIComponent(
-        `[${category}] ${subject}`,
-      )}&body=${encodeURIComponent(message)}`;
+      const data = await response.json().catch(() => ({}));
 
-      window.location.href = mailtoLink;
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      if (!response.ok) {
+        setErrors(
+          data.errors || {
+            form: data.message || "Unable to send your message right now.",
+          },
+        );
+        return;
+      }
 
       onSubmitSuccess();
-      formRef.current?.reset();
+      setFormValues(initialFormValues);
       setErrors({});
     } catch {
       setErrors({
-        message:
-          "Unable to open your mail app. Please email me directly at sandeepkhati788@gmail.com.",
+        form: "Unable to send your message right now. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
@@ -89,14 +139,12 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     `;
   };
 
-  const renderFloatingLabel = (fieldName: string, label: string) => {
+  const renderFloatingLabel = (
+    fieldName: keyof ContactFormValues,
+    label: string,
+  ) => {
     const isFocused = focusedField === fieldName;
-    const hasValue =
-      fieldName === "category"
-        ? categoryInputRef.current?.value
-        : fieldName === "subject"
-          ? subjectInputRef.current?.value
-          : messageTextareaRef.current?.value;
+    const hasValue = formValues[fieldName];
 
     return (
       <label
@@ -121,18 +169,76 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         className="space-y-8"
         noValidate
       >
+        <input
+          type="text"
+          name="company"
+          value={formValues.company}
+          onChange={(event) => handleFieldChange("company", event.target.value)}
+          tabIndex={-1}
+          autoComplete="off"
+          className="sr-only"
+          aria-hidden="true"
+        />
+
+        <div className="grid gap-8 sm:grid-cols-2">
+          <div className="relative">
+            <input
+              type="text"
+              name="name"
+              value={formValues.name}
+              className={getInputClasses("name", !!errors.name)}
+              onFocus={() => setFocusedField("name")}
+              onBlur={() => setFocusedField(null)}
+              onChange={(event) =>
+                handleFieldChange("name", event.target.value)
+              }
+              disabled={isSubmitting}
+              autoComplete="name"
+            />
+            {renderFloatingLabel("name", "Name")}
+            {errors.name && (
+              <span className="absolute -bottom-5 left-0 text-xs text-red-400">
+                {errors.name}
+              </span>
+            )}
+          </div>
+
+          <div className="relative">
+            <input
+              type="email"
+              name="email"
+              value={formValues.email}
+              className={getInputClasses("email", !!errors.email)}
+              onFocus={() => setFocusedField("email")}
+              onBlur={() => setFocusedField(null)}
+              onChange={(event) =>
+                handleFieldChange("email", event.target.value)
+              }
+              disabled={isSubmitting}
+              autoComplete="email"
+            />
+            {renderFloatingLabel("email", "Email")}
+            {errors.email && (
+              <span className="absolute -bottom-5 left-0 text-xs text-red-400">
+                {errors.email}
+              </span>
+            )}
+          </div>
+        </div>
+
         <div className="relative">
           <input
-            ref={categoryInputRef}
             type="text"
             name="category"
+            value={formValues.category}
             className={getInputClasses("category", !!errors.category)}
             onFocus={() => setFocusedField("category")}
             onBlur={() => setFocusedField(null)}
-            onChange={() => {
-              if (errors.category) setErrors({ ...errors, category: "" });
-            }}
+            onChange={(event) =>
+              handleFieldChange("category", event.target.value)
+            }
             disabled={isSubmitting}
+            autoComplete="off"
           />
           {renderFloatingLabel("category", "Category (e.g., Project Inquiry)")}
           {errors.category && (
@@ -144,16 +250,17 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
         <div className="relative">
           <input
-            ref={subjectInputRef}
             type="text"
             name="subject"
+            value={formValues.subject}
             className={getInputClasses("subject", !!errors.subject)}
             onFocus={() => setFocusedField("subject")}
             onBlur={() => setFocusedField(null)}
-            onChange={() => {
-              if (errors.subject) setErrors({ ...errors, subject: "" });
-            }}
+            onChange={(event) =>
+              handleFieldChange("subject", event.target.value)
+            }
             disabled={isSubmitting}
+            autoComplete="off"
           />
           {renderFloatingLabel("subject", "Subject")}
           {errors.subject && (
@@ -165,15 +272,15 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
         <div className="relative">
           <textarea
-            ref={messageTextareaRef}
             name="message"
             rows={4}
+            value={formValues.message}
             className={`${getInputClasses("message", !!errors.message)} resize-none`}
             onFocus={() => setFocusedField("message")}
             onBlur={() => setFocusedField(null)}
-            onChange={() => {
-              if (errors.message) setErrors({ ...errors, message: "" });
-            }}
+            onChange={(event) =>
+              handleFieldChange("message", event.target.value)
+            }
             disabled={isSubmitting}
           />
           {renderFloatingLabel("message", "Your Message...")}
@@ -183,6 +290,12 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
             </span>
           )}
         </div>
+
+        {errors.form && (
+          <p className="text-sm text-red-400" role="alert">
+            {errors.form}
+          </p>
+        )}
 
         <div className="pt-6">
           <button

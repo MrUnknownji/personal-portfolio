@@ -1,4 +1,4 @@
-import { Project } from "@/types/Project";
+import { Project, ProjectCaseStudy } from "@/types/Project";
 
 export const projects: Project[] = [
   //AudioVibes
@@ -806,6 +806,111 @@ export const projects: Project[] = [
     ],
   },
 ];
+
+export const selectedProjectIds = [9, 8, 7, 1, 10] as const;
+
+const selectedProjectIdSet = new Set<number>(selectedProjectIds);
+
+const projectTitleOverrides: Record<number, string> = {
+  7: "AuraEdit",
+  8: "YouTube Content OS",
+};
+
+const projectCaseStudies: Record<number, ProjectCaseStudy> = {
+  1: {
+    problem:
+      "Mobile music players often feel generic or depend on cloud-first flows even when users mainly want polished local playback.",
+    solution:
+      "AudioVibes focuses on a local-first listening experience with a minimal interface, animated transitions, Material You styling, and background playback support.",
+    architecture: [
+      "Expo and React Native handle cross-platform screens and navigation.",
+      "Reanimated powers high-frequency UI transitions without blocking the JavaScript thread.",
+      "Playback state is separated from presentation so notification controls and app screens stay in sync.",
+    ],
+    tradeoffs: [
+      "Local file handling keeps privacy high but requires more platform-specific testing.",
+      "Animation richness is balanced against battery use and older Android device performance.",
+    ],
+  },
+  7: {
+    problem:
+      "Most browser image tools upload user files before editing, which adds latency and creates unnecessary privacy concerns.",
+    solution:
+      "AuraEdit keeps the editing pipeline inside the browser so users can resize, adjust, batch-process, and export images without server uploads.",
+    architecture: [
+      "Next.js and TypeScript provide the app shell, routing, and strong UI contracts.",
+      "Canvas APIs run the image transformation pipeline locally in the browser.",
+      "Batch operations reuse one processing path so single-image and multi-image exports stay consistent.",
+    ],
+    tradeoffs: [
+      "Local processing protects privacy but depends on the user's device memory and CPU.",
+      "Canvas-based transforms are portable, while very advanced editing features would need heavier rendering infrastructure.",
+    ],
+  },
+  8: {
+    problem:
+      "YouTube creators juggle scripts, hooks, metadata, thumbnails, and exports across disconnected tools.",
+    solution:
+      "YouTube Content OS centralizes ideation, AI drafting, metadata generation, visual workflows, and export tasks in one creator workspace.",
+    architecture: [
+      "Next.js and TypeScript structure the product dashboard and creator workflows.",
+      "AI provider calls are isolated behind workflow actions so prompts and outputs can evolve without rewriting the UI.",
+      "Supabase and Drizzle model creator projects, saved content, settings, and generated assets.",
+    ],
+    tradeoffs: [
+      "AI-assisted output speeds up drafting but still needs user review before publishing.",
+      "A richer workspace creates more state to manage, so flows are split by content task instead of one oversized editor.",
+    ],
+  },
+  9: {
+    problem:
+      "Auction products need fast bid updates, clear bidder feedback, and reliable dashboard state under time pressure.",
+    solution:
+      "BidStrike combines real-time bidding, auction management, AI suggestions, and responsive dashboards for bidders and auctioneers.",
+    architecture: [
+      "Next.js and TypeScript power the product surface and route-level workflows.",
+      "Pusher handles real-time bid events so open auction views update immediately.",
+      "Prisma and PostgreSQL model auctions, bids, users, notifications, and dashboard data.",
+    ],
+    tradeoffs: [
+      "Real-time UX improves trust but requires careful event ordering and stale-state handling.",
+      "AI price suggestions are positioned as decision support, not automatic bidding.",
+    ],
+  },
+  10: {
+    problem:
+      "E-commerce demos often stop at product grids and miss admin, support, checkout, and personalization flows.",
+    solution:
+      "OmniMart presents a fuller retail product with editorial shopping, cart and checkout flows, AI discovery ideas, and admin management screens.",
+    architecture: [
+      "Next.js, TypeScript, Tailwind CSS, and Redux organize storefront, cart, checkout, and admin UI state.",
+      "Stripe-oriented checkout flows separate purchase intent from catalog browsing.",
+      "Admin dashboards cover product, order, and customer management surfaces.",
+    ],
+    tradeoffs: [
+      "A broad product surface demonstrates end-to-end thinking but needs clear boundaries between demo and production payment behavior.",
+      "Editorial visuals strengthen brand feel while dense admin screens stay more utilitarian.",
+    ],
+  },
+};
+
+export const selectedProjects: Project[] = selectedProjectIds.flatMap((id) => {
+  const project = projects.find((item) => item.id === id);
+  if (!project) return [];
+
+  return [
+    {
+      ...project,
+      title: projectTitleOverrides[id] || project.title,
+      featured: true,
+      caseStudy: projectCaseStudies[id],
+    },
+  ];
+});
+
+export const archivedProjects = projects.filter((project) => {
+  return !selectedProjectIdSet.has(project.id);
+});
 
 import { FiCpu, FiTrendingUp, FiUsers, FiClock, FiZap, FiSearch } from "react-icons/fi";
 
