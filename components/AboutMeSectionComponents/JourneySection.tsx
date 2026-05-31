@@ -22,7 +22,7 @@ const journeyData = [
     year: "2024",
     title: "Joined TCS",
     description:
-      "Started working as an Analyst in TCS. Gained professional experience in large-scale enterprise applications and agile workflows.",
+      "Started working as an Developer in TCS. Gained professional experience in large-scale enterprise applications and agile workflows.",
   },
   {
     year: "2025",
@@ -155,8 +155,8 @@ const JourneySection = () => {
                 className="journey-card relative bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 md:p-8 shadow-lg transition-all duration-500 overflow-hidden transform-gpu group-hover:-translate-y-2 group-hover:border-primary/40 group-hover:shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.25)] z-10"
                 style={
                   {
-                  "--mouse-x": "0px",
-                  "--mouse-y": "0px",
+                    "--mouse-x": "0px",
+                    "--mouse-y": "0px",
                   } as CSSProperties
                 }
               >

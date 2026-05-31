@@ -3,7 +3,8 @@
 import { projects, selectedProjects, SkillsData } from "@/data/data";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite-preview";
+const GEMINI_MODEL =
+  process.env.GEMINI_MODEL || "gemini-3.1-flash-lite-preview";
 
 function getLocalPortfolioAnswer(prompt: string) {
   const normalizedPrompt = prompt.toLowerCase();
@@ -36,7 +37,9 @@ function getLocalPortfolioAnswer(prompt: string) {
     return "Sandeep is available for full stack work. Use the contact form or email him at sandeepkhati788@gmail.com.";
   }
 
-  if (/\b(skill|stack|technology|tech|frontend|backend)\b/.test(normalizedPrompt)) {
+  if (
+    /\b(skill|stack|technology|tech|frontend|backend)\b/.test(normalizedPrompt)
+  ) {
     return "Sandeep works with React, Next.js, TypeScript, Tailwind CSS, GSAP, Node.js, Express, MongoDB, REST APIs, and deployment tools like Vercel.";
   }
 
@@ -50,7 +53,7 @@ function getLocalPortfolioAnswer(prompt: string) {
   }
 
   if (/\b(experience|job|tcs|journey|background)\b/.test(normalizedPrompt)) {
-    return "Sandeep started web development in 2020, graduated in Computer Science, and works as an Analyst at TCS while building full stack products.";
+    return "Sandeep started web development in 2020, graduated in Computer Science, and works as an Developer at TCS while building full stack products.";
   }
 
   return null;
@@ -135,7 +138,9 @@ export async function chatWithBot(prompt: string) {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API Error ${response.status}`);
+      throw new Error(
+        errorData.error?.message || `API Error ${response.status}`,
+      );
     }
 
     const data = await response.json();
