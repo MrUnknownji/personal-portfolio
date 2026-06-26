@@ -1,59 +1,149 @@
-I ran the portfolio locally in production mode and profiled / and /my-projects in Chrome with scroll, hover, and click interactions. next build passed. I stopped the servers/browser afterward.
+# Portfolio Performance Load Report
 
-  Top Performance Load Areas
+Date: 2026-06-26  
+Build tested: production build via `pnpm build` and `next start -p 3001`  
+Browser test: Chrome DevTools Protocol, desktop viewport `1440x1000`, wheel scroll + hover interactions
 
-  1. Floating Three.js bot is the biggest hotspot
-      - components/Bot/useBotScene.ts:45 creates a WebGLRenderer.
-      - components/Bot/useBotScene.ts:231 runs a permanent requestAnimationFrame loop and renders every frame.
-      - Trace showed WebGL/GPU tasks creating long stalls, including GLES2::ReadPixels and WebGL flushes around 325-442ms.
-      - Chrome also logged WebGL warnings: texSubImage2D: bad image data, Texture is immutable, and GPU stall warnings.
-      - This bot can fail entirely in environments without WebGL, which caused the app to crash in the first headless run.
+## Current Summary
 
-  2. Bot eye texture redraw adds another canvas loop
-      - components/Bot/useBotEyes.ts:35 redraws a 512x256 canvas and marks texture.needsUpdate = true.
-      - Even when the visual change is small, it can force texture uploads into WebGL.
+Smooth scrolling is still enabled. The current implementation keeps GSAP `ScrollSmoother`, but uses a lighter profile:
 
-  3. Hero code comparison runs continuously
-      - components/HeroSectionComponents/CodeDisplay.tsx:252 starts an autoplay requestAnimationFrame.
-      - components/HeroSectionComponents/CodeDisplay.tsx:242 updates left and clipPath every frame.
-      - clip-path animation is more expensive than transform-only animation and contributes to paint/raster work.
+- `smooth: 0.45` on desktop
+- `smoothTouch: 0.12` on touch devices
+- `effects: false`
+- disabled only for `prefers-reduced-motion: reduce`
 
-  4. Sparkles canvas animation runs every frame
-      - components/ui/Sparkles.tsx:95 clears and redraws particles every frame.
-      - Used inside the hero slider at components/HeroSectionComponents/CodeDisplay.tsx:413 with particleDensity={300}.
+The scroll-specific GSAP scrub load has been reduced:
 
-  5. Click spark canvas also runs every frame even when idle
-      - components/ui/ClickSpark.tsx:51 redraws on every animation frame.
-      - It should only animate while sparks exist. Right now the full-screen canvas keeps looping.
+- `GlobalBackground` no longer uses ScrollTrigger scrub.
+- `ScrollMandala` no longer uses one timeline plus four scrubbed ScrollTriggers.
+- Both now use passive scroll listeners with `requestAnimationFrame`.
+- Scroll height is cached and recalculated on resize instead of read on every scroll frame.
 
-  6. Meteors are 30 infinite CSS animations on desktop
-      - components/ui/ResponsiveMeteors.tsx:10 sets desktop count to 30.
-      - components/ui/Meteors.tsx:60 renders each meteor as an independently animated element.
-      - These showed up as many costly animated/shadowed elements.
+## Latest Measurements
 
-  7. Scroll system is heavy
-      - components/SmoothScroller.tsx:24 enables GSAP ScrollSmoother.
-      - components/GlobalBackground.tsx:71 animates a fixed full-screen SVG background on scroll.
-      - components/ui/ScrollMandala.tsx:181 adds multiple scrubbed scroll animations.
-      - Home trace during scroll/hover: 937 raster tasks, about 2.5s total raster time, 260 animation-frame callbacks, and 124 style recalculations.
+### Home: `/`
 
-  8. Large blur/backdrop/shadow effects increase paint/raster cost
-      - Hero container backdrop blur and huge glow: components/HeroSection.tsx:10, components/HeroSection.tsx:18
-      - Header backdrop blur: components/Header.tsx:197
-      - Projects sticky controls backdrop blur: app/my-projects/page.tsx:390
+Interaction flow: load, wheel-scroll down/up through the page, hover hero/social areas. Bot was not clicked, so the 3D bot was not part of the main scroll profile.
 
-  9. Hover handlers do per-mousemove work
-      - Magnetic text reads every character’s layout on mousemove: components/HeroSectionComponents/MagneticText.tsx:37
-      - Social tooltip updates React state through RAF on mousemove: components/HeroSectionComponents/SocialLinks.tsx:88
-      - Journey cards write CSS vars on mousemove: components/AboutMeSectionComponents/JourneySection.tsx:101
+- Smooth scroll active: yes, `#smooth-content` transform observed as `matrix(1, 0, 0, 1, 0, -2040)`
+- DOM nodes: `1084`
+- Canvases: `2`
+- WebGL canvases: `1` from capability checks / browser context, not the activated 3D bot
+- Meteors: `12`
+- SVG bot: visible
+- Long tasks during measured interaction: `7`
+- Task duration delta: `4.532s`
+- Script duration delta: `0.529s`
+- Layout duration delta: `0.229s`
+- Style recalculation duration delta: `0.633s`
+- Layout count delta: `400`
+- Style recalculation count delta: `485`
+- Paint events: `1123`, total `218.6ms`
+- Raster tasks: `2826`, total `1855.9ms`
+- Max long trace task: `95.2ms`
+- Console warnings: none
 
-  10. Project page hover/filter effects add cost
+### Projects: `/my-projects`
 
-  - Grid filter transitions animate blur: app/my-projects/page.tsx:210
-  - Global mousemove particle parallax runs page-wide: app/my-projects/page.tsx:295
-  - Project cards animate image filter: blur/brightness/contrast on hover: components/ProjectCard.tsx:65
+Interaction flow: load, wheel-scroll, hover project cards.
 
-  Summary
-  The primary load is not page size or images. It is continuous animation work: Three.js bot rendering, canvas loops, CSS meteors, scroll-scrubbed GSAP, clip-path animation, blur/backdrop-filter, and hover handlers. The first
-  optimization target should be the bot: pause rendering when idle/offscreen, handle WebGL creation failure, reduce texture uploads, and avoid rendering every frame unless visible or interacting.
+- Smooth scroll active: yes, `#smooth-content` transform observed as `matrix(1, 0, 0, 1, 0, -846)`
+- DOM nodes: `528`
+- Canvases: `1`
+- Meteors: `12`
+- SVG bot: visible
+- Long tasks during measured interaction: `0`
+- Task duration delta: `0.672s`
+- Script duration delta: `0.078s`
+- Layout duration delta: `0.005s`
+- Style recalculation duration delta: `0.169s`
+- Layout count delta: `16`
+- Style recalculation count delta: `234`
+- Paint events: `136`, total `17.7ms`
+- Raster tasks: `291`, total `179.6ms`
+- Max trace task: `48ms`
+- Console warnings: none
 
+## Fixed / Improved Areas
+
+1. 3D bot no longer mounts on hover.
+   - It remains SVG until deliberate click/open intent.
+   - Mobile stays SVG-only.
+   - 3D eye canvas is seeded immediately so the first 3D render has visible eyes.
+   - 3D renderer idles instead of running a permanent render loop.
+
+2. Click spark canvas no longer loops while idle.
+   - It starts `requestAnimationFrame` only when sparks exist.
+   - It stops as soon as the spark list is empty.
+
+3. Project page hover/filter costs were reduced.
+   - Grid transitions no longer animate `filter: blur(...)`.
+   - Project card images no longer animate brightness/contrast/blur filters.
+   - The old page-wide mousemove parallax listener was removed.
+
+4. Meteors were reduced.
+   - Desktop count reduced from `30` to `12`.
+   - Mobile count reduced from `10` to `4`.
+   - Reduced-motion users get no meteors.
+   - Per-meteor shadow was removed and trails shortened.
+
+5. Large backdrop blur / shadow costs were reduced.
+   - Hero backdrop blur removed.
+   - Header backdrop blur removed.
+   - Project sticky controls backdrop blur removed.
+   - Hero huge blurred glow replaced with a radial gradient.
+
+6. Scroll system was made lighter while keeping smooth scroll.
+   - ScrollSmoother is retained.
+   - ScrollSmoother `effects` disabled.
+   - Background and mandala no longer use ScrollTrigger scrub.
+   - Mandala still moves, scales, rotates, and breathes.
+   - Background still has parallax motion.
+
+## Remaining Load Areas
+
+1. Home page raster work is still the largest active cost.
+   - The latest home trace still shows `2826` raster tasks and `1855.9ms` total raster time during wheel scrolling.
+   - This is now less about ScrollTrigger scrub and more about the total moving visual surface: smooth content transform, fixed background art, mandala SVG/filter, meteors, hero code comparison, and canvas effects.
+
+2. Hero code comparison remains a major candidate.
+   - `components/HeroSectionComponents/CodeDisplay.tsx` still runs autoplay with `requestAnimationFrame`.
+   - It updates `left` and `clipPath`.
+   - `clipPath` animation tends to increase paint/raster work.
+   - It also embeds `SparklesCore`.
+
+3. Sparkles canvas is still continuous where mounted.
+   - `components/ui/Sparkles.tsx` clears and redraws particles every frame.
+   - The hero slider uses `particleDensity={300}`.
+   - This is probably the next best optimization target.
+
+4. Smooth scrolling itself has a cost.
+   - Keeping it means the whole content layer is transformed during scroll.
+   - Current settings are lighter, but smooth scrolling plus multiple fixed/animated decorative layers still increases paint/raster work on the home page.
+
+5. Some hover handlers still do per-pointer work.
+   - Magnetic text reads character bounding boxes during mouse movement.
+   - Social info box tracks mouse position.
+   - Journey cards write CSS vars on mousemove.
+
+## Recommended Next Pass
+
+1. Optimize `CodeDisplay`.
+   - Replace `clipPath` animation with transform-based masking if possible.
+   - Pause autoplay when offscreen.
+   - Respect reduced motion.
+   - Consider stopping autoplay after one or two cycles until hover.
+
+2. Optimize `SparklesCore`.
+   - Pause when offscreen.
+   - Lower particle density.
+   - Draw at a lower internal resolution or lower FPS.
+
+3. Reduce mandala paint cost further without removing it.
+   - Consider removing or further reducing the SVG glow filter.
+   - Keep the same geometry and motion, but avoid expensive SVG filter compositing during scroll.
+
+4. Re-profile after hero canvas/code optimizations.
+   - The projects page is now in decent shape.
+   - The home page is where the remaining performance budget is being spent.

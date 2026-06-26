@@ -270,6 +270,21 @@ textarea:-webkit-autofill:active {
   animation: pulse-subtle 2s ease-in-out infinite;
 }
 
+@keyframes mandala-breathe {
+  0%,
+  100% {
+    opacity: 0.08;
+  }
+
+  50% {
+    opacity: 0.15;
+  }
+}
+
+.animate-mandala-breathe {
+  animation: mandala-breathe 4s ease-in-out infinite;
+}
+
 @keyframes pulse-scale {
   0%,
   100% {

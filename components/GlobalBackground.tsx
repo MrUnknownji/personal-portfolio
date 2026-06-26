@@ -1,30 +1,60 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function GlobalBackground() {
   const bgRef = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<number | null>(null);
+  const maxScrollRef = useRef(0);
 
   useEffect(() => {
     if (!bgRef.current) return;
 
-    const animation = gsap.to(bgRef.current, {
-      yPercent: -15,
-      ease: "none",
-      scrollTrigger: {
-        trigger: document.body,
-        start: "top top",
-        end: "bottom top",
-        scrub: true,
-      },
-    });
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduceMotion) return;
+
+    const updateScrollBounds = () => {
+      maxScrollRef.current = Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight,
+      );
+    };
+
+    const update = () => {
+      frameRef.current = null;
+      const maxScroll = maxScrollRef.current;
+      const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+      const y = Math.max(-15, Math.min(0, progress * -15));
+
+      if (bgRef.current) {
+        bgRef.current.style.transform = `translate3d(0, ${y}%, 0)`;
+      }
+    };
+
+    const requestUpdate = () => {
+      if (frameRef.current === null) {
+        frameRef.current = requestAnimationFrame(update);
+      }
+    };
+
+    const handleResize = () => {
+      updateScrollBounds();
+      requestUpdate();
+    };
+
+    updateScrollBounds();
+    update();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      animation.kill();
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", handleResize);
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current);
+      }
     };
   }, []);
 
@@ -32,7 +62,7 @@ export default function GlobalBackground() {
     <div className="fixed inset-0 z-[-10] overflow-hidden pointer-events-none bg-background">
       <div
         ref={bgRef}
-        className="absolute top-[-20%] left-[-10%] w-[120%] h-[150%] opacity-[0.07]"
+        className="absolute top-[-20%] left-[-10%] w-[120%] h-[150%] opacity-[0.07] will-change-transform"
       >
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>

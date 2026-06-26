@@ -1,14 +1,7 @@
 "use client";
 
-import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 export default function ScrollMandala() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -16,93 +9,84 @@ export default function ScrollMandala() {
   const middleLotusRef = useRef<SVGGElement>(null);
   const outerRingRef = useRef<SVGGElement>(null);
   const particlesRef = useRef<SVGGElement>(null);
+  const frameRef = useRef<number | null>(null);
+  const maxScrollRef = useRef(0);
   const pathname = usePathname();
 
-  useGSAP(
-    () => {
-      if (!containerRef.current) return;
-      const animations: gsap.core.Animation[] = [];
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-      const setupAnimation = gsap.delayedCall(0.25, () => {
-        gsap.set(containerRef.current, { x: "-5vw", y: "5vh" });
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: document.body,
-            start: "top top",
-            end: "bottom bottom",
-            scrub: 1.5,
-          },
-        });
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
 
-        tl.to(containerRef.current, {
-          x: "80vw",
-          y: "45vh",
-          scale: 1.3,
-          rotation: 45,
-          ease: "sine.inOut",
-          duration: 1,
-        }).to(containerRef.current, {
-          x: "5vw",
-          y: "85vh",
-          scale: 0.9,
-          rotation: 90,
-          ease: "sine.inOut",
-          duration: 1,
-        });
-        animations.push(tl);
+    const lerp = (start: number, end: number, amount: number) => {
+      return start + (end - start) * amount;
+    };
 
-        const scrubConfig = {
-          trigger: document.body,
-          start: "top top",
-          end: "bottom bottom",
-          scrub: 2,
-        };
+    const updateScrollBounds = () => {
+      maxScrollRef.current = Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight,
+      );
+    };
 
-        animations.push(
-          gsap.to(innerStarRef.current, {
-            rotation: 360,
-            transformOrigin: "center center",
-            scrollTrigger: scrubConfig,
-          }),
-          gsap.to(middleLotusRef.current, {
-            rotation: -180,
-            transformOrigin: "center center",
-            scrollTrigger: scrubConfig,
-          }),
-          gsap.to(outerRingRef.current, {
-            rotation: 360,
-            transformOrigin: "center center",
-            scrollTrigger: scrubConfig,
-          }),
-          gsap.to(particlesRef.current, {
-            rotation: -360,
-            transformOrigin: "center center",
-            scrollTrigger: scrubConfig,
-          }),
-        );
-      });
+    const update = () => {
+      frameRef.current = null;
 
-      const breathe = gsap.to(containerRef.current, {
-        opacity: 0.15,
-        duration: 4,
-        repeat: -1,
-        yoyo: true,
-        ease: "power1.inOut",
-      });
+      if (reduceMotion) {
+        container.style.transform = "translate3d(5vw, 80vh, 0) scale(0.9)";
+        return;
+      }
 
-      return () => {
-        setupAnimation.kill();
-        animations.forEach((animation) => animation.kill());
-        breathe.kill();
-      };
-    },
-    { scope: containerRef, dependencies: [pathname] },
-  );
+      const maxScroll = maxScrollRef.current;
+      const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+      const clamped = Math.max(0, Math.min(1, progress));
+      const firstHalf = clamped <= 0.5;
+      const t = firstHalf ? clamped * 2 : (clamped - 0.5) * 2;
+
+      const x = firstHalf ? lerp(-5, 80, t) : lerp(80, 5, t);
+      const y = firstHalf ? lerp(5, 45, t) : lerp(45, 85, t);
+      const scale = firstHalf ? lerp(1, 1.3, t) : lerp(1.3, 0.9, t);
+      const rotation = firstHalf ? lerp(0, 45, t) : lerp(45, 90, t);
+
+      container.style.transform = `translate3d(${x}vw, ${y}vh, 0) scale(${scale}) rotate(${rotation}deg)`;
+      innerStarRef.current?.setAttribute("transform", `rotate(${clamped * 360})`);
+      middleLotusRef.current?.setAttribute("transform", `rotate(${clamped * -180})`);
+      outerRingRef.current?.setAttribute("transform", `rotate(${clamped * 360})`);
+      particlesRef.current?.setAttribute("transform", `rotate(${clamped * -360})`);
+    };
+
+    const requestUpdate = () => {
+      if (frameRef.current === null) {
+        frameRef.current = requestAnimationFrame(update);
+      }
+    };
+
+    const handleResize = () => {
+      updateScrollBounds();
+      requestUpdate();
+    };
+
+    updateScrollBounds();
+    update();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", handleResize);
+      if (frameRef.current !== null) {
+        cancelAnimationFrame(frameRef.current);
+      }
+    };
+  }, [pathname]);
 
   return (
     <div
       ref={containerRef}
-      className="fixed left-0 top-0 z-[-5] pointer-events-none mix-blend-screen"
+      className="fixed left-0 top-0 z-[-5] pointer-events-none mix-blend-screen animate-mandala-breathe"
       style={{
         width: "28vw",
         minWidth: "250px",
@@ -110,6 +94,7 @@ export default function ScrollMandala() {
         minHeight: "250px",
         transformOrigin: "center",
         opacity: 0.08,
+        willChange: "transform, opacity",
       }}
     >
       <svg
@@ -132,8 +117,8 @@ export default function ScrollMandala() {
             <stop offset="0%" stopColor="#ffcc00" />
             <stop offset="100%" stopColor="#ff0055" />
           </linearGradient>
-          <filter id="clean-glow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="2" result="blur" />
+          <filter id="clean-glow" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="1.1" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
