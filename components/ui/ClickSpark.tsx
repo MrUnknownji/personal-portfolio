@@ -16,6 +16,8 @@ interface ClickSparkProps {
 const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sparksRef = useRef<Spark[]>([]);
+  const animationIdRef = useRef<number | null>(null);
+  const drawRef = useRef<(timestamp: number) => void>(() => {});
 
   const sparkColor = "#ff9233";
   const sparkSize = 12;
@@ -23,32 +25,17 @@ const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
   const sparkCount = 8;
   const duration = 500;
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-
-    return () => window.removeEventListener("resize", resizeCanvas);
-  }, []);
-
   const easeOut = useCallback((t: number) => t * (2 - t), []);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    drawRef.current = (timestamp: number) => {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (!canvas || !ctx) {
+        animationIdRef.current = null;
+        return;
+      }
 
-    let animationId: number;
-
-    const draw = (timestamp: number) => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       sparksRef.current = sparksRef.current.filter((spark) => {
@@ -80,13 +67,38 @@ const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
       });
 
       ctx.globalAlpha = 1;
-      animationId = requestAnimationFrame(draw);
+
+      if (sparksRef.current.length > 0) {
+        animationIdRef.current = requestAnimationFrame(drawRef.current);
+      } else {
+        animationIdRef.current = null;
+      }
+    };
+  }, [easeOut]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     };
 
-    animationId = requestAnimationFrame(draw);
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
 
-    return () => cancelAnimationFrame(animationId);
-  }, [easeOut]);
+    return () => window.removeEventListener("resize", resizeCanvas);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (animationIdRef.current) {
+        cancelAnimationFrame(animationIdRef.current);
+        animationIdRef.current = null;
+      }
+    };
+  }, []);
 
   const handleClick = useCallback((e: MouseEvent) => {
     const now = performance.now();
@@ -98,6 +110,10 @@ const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
     }));
 
     sparksRef.current.push(...newSparks);
+
+    if (!animationIdRef.current) {
+      animationIdRef.current = requestAnimationFrame(drawRef.current);
+    }
   }, []);
 
   useEffect(() => {

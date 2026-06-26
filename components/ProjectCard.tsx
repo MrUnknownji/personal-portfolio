@@ -62,14 +62,18 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
           fill
           className="object-cover"
           style={{
-            filter: isHovered
-              ? "brightness(0.25) contrast(1.1) saturate(0.8) blur(2px)"
-              : "brightness(0.9) contrast(1.05) saturate(0.85)",
             transform: isHovered ? "scale(1.08)" : "scale(1)",
             transition:
-              "filter 0.5s ease, transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)",
+              "transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)",
           }}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        />
+        <div
+          className="absolute inset-0 bg-black pointer-events-none"
+          style={{
+            opacity: isHovered ? 0.62 : 0.12,
+            transition: "opacity 0.35s ease",
+          }}
         />
 
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

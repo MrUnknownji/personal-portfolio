@@ -32,7 +32,20 @@ export const useBotEyes = ({
 
         let animationFrameId: number;
 
-        const draw = () => {
+        let lastAnimatedDraw = 0;
+        const animatedFrameInterval = 1000 / 15;
+
+        const draw = (timestamp = performance.now()) => {
+            const shouldThrottle =
+                (eyeState === 'thinking' || eyeState === 'dizzy') &&
+                timestamp - lastAnimatedDraw < animatedFrameInterval;
+
+            if (shouldThrottle) {
+                animationFrameId = requestAnimationFrame(draw);
+                return;
+            }
+
+            lastAnimatedDraw = timestamp;
             const time = clockRef.current.getElapsedTime();
 
             if (eyeState === 'thinking') {

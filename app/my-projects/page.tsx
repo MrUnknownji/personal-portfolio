@@ -48,8 +48,6 @@ export default function MyProjects() {
   const activeGridTransitionRef = useRef<gsap.core.Animation | null>(null);
   const displayedProjectIdsRef = useRef(displayedProjectIds);
 
-  const particlesRef = useRef<HTMLDivElement>(null);
-
   const categories = useMemo(
     () => [
       "All",
@@ -179,10 +177,10 @@ export default function MyProjects() {
     activeGridTransitionRef.current?.kill();
     gsap.killTweensOf([projectGrid, ...currentCards]);
     gsap.set(projectGrid, {
-      clearProps: "transform,opacity,visibility,filter",
+      clearProps: "transform,opacity,visibility",
     });
     gsap.set(currentCards, {
-      clearProps: "transform,opacity,visibility,filter",
+      clearProps: "transform,opacity,visibility",
     });
 
     if (prefersReducedMotion) {
@@ -200,7 +198,7 @@ export default function MyProjects() {
         activeGridTransitionRef.current = null;
         setIsGridTransitioning(false);
         gsap.set(projectGrid.querySelectorAll(".project-card-container"), {
-          clearProps: "transform,opacity,visibility,filter",
+          clearProps: "transform,opacity,visibility",
         });
       },
     });
@@ -211,7 +209,7 @@ export default function MyProjects() {
       .to(currentCards, {
         autoAlpha: 0,
         scale: 0.96,
-        filter: "blur(6px)",
+        y: 8,
         duration: 0.18,
         ease: "power2.in",
         stagger: 0.015,
@@ -230,7 +228,7 @@ export default function MyProjects() {
             activeGridTransitionRef.current = null;
             setIsGridTransitioning(false);
             gsap.set(projectGrid, {
-              clearProps: "transform,opacity,visibility,filter",
+              clearProps: "transform,opacity,visibility",
             });
             ScrollTrigger.refresh();
             return;
@@ -239,23 +237,23 @@ export default function MyProjects() {
           gsap.set(nextCards, {
             autoAlpha: 0,
             scale: 0.96,
-            filter: "blur(6px)",
+            y: 8,
           });
           gsap.set(projectGrid, { autoAlpha: 1 });
 
           const enterTransition = gsap.to(nextCards, {
             autoAlpha: 1,
             scale: 1,
-            filter: "blur(0px)",
+            y: 0,
             duration: 0.24,
             ease: "power2.out",
             stagger: 0.025,
-            clearProps: "transform,opacity,visibility,filter",
+            clearProps: "transform,opacity,visibility",
             onComplete: () => {
               activeGridTransitionRef.current = null;
               setIsGridTransitioning(false);
               gsap.set(projectGrid, {
-                clearProps: "transform,opacity,visibility,filter",
+                clearProps: "transform,opacity,visibility",
               });
               ScrollTrigger.refresh();
             },
@@ -269,32 +267,6 @@ export default function MyProjects() {
       transition.kill();
     };
   }, [targetProjectIds]);
-
-  useEffect(() => {
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (!particlesRef.current) return;
-
-      const particles = particlesRef.current.children;
-      const x = e.clientX - window.innerWidth / 2;
-      const y = e.clientY - window.innerHeight / 2;
-
-      Array.from(particles).forEach((particle) => {
-        const speed = Number(particle.getAttribute("data-speed")) || 0.1;
-        const dampening = 0.4;
-
-        gsap.to(particle, {
-          x: x * speed * dampening,
-          y: y * speed * dampening,
-          duration: 1.5,
-          ease: "power2.out",
-          overwrite: "auto",
-        });
-      });
-    };
-
-    window.addEventListener("mousemove", handleGlobalMouseMove);
-    return () => window.removeEventListener("mousemove", handleGlobalMouseMove);
-  }, []);
 
   useEffect(() => {
     const projectGrid = projectsRef.current;
@@ -362,23 +334,20 @@ export default function MyProjects() {
             className="mb-4"
           />
 
-          <div
-            ref={particlesRef}
-            className="absolute inset-0 pointer-events-none"
-          >
-            <div className="absolute top-1/2 left-1/4" data-speed="0.15">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-1/2 left-1/4">
               <div
                 className="w-1 h-1 rounded-full bg-primary/30 animate-float"
                 style={{ animationDelay: "0.5s" }}
               />
             </div>
-            <div className="absolute top-1/3 right-1/4" data-speed="0.25">
+            <div className="absolute top-1/3 right-1/4">
               <div
                 className="w-1.5 h-1.5 rounded-full bg-primary/20 animate-float"
                 style={{ animationDelay: "1s" }}
               />
             </div>
-            <div className="absolute bottom-1/3 left-1/3" data-speed="0.1">
+            <div className="absolute bottom-1/3 left-1/3">
               <div
                 className="w-1 h-1 rounded-full bg-accent/20 animate-float"
                 style={{ animationDelay: "1.5s" }}
@@ -389,7 +358,7 @@ export default function MyProjects() {
 
         <div className="sticky top-24 z-30 mb-8 md:mb-16 mx-auto max-w-5xl px-4">
           <div ref={controlsRef} className="relative z-30 flex justify-center">
-            <div className="relative bg-background/80 backdrop-blur-md border border-border/50 rounded-4xl lg:rounded-full p-2 shadow-lg shadow-black/10 flex flex-col lg:flex-row gap-3 lg:gap-2 items-center w-full max-w-4xl">
+            <div className="relative bg-background/95 border border-border/50 rounded-4xl lg:rounded-full p-2 shadow-sm shadow-black/10 flex flex-col lg:flex-row gap-3 lg:gap-2 items-center w-full max-w-4xl">
               <div className="absolute inset-0 bg-linear-to-br from-white/2 via-transparent to-primary/2 pointer-events-none rounded-4xl lg:rounded-full" />
 
               <div className="relative w-full lg:flex-1 group rounded-full border border-border/50 bg-foreground/4 transition-all duration-300 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-foreground/6 hover:bg-foreground/6">

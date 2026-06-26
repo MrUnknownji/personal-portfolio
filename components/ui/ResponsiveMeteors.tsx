@@ -7,15 +7,30 @@ export default function ResponsiveMeteors() {
 
   useEffect(() => {
     const updateCount = () => {
-      setCount(window.innerWidth >= 768 ? 30 : 10);
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      if (reduceMotion) {
+        setCount(0);
+        return;
+      }
+
+      setCount(window.innerWidth >= 768 ? 12 : 4);
     };
 
     updateCount();
     window.addEventListener("resize", updateCount);
-    return () => window.removeEventListener("resize", updateCount);
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    motionQuery.addEventListener("change", updateCount);
+
+    return () => {
+      window.removeEventListener("resize", updateCount);
+      motionQuery.removeEventListener("change", updateCount);
+    };
   }, []);
 
-  if (count === null) return null;
+  if (!count) return null;
 
   return <Meteors number={count} />;
 }

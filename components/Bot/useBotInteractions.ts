@@ -13,6 +13,7 @@ interface UseBotInteractionsProps {
     isHoveredRef: React.MutableRefObject<boolean>;
     robotRef: React.MutableRefObject<THREE.Group | null>;
     setBubbleText: (text: string | null) => void;
+    enabled: boolean;
 }
 
 export const useBotInteractions = ({
@@ -25,6 +26,7 @@ export const useBotInteractions = ({
     isHoveredRef,
     robotRef,
     setBubbleText,
+    enabled,
 }: UseBotInteractionsProps) => {
     const pathname = usePathname();
     const isRightClickingRef = useRef(false);
@@ -97,6 +99,8 @@ export const useBotInteractions = ({
     }
 
     useEffect(() => {
+        if (!enabled) return;
+
         const handleWindowMouseMove = (e: MouseEvent | TouchEvent) => {
             if (!containerRef.current) return;
             const now = Date.now();
@@ -264,7 +268,7 @@ export const useBotInteractions = ({
             if (win.dizzyTimeout) clearTimeout(win.dizzyTimeout);
             if (win.scrollTimeout) clearTimeout(win.scrollTimeout);
         };
-    }, [isProcessing, isCooldown, containerRef, isHoveredRef, mouseRef, setBubbleText, setChatOpen, setEyeState]);
+    }, [enabled, isProcessing, isCooldown, containerRef, isHoveredRef, mouseRef, setBubbleText, setChatOpen, setEyeState]);
 
     const handleMouseEnter = () => {
         isHoveredRef.current = true;

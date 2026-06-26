@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import * as THREE from "three";
 import gsap from "gsap";
@@ -18,6 +18,107 @@ type KryptonContextMenu = {
   label: string;
 } | null;
 
+type BotVisualMode = "svg" | "three";
+
+function supportsWebGL() {
+  try {
+    const canvas = document.createElement("canvas");
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
+  } catch {
+    return false;
+  }
+}
+
+function SvgBotVisual({
+  active,
+  mood,
+}: {
+  active: boolean;
+  mood: EyeState;
+}) {
+  const happy = mood === "happy" || active;
+  const thinking = mood === "thinking";
+  const sad = mood === "sad" || mood === "error";
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-center">
+      <svg
+        viewBox="0 0 160 160"
+        className="h-28 w-28 sm:h-36 sm:w-36 drop-shadow-[0_0_24px_rgba(255,146,51,0.35)] transition-transform duration-300 group-hover:scale-105"
+        role="img"
+        aria-label="Krypton assistant"
+      >
+        <defs>
+          <filter id="bot-eye-glow" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <linearGradient id="bot-shell" x1="28" y1="20" x2="132" y2="144">
+            <stop stopColor="#2a2623" />
+            <stop offset="1" stopColor="#090807" />
+          </linearGradient>
+          <linearGradient id="bot-accent" x1="40" y1="28" x2="126" y2="132">
+            <stop stopColor="#ffcc66" />
+            <stop offset="0.48" stopColor="#ff9233" />
+            <stop offset="1" stopColor="#d04438" />
+          </linearGradient>
+        </defs>
+        <circle cx="80" cy="80" r="58" fill="url(#bot-shell)" stroke="#ff9233" strokeWidth="3" />
+        <path
+          d="M42 88c6 28 24 43 38 43s32-15 38-43"
+          fill="none"
+          stroke="url(#bot-accent)"
+          strokeWidth="8"
+          strokeLinecap="round"
+          opacity="0.45"
+        />
+        <rect x="38" y="48" width="84" height="54" rx="24" fill="#050505" stroke="#3a3028" strokeWidth="3" />
+        <g filter="url(#bot-eye-glow)">
+          {thinking ? (
+            <>
+            <circle cx="62" cy="75" r="5" fill="#ff9233">
+              <animate attributeName="cy" values="75;66;75" dur="0.9s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="80" cy="75" r="5" fill="#ff9233">
+              <animate attributeName="cy" values="75;66;75" dur="0.9s" begin="0.12s" repeatCount="indefinite" />
+            </circle>
+            <circle cx="98" cy="75" r="5" fill="#ff9233">
+              <animate attributeName="cy" values="75;66;75" dur="0.9s" begin="0.24s" repeatCount="indefinite" />
+            </circle>
+            </>
+          ) : sad ? (
+            <>
+            <path d="M58 76l18-8" stroke="#ff9233" strokeWidth="5" strokeLinecap="round" />
+            <path d="M102 76l-18-8" stroke="#ff9233" strokeWidth="5" strokeLinecap="round" />
+            </>
+          ) : happy ? (
+            <>
+            <path d="M56 76c6-12 18-12 24 0" stroke="#ff9233" strokeWidth="5" strokeLinecap="round" fill="none" />
+            <path d="M80 76c6-12 18-12 24 0" stroke="#ff9233" strokeWidth="5" strokeLinecap="round" fill="none" />
+            </>
+          ) : (
+            <>
+              <circle cx="66" cy="75" r="12" fill="#ff9233" fillOpacity="0.22" stroke="#ff9233" strokeWidth="5" />
+              <circle cx="94" cy="75" r="12" fill="#ff9233" fillOpacity="0.22" stroke="#ff9233" strokeWidth="5" />
+              <circle cx="66" cy="75" r="4" fill="#ffcc66" />
+              <circle cx="94" cy="75" r="4" fill="#ffcc66" />
+            </>
+          )}
+        </g>
+        <circle cx="80" cy="118" r="9" fill="url(#bot-accent)" />
+        <path d="M80 30v-13" stroke="#ff9233" strokeWidth="5" strokeLinecap="round" />
+        <circle cx="80" cy="13" r="6" fill="#ff9233" />
+      </svg>
+    </div>
+  );
+}
+
 export default function Bot() {
   const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -34,6 +135,10 @@ export default function Bot() {
     title: string;
   } | null>(null);
   const [contextMenu, setContextMenu] = useState<KryptonContextMenu>(null);
+  const [visualMode, setVisualMode] = useState<BotVisualMode>("svg");
+  const [canUse3D, setCanUse3D] = useState(false);
+  const [idleReadyFor3D, setIdleReadyFor3D] = useState(false);
+  const [hasVisualIntent, setHasVisualIntent] = useState(false);
 
   const mouseRef = useRef(new THREE.Vector2());
   const isHoveredRef = useRef(false);
@@ -45,6 +150,10 @@ export default function Bot() {
   const nextBlinkTimeRef = useRef(2);
   const [isGlobalModalOpen, setIsGlobalModalOpen] = useState(false);
   const isGlobalModalOpenRef = useRef(false);
+  const handleSceneUnavailable = useCallback(() => {
+    setCanUse3D(false);
+    setVisualMode("svg");
+  }, []);
 
   const scheduleTimeout = (callback: () => void, delay: number) => {
     const timeout = setTimeout(() => {
@@ -63,6 +172,48 @@ export default function Bot() {
       timeoutsRef.current = [];
     };
   }, []);
+
+  useEffect(() => {
+    const isMobile =
+      window.matchMedia("(max-width: 767px)").matches ||
+      window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    if (isMobile || reduceMotion || !supportsWebGL()) {
+      setCanUse3D(false);
+      setVisualMode("svg");
+      return;
+    }
+
+    setCanUse3D(true);
+
+    const win = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+
+    let idleId: number | null = null;
+    const timeoutId = window.setTimeout(() => setIdleReadyFor3D(true), 3000);
+
+    if (win.requestIdleCallback) {
+      idleId = win.requestIdleCallback(() => setIdleReadyFor3D(true), {
+        timeout: 2500,
+      });
+    }
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (idleId !== null && win.cancelIdleCallback) {
+        win.cancelIdleCallback(idleId);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    setVisualMode(canUse3D && idleReadyFor3D && hasVisualIntent ? "three" : "svg");
+  }, [canUse3D, hasVisualIntent, idleReadyFor3D]);
 
   useEffect(() => {
     const checkModal = () => {
@@ -109,6 +260,8 @@ export default function Bot() {
       isCooldownRef,
       chatOpenRef,
       isGlobalModalOpenRef,
+      enabled: visualMode === "three",
+      onUnavailable: handleSceneUnavailable,
     });
 
   const { eyeStateRef } = useBotEyes({
@@ -133,6 +286,7 @@ export default function Bot() {
     isHoveredRef,
     robotRef,
     setBubbleText,
+    enabled: visualMode === "three",
   });
 
   const { handleLocalCommand } = useBotCommands({
@@ -180,7 +334,9 @@ export default function Bot() {
   ]);
 
   const handleMouseEnter = () => {
-    interactionMouseEnter();
+    if (visualMode === "three") {
+      interactionMouseEnter();
+    }
   };
 
   const handleMouseLeave = () => {
@@ -191,6 +347,7 @@ export default function Bot() {
   };
 
   const openChat = (message = "Ask me about projects, skills, or hiring.") => {
+    setHasVisualIntent(true);
     setChatOpen(true);
     isHoveredRef.current = true;
     setEyeState("happy");
@@ -209,6 +366,7 @@ export default function Bot() {
   };
 
   const handleContainerClick = () => {
+    setHasVisualIntent(true);
     if (chatOpen) {
       closeChat();
       return;
@@ -450,10 +608,14 @@ export default function Bot() {
 
       <div
         ref={containerRef}
-        className="w-full h-full"
+        className={`group relative w-full h-full ${visualMode === "svg" ? "cursor-pointer" : ""}`}
         onDoubleClick={handleDoubleClick}
         onClick={handleContainerClick}
-      />
+      >
+        {visualMode === "svg" && (
+          <SvgBotVisual active={chatOpen || isHoveredRef.current} mood={eyeState} />
+        )}
+      </div>
 
       {isMinimized && (
         <div

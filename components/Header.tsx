@@ -194,7 +194,7 @@ const Header = () => {
         className={cn(
           "hidden lg:flex mx-auto max-w-7xl items-center justify-between px-6 py-3 rounded-full transition-colors duration-300",
           isScrolled
-            ? "bg-background/80 backdrop-blur-md border border-border/50 shadow-lg shadow-black/10"
+            ? "bg-background/95 border border-border/50 shadow-sm shadow-black/10"
             : "bg-transparent border border-transparent",
         )}
       >
@@ -270,7 +270,7 @@ const Header = () => {
         className={cn(
           "lg:hidden mx-auto flex flex-col px-4 py-3 rounded-2xl transition-colors duration-300",
           isScrolled || isMobileMenuOpen
-            ? "bg-background/80 backdrop-blur-md border border-border/50 shadow-lg shadow-black/10"
+            ? "bg-background/95 border border-border/50 shadow-sm shadow-black/10"
             : "bg-transparent border border-transparent",
         )}
       >

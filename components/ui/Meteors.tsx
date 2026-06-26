@@ -40,8 +40,8 @@ export const Meteors = ({
                 <span
                     key={"meteor" + idx}
                     className={cn(
-                        "absolute h-0.5 w-0.5 rounded-full bg-primary shadow-[0_0_0_1px_rgba(255,255,255,0.1)]",
-                        "before:content-[''] before:absolute before:top-1/2 before:-translate-y-1/2 before:w-[50px] before:h-[1px] before:bg-gradient-to-r before:from-primary before:to-transparent",
+                        "absolute h-0.5 w-0.5 rounded-full bg-primary",
+                        "before:content-[''] before:absolute before:top-1/2 before:-translate-y-1/2 before:w-8 before:h-px before:bg-gradient-to-r before:from-primary before:to-transparent",
                     )}
                     style={{
                         top: "-40px",
