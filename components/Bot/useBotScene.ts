@@ -3,7 +3,6 @@ import * as THREE from 'three';
 
 interface UseBotSceneProps {
     containerRef: React.RefObject<HTMLDivElement | null>;
-    mouseRef: React.MutableRefObject<THREE.Vector2>;
     isHoveredRef: React.MutableRefObject<boolean>;
     isProcessingRef: React.MutableRefObject<boolean>;
     isCooldownRef: React.MutableRefObject<boolean>;
@@ -15,7 +14,6 @@ interface UseBotSceneProps {
 
 export const useBotScene = ({
     containerRef,
-    mouseRef,
     isHoveredRef,
     isProcessingRef,
     isCooldownRef,
@@ -34,7 +32,6 @@ export const useBotScene = ({
     const robotRef = useRef<THREE.Group | null>(null);
     const requestRef = useRef<number | null>(null);
     const idleTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const targetRotationRef = useRef(new THREE.Vector2());
     const clockRef = useRef(new THREE.Clock());
 
     useEffect(() => {
@@ -63,6 +60,7 @@ export const useBotScene = ({
 
         const container = containerRef.current;
         if (container) {
+            renderer.domElement.style.pointerEvents = "none";
             container.appendChild(renderer.domElement);
             const width = container.clientWidth;
             const height = container.clientHeight;
@@ -317,18 +315,6 @@ export const useBotScene = ({
                 chestCenter.scale.set(scaleWobble, scaleWobble, scaleWobble);
             }
 
-            if (active) {
-                targetRotationRef.current.x = -mouseRef.current.y * 0.4;
-                targetRotationRef.current.y = mouseRef.current.x * 0.6;
-            } else {
-                targetRotationRef.current.x = 0;
-                targetRotationRef.current.y = 0;
-            }
-
-            headPivot.rotation.x += (targetRotationRef.current.x - headPivot.rotation.x) * 0.05;
-            headPivot.rotation.y += (targetRotationRef.current.y - headPivot.rotation.y) * 0.05;
-            robot.rotation.y += (targetRotationRef.current.y * 0.2 - robot.rotation.y) * 0.05;
-
             // Animate Cloak Billowing effect
             const cloakGrp = robot.getObjectByName("cloakGroup");
             if (cloakGrp) {
@@ -384,7 +370,7 @@ export const useBotScene = ({
             eyeCanvasRef.current = null;
             robotRef.current = null;
         };
-    }, [containerRef, chatOpenRef, enabled, isCooldownRef, isHoveredRef, isProcessingRef, mouseRef, isGlobalModalOpenRef, onUnavailable]);
+    }, [containerRef, chatOpenRef, enabled, isCooldownRef, isHoveredRef, isProcessingRef, isGlobalModalOpenRef, onUnavailable]);
 
     return {
         sceneRef,

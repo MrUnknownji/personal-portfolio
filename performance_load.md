@@ -115,7 +115,7 @@ Equal-length idle trace at the Contact section:
 - Paint: `252` events, `49.0ms`
 - Raster: `280` tasks, `185.4ms`
 
-The repeated Contact hovers did not add meaningful paint/raster work above the idle baseline. The remaining paint cost at this section is primarily the continuously moving background pattern and meteor layers behind the card.
+The repeated Contact hovers did not add meaningful paint/raster work above the idle baseline. The remaining paint cost at this section is primarily the continuously moving background pattern behind the card.
 
 Projects page, 12 project-card hover transitions:
 
@@ -126,6 +126,34 @@ Projects page, 12 project-card hover transitions:
 - Raster: `1` task, `0.09ms`
 
 Project-card hover is now effectively compositor-only in this trace.
+
+### Loader, Click Spark, and Bot Audit
+
+Initial loader before -> after:
+
+- Visible overlay duration: `904ms` -> `583ms`
+- Maximum task: `140.1ms` -> `85.7ms`
+- Long tasks: `5` -> `3`
+- Raster time: `361.2ms` -> `336.0ms`
+- Hidden infinite flower animation: active -> removed
+- Subsequent client route transition: full loader -> `222ms` content fade with no overlay
+
+Optimized ClickSpark:
+
+- Idle canvas display: `none`
+- Eight-click stress burst versus equal idle trace:
+  - Script: `54.5ms` versus `21.9ms`
+  - Raster: `300.5ms` versus `151.7ms`
+  - Long tasks: `0`
+- This is about `4ms` additional script and `19ms` additional raster per click in the stress trace, with no idle animation cost.
+
+Bot command/behavior verification:
+
+- Same-page Contact command position error: `0px`
+- Cross-page Contact command position error: `0px`
+- Label-based synthetic button command clicked the exact requested element.
+- Global mousemove, touchmove, scroll-speed, route-change jump, and scroll-derived suggestion behaviors are removed.
+- Header shrink samples are monotonic from `1440px` to `864px`; the previous undershoot/correction is gone.
 
 ## Fixed / Improved Areas
 
@@ -138,6 +166,8 @@ Project-card hover is now effectively compositor-only in this trace.
 2. Click spark canvas no longer loops while idle.
    - It starts `requestAnimationFrame` only when sparks exist.
    - It stops as soon as the spark list is empty.
+   - Its full-screen blend canvas uses `display: none` between bursts.
+   - Reduced-motion users get no click listener, and rapid bursts are capped at `64` sparks.
 
 3. Project page hover/filter costs were reduced.
    - Grid transitions no longer animate `filter: blur(...)`.
@@ -168,10 +198,10 @@ Project-card hover is now effectively compositor-only in this trace.
    - Autoplay paints at a capped cadence instead of every browser frame.
    - Autoplay now reverses continuously instead of stopping after a few sweeps.
 
-8. Sparkles canvases were disabled.
+8. Continuous Sparkles canvases were disabled.
    - The hero slider Sparkles canvas is now disabled.
-   - ClickSpark is also unmounted for the current comparison.
-   - Home-page canvas count dropped from `2` to `0` before activating the 3D bot.
+   - ClickSpark is restored as an event-driven effect and remains hidden while idle.
+   - Active ambient canvas count remains `0` before activating the 3D bot.
 
 9. Pointer-heavy hover effects were throttled.
    - Magnetic title text now caches character positions and coalesces updates through `requestAnimationFrame`.
@@ -200,6 +230,14 @@ Project-card hover is now effectively compositor-only in this trace.
    - Script time in the matching scroll trace moved from `176ms` to a particle-free median of `161ms`, about `9%` lower.
    - The baseline trace had `16` long tasks with an `80.6ms` maximum; repeated particle-free traces had a median of `0` long tasks and a `36.2ms` median maximum.
    - Total raster time remained noisy (`1.21s` baseline versus `1.27s` to `1.61s` particle-free), so the particles were not the dominant scroll raster cost.
+
+13. Loader, bot targeting, and header motion were corrected.
+   - Loader flower animation is finite and owned by the transition timeline.
+   - Later route changes use a short content fade instead of replaying the loader.
+   - Bot section scrolling uses measured header offset, `ScrollSmoother.offset()`, and final position correction.
+   - Bot can resolve explicit click/press/select commands by visible DOM label.
+   - Bot ambient mouse, scroll, and page-change reactions were removed.
+   - Header geometry now animates as one numeric GSAP motion without competing CSS constraints.
 
 ## Remaining Load Areas
 

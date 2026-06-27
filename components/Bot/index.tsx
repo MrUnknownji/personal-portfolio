@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import * as THREE from "three";
 import gsap from "gsap";
 import { chatWithBot } from "@/app/actions/chat";
 import { useBotScene } from "./useBotScene";
@@ -32,81 +31,146 @@ function supportsWebGL() {
   }
 }
 
-function SvgBotVisual({
-  active,
-  mood,
-}: {
-  active: boolean;
-  mood: EyeState;
-}) {
-  const happy = mood === "happy" || active;
-  const thinking = mood === "thinking";
-  const sad = mood === "sad" || mood === "error";
-
+function SvgBotVisual() {
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <svg
-        viewBox="0 0 160 160"
-        className="h-28 w-28 sm:h-36 sm:w-36 transition-transform duration-300 group-hover:scale-105"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 400 400"
+        className="h-28 w-28 sm:h-36 sm:w-36"
         role="img"
         aria-label="Krypton assistant"
       >
         <defs>
-          <linearGradient id="bot-shell" x1="28" y1="20" x2="132" y2="144">
-            <stop stopColor="#2a2623" />
-            <stop offset="1" stopColor="#090807" />
+          <linearGradient id="head-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#273549" />
+            <stop offset="100%" stopColor="#0f172a" />
           </linearGradient>
-          <linearGradient id="bot-accent" x1="40" y1="28" x2="126" y2="132">
-            <stop stopColor="#ffcc66" />
-            <stop offset="0.48" stopColor="#ff9233" />
-            <stop offset="1" stopColor="#d04438" />
+          <linearGradient id="visor-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#090d16" />
+            <stop offset="100%" stopColor="#020408" />
+          </linearGradient>
+          <linearGradient id="accent-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ffa552" />
+            <stop offset="100%" stopColor="#ff9233" />
           </linearGradient>
         </defs>
-        <circle cx="80" cy="80" r="58" fill="url(#bot-shell)" stroke="#ff9233" strokeWidth="3" />
-        <path
-          d="M42 88c6 28 24 43 38 43s32-15 38-43"
-          fill="none"
-          stroke="url(#bot-accent)"
-          strokeWidth="8"
-          strokeLinecap="round"
-          opacity="0.45"
-        />
-        <rect x="38" y="48" width="84" height="54" rx="24" fill="#050505" stroke="#3a3028" strokeWidth="3" />
-        <g>
-          {thinking ? (
-            <>
-            <circle cx="62" cy="75" r="5" fill="#ff9233">
-              <animate attributeName="cy" values="75;66;75" dur="0.9s" repeatCount="indefinite" />
-            </circle>
-            <circle cx="80" cy="75" r="5" fill="#ff9233">
-              <animate attributeName="cy" values="75;66;75" dur="0.9s" begin="0.12s" repeatCount="indefinite" />
-            </circle>
-            <circle cx="98" cy="75" r="5" fill="#ff9233">
-              <animate attributeName="cy" values="75;66;75" dur="0.9s" begin="0.24s" repeatCount="indefinite" />
-            </circle>
-            </>
-          ) : sad ? (
-            <>
-            <path d="M58 76l18-8" stroke="#ff9233" strokeWidth="5" strokeLinecap="round" />
-            <path d="M102 76l-18-8" stroke="#ff9233" strokeWidth="5" strokeLinecap="round" />
-            </>
-          ) : happy ? (
-            <>
-            <path d="M56 76c6-12 18-12 24 0" stroke="#ff9233" strokeWidth="5" strokeLinecap="round" fill="none" />
-            <path d="M80 76c6-12 18-12 24 0" stroke="#ff9233" strokeWidth="5" strokeLinecap="round" fill="none" />
-            </>
-          ) : (
-            <>
-              <circle cx="66" cy="75" r="12" fill="#ff9233" fillOpacity="0.22" stroke="#ff9233" strokeWidth="5" />
-              <circle cx="94" cy="75" r="12" fill="#ff9233" fillOpacity="0.22" stroke="#ff9233" strokeWidth="5" />
-              <circle cx="66" cy="75" r="4" fill="#ffcc66" />
-              <circle cx="94" cy="75" r="4" fill="#ffcc66" />
-            </>
-          )}
+        <g id="bot-head">
+          <rect
+            x="194"
+            y="95"
+            width="12"
+            height="24"
+            rx="6"
+            fill="url(#accent-grad)"
+          />
+          <rect
+            x="62"
+            y="170"
+            width="18"
+            height="60"
+            rx="9"
+            fill="#0f172a"
+            stroke="#334155"
+            strokeWidth="2"
+          />
+          <rect
+            x="56"
+            y="185"
+            width="6"
+            height="30"
+            rx="3"
+            fill="url(#accent-grad)"
+          />
+          <rect
+            x="320"
+            y="170"
+            width="18"
+            height="60"
+            rx="9"
+            fill="#0f172a"
+            stroke="#334155"
+            strokeWidth="2"
+          />
+          <rect
+            x="338"
+            y="185"
+            width="6"
+            height="30"
+            rx="3"
+            fill="url(#accent-grad)"
+          />
+          <rect
+            x="80"
+            y="115"
+            width="240"
+            height="170"
+            rx="60"
+            fill="url(#head-grad)"
+            stroke="#334155"
+            strokeWidth="2"
+          />
+          <path
+            d="M 110,135 C 160,126 240,126 290,135 C 295,136 290,142 250,140 C 190,137 130,140 110,135 Z"
+            fill="#ffffff"
+            opacity="0.08"
+          />
+          <rect
+            x="105"
+            y="145"
+            width="190"
+            height="110"
+            rx="45"
+            fill="url(#visor-grad)"
+            stroke="#1e293b"
+            strokeWidth="1.5"
+          />
+          <rect
+            x="108"
+            y="148"
+            width="184"
+            height="104"
+            rx="42"
+            fill="none"
+            stroke="#334155"
+            strokeWidth="1"
+            opacity="0.3"
+          />
+          <g id="eyes">
+            <rect
+              x="140"
+              y="185"
+              width="36"
+              height="20"
+              rx="10"
+              fill="url(#accent-grad)"
+            />
+            <circle cx="149" cy="191" r="3.5" fill="#ffffff" opacity="0.9" />
+            <rect
+              x="224"
+              y="185"
+              width="36"
+              height="20"
+              rx="10"
+              fill="url(#accent-grad)"
+            />
+            <circle cx="233" cy="191" r="3.5" fill="#ffffff" opacity="0.9" />
+            <rect
+              x="230"
+              y="175"
+              width="24"
+              height="3"
+              rx="1.5"
+              fill="url(#accent-grad)"
+              opacity="0.8"
+            />
+          </g>
+          <path
+            d="M 210,146 C 245,146 290,175 290,210 C 290,185 245,146 210,146 Z"
+            fill="#ffffff"
+            opacity="0.03"
+          />
         </g>
-        <circle cx="80" cy="118" r="9" fill="url(#bot-accent)" />
-        <path d="M80 30v-13" stroke="#ff9233" strokeWidth="5" strokeLinecap="round" />
-        <circle cx="80" cy="13" r="6" fill="#ff9233" />
       </svg>
     </div>
   );
@@ -122,7 +186,6 @@ export default function Bot() {
   const [isCooldown, setIsCooldown] = useState(false);
   const [bubbleText, setBubbleText] = useState<string | null>(null);
   const [eyeState, setEyeState] = useState<EyeState>("open");
-  const [activeSection, setActiveSection] = useState("home");
   const [activeProject, setActiveProject] = useState<{
     id: number;
     title: string;
@@ -133,7 +196,6 @@ export default function Bot() {
   const [idleReadyFor3D, setIdleReadyFor3D] = useState(false);
   const [hasVisualIntent, setHasVisualIntent] = useState(false);
 
-  const mouseRef = useRef(new THREE.Vector2());
   const isHoveredRef = useRef(false);
   const isProcessingRef = useRef(false);
   const isCooldownRef = useRef(false);
@@ -244,10 +306,9 @@ export default function Bot() {
     isCooldownRef.current = isCooldown;
   }, [isCooldown]);
 
-  const { eyeContextRef, eyeCanvasRef, eyeTextureRef, clockRef, robotRef } =
+  const { eyeContextRef, eyeCanvasRef, eyeTextureRef, clockRef } =
     useBotScene({
       containerRef,
-      mouseRef,
       isHoveredRef,
       isProcessingRef,
       isCooldownRef,
@@ -271,13 +332,10 @@ export default function Bot() {
     isRightClickingRef,
   } = useBotInteractions({
     containerRef,
-    mouseRef,
     setEyeState,
     isProcessing,
     isCooldown,
-    setChatOpen,
     isHoveredRef,
-    robotRef,
     setBubbleText,
     enabled: visualMode === "three",
   });
@@ -484,29 +542,6 @@ export default function Bot() {
   }, []);
 
   useEffect(() => {
-    const sections = ["about", "contact"];
-    const updateActiveSection = () => {
-      if (pathname === "/my-projects") {
-        setActiveSection("projects");
-        return;
-      }
-
-      const visibleSection = sections.find((section) => {
-        const element = document.getElementById(section);
-        if (!element) return false;
-        const rect = element.getBoundingClientRect();
-        return rect.top <= window.innerHeight * 0.45 && rect.bottom >= 160;
-      });
-
-      setActiveSection(visibleSection || "home");
-    };
-
-    updateActiveSection();
-    window.addEventListener("scroll", updateActiveSection, { passive: true });
-    return () => window.removeEventListener("scroll", updateActiveSection);
-  }, [pathname]);
-
-  useEffect(() => {
     const handleProjectContext = (event: Event) => {
       const customEvent = event as CustomEvent<{ id: number; title: string }>;
       setActiveProject(customEvent.detail);
@@ -539,20 +574,8 @@ export default function Bot() {
       ];
     }
 
-    if (activeSection === "projects") {
-      return ["Open BidStrike", "Open AudioVibes", "Open GitHub"];
-    }
-
-    if (activeSection === "about") {
-      return ["Summarize Sandeep", "Show skills", "Go to contact"];
-    }
-
-    if (activeSection === "contact") {
-      return ["How can I hire Sandeep?", "Show projects", "Go to top"];
-    }
-
     return ["Show projects", "Summarize Sandeep", "Go to contact"];
-  }, [activeProject, activeSection]);
+  }, [activeProject]);
 
   const isMinimized = !chatOpen && !isHoveredRef.current;
   const menuLeft =
@@ -601,12 +624,12 @@ export default function Bot() {
 
       <div
         ref={containerRef}
-        className={`group relative w-full h-full ${visualMode === "svg" ? "cursor-pointer" : ""}`}
+        className={`group relative z-10 w-full h-full ${visualMode === "svg" ? "cursor-pointer" : ""}`}
         onDoubleClick={handleDoubleClick}
         onClick={handleContainerClick}
       >
         {visualMode === "svg" && (
-          <SvgBotVisual active={chatOpen || isHoveredRef.current} mood={eyeState} />
+          <SvgBotVisual />
         )}
       </div>
 

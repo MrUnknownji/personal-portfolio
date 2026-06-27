@@ -72,6 +72,7 @@ const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
         animationIdRef.current = requestAnimationFrame(drawRef.current);
       } else {
         animationIdRef.current = null;
+        canvas.style.display = "none";
       }
     };
   }, [easeOut]);
@@ -101,6 +102,9 @@ const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
   }, []);
 
   const handleClick = useCallback((e: MouseEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const now = performance.now();
     const newSparks: Spark[] = Array.from({ length: sparkCount }, (_, i) => ({
       x: e.clientX,
@@ -109,7 +113,8 @@ const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
       startTime: now,
     }));
 
-    sparksRef.current.push(...newSparks);
+    sparksRef.current = [...sparksRef.current, ...newSparks].slice(-64);
+    canvas.style.display = "block";
 
     if (!animationIdRef.current) {
       animationIdRef.current = requestAnimationFrame(drawRef.current);
@@ -117,6 +122,9 @@ const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (motionQuery.matches) return;
+
     window.addEventListener("click", handleClick);
     return () => window.removeEventListener("click", handleClick);
   }, [handleClick]);
@@ -126,7 +134,7 @@ const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
       <canvas
         ref={canvasRef}
         className="fixed inset-0 z-[99998] pointer-events-none"
-        style={{ mixBlendMode: "screen" }}
+        style={{ display: "none", mixBlendMode: "screen" }}
       />
       {children}
     </>

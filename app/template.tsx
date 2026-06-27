@@ -10,6 +10,27 @@ if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 }
 
+let hasPlayedInitialLoader = false;
+
+function scrollToCurrentHash(duration = 0.65) {
+  if (!window.location.hash) return;
+
+  const target = document.querySelector(window.location.hash);
+  if (!target) return;
+
+  const headerHeight =
+    document.querySelector("header")?.getBoundingClientRect().height ?? 64;
+  gsap.to(window, {
+    scrollTo: {
+      y: target,
+      offsetY: Math.round(headerHeight + 20),
+      autoKill: false,
+    },
+    duration,
+    ease: "power2.inOut",
+  });
+}
+
 function getOrCreateOverlay(): HTMLDivElement {
   let overlay = document.getElementById(
     "page-transition-overlay",
@@ -50,11 +71,11 @@ function getOrCreateOverlay(): HTMLDivElement {
   return overlay;
 }
 
-function playFlowerAnimation(overlay: HTMLDivElement) {
+function createFlowerAnimation(overlay: HTMLDivElement) {
   const petals = overlay.querySelectorAll(".petal");
   const centerGlow = overlay.querySelector(".center-glow");
 
-  if (!centerGlow || petals.length === 0) return;
+  if (!centerGlow || petals.length === 0) return null;
 
   gsap.killTweensOf([centerGlow, ...Array.from(petals)]);
 
@@ -62,24 +83,32 @@ function playFlowerAnimation(overlay: HTMLDivElement) {
   centerGlow.setAttribute("opacity", "0");
   petals.forEach((p) => p.setAttribute("transform", "scale(0)"));
 
-  gsap.to(centerGlow, {
-    attr: { transform: "translate(0,-10) scale(1)", opacity: 0.8 },
-    duration: 1.5,
-    ease: "power2.inOut",
-    repeat: -1,
-    yoyo: true,
-    delay: 0.1,
+  const angles = [-75, -50, -25, 0, 25, 50, 75];
+  const timeline = gsap.timeline();
+
+  timeline.to(
+    centerGlow,
+    {
+      attr: { transform: "translate(0,-10) scale(1)", opacity: 0.8 },
+      duration: 0.35,
+      ease: "power2.out",
+    },
+    0,
+  );
+
+  petals.forEach((petal, i) => {
+    timeline.to(
+      petal,
+      {
+        attr: { transform: `rotate(${angles[i]}) scale(1)` },
+        duration: 0.45,
+        ease: "back.out(1.15)",
+      },
+      0.04 + i * 0.025,
+    );
   });
 
-  const angles = [-75, -50, -25, 0, 25, 50, 75];
-  petals.forEach((petal, i) => {
-    gsap.to(petal, {
-      attr: { transform: `rotate(${angles[i]}) scale(1)` },
-      duration: 1.8,
-      ease: "back.out(1.2)",
-      delay: 0.1,
-    });
-  });
+  return timeline;
 }
 
 export default function Template({ children }: { children: React.ReactNode }) {
@@ -99,9 +128,31 @@ export default function Template({ children }: { children: React.ReactNode }) {
       if (!counterEl) return;
 
       gsap.killTweensOf([overlay, contentRef.current, counterEl]);
+      const bodyStyle = document.body.style;
+
+      if (hasPlayedInitialLoader) {
+        overlay.style.display = "none";
+        overlay.style.pointerEvents = "none";
+        bodyStyle.cursor = "";
+        bodyStyle.overflow = "";
+
+        gsap.set(contentRef.current, { opacity: 0 });
+        const routeFade = gsap.to(contentRef.current, {
+          opacity: 1,
+          duration: 0.22,
+          ease: "power2.out",
+          onComplete: () => {
+            ScrollTrigger.refresh();
+            scrollToCurrentHash();
+          },
+        });
+
+        return () => routeFade.kill();
+      }
 
       const counter = { value: 0 };
-      const bodyStyle = document.body.style;
+      let lastCounterValue = -1;
+      let flowerTimeline: gsap.core.Timeline | null = null;
 
       const tl = gsap.timeline({
         onStart: () => {
@@ -114,15 +165,13 @@ export default function Template({ children }: { children: React.ReactNode }) {
           }
 
           window.scrollTo(0, 0);
-          gsap.set(window, { scrollTo: { y: 0, autoKill: false } });
-
-          gsap.delayedCall(0.1, () => {
-            ScrollTrigger.refresh();
-          });
-
-          playFlowerAnimation(overlay);
+          flowerTimeline = createFlowerAnimation(overlay);
         },
         onComplete: () => {
+          hasPlayedInitialLoader = true;
+          flowerTimeline?.kill();
+          flowerTimeline = null;
+
           if (!window.location.hash) {
             window.scrollTo(0, 0);
           }
@@ -131,28 +180,22 @@ export default function Template({ children }: { children: React.ReactNode }) {
           bodyStyle.overflow = "";
           overlay.style.display = "none";
           overlay.style.pointerEvents = "none";
+          ScrollTrigger.refresh();
 
-          if (window.location.hash) {
-            const id = window.location.hash.substring(1);
-            gsap.to(window, {
-              scrollTo: { y: `#${id}`, offsetY: 20, autoKill: false },
-              duration: 1,
-              ease: "power2.inOut",
-            });
-          }
+          scrollToCurrentHash();
         },
         defaults: { ease: "power2.inOut" },
       });
 
-      const counterDuration = 0.9;
-      const contentFadeInDelay = 0.15;
-      const overlayFadeOutDelay = counterDuration - 0.1;
-      const overlayFadeOutDuration = 0.3;
+      const counterDuration = 0.55;
+      const contentFadeInDelay = 0.1;
+      const overlayFadeOutDelay = 0.46;
+      const overlayFadeOutDuration = 0.22;
 
       tl.set(overlay, { opacity: 1, display: "flex" })
         .set(contentRef.current, { opacity: 0 })
         .set(counterEl, { textContent: "0%", opacity: 0 })
-        .to(counterEl, { opacity: 1, duration: 0.5 }, 0)
+        .to(counterEl, { opacity: 1, duration: 0.16 }, 0)
         .to(
           counter,
           {
@@ -160,7 +203,11 @@ export default function Template({ children }: { children: React.ReactNode }) {
             duration: counterDuration,
             ease: "power1.out",
             onUpdate: () => {
-              counterEl.textContent = Math.floor(counter.value) + "%";
+              const nextValue = Math.floor(counter.value);
+              if (nextValue !== lastCounterValue) {
+                counterEl.textContent = nextValue + "%";
+                lastCounterValue = nextValue;
+              }
             },
           },
           0,
@@ -169,7 +216,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
           contentRef.current,
           {
             opacity: 1,
-            duration: 0.5,
+            duration: 0.32,
           },
           contentFadeInDelay,
         )
@@ -192,6 +239,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
       return () => {
         tl.kill();
+        flowerTimeline?.kill();
         gsap.killTweensOf([overlay, contentRef.current, counterEl]);
         bodyStyle.cursor = "";
         bodyStyle.overflow = "";

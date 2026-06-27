@@ -28,7 +28,7 @@ export const BotChat: React.FC<BotChatProps> = ({
     <>
       {/* Bubble */}
       <div
-        className={`absolute top-[20px] sm:top-[0px] left-1/2 -translate-x-1/2 -translate-y-full mb-4 w-max max-w-[200px] bg-primary/10 border-2 border-primary text-primary px-4 py-2 rounded-xl text-center font-mono text-sm font-bold pointer-events-none transition-opacity duration-200 ${bubbleText ? "opacity-100" : "opacity-0"}`}
+        className={`absolute z-30 top-[20px] sm:top-[0px] left-1/2 -translate-x-1/2 -translate-y-full mb-4 w-max max-w-[200px] bg-primary/10 border-2 border-primary text-primary px-4 py-2 rounded-xl text-center font-mono text-sm font-bold pointer-events-none transition-opacity duration-200 ${bubbleText ? "opacity-100" : "opacity-0"}`}
       >
         {bubbleText}
         <div className="absolute bottom-[-10px] left-1/2 -translate-x-1/2 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] border-t-primary">
@@ -38,7 +38,7 @@ export const BotChat: React.FC<BotChatProps> = ({
 
       {/* Input Area */}
       <div
-        className={`absolute bottom-[60px] sm:bottom-[40px] left-1/2 -translate-x-1/2 translate-y-full w-[90%] sm:w-[300px] transition-all duration-300 ${chatOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible translate-y-4"}`}
+        className={`absolute z-40 pointer-events-auto bottom-[60px] sm:bottom-[40px] left-1/2 -translate-x-1/2 translate-y-full w-[90%] sm:w-[300px] transition-all duration-300 ${chatOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible translate-y-4"}`}
       >
         {suggestions.length > 0 && (
           <div className="mb-2 flex flex-wrap justify-center gap-2">

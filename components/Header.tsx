@@ -42,26 +42,52 @@ const Header = () => {
 
   useGSAP(() => {
     if (desktopNavRef.current) {
+      const targetWidth = isScrolled
+        ? Math.min(864, Math.max(700, window.innerWidth * 0.6))
+        : window.innerWidth;
+      gsap.killTweensOf(desktopNavRef.current);
       gsap.to(desktopNavRef.current, {
-        width: isScrolled ? "60%" : "100%",
+        width: targetWidth,
         y: isScrolled ? 8 : 0,
-        duration: 0.4,
-        ease: "power2.out",
+        borderRadius: isScrolled ? 999 : 0,
+        duration: 0.38,
+        ease: "power2.inOut",
+        overwrite: "auto",
+        onComplete: () => {
+          if (!isScrolled && desktopNavRef.current) {
+            gsap.set(desktopNavRef.current, { clearProps: "width" });
+          }
+        },
       });
     }
     if (mobileNavRef.current) {
+      const targetWidth =
+        isScrolled || isMobileMenuOpen
+          ? window.innerWidth * 0.92
+          : window.innerWidth;
+      gsap.killTweensOf(mobileNavRef.current);
       gsap.to(mobileNavRef.current, {
-        width: isScrolled || isMobileMenuOpen ? "92%" : "100%",
+        width: targetWidth,
         y: isScrolled ? 8 : 0,
-        duration: 0.4,
-        ease: "power2.out",
+        borderRadius: isScrolled || isMobileMenuOpen ? 16 : 0,
+        duration: 0.38,
+        ease: "power2.inOut",
+        overwrite: "auto",
+        onComplete: () => {
+          if (!isScrolled && !isMobileMenuOpen && mobileNavRef.current) {
+            gsap.set(mobileNavRef.current, { clearProps: "width" });
+          }
+        },
       });
     }
     if (logoTextRef.current) {
+      gsap.killTweensOf(logoTextRef.current);
       gsap.to(logoTextRef.current, {
         opacity: isScrolled ? 0 : 1,
-        x: isScrolled ? -10 : 0,
-        duration: 0.2,
+        x: isScrolled ? -6 : 0,
+        duration: 0.38,
+        ease: "power2.inOut",
+        overwrite: "auto",
       });
     }
   }, { dependencies: [isScrolled, isMobileMenuOpen] });
@@ -145,12 +171,11 @@ const Header = () => {
     >
       <nav
         ref={desktopNavRef}
-        style={{ minWidth: isScrolled ? "700px" : "auto" }}
         className={cn(
-          "hidden lg:flex mx-auto items-center justify-between px-6 py-3 transition-[border-color,border-radius] duration-300 bg-[radial-gradient(circle_at_50%_0%,rgb(25,17,12),rgb(10,10,10)_72%)]",
+          "hidden lg:flex w-full mx-auto items-center justify-between px-6 py-3 transition-colors duration-200 bg-[radial-gradient(circle_at_50%_0%,rgb(25,17,12),rgb(10,10,10)_72%)]",
           isScrolled
-            ? "max-w-7xl rounded-full border border-border/70"
-            : "max-w-none rounded-none border-x-0 border-t-0 border-b border-white/10",
+            ? "border border-border/70"
+            : "border border-transparent border-b-white/10",
         )}
       >
         <Link
@@ -202,10 +227,10 @@ const Header = () => {
       <nav
         ref={mobileNavRef}
         className={cn(
-          "lg:hidden mx-auto flex flex-col px-4 py-3 transition-[border-color,border-radius] duration-300 bg-[radial-gradient(circle_at_50%_0%,rgb(25,17,12),rgb(10,10,10)_72%)]",
+          "lg:hidden w-full mx-auto flex flex-col px-4 py-3 transition-colors duration-200 bg-[radial-gradient(circle_at_50%_0%,rgb(25,17,12),rgb(10,10,10)_72%)]",
           isScrolled || isMobileMenuOpen
-            ? "rounded-2xl border border-border/70"
-            : "rounded-none border-x-0 border-t-0 border-b border-white/10",
+            ? "border border-border/70"
+            : "border border-transparent border-b-white/10",
         )}
       >
         <div className="flex items-center justify-between w-full">

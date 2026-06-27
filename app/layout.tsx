@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import SmoothScroller from "@/components/SmoothScroller";
 import Template from "./template";
 import LazyBot from "@/components/LazyBot";
+import ClickSpark from "@/components/ui/ClickSpark";
 import DynamicCursor from "@/components/ui/DynamicCursor";
 import GlobalBackground from "@/components/GlobalBackground";
 
@@ -78,6 +79,7 @@ export default function RootLayout({
         </SmoothScroller>
         <LazyBot />
 
+        <ClickSpark />
         <DynamicCursor />
       </body>
     </html>
