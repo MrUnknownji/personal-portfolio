@@ -25,6 +25,24 @@ export const MagneticText = ({
 
       const charElements = el.querySelectorAll(".char");
       if (!charElements.length) return;
+      const chars = Array.from(charElements) as HTMLElement[];
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      let charMetrics: Array<{ x: number; y: number }> = [];
+      let rafId: number | null = null;
+      let lastFrameTime = 0;
+      let pointer = { x: 0, y: 0 };
+
+      const measureChars = () => {
+        charMetrics = chars.map((char) => {
+          const rect = char.getBoundingClientRect();
+          return {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+          };
+        });
+      };
 
       gsap.from(charElements, {
         y: 20,
@@ -34,22 +52,31 @@ export const MagneticText = ({
         ease: "power3.out",
       });
 
-      const handleMouseMove = (e: MouseEvent) => {
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
+      if (prefersReducedMotion) return;
 
-        charElements.forEach((char) => {
-          const charRect = char.getBoundingClientRect();
-          const charCenterX = charRect.left + charRect.width / 2;
-          const charCenterY = charRect.top + charRect.height / 2;
+      const applyMagnet = (timestamp: number) => {
+        rafId = null;
 
-          const dist = Math.hypot(mouseX - charCenterX, mouseY - charCenterY);
+        if (timestamp - lastFrameTime < 33) {
+          rafId = requestAnimationFrame(applyMagnet);
+          return;
+        }
+
+        lastFrameTime = timestamp;
+        const mouseX = pointer.x;
+        const mouseY = pointer.y;
+
+        chars.forEach((char, index) => {
+          const metric = charMetrics[index];
+          if (!metric) return;
+
+          const dist = Math.hypot(mouseX - metric.x, mouseY - metric.y);
 
           const maxDist = 80;
           if (dist < maxDist) {
             const intensity = 1 - dist / maxDist;
-            const moveX = (mouseX - charCenterX) * intensity * 0.1;
-            const moveY = (mouseY - charCenterY) * intensity * 0.1;
+            const moveX = (mouseX - metric.x) * intensity * 0.1;
+            const moveY = (mouseY - metric.y) * intensity * 0.1;
 
             gsap.to(char, {
               x: moveX,
@@ -74,7 +101,18 @@ export const MagneticText = ({
         });
       };
 
+      const handleMouseMove = (e: MouseEvent) => {
+        pointer = { x: e.clientX, y: e.clientY };
+        if (rafId === null) {
+          rafId = requestAnimationFrame(applyMagnet);
+        }
+      };
+
       const handleMouseLeave = () => {
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+        }
         gsap.to(charElements, {
           x: 0,
           y: 0,
@@ -86,12 +124,20 @@ export const MagneticText = ({
         });
       };
 
+      measureChars();
+      el.addEventListener("mouseenter", measureChars);
       el.addEventListener("mousemove", handleMouseMove);
       el.addEventListener("mouseleave", handleMouseLeave);
+      window.addEventListener("resize", measureChars);
 
       return () => {
+        if (rafId !== null) {
+          cancelAnimationFrame(rafId);
+        }
+        el.removeEventListener("mouseenter", measureChars);
         el.removeEventListener("mousemove", handleMouseMove);
         el.removeEventListener("mouseleave", handleMouseLeave);
+        window.removeEventListener("resize", measureChars);
       };
     },
     { scope: containerRef },

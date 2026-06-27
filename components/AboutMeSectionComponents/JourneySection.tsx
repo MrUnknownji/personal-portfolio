@@ -98,18 +98,54 @@ const JourneySection = () => {
       items.forEach((item) => {
         const card = item.querySelector(".journey-card") as HTMLElement;
         if (!card) return;
-        const handleMouseMove = (e: MouseEvent) => {
-          const rect = card.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
+        let rect: DOMRect | null = null;
+        let frameId: number | null = null;
+        let pendingX = 0;
+        let pendingY = 0;
 
-          card.style.setProperty("--mouse-x", `${x}px`);
-          card.style.setProperty("--mouse-y", `${y}px`);
+        const writeMousePosition = () => {
+          frameId = null;
+          card.style.setProperty("--mouse-x", `${pendingX}px`);
+          card.style.setProperty("--mouse-y", `${pendingY}px`);
         };
 
+        const measureCard = () => {
+          rect = card.getBoundingClientRect();
+        };
+
+        const handleMouseMove = (e: MouseEvent) => {
+          if (!rect) {
+            measureCard();
+          }
+
+          if (!rect) return;
+
+          pendingX = e.clientX - rect.left;
+          pendingY = e.clientY - rect.top;
+
+          if (frameId === null) {
+            frameId = requestAnimationFrame(writeMousePosition);
+          }
+        };
+
+        const handleMouseLeave = () => {
+          rect = null;
+          if (frameId !== null) {
+            cancelAnimationFrame(frameId);
+            frameId = null;
+          }
+        };
+
+        card.addEventListener("mouseenter", measureCard);
         card.addEventListener("mousemove", handleMouseMove);
+        card.addEventListener("mouseleave", handleMouseLeave);
         cleanupMouseListeners.push(() => {
+          if (frameId !== null) {
+            cancelAnimationFrame(frameId);
+          }
+          card.removeEventListener("mouseenter", measureCard);
           card.removeEventListener("mousemove", handleMouseMove);
+          card.removeEventListener("mouseleave", handleMouseLeave);
         });
       });
 

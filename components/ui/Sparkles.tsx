@@ -13,6 +13,7 @@ type SparklesProps = {
   speed?: number;
   particleColor?: string;
   particleDensity?: number;
+  fps?: number;
 };
 
 export const SparklesCore = ({
@@ -24,10 +25,12 @@ export const SparklesCore = ({
   speed = 4,
   particleColor = "#ff9233",
   particleDensity = 100,
+  fps = 30,
 }: SparklesProps) => {
   const generatedId = useId();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isVisibleRef = useRef(true);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
@@ -40,8 +43,31 @@ export const SparklesCore = ({
     };
 
     updateDimensions();
-    window.addEventListener("resize", updateDimensions);
-    return () => window.removeEventListener("resize", updateDimensions);
+
+    if (!containerRef.current || typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", updateDimensions);
+      return () => window.removeEventListener("resize", updateDimensions);
+    }
+
+    const resizeObserver = new ResizeObserver(updateDimensions);
+    resizeObserver.observe(containerRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisibleRef.current = entry.isIntersecting;
+      },
+      { threshold: 0.05 },
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
@@ -90,9 +116,38 @@ export const SparklesCore = ({
       });
     }
 
-    let animationFrameId: number;
+    let animationFrameId: number | null = null;
+    let idleTimeoutId: number | null = null;
+    let lastFrameTime = 0;
+    const frameInterval = 1000 / Math.max(1, Math.min(fps, 60));
 
-    const animate = () => {
+    const clearScheduledFrame = () => {
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+      if (idleTimeoutId !== null) {
+        window.clearTimeout(idleTimeoutId);
+        idleTimeoutId = null;
+      }
+    };
+
+    const animate = (timestamp: number) => {
+      animationFrameId = null;
+
+      if (!isVisibleRef.current || document.hidden) {
+        idleTimeoutId = window.setTimeout(() => {
+          animationFrameId = requestAnimationFrame(animate);
+        }, 250);
+        return;
+      }
+
+      if (timestamp - lastFrameTime < frameInterval) {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+
+      lastFrameTime = timestamp;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       particles.forEach((particle) => {
@@ -120,12 +175,20 @@ export const SparklesCore = ({
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    animate();
+    animationFrameId = requestAnimationFrame(animate);
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      clearScheduledFrame();
     };
-  }, [dimensions, minSize, maxSize, speed, particleColor, particleDensity]);
+  }, [
+    dimensions,
+    minSize,
+    maxSize,
+    speed,
+    particleColor,
+    particleDensity,
+    fps,
+  ]);
 
   return (
     <div

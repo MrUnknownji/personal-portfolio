@@ -237,6 +237,9 @@ const CodeCompare = ({
   const rafRef = useRef<number | null>(null);
   const sliderPositionRef = useRef(initialSliderPercentage);
   const isHoveredRef = useRef(false);
+  const isInViewRef = useRef(true);
+  const autoplayCompleteRef = useRef(false);
+  const resumeAutoplayRef = useRef<(() => void) | null>(null);
   const autoplayProgressRef = useRef(initialSliderPercentage);
 
   const updateSliderVisual = useCallback((percent: number) => {
@@ -251,15 +254,44 @@ const CodeCompare = ({
 
   useEffect(() => {
     if (!autoplay) return;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+
+    if (prefersReducedMotion.matches) {
+      updateSliderVisual(initialSliderPercentage);
+      return;
+    }
 
     let lastTime = performance.now();
+    let lastPaintTime = 0;
     const speed = 100 / autoplayDuration;
+    const frameInterval = 1000 / 30;
     let direction = 1;
+    let edgeHits = 0;
+
+    const stopAutoplayFrame = () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
+
+    const scheduleAutoplayFrame = () => {
+      if (rafRef.current !== null || autoplayCompleteRef.current) return;
+      rafRef.current = requestAnimationFrame(animate);
+    };
 
     const animate = (currentTime: number) => {
-      if (isHoveredRef.current) {
+      rafRef.current = null;
+
+      if (
+        autoplayCompleteRef.current ||
+        isHoveredRef.current ||
+        !isInViewRef.current ||
+        document.hidden
+      ) {
         lastTime = currentTime;
-        rafRef.current = requestAnimationFrame(animate);
         return;
       }
 
@@ -268,26 +300,90 @@ const CodeCompare = ({
 
       autoplayProgressRef.current += direction * speed * delta;
 
+      let hitEdge = false;
+
       if (autoplayProgressRef.current >= 100) {
         autoplayProgressRef.current = 100;
         direction = -1;
+        hitEdge = true;
       } else if (autoplayProgressRef.current <= 0) {
         autoplayProgressRef.current = 0;
         direction = 1;
+        hitEdge = true;
       }
 
-      updateSliderVisual(autoplayProgressRef.current);
-      rafRef.current = requestAnimationFrame(animate);
+      if (hitEdge) {
+        edgeHits += 1;
+      }
+
+      if (currentTime - lastPaintTime >= frameInterval || hitEdge) {
+        updateSliderVisual(autoplayProgressRef.current);
+        lastPaintTime = currentTime;
+      }
+
+      if (edgeHits >= 4) {
+        autoplayCompleteRef.current = true;
+        return;
+      }
+
+      scheduleAutoplayFrame();
     };
 
-    rafRef.current = requestAnimationFrame(animate);
+    const resumeAutoplay = () => {
+      if (
+        autoplayCompleteRef.current ||
+        isHoveredRef.current ||
+        !isInViewRef.current ||
+        document.hidden
+      ) {
+        return;
+      }
+
+      lastTime = performance.now();
+      scheduleAutoplayFrame();
+    };
+
+    resumeAutoplayRef.current = resumeAutoplay;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isInViewRef.current = entry.isIntersecting;
+        if (entry.isIntersecting) {
+          resumeAutoplay();
+        } else {
+          stopAutoplayFrame();
+        }
+      },
+      { threshold: 0.15 },
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopAutoplayFrame();
+      } else {
+        resumeAutoplay();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    resumeAutoplay();
 
     return () => {
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      observer.disconnect();
+      resumeAutoplayRef.current = null;
+      stopAutoplayFrame();
     };
-  }, [autoplay, autoplayDuration, updateSliderVisual]);
+  }, [
+    autoplay,
+    autoplayDuration,
+    initialSliderPercentage,
+    updateSliderVisual,
+  ]);
 
   useGSAP(
     () => {
@@ -312,6 +408,10 @@ const CodeCompare = ({
 
   const handleMouseEnter = () => {
     isHoveredRef.current = true;
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
   };
 
   const handleMouseLeave = () => {
@@ -320,6 +420,7 @@ const CodeCompare = ({
       setIsDragging(false);
     }
     autoplayProgressRef.current = sliderPositionRef.current;
+    resumeAutoplayRef.current?.();
   };
 
   const handleStart = useCallback(
@@ -414,7 +515,8 @@ const CodeCompare = ({
                 background="transparent"
                 minSize={0.6}
                 maxSize={1.5}
-                particleDensity={300}
+                particleDensity={140}
+                fps={24}
                 className="w-full h-full"
                 particleColor="#ff9233"
               />

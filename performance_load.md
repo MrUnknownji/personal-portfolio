@@ -2,7 +2,7 @@
 
 Date: 2026-06-26  
 Build tested: production build via `pnpm build` and `next start -p 3001`  
-Browser test: Chrome DevTools Protocol, desktop viewport `1440x1000`, wheel scroll + hover interactions
+Browser test: Chrome DevTools Protocol, desktop viewport `1440x1000`, `prefers-reduced-motion: no-preference`, wheel scroll + hover interactions
 
 ## Current Summary
 
@@ -22,27 +22,36 @@ The scroll-specific GSAP scrub load has been reduced:
 
 ## Latest Measurements
 
+These numbers are from the latest pass after optimizing `CodeDisplay`, `SparklesCore`, magnetic text, and journey card pointer handlers.
+
 ### Home: `/`
 
 Interaction flow: load, wheel-scroll down/up through the page, hover hero/social areas. Bot was not clicked, so the 3D bot was not part of the main scroll profile.
 
-- Smooth scroll active: yes, `#smooth-content` transform observed as `matrix(1, 0, 0, 1, 0, -2040)`
+- Smooth scroll active: yes, `#smooth-content` transform observed mid-scroll as `matrix(1, 0, 0, 1, 0, -4160)`
 - DOM nodes: `1084`
 - Canvases: `2`
 - WebGL canvases: `1` from capability checks / browser context, not the activated 3D bot
-- Meteors: `12`
-- SVG bot: visible
-- Long tasks during measured interaction: `7`
-- Task duration delta: `4.532s`
-- Script duration delta: `0.529s`
-- Layout duration delta: `0.229s`
-- Style recalculation duration delta: `0.633s`
-- Layout count delta: `400`
-- Style recalculation count delta: `485`
-- Paint events: `1123`, total `218.6ms`
-- Raster tasks: `2826`, total `1855.9ms`
-- Max long trace task: `95.2ms`
-- Console warnings: none
+- Meteors: source count remains desktop `12`; latest CDP selector did not expose a stable class marker
+- Long tasks during measured interaction: `6`
+- Task duration delta: `1.797s`
+- Script duration delta: `0.178s`
+- Layout duration delta: `0.031s`
+- Style recalculation duration delta: `0.279s`
+- Layout count delta: `55`
+- Style recalculation count delta: `291`
+- Paint events: `747`, total `113.6ms`
+- Raster tasks: `1883`, total `1294.2ms`
+- Max long trace task: `145.8ms`
+
+Compared with the previous home trace:
+
+- Task duration: `4.532s` -> `1.797s`
+- Script duration: `0.529s` -> `0.178s`
+- Layout duration: `0.229s` -> `0.031s`
+- Layout count: `400` -> `55`
+- Paint events: `1123` -> `747`
+- Raster tasks: `2826` -> `1883`
 
 ### Projects: `/my-projects`
 
@@ -51,19 +60,17 @@ Interaction flow: load, wheel-scroll, hover project cards.
 - Smooth scroll active: yes, `#smooth-content` transform observed as `matrix(1, 0, 0, 1, 0, -846)`
 - DOM nodes: `528`
 - Canvases: `1`
-- Meteors: `12`
-- SVG bot: visible
-- Long tasks during measured interaction: `0`
-- Task duration delta: `0.672s`
-- Script duration delta: `0.078s`
-- Layout duration delta: `0.005s`
-- Style recalculation duration delta: `0.169s`
-- Layout count delta: `16`
-- Style recalculation count delta: `234`
-- Paint events: `136`, total `17.7ms`
-- Raster tasks: `291`, total `179.6ms`
-- Max trace task: `48ms`
-- Console warnings: none
+- Meteors: source count remains desktop `12`; latest CDP selector did not expose a stable class marker
+- Long tasks during measured interaction: `1`
+- Task duration delta: `0.561s`
+- Script duration delta: `0.074s`
+- Layout duration delta: `0.007s`
+- Style recalculation duration delta: `0.118s`
+- Layout count delta: `25`
+- Style recalculation count delta: `186`
+- Paint events: `74`, total `18.5ms`
+- Raster tasks: `293`, total `222.4ms`
+- Max trace task: `90.2ms`
 
 ## Fixed / Improved Areas
 
@@ -101,49 +108,61 @@ Interaction flow: load, wheel-scroll, hover project cards.
    - Mandala still moves, scales, rotates, and breathes.
    - Background still has parallax motion.
 
+7. Hero code comparison was made finite and visibility-aware.
+   - Autoplay pauses when offscreen, when the tab is hidden, and while the user is interacting.
+   - Autoplay respects reduced motion.
+   - Autoplay paints at a capped cadence instead of every browser frame.
+   - Autoplay stops after a couple of full sweeps instead of looping forever.
+
+8. Sparkles canvas was made cheaper.
+   - It pauses into a slow idle check when offscreen or the tab is hidden.
+   - It supports capped FPS and is now used at `24fps` in the hero slider.
+   - Hero slider particle density was reduced from `300` to `140`.
+   - It observes its own container size instead of relying only on global resize.
+
+9. Pointer-heavy hover effects were throttled.
+   - Magnetic title text now caches character positions and coalesces updates through `requestAnimationFrame`.
+   - Journey cards cache their card rect on enter and write spotlight CSS variables through one frame callback.
+
 ## Remaining Load Areas
 
 1. Home page raster work is still the largest active cost.
-   - The latest home trace still shows `2826` raster tasks and `1855.9ms` total raster time during wheel scrolling.
-   - This is now less about ScrollTrigger scrub and more about the total moving visual surface: smooth content transform, fixed background art, mandala SVG/filter, meteors, hero code comparison, and canvas effects.
+   - The latest home trace still shows `1883` raster tasks and `1294.2ms` total raster time during wheel scrolling.
+   - This is much lower than before, but still the dominant cost.
+   - The remaining load is mostly the total moving visual surface: smooth content transform, fixed background art, mandala SVG/filter, meteors, and hero decorative layers.
 
-2. Hero code comparison remains a major candidate.
-   - `components/HeroSectionComponents/CodeDisplay.tsx` still runs autoplay with `requestAnimationFrame`.
-   - It updates `left` and `clipPath`.
-   - `clipPath` animation tends to increase paint/raster work.
-   - It also embeds `SparklesCore`.
+2. Hero code comparison is improved, but `clipPath` is still not ideal.
+   - The autoplay is now finite and visibility-aware.
+   - It still updates `left` and `clipPath` while running.
+   - A transform-based reveal would likely reduce paint/raster further, but needs careful visual matching.
 
-3. Sparkles canvas is still continuous where mounted.
-   - `components/ui/Sparkles.tsx` clears and redraws particles every frame.
-   - The hero slider uses `particleDensity={300}`.
-   - This is probably the next best optimization target.
-
-4. Smooth scrolling itself has a cost.
+3. Smooth scrolling itself has a cost.
    - Keeping it means the whole content layer is transformed during scroll.
    - Current settings are lighter, but smooth scrolling plus multiple fixed/animated decorative layers still increases paint/raster work on the home page.
 
-5. Some hover handlers still do per-pointer work.
-   - Magnetic text reads character bounding boxes during mouse movement.
-   - Social info box tracks mouse position.
-   - Journey cards write CSS vars on mousemove.
+4. Mandala SVG/filter remains a likely raster contributor.
+   - It no longer uses ScrollTrigger scrub, but it is still a fixed, blended SVG with a glow filter.
+   - The best next version would keep the mandala but replace the SVG filter glow with cheaper strokes/opacities or a precomposed asset.
+
+5. Social info box still follows the mouse while active.
+   - It only attaches the global listener while a social link is active.
+   - It already coalesces updates through `requestAnimationFrame`.
+   - If needed, it can be changed to anchor near the hovered icon instead of following the pointer.
 
 ## Recommended Next Pass
 
-1. Optimize `CodeDisplay`.
-   - Replace `clipPath` animation with transform-based masking if possible.
-   - Pause autoplay when offscreen.
-   - Respect reduced motion.
-   - Consider stopping autoplay after one or two cycles until hover.
-
-2. Optimize `SparklesCore`.
-   - Pause when offscreen.
-   - Lower particle density.
-   - Draw at a lower internal resolution or lower FPS.
-
-3. Reduce mandala paint cost further without removing it.
+1. Reduce mandala paint cost further without removing it.
    - Consider removing or further reducing the SVG glow filter.
    - Keep the same geometry and motion, but avoid expensive SVG filter compositing during scroll.
 
-4. Re-profile after hero canvas/code optimizations.
+2. Consider a transform-based `CodeDisplay` reveal.
+   - The current finite autoplay is much cheaper.
+   - Replacing `clipPath` would be the next deeper improvement if the visual can be matched closely.
+
+3. Consider anchoring the social info box.
+   - This would remove the last page-level mouse tracking in the hero.
+   - It is a quality tradeoff because the current follow behavior feels more interactive.
+
+4. Re-profile again after mandala or reveal changes.
    - The projects page is now in decent shape.
    - The home page is where the remaining performance budget is being spent.
