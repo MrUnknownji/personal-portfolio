@@ -105,10 +105,8 @@ export const useBotScene = ({
             ctx.fillStyle = '#000000';
             ctx.fillRect(0, 0, eyeCanvas.width, eyeCanvas.height);
             ctx.strokeStyle = '#ff8c00';
-            ctx.lineWidth = 5;
+            ctx.lineWidth = 7;
             ctx.lineCap = 'round';
-            ctx.shadowColor = '#ff8c00';
-            ctx.shadowBlur = 20;
             ctx.beginPath();
             ctx.arc(eyeCanvas.width / 2 - 40, eyeCanvas.height / 2, 20, 0, Math.PI * 2);
             ctx.stroke();

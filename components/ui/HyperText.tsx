@@ -29,7 +29,7 @@ export function HyperText({
   delay = 0,
   as: Component = "span",
   startOnView = false,
-  animateOnHover = true,
+  animateOnHover = false,
   characterSet = DEFAULT_CHARACTER_SET,
 }: HyperTextProps) {
   const [displayText, setDisplayText] = useState<string[]>(() =>
@@ -84,6 +84,7 @@ export function HyperText({
 
     const maxIterations = children.length;
     const startTime = performance.now();
+    let lastTextUpdate = 0;
     let animationFrameId: number;
 
     const animate = (currentTime: number) => {
@@ -92,17 +93,20 @@ export function HyperText({
 
       iterationCount.current = progress * maxIterations;
 
-      setDisplayText(
-        children
-          .split("")
-          .map((letter, index) =>
-            letter === " "
-              ? " "
-              : index <= iterationCount.current
-                ? children[index]
-                : characterSet[getRandomInt(characterSet.length)],
-          ),
-      );
+      if (currentTime - lastTextUpdate >= 1000 / 30 || progress === 1) {
+        setDisplayText(
+          children
+            .split("")
+            .map((letter, index) =>
+              letter === " "
+                ? " "
+                : index <= iterationCount.current
+                  ? children[index]
+                  : characterSet[getRandomInt(characterSet.length)],
+            ),
+        );
+        lastTextUpdate = currentTime;
+      }
 
       if (progress < 1) {
         animationFrameId = requestAnimationFrame(animate);
@@ -121,7 +125,7 @@ export function HyperText({
     <Component
       ref={elementRef}
       className={cn("inline-block whitespace-nowrap", className)}
-      onMouseEnter={handleAnimationTrigger}
+      onMouseEnter={animateOnHover ? handleAnimationTrigger : undefined}
     >
       {displayText.join("")}
     </Component>

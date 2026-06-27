@@ -1,7 +1,4 @@
-"use client";
-import React, { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+import React from "react";
 import {
   FiMail,
   FiPhone,
@@ -52,87 +49,8 @@ const SOCIAL_LINKS = [
 ] as const;
 
 const ContactInfo = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(
-    () => {
-      const title = containerRef.current?.querySelector(".contact-title");
-      const infoItems = gsap.utils.toArray<HTMLElement>(
-        containerRef.current?.querySelectorAll(".info-item") ?? [],
-      );
-      const socialTitle = containerRef.current?.querySelector(".social-title");
-      const socialIcons = gsap.utils.toArray<HTMLElement>(
-        containerRef.current?.querySelectorAll(".social-link") ?? [],
-      );
-
-      if (
-        !title ||
-        infoItems.length === 0 ||
-        !socialTitle ||
-        socialIcons.length === 0
-      )
-        return;
-
-      // Initial States
-      gsap.set([title, socialTitle], { opacity: 0, y: 20 });
-      gsap.set(infoItems, { opacity: 0, x: -20 });
-      gsap.set(socialIcons, { opacity: 0, scale: 0.8 });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 85%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      tl.to(title, {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        ease: "power2.out",
-      })
-        .to(
-          infoItems,
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.4,
-            stagger: 0.08,
-            ease: "power2.out",
-          },
-          "-=0.2",
-        )
-        .to(
-          socialTitle,
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.4,
-            ease: "power2.out",
-          },
-          "-=0.2",
-        )
-        .to(
-          socialIcons,
-          {
-            opacity: 1,
-            scale: 1,
-            duration: 0.4,
-            stagger: 0.08,
-            ease: "back.out(1.5)",
-          },
-          "-=0.2",
-        );
-    },
-    { scope: containerRef },
-  );
-
   return (
-    <div
-      ref={containerRef}
-      className="w-full relative h-full flex flex-col justify-between gap-10"
-    >
+    <div className="w-full relative h-full flex flex-col justify-between gap-10">
       <div className="space-y-8">
         <div>
           <h3 className="contact-title text-2xl font-bold text-foreground mb-6 flex items-center gap-3">
@@ -141,7 +59,7 @@ const ContactInfo = () => {
           </h3>
           <div className="space-y-5">
             {CONTACT_INFO.map((info) => (
-              <div key={info.label} className="info-item">
+              <div key={info.label}>
                 <InfoItem {...info} />
               </div>
             ))}
@@ -159,13 +77,13 @@ const ContactInfo = () => {
                 href={social.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="social-link w-12 h-12 flex items-center justify-center rounded-xl 
-                           bg-[#111] text-muted-foreground border border-white/10 shadow-md
-                           transition-all duration-300 ease-out
-                           hover:border-primary hover:text-primary hover:bg-primary/10 hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)] hover:-translate-y-1 group"
+                className="social-link group w-12 h-12 flex items-center justify-center rounded-xl
+                           bg-[#111] text-muted-foreground border border-white/10
+                           transition-[transform,border-color,background-color,color] duration-150 ease-out
+                           hover:border-primary/70 hover:text-primary hover:bg-primary/10 hover:-translate-y-0.5"
                 aria-label={social.label}
               >
-                <div className="transition-transform duration-300 group-hover:scale-110">
+                <div className="transition-transform duration-150 group-hover:scale-105">
                   {social.icon}
                 </div>
               </a>

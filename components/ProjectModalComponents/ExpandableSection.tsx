@@ -69,7 +69,7 @@ export const ExpandableSection = ({
   return (
     <div
       ref={containerRef}
-      className={`overflow-hidden rounded-xl shadow-md transition-colors duration-300 border ${isExpanded ? "bg-primary/5 border-primary/40" : "bg-card border-border"}`}
+      className={`overflow-hidden rounded-xl transition-colors duration-300 border ${isExpanded ? "bg-primary/5 border-primary/40" : "bg-card border-border"}`}
     >
       <button
         ref={headerRef}

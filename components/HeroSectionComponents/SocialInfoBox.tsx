@@ -1,29 +1,28 @@
 import Image from "next/image";
 import { SocialLink } from "../../types/social";
-import { useRef, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 interface SocialInfoBoxProps {
   socialLink: SocialLink;
-  position: { x: number; y: number };
+  position: { x: number; top: number; bottom: number };
   opacity: number;
-  onHeightChange: (height: number) => void;
 }
 
 const SocialInfoBox = ({
   socialLink,
   position,
   opacity,
-  onHeightChange,
 }: SocialInfoBoxProps) => {
-  const boxRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
 
   useEffect(() => {
     setMounted(true);
     const updateViewport = () => {
       setViewportWidth(window.innerWidth);
+      setViewportHeight(window.innerHeight);
     };
 
     updateViewport();
@@ -33,13 +32,6 @@ const SocialInfoBox = ({
       window.removeEventListener("resize", updateViewport);
     };
   }, []);
-
-  useEffect(() => {
-    if (boxRef.current && opacity > 0.1) {
-      const height = boxRef.current.offsetHeight;
-      onHeightChange(height);
-    }
-  }, [opacity, onHeightChange, socialLink]);
 
   const boxWidth = 320;
   const margin = 16;
@@ -51,15 +43,17 @@ const SocialInfoBox = ({
           viewportWidth - boxWidth / 2 - margin,
         )
       : position.x;
-  const renderAbove = position.y > 180;
+  const estimatedBoxHeight = 240;
+  const renderAbove =
+    viewportHeight > 0 &&
+    position.bottom + offsetY + estimatedBoxHeight > viewportHeight - margin;
 
   const content = (
     <div
-      ref={boxRef}
       className="fixed pointer-events-none z-[60] transform-gpu"
       style={{
         left: `${clampedX}px`,
-        top: `${renderAbove ? position.y - offsetY : position.y + offsetY}px`,
+        top: `${renderAbove ? position.top - offsetY : position.bottom + offsetY}px`,
         opacity: opacity,
         transform: `translate(-50%, ${renderAbove ? "-100%" : "0"}) scale(${
           opacity * 0.1 + 0.9
@@ -69,8 +63,8 @@ const SocialInfoBox = ({
       }}
     >
       <div
-        className="relative w-80 p-5 rounded-none shadow-[8px_8px_0px_rgba(0,0,0,0.8)]
-                   bg-[var(--card)] border border-[var(--border)] overflow-hidden group"
+        className="relative w-80 p-5 rounded-none bg-[var(--card)]
+                   border border-[var(--border)] border-l-primary overflow-hidden group"
       >
         <div className="relative z-10 space-y-5">
           {/* Header */}
@@ -89,7 +83,7 @@ const SocialInfoBox = ({
                 alt={socialLink.label}
                 width={52}
                 height={52}
-                className="relative rounded-none object-cover border border-white/10 shadow-lg bg-[var(--background)]"
+                className="relative rounded-none object-cover border border-white/10 bg-[var(--background)]"
                 onError={(e) => {
                   e.currentTarget.src = `https://placehold.co/52x52/1a1a1a/f1f1f1?text=${socialLink.label.charAt(0)}`;
                 }}

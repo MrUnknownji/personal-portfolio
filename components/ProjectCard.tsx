@@ -1,4 +1,4 @@
-import React, { memo, useRef, useState, useEffect } from "react";
+import React, { memo } from "react";
 import Image from "next/image";
 import { Project } from "@/types/Project";
 import { FiArrowUpRight, FiStar } from "react-icons/fi";
@@ -14,18 +14,6 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
   project,
   onClick,
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 768px)");
-    const updateMobileState = () => setIsMobile(mediaQuery.matches);
-
-    updateMobileState();
-    mediaQuery.addEventListener("change", updateMobileState);
-    return () => mediaQuery.removeEventListener("change", updateMobileState);
-  }, []);
-
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
@@ -40,55 +28,28 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       data-krypton-context="project"
       data-krypton-title={project.title}
       data-krypton-summary={`${project.title}: ${project.shortDescription} Built with ${project.technologies.join(", ")}.`}
-      className="project-card relative bg-card rounded-xl overflow-hidden cursor-pointer border border-border"
+      className="project-card group relative bg-card rounded-xl overflow-hidden cursor-pointer border border-border
+                 transition-[transform,border-color] duration-150 ease-out
+                 hover:-translate-y-1 hover:border-primary/60"
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      onMouseEnter={() => !isMobile && setIsHovered(true)}
-      onMouseLeave={() => !isMobile && setIsHovered(false)}
-      style={{
-        transform: isHovered
-          ? "translateY(-4px) translateX(-4px)"
-          : "translateY(0) translateX(0)",
-        boxShadow: isHovered
-          ? "6px 6px 0px var(--primary)"
-          : "0px 0px 0px transparent",
-        transition: "all 0.3s cubic-bezier(0.23, 1, 0.32, 1)",
-      }}
     >
       <div className="relative h-52 md:h-64 overflow-hidden">
         <Image
           src={project.image}
           alt={project.title}
           fill
-          className="object-cover"
-          style={{
-            transform: isHovered ? "scale(1.08)" : "scale(1)",
-            transition:
-              "transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)",
-          }}
+          className="object-cover transition-transform duration-200 ease-out group-hover:scale-[1.04]"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
-        <div
-          className="absolute inset-0 bg-black pointer-events-none"
-          style={{
-            opacity: isHovered ? 0.62 : 0.12,
-            transition: "opacity 0.35s ease",
-          }}
-        />
+        <div className="absolute inset-0 bg-black opacity-[0.12] pointer-events-none transition-opacity duration-150 group-hover:opacity-60" />
 
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <span
-            className="flex items-center gap-2 text-base font-bold text-white px-6 py-3 rounded-full bg-primary/20 border-2 border-primary/60"
-            style={{
-              transform: isHovered
-                ? "translateY(0) scale(1) rotate(0deg)"
-                : "translateY(24px) scale(0.7) rotate(-3deg)",
-              opacity: isHovered ? 1 : 0,
-              transition: isHovered
-                ? "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.5), opacity 0.3s ease"
-                : "transform 0.35s cubic-bezier(0.6, -0.28, 0.735, 0.045), opacity 0.2s ease",
-              transitionDelay: isHovered ? "0.1s" : "0s",
-            }}
+            className="flex items-center gap-2 text-base font-bold text-white px-6 py-3 rounded-full
+                       bg-primary/20 border-2 border-primary/60 opacity-0 translate-y-3 scale-95
+                       transition-[transform,opacity] duration-150 ease-out
+                       group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100"
           >
             View Project <FiArrowUpRight className="w-5 h-5" />
           </span>
@@ -110,7 +71,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
           {project.technologies.slice(0, TECH_TAGS_MAX).map((tech) => (
             <span
               key={tech}
-              className="tech-tag flex items-center px-3 py-1 text-xs font-semibold bg-transparent text-primary border border-primary/50 hover:bg-primary hover:text-dark transition-all duration-300"
+              className="tech-tag flex items-center px-3 py-1 text-xs font-semibold bg-transparent text-primary border border-primary/50 hover:bg-primary hover:text-dark transition-colors duration-150"
               style={{
                 boxShadow: "2px 2px 0px var(--primary)",
                 borderRadius: "2px",

@@ -236,7 +236,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         data-krypton-summary={`${project.title}: ${project.shortDescription} Features include ${project.features.slice(0, 3).join(", ")}.`}
         className="relative z-50 flex flex-col transform-gpu
                      bg-card border-x border-b border-t-[3px] border-t-primary border-x-border border-b-border
-                     h-dvh w-full shadow-2xl
+                     h-dvh w-full
                      md:max-w-6xl md:h-[85vh] md:max-h-[850px]
                      md:rounded-xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}

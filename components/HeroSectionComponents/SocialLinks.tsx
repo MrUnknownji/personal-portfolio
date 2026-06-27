@@ -3,7 +3,6 @@
 import React, { useState, useRef, useCallback, useEffect, memo } from "react";
 import { FiGithub, FiLinkedin } from "react-icons/fi";
 import { FaXTwitter } from "react-icons/fa6";
-import gsap from "gsap";
 import { SocialLink } from "../../types/social";
 import { fetchSocialStats } from "../../utils/social";
 import SocialInfoBox from "./SocialInfoBox";
@@ -40,25 +39,18 @@ const SocialLinkItem = memo(
         target="_blank"
         rel="noopener noreferrer"
         className="group relative flex items-center justify-center w-12 h-12 rounded-xl
-                 bg-[#111] border border-white/10 shadow-md
-                 transition-all duration-300 ease-out z-10"
+                 bg-[#111] border border-white/10
+                 transition-[transform,border-color] duration-150 ease-out z-10
+                 hover:-translate-y-0.5"
         style={{
-          boxShadow: isActive ? `0 10px 30px -10px ${link.color}90` : "none",
           borderColor: isActive ? link.color : "",
-          backgroundColor: isActive ? `${link.color}15` : "",
         }}
         onMouseEnter={(event) => onMouseEnter(event, index)}
         onMouseLeave={onMouseLeave}
         aria-label={`Open ${link.label}`}
       >
-        {/* Inner abstract glow element */}
         <div
-          className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-md pointer-events-none"
-          style={{ background: link.color, opacity: isActive ? 0.2 : 0 }}
-        />
-
-        <div
-          className="text-muted-foreground transition-transform duration-300 group-hover:scale-110 relative z-10"
+          className="text-muted-foreground transition-transform duration-150 group-hover:scale-105 relative z-10"
           style={{ color: isActive ? link.color : undefined }}
         >
           {React.cloneElement(
@@ -77,35 +69,14 @@ const SocialLinks = () => {
   const [activeLink, setActiveLink] = useState<number | null>(null);
   const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [infoBoxPosition, setInfoBoxPosition] = useState({ x: 0, y: 0 });
+  const [infoBoxPosition, setInfoBoxPosition] = useState({
+    x: 0,
+    top: 0,
+    bottom: 0,
+  });
   const [infoBoxOpacity, setInfoBoxOpacity] = useState(0);
 
-  const animationRef = useRef<gsap.core.Tween | null>(null);
   const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const mousePositionRef = useRef({ x: 0, y: 0 });
-  const rafIdRef = useRef<number | null>(null);
-
-  const updateInfoBoxPosition = useCallback(() => {
-    setInfoBoxPosition(mousePositionRef.current);
-    rafIdRef.current = null;
-  }, []);
-
-  useEffect(() => {
-    if (activeLink === null) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mousePositionRef.current = { x: e.clientX, y: e.clientY };
-      if (!rafIdRef.current) {
-        rafIdRef.current = requestAnimationFrame(updateInfoBoxPosition);
-      }
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
-    };
-  }, [activeLink, updateInfoBoxPosition]);
 
   useEffect(() => {
     const initializeSocialLinks = async () => {
@@ -199,25 +170,24 @@ const SocialLinks = () => {
 
   const handleMouseEnter = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>, index: number) => {
-      mousePositionRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-      };
-      setInfoBoxPosition(mousePositionRef.current);
+      const rect = event.currentTarget.getBoundingClientRect();
+      setInfoBoxPosition({
+        x: rect.left + rect.width / 2,
+        top: rect.top,
+        bottom: rect.bottom,
+      });
 
       if (hideTimeoutRef.current) {
         clearTimeout(hideTimeoutRef.current);
         hideTimeoutRef.current = null;
       }
       setActiveLink(index);
-      if (animationRef.current) animationRef.current.kill();
       setInfoBoxOpacity(1);
     },
     [],
   );
 
   const handleMouseLeave = useCallback(() => {
-    if (animationRef.current) animationRef.current.kill();
     setInfoBoxOpacity(0);
     hideTimeoutRef.current = setTimeout(() => {
       setActiveLink(null);
@@ -226,11 +196,8 @@ const SocialLinks = () => {
   }, []);
 
   useEffect(() => {
-    const animation = animationRef.current;
     return () => {
       if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
-      if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
-      animation?.kill();
     };
   }, []);
 
@@ -262,7 +229,6 @@ const SocialLinks = () => {
               socialLink={socialLinks[activeLink]}
               position={infoBoxPosition}
               opacity={infoBoxOpacity}
-              onHeightChange={() => {}}
             />
           </div>
         )}

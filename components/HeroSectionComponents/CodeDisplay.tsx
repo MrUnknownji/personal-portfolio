@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
-import { SparklesCore } from "@/components/ui/Sparkles";
 import { cn } from "@/lib/utils";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -169,7 +168,7 @@ const CodePanel = memo(
     label: string;
     icon: React.ElementType;
   }) => (
-    <div className="w-full h-full bg-[#0a0a0a] rounded-xl overflow-hidden border border-white/5 shadow-[0_0_30px_hsl(var(--primary)/0.05)]">
+    <div className="w-full h-full bg-[#0a0a0a] rounded-xl overflow-hidden border border-white/5">
       {/* Code Editor Header */}
       <div className="h-10 bg-[#111] flex items-center px-4 border-b border-white/5 justify-between relative overflow-hidden">
         {/* Subtle top sweeping accent */}
@@ -179,20 +178,18 @@ const CodePanel = memo(
           {["#FF5F56", "#FFBD2E", "#27C93F"].map((color, index) => (
             <div
               key={index}
-              className="w-3 h-3 rounded-full opacity-80 shadow-sm"
+              className="w-3 h-3 rounded-full opacity-80"
               style={{ backgroundColor: color }}
             />
           ))}
         </div>
-        <div className="flex items-center gap-2 px-4 py-1.5 bg-[#0a0a0a] rounded-md text-xs text-muted-foreground font-sans border border-white/5 shadow-inner z-10">
-          <Icon className="w-3.5 h-3.5 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.8)]" />
+        <div className="flex items-center gap-2 px-4 py-1.5 bg-[#0a0a0a] rounded-md text-xs text-muted-foreground font-sans border border-white/5 z-10">
+          <Icon className="w-3.5 h-3.5 text-primary" />
           <span className="tracking-wide">{label}</span>
         </div>
         <div className="w-12 z-10" />
       </div>
       <div className="p-6 font-mono text-[13px] md:text-sm leading-relaxed h-[calc(100%-2.5rem)] relative">
-        {/* Ambient code background glow */}
-        <div className="absolute top-10 left-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
         <div className="flex flex-col gap-0.5">
           {lines.map((item) => (
             <div key={item.line} className="flex gap-4">
@@ -238,7 +235,6 @@ const CodeCompare = ({
   const sliderPositionRef = useRef(initialSliderPercentage);
   const isHoveredRef = useRef(false);
   const isInViewRef = useRef(true);
-  const autoplayCompleteRef = useRef(false);
   const resumeAutoplayRef = useRef<(() => void) | null>(null);
   const autoplayProgressRef = useRef(initialSliderPercentage);
 
@@ -268,8 +264,6 @@ const CodeCompare = ({
     const speed = 100 / autoplayDuration;
     const frameInterval = 1000 / 30;
     let direction = 1;
-    let edgeHits = 0;
-
     const stopAutoplayFrame = () => {
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
@@ -278,7 +272,7 @@ const CodeCompare = ({
     };
 
     const scheduleAutoplayFrame = () => {
-      if (rafRef.current !== null || autoplayCompleteRef.current) return;
+      if (rafRef.current !== null) return;
       rafRef.current = requestAnimationFrame(animate);
     };
 
@@ -286,7 +280,6 @@ const CodeCompare = ({
       rafRef.current = null;
 
       if (
-        autoplayCompleteRef.current ||
         isHoveredRef.current ||
         !isInViewRef.current ||
         document.hidden
@@ -312,18 +305,9 @@ const CodeCompare = ({
         hitEdge = true;
       }
 
-      if (hitEdge) {
-        edgeHits += 1;
-      }
-
       if (currentTime - lastPaintTime >= frameInterval || hitEdge) {
         updateSliderVisual(autoplayProgressRef.current);
         lastPaintTime = currentTime;
-      }
-
-      if (edgeHits >= 4) {
-        autoplayCompleteRef.current = true;
-        return;
       }
 
       scheduleAutoplayFrame();
@@ -331,7 +315,6 @@ const CodeCompare = ({
 
     const resumeAutoplay = () => {
       if (
-        autoplayCompleteRef.current ||
         isHoveredRef.current ||
         !isInViewRef.current ||
         document.hidden
@@ -486,7 +469,7 @@ const CodeCompare = ({
         <div
           ref={sliderRef}
           className={cn(
-            "code-resizer-handle w-full h-full overflow-hidden rounded-xl border border-white/10 shadow-[0_20px_50px_hsl(var(--primary)/0.15)]",
+            "code-resizer-handle w-full h-full overflow-hidden rounded-xl border border-white/10",
             className,
           )}
           style={{ position: "relative" }}
@@ -501,7 +484,7 @@ const CodeCompare = ({
         >
           <div
             ref={sliderLineRef}
-            className="h-full w-[2px] absolute top-0 m-auto z-30 bg-gradient-to-b from-transparent via-primary to-transparent shadow-[0_0_15px_hsl(var(--primary)/1)]"
+            className="h-full w-[2px] absolute top-0 m-auto z-30 bg-gradient-to-b from-transparent via-primary to-transparent"
             style={{
               left: `${initialSliderPercentage}%`,
               top: "0",
@@ -510,19 +493,8 @@ const CodeCompare = ({
           >
             <div className="w-32 h-full [mask-image:radial-gradient(80px_at_left,white,transparent)] absolute top-1/2 -translate-y-1/2 left-0 bg-gradient-to-r from-primary/60 via-transparent to-transparent z-20" />
             <div className="w-16 h-1/2 [mask-image:radial-gradient(40px_at_left,white,transparent)] absolute top-1/2 -translate-y-1/2 left-0 bg-gradient-to-r from-accent/80 via-transparent to-transparent z-10" />
-            <div className="w-12 h-3/4 top-1/2 -translate-y-1/2 absolute -right-6 [mask-image:radial-gradient(60px_at_left,white,transparent)]">
-              <SparklesCore
-                background="transparent"
-                minSize={0.6}
-                maxSize={1.5}
-                particleDensity={140}
-                fps={24}
-                className="w-full h-full"
-                particleColor="#ff9233"
-              />
-            </div>
             {showHandlebar && (
-              <div className="h-10 w-6 rounded-lg top-1/2 -translate-y-1/2 bg-[#111] border border-primary/50 shadow-[0_0_20px_hsl(var(--primary)/0.5)] z-30 -right-3 absolute flex items-center justify-center">
+              <div className="h-10 w-6 rounded-lg top-1/2 -translate-y-1/2 bg-[#111] border border-primary/70 z-30 -right-3 absolute flex items-center justify-center">
                 <div className="flex gap-1">
                   <div className="w-[1.5px] h-4 bg-primary/80 rounded-full" />
                   <div className="w-[1.5px] h-4 bg-primary/80 rounded-full" />

@@ -47,18 +47,11 @@ function SvgBotVisual({
     <div className="absolute inset-0 flex items-center justify-center">
       <svg
         viewBox="0 0 160 160"
-        className="h-28 w-28 sm:h-36 sm:w-36 drop-shadow-[0_0_24px_rgba(255,146,51,0.35)] transition-transform duration-300 group-hover:scale-105"
+        className="h-28 w-28 sm:h-36 sm:w-36 transition-transform duration-300 group-hover:scale-105"
         role="img"
         aria-label="Krypton assistant"
       >
         <defs>
-          <filter id="bot-eye-glow" x="-80%" y="-80%" width="260%" height="260%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
           <linearGradient id="bot-shell" x1="28" y1="20" x2="132" y2="144">
             <stop stopColor="#2a2623" />
             <stop offset="1" stopColor="#090807" />
@@ -79,7 +72,7 @@ function SvgBotVisual({
           opacity="0.45"
         />
         <rect x="38" y="48" width="84" height="54" rx="24" fill="#050505" stroke="#3a3028" strokeWidth="3" />
-        <g filter="url(#bot-eye-glow)">
+        <g>
           {thinking ? (
             <>
             <circle cx="62" cy="75" r="5" fill="#ff9233">
@@ -630,7 +623,7 @@ export default function Bot() {
 
       {contextMenu && (
         <div
-          className="fixed z-60 min-w-48 rounded-lg border border-primary/30 bg-card/95 p-1.5 shadow-xl shadow-black/30 backdrop-blur"
+          className="fixed z-60 min-w-48 rounded-lg border border-primary/30 bg-card p-1.5"
           style={{
             left: menuLeft,
             top: menuTop,

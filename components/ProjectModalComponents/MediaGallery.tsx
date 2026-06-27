@@ -160,7 +160,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
             onClick={() => openPreview(index)}
             className={`
               relative rounded-xl overflow-hidden border border-border bg-card group focus:outline-none
-              transition-all duration-300 ease-out hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl hover:shadow-background/40
+              transition-[transform,border-color] duration-150 ease-out hover:-translate-y-0.5 hover:border-primary/50
               ${index === 0 ? "col-span-2 aspect-[21/9]" : "col-span-1 aspect-video"}
             `}
             aria-label={`View ${item.type} ${index + 1}`}
@@ -173,7 +173,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
               }
               alt={item.alt || `${item.type} ${index + 1}`}
               fill
-              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+              className="object-cover transition-transform duration-200 ease-out group-hover:scale-[1.03]"
               sizes={
                 index === 0
                   ? "(max-width: 768px) 100vw, 50vw"
@@ -182,8 +182,8 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
             />
 
             {/* Hover Overlay */}
-            <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-              <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 p-3 rounded-full bg-primary border border-primary text-primary-foreground shadow-xl">
+            <div className="absolute inset-0 bg-background/0 group-hover:bg-background/40 transition-[background-color,opacity] duration-150 flex items-center justify-center opacity-0 group-hover:opacity-100">
+              <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-150 p-3 rounded-full bg-primary border border-primary text-primary-foreground">
                 {item.type === "video" ? (
                   <FiPlay className="w-6 h-6 fill-current" />
                 ) : (
@@ -216,7 +216,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
           */}
           <div
             ref={previewContentRef}
-            className="relative z-[70] w-full max-w-6xl h-[50vh] md:h-[80vh] bg-card rounded-xl shadow-2xl flex flex-col overflow-hidden border border-border"
+            className="relative z-[70] w-full max-w-6xl h-[50vh] md:h-[80vh] bg-card rounded-xl flex flex-col overflow-hidden border border-border"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -234,7 +234,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
                   e.stopPropagation();
                   handlePrev();
                 }}
-                className="absolute left-4 z-30 p-3 rounded-full bg-background/80 hover:bg-card text-foreground/70 hover:text-foreground border border-border transition-all duration-300 hover:scale-110 shadow-md"
+                className="absolute left-4 z-30 p-3 rounded-full bg-background/80 hover:bg-card text-foreground/70 hover:text-foreground border border-border transition-[transform,background-color,color] duration-150 hover:scale-105"
                 aria-label="Previous media item"
               >
                 <FiChevronLeft className="w-6 h-6" />
@@ -244,7 +244,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
                   e.stopPropagation();
                   handleNext();
                 }}
-                className="absolute right-4 z-30 p-3 rounded-full bg-background/80 hover:bg-card text-foreground/70 hover:text-foreground border border-border transition-all duration-300 hover:scale-110 shadow-md"
+                className="absolute right-4 z-30 p-3 rounded-full bg-background/80 hover:bg-card text-foreground/70 hover:text-foreground border border-border transition-[transform,background-color,color] duration-150 hover:scale-105"
                 aria-label="Next media item"
               >
                 <FiChevronRight className="w-6 h-6" />

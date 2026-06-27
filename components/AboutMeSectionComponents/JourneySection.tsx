@@ -182,13 +182,13 @@ const JourneySection = () => {
               className="journey-item relative pl-8 md:pl-12 group"
             >
               {/* Timeline Dot */}
-              <div className="journey-dot absolute left-0 md:left-[9px] top-8 w-5 h-5 rounded-full border border-white/20 bg-[#0a0a0a] z-10 flex items-center justify-center group-hover:border-primary group-hover:shadow-[0_0_15px_hsl(var(--primary)/0.6)] transition-all duration-500">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors duration-500" />
+              <div className="journey-dot absolute left-0 md:left-[9px] top-8 w-5 h-5 rounded-full border border-white/20 bg-[#0a0a0a] z-10 flex items-center justify-center group-hover:border-primary transition-colors duration-150">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors duration-150" />
               </div>
 
               {/* Card */}
               <div
-                className="journey-card relative bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 md:p-8 shadow-lg transition-all duration-500 overflow-hidden transform-gpu group-hover:-translate-y-2 group-hover:border-primary/40 group-hover:shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.25)] z-10"
+                className="journey-card relative bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 md:p-8 transition-[transform,border-color] duration-150 overflow-hidden transform-gpu group-hover:-translate-y-1 group-hover:border-primary/40 z-10"
                 style={
                   {
                     "--mouse-x": "0px",
@@ -197,11 +197,11 @@ const JourneySection = () => {
                 }
               >
                 {/* Inner Ambient Glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none" />
 
                 {/* Shimmer Sweep Effect */}
                 <div
-                  className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_2s_infinite]
+                  className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_650ms_ease-out_1]
                              bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none"
                   style={{ width: "200%" }}
                 />
@@ -211,7 +211,7 @@ const JourneySection = () => {
                     <h4 className="text-xl md:text-2xl font-bold tracking-wide text-foreground/90 group-hover:text-white transition-colors duration-300">
                       {item.title}
                     </h4>
-                    <span className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-bold tracking-widest uppercase rounded-full bg-white/5 text-primary border border-white/10 shadow-sm group-hover:shadow-[0_0_15px_hsl(var(--primary)/0.3)] group-hover:bg-primary/20 group-hover:border-primary/50 transition-all duration-500">
+                    <span className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-bold tracking-widest uppercase rounded-full bg-white/5 text-primary border border-white/10 group-hover:bg-primary/20 group-hover:border-primary/50 transition-[background-color,border-color] duration-150">
                       {item.year}
                     </span>
                   </div>

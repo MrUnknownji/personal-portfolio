@@ -25,22 +25,22 @@ const HireBadge = () => {
     <div
       ref={badgeRef}
       className="group relative inline-flex items-center gap-3 px-5 py-2.5 rounded-full
-                 bg-[#111] border border-white/10 shadow-md
-                 transition-all duration-500 ease-out hover:border-primary/50 hover:shadow-[0_0_20px_hsl(var(--primary)/0.3)]
+                 bg-[#111] border border-white/10
+                 transition-[border-color,background-color] duration-150 ease-out hover:border-primary/50 hover:bg-primary/5
                  cursor-pointer overflow-hidden"
     >
       {/* Subtle Inner Glow */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-      {/* Continuous Shimmer on Hover */}
+      {/* One-pass sheen on hover */}
       <div
-        className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_2s_infinite]
+        className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_650ms_ease-out_1]
                    bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none"
         style={{ width: "200%" }}
       />
 
       {/* Decorative left accent */}
-      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/0 group-hover:bg-primary/80 transition-colors duration-500" />
+      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/0 group-hover:bg-primary/80 transition-colors duration-150" />
 
       {/* Status Dot Container */}
       <div className="relative flex items-center justify-center w-2 h-2 flex-shrink-0">
@@ -48,7 +48,7 @@ const HireBadge = () => {
           ref={pulseRef}
           className="absolute inset-0 rounded-full bg-primary opacity-80"
         />
-        <span className="relative w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.8)]" />
+        <span className="relative w-2 h-2 rounded-full bg-primary" />
       </div>
 
       {/* Text */}

@@ -131,9 +131,9 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
       outline-none transition-colors duration-200
       ${
         hasError
-          ? "border-red-500/70 shadow-[0_1px_10px_rgba(239,68,68,0.2)]"
+          ? "border-red-500/70"
           : isFocused
-            ? "border-primary shadow-[0_1px_15px_hsl(var(--primary)/0.2)]"
+            ? "border-primary"
             : "border-white/10 hover:border-white/30"
       }
     `;
@@ -301,14 +301,14 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
           <button
             ref={submitButtonRef}
             type="submit"
-            disabled={isSubmitting}
-            className="group relative w-full bg-primary text-[#0a0a0a] font-bold tracking-widest uppercase py-4 px-6 rounded-xl
-                       flex items-center justify-center gap-3 transition-all duration-500 overflow-hidden
-                       hover:shadow-[0_0_30px_hsl(var(--primary)/0.4)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
+          disabled={isSubmitting}
+          className="group relative w-full bg-primary text-[#0a0a0a] font-bold tracking-widest uppercase py-4 px-6 rounded-xl
+                       flex items-center justify-center gap-3 transition-[transform,background-color,opacity] duration-150 overflow-hidden
+                       hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {/* Shimmer Sweep Effect */}
             <div
-              className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_2s_infinite]
+              className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_650ms_ease-out_1]
                          bg-gradient-to-r from-transparent via-white/40 to-transparent pointer-events-none"
               style={{ width: "200%" }}
             />
@@ -317,7 +317,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
               {isSubmitting ? "Sending..." : "Send Message"}
             </span>
             <FiSend
-              className={`relative z-10 w-4 h-4 transition-transform duration-300 ${
+              className={`relative z-10 w-4 h-4 transition-transform duration-150 ${
                 isSubmitting
                   ? ""
                   : "group-hover:translate-x-0.5 group-hover:-translate-y-0.5"

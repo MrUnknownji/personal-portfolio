@@ -124,7 +124,7 @@ const Title: React.FC<TitleProps> = ({
         <HyperText
           duration={1000}
           delay={200}
-          animateOnHover={true}
+          animateOnHover={false}
           startOnView={true}
           className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent pb-2"
         >
@@ -160,7 +160,7 @@ const Title: React.FC<TitleProps> = ({
             width="240"
             height="28"
             viewBox="0 0 240 28"
-            className="text-primary filter drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)] origin-center"
+            className="text-primary origin-center"
             style={{ opacity: 0, transform: "scale(0)" }}
           >
             {/* Center Motif */}

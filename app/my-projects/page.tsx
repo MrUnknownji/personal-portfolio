@@ -358,10 +358,10 @@ export default function MyProjects() {
 
         <div className="sticky top-24 z-30 mb-8 md:mb-16 mx-auto max-w-5xl px-4">
           <div ref={controlsRef} className="relative z-30 flex justify-center">
-            <div className="relative bg-background/95 border border-border/50 rounded-4xl lg:rounded-full p-2 shadow-sm shadow-black/10 flex flex-col lg:flex-row gap-3 lg:gap-2 items-center w-full max-w-4xl">
+            <div className="relative bg-background/95 border border-border/50 rounded-4xl lg:rounded-full p-2 flex flex-col lg:flex-row gap-3 lg:gap-2 items-center w-full max-w-4xl">
               <div className="absolute inset-0 bg-linear-to-br from-white/2 via-transparent to-primary/2 pointer-events-none rounded-4xl lg:rounded-full" />
 
-              <div className="relative w-full lg:flex-1 group rounded-full border border-border/50 bg-foreground/4 transition-all duration-300 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-foreground/6 hover:bg-foreground/6">
+              <div className="relative w-full lg:flex-1 group rounded-full border border-border/50 bg-foreground/4 transition-[border-color,background-color] duration-150 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-foreground/6 hover:bg-foreground/6">
                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none z-10">
                   <FiSearch className="text-muted-foreground group-focus-within:text-primary transition-colors duration-300 w-4 h-4 md:w-5 md:h-5" />
                 </div>
@@ -400,7 +400,7 @@ export default function MyProjects() {
                         },
                       );
                     }}
-                    className="absolute inset-y-0 right-4 flex items-center justify-center text-muted-foreground hover:text-foreground hover:rotate-90 transition-all duration-300 z-20 hover:scale-110"
+                    className="absolute inset-y-0 right-4 flex items-center justify-center text-muted-foreground hover:text-foreground hover:rotate-90 transition-[transform,color] duration-150 z-20 hover:scale-105"
                   >
                     <FiX className="w-5 h-5" />
                   </button>
@@ -430,11 +430,11 @@ export default function MyProjects() {
                       );
                     }}
                     className={`
-                    relative whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 overflow-hidden shrink-0
+                    relative whitespace-nowrap px-5 py-2.5 rounded-full text-sm font-medium transition-[transform,background-color,color,border-color] duration-150 overflow-hidden shrink-0
                     ${
                       filter === category
                         ? "text-dark bg-primary scale-105 font-semibold"
-                        : "text-muted-foreground hover:text-foreground bg-transparent hover:bg-foreground/10 border border-transparent hover:scale-105"
+                        : "text-muted-foreground hover:text-foreground bg-transparent hover:bg-foreground/10 border border-transparent hover:scale-[1.03]"
                     }
                   `}
                   >
@@ -488,7 +488,7 @@ export default function MyProjects() {
                 setFilter("All");
                 setSearchQuery("");
               }}
-              className="group px-8 py-3 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-dark transition-all duration-300 font-medium border border-primary/20 hover:border-primary hover:shadow-lg hover:shadow-primary/20 hover:scale-105"
+              className="group px-8 py-3 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-dark transition-[transform,background-color,color,border-color] duration-150 font-medium border border-primary/20 hover:border-primary hover:scale-[1.03]"
             >
               <span className="flex items-center gap-2">
                 Clear All Filters

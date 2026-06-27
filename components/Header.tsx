@@ -23,13 +23,10 @@ const Header = () => {
   const desktopNavRef = useRef<HTMLElement>(null);
   const mobileNavRef = useRef<HTMLElement>(null);
   const logoTextRef = useRef<HTMLSpanElement>(null);
-  const hoverBgRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
-  const navItemsRef = useRef<(HTMLAnchorElement | null)[]>([]);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const pathname = usePathname();
   const router = useRouter();
@@ -69,29 +66,6 @@ const Header = () => {
     }
   }, { dependencies: [isScrolled, isMobileMenuOpen] });
 
-  useGSAP(() => {
-    if (
-      hoveredIndex !== null &&
-      hoverBgRef.current &&
-      navItemsRef.current[hoveredIndex]
-    ) {
-      const navItem = navItemsRef.current[hoveredIndex];
-      const navContainer = navItem?.parentElement;
-      if (navItem && navContainer) {
-        const itemRect = navItem.getBoundingClientRect();
-        const containerRect = navContainer.getBoundingClientRect();
-        gsap.to(hoverBgRef.current, {
-          x: itemRect.left - containerRect.left,
-          width: itemRect.width,
-          opacity: 1,
-          duration: 0.25,
-          ease: "power2.out",
-        });
-      }
-    } else if (hoverBgRef.current) {
-      gsap.to(hoverBgRef.current, { opacity: 0, duration: 0.2 });
-    }
-  }, { dependencies: [hoveredIndex] });
   useGSAP(() => {
     if (mobileMenuRef.current) {
       if (isMobileMenuOpen) {
@@ -165,45 +139,24 @@ const Header = () => {
     [pathname, router],
   );
 
-  const handleLogoHover = useCallback((e: React.MouseEvent, enter: boolean) => {
-    gsap.to(e.currentTarget, {
-      scale: enter ? 1.05 : 1,
-      duration: 0.2,
-      ease: "power2.out",
-    });
-  }, []);
-
-  const handleButtonHover = useCallback(
-    (e: React.MouseEvent, enter: boolean) => {
-      gsap.to(e.currentTarget, {
-        scale: enter ? 1.02 : 1,
-        duration: 0.15,
-        ease: "power2.out",
-      });
-    },
-    [],
-  );
-
   return (
     <header
-      className="fixed top-0 inset-x-0 z-50 pt-4 transition-opacity duration-300"
+      className="fixed top-0 inset-x-0 z-50 transition-opacity duration-300"
     >
       <nav
         ref={desktopNavRef}
         style={{ minWidth: isScrolled ? "700px" : "auto" }}
         className={cn(
-          "hidden lg:flex mx-auto max-w-7xl items-center justify-between px-6 py-3 rounded-full transition-colors duration-300",
+          "hidden lg:flex mx-auto items-center justify-between px-6 py-3 transition-[border-color,border-radius] duration-300 bg-[radial-gradient(circle_at_50%_0%,rgb(25,17,12),rgb(10,10,10)_72%)]",
           isScrolled
-            ? "bg-background/95 border border-border/50 shadow-sm shadow-black/10"
-            : "bg-transparent border border-transparent",
+            ? "max-w-7xl rounded-full border border-border/70"
+            : "max-w-none rounded-none border-x-0 border-t-0 border-b border-white/10",
         )}
       >
         <Link
           href="/"
-          className="relative z-20 flex items-center gap-2 group"
+          className="relative z-20 flex items-center gap-2 group transition-transform duration-150 hover:scale-[1.03]"
           aria-label="Homepage"
-          onMouseEnter={(e) => handleLogoHover(e, true)}
-          onMouseLeave={(e) => handleLogoHover(e, false)}
         >
           <Image
             src="/images/logo.svg"
@@ -221,25 +174,14 @@ const Header = () => {
           </span>
         </Link>
 
-        <div
-          onMouseLeave={() => setHoveredIndex(null)}
-          className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1"
-        >
-          <div
-            ref={hoverBgRef}
-            className="absolute h-full bg-foreground/5 rounded-full pointer-events-none"
-            style={{ opacity: 0, left: 0 }}
-          />
-          {NAV_ITEMS.map((item, idx) => (
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
+          {NAV_ITEMS.map((item) => (
             <Link
               key={item.name}
               href={item.link}
-              ref={(el) => {
-                navItemsRef.current[idx] = el;
-              }}
               onClick={(e) => handleNavClick(e, item.link)}
-              onMouseEnter={() => setHoveredIndex(idx)}
-              className="relative px-4 py-2 text-sm font-medium text-foreground/70 hover:text-foreground transition-colors z-10"
+              className="relative px-4 py-2 rounded-full text-sm font-medium text-foreground/70
+                         hover:text-foreground hover:bg-foreground/5 transition-colors duration-150 z-10"
             >
               {item.name}
             </Link>
@@ -248,17 +190,9 @@ const Header = () => {
 
         <button
           onClick={handleContactClick}
-          onMouseEnter={(e) => handleButtonHover(e, true)}
-          onMouseLeave={(e) => handleButtonHover(e, false)}
-          onMouseDown={(e) =>
-            gsap.to(e.currentTarget, { scale: 0.98, duration: 0.1 })
-          }
-          onMouseUp={(e) =>
-            gsap.to(e.currentTarget, { scale: 1.02, duration: 0.1 })
-          }
           className="relative z-20 group flex items-center gap-2 px-5 py-2.5 rounded-full
                      bg-primary text-dark font-medium text-sm
-                     transition-transform duration-300"
+                     transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]"
         >
           <span>Contact Me</span>
           <FiArrowRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" />
@@ -268,10 +202,10 @@ const Header = () => {
       <nav
         ref={mobileNavRef}
         className={cn(
-          "lg:hidden mx-auto flex flex-col px-4 py-3 rounded-2xl transition-colors duration-300",
+          "lg:hidden mx-auto flex flex-col px-4 py-3 transition-[border-color,border-radius] duration-300 bg-[radial-gradient(circle_at_50%_0%,rgb(25,17,12),rgb(10,10,10)_72%)]",
           isScrolled || isMobileMenuOpen
-            ? "bg-background/95 border border-border/50 shadow-sm shadow-black/10"
-            : "bg-transparent border border-transparent",
+            ? "rounded-2xl border border-border/70"
+            : "rounded-none border-x-0 border-t-0 border-b border-white/10",
         )}
       >
         <div className="flex items-center justify-between w-full">

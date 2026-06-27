@@ -7,7 +7,7 @@ const ViewProjectsButton = () => {
     <Link href="/my-projects" className="group relative inline-block">
       <div
         className="relative overflow-hidden rounded-full bg-card border border-white/5
-                   transition-all duration-300 ease-out group-hover:border-primary/40 group-hover:shadow-[0_0_25px_hsl(var(--primary)/0.2)]"
+                   transition-[transform,border-color] duration-150 ease-out group-hover:border-primary/50 group-hover:-translate-y-0.5"
       >
         {/* Subtle Inner Glow */}
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -28,9 +28,9 @@ const ViewProjectsButton = () => {
             <FiArrowRight className="w-3.5 h-3.5 text-foreground/50 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-primary" />
           </div>
 
-          {/* Shine Effect */}
+          {/* One-pass sheen */}
           <div
-            className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_2s_infinite]
+            className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_650ms_ease-out_1]
                        bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none"
             style={{ width: "200%" }}
           />

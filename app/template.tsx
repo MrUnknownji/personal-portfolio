@@ -30,15 +30,8 @@ function getOrCreateOverlay(): HTMLDivElement {
               <stop offset="50%" stop-color="#ff8c00" />
               <stop offset="100%" stop-color="#ffcc00" />
             </linearGradient>
-            <filter id="lotusGlow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
           </defs>
-          <g transform="translate(50, 70)" filter="url(#lotusGlow)">
+          <g transform="translate(50, 70)">
             <circle class="center-glow" cx="0" cy="-10" r="15" fill="#ff8c00" transform="translate(0,-10) scale(0)" opacity="0" />
             <path class="petal" d="M0,0 C15,-15 20,-40 0,-60 C-20,-40 -15,-15 0,0 Z" fill="url(#lotusGrad)" opacity="0.85" transform="scale(0)" />
             <path class="petal" d="M0,0 C15,-15 20,-40 0,-60 C-20,-40 -15,-15 0,0 Z" fill="url(#lotusGrad)" opacity="0.85" transform="scale(0)" />

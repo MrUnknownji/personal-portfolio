@@ -161,7 +161,7 @@ const ThankYouDialog = ({
 
       <div
         ref={dialogRef}
-        className="relative z-[101] w-full max-w-lg bg-[#0a0a0a] rounded-3xl overflow-hidden border border-white/10 shadow-2xl"
+        className="relative z-[101] w-full max-w-lg bg-[#0a0a0a] rounded-3xl overflow-hidden border border-white/10"
       >
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
 

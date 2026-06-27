@@ -188,6 +188,18 @@ textarea:-webkit-autofill:active {
     @apply border-primary;
   }
 
+  .portrait-filter {
+    filter: grayscale(1) contrast(1.25);
+    transition:
+      filter 300ms ease-out,
+      transform 300ms ease-out;
+  }
+
+  .group:hover .portrait-filter {
+    filter: grayscale(0) contrast(1) !important;
+    transform: scale(1.05) !important;
+  }
+
   .bg-noise {
     background-image:
       repeating-conic-gradient(#000 0% 0.0001%, transparent 0.0001% 0.0002%),
@@ -268,21 +280,6 @@ textarea:-webkit-autofill:active {
 
 .animate-pulse-subtle {
   animation: pulse-subtle 2s ease-in-out infinite;
-}
-
-@keyframes mandala-breathe {
-  0%,
-  100% {
-    opacity: 0.08;
-  }
-
-  50% {
-    opacity: 0.15;
-  }
-}
-
-.animate-mandala-breathe {
-  animation: mandala-breathe 4s ease-in-out infinite;
 }
 
 @keyframes pulse-scale {
