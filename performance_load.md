@@ -1,280 +1,376 @@
 # Portfolio Performance Load Report
 
 Date: 2026-06-27
-Build tested: production build via `pnpm build` and `next start -p 3001`  
-Browser test: Chrome DevTools Protocol, desktop viewport `1440x1000`, `prefers-reduced-motion: no-preference`, wheel scroll + hover interactions
 
-## Current Summary
+## Test Setup
 
-Smooth scrolling is still enabled. The current implementation keeps GSAP `ScrollSmoother`, but uses a lighter profile:
+- Build: production (`pnpm build`, `next start -p 3001`)
+- Browser: Chrome 149, real headed GPU session
+- Desktop viewport: `1440x1000`
+- Mobile viewport: `390x844`, touch input
+- Motion preference: `no-preference`
+- Network/CPU throttling: none
+- Cache: disabled for load tests
+- Trace categories: Chrome timeline and frame events
+- Interactions: real wheel, pointer, hover, and click events
 
-- `smooth: 0.45` on desktop
-- `smoothTouch: 0.12` on touch devices
-- `effects: false`
-- disabled only for `prefers-reduced-motion: reduce`
+This is a local lab test. Load timings are useful for comparing code changes, but
+deployment latency is not represented. Interaction traces are repeated or paired
+with equal-duration idle traces where practical.
 
-The scroll-specific GSAP scrub load has been reduced:
+## Executive Summary
 
-- `GlobalBackground` no longer uses ScrollTrigger scrub.
-- The background flower/mandala and all of its scroll/breathing animation code were removed.
-- Background scroll height is cached and recalculated on resize instead of read on every scroll frame.
-- Source and computed-style audits now find zero visual blur implementations.
+Performance is substantially better than the original audit. Blur, ambient
+particle canvases, meteors, scroll-scrubbed decoration, and page-wide pointer
+effects are no longer active. The projects page is relatively light.
 
-## Latest Measurements
+The remaining load is concentrated in four areas:
 
-The full-page numbers below are from the previous scroll pass after optimizing `CodeDisplay`, `SparklesCore`, magnetic text, and journey card pointer handlers. A focused production hover profile from the latest pass follows them.
+1. The 3D bot is the largest optional runtime and bundle cost.
+2. Initial hydration/animation produces too many long tasks before LCP.
+3. The visible code-comparison autoplay causes continuous layout and paint work.
+4. Project and Contact card hovers are bounded but still repaint more than the
+   earlier headless-browser profile suggested.
 
-### Home: `/`
+## Current Load Metrics
 
-Interaction flow: load, wheel-scroll down/up through the page, hover hero/social areas. Bot was not clicked, so the 3D bot was not part of the main scroll profile.
+### Desktop Initial Load: `/`
 
-- Smooth scroll active: yes, `#smooth-content` transform observed mid-scroll as `matrix(1, 0, 0, 1, 0, -4160)`
-- DOM nodes: `1084`
-- Canvases: `2`
-- WebGL canvases: `1` from capability checks / browser context, not the activated 3D bot
-- Meteors: source count remains desktop `12`; latest CDP selector did not expose a stable class marker
-- Long tasks during measured interaction: `6`
-- Task duration delta: `1.797s`
-- Script duration delta: `0.178s`
-- Layout duration delta: `0.031s`
-- Style recalculation duration delta: `0.279s`
-- Layout count delta: `55`
-- Style recalculation count delta: `291`
-- Paint events: `747`, total `113.6ms`
-- Raster tasks: `1883`, total `1294.2ms`
-- Max long trace task: `145.8ms`
+- TTFB: `17.2ms` on the local server
+- DOMContentLoaded: `152.3ms`
+- Load event: `622.7ms`
+- FCP: `736ms`
+- LCP: `2136ms`
+- CLS: `0.0099`
+- LCP element: hero `H1`
+- Long tasks: `10`
+- Maximum task: `561.2ms`
+- Paint: `1291` events, `277.5ms`
+- Raster: `607` tasks, `109.4ms`
+- DOM nodes: `935`
+- JS heap after settling: `7.83MB`
 
-Compared with the previous home trace:
+Transfer:
 
-- Task duration: `4.532s` -> `1.797s`
-- Script duration: `0.529s` -> `0.178s`
-- Layout duration: `0.229s` -> `0.031s`
-- Layout count: `400` -> `55`
-- Paint events: `1123` -> `747`
-- Raster tasks: `2826` -> `1883`
+- Total resources: `538.4KB`
+- JavaScript: `388.8KB` across `17` requests
+- Images: `21.6KB`
+- Largest JS chunk: `134.8KB`
+- GSAP chunk: `42.9KB`
 
-### Projects: `/my-projects`
+The page load event finishes quickly, but LCP occurs much later because the hero
+heading is revealed through the loader/startup animation path. The maximum trace
+task is a `560.8ms` JavaScript function call. A CPU sample also identifies the
+GSAP chunk as the largest named startup function cost (`171ms` self time).
 
-Interaction flow: load, wheel-scroll, hover project cards.
+### Mobile Initial Load: `/`
 
-- Smooth scroll active: yes, `#smooth-content` transform observed as `matrix(1, 0, 0, 1, 0, -846)`
-- DOM nodes: `528`
-- Canvases: `1`
-- Meteors: source count remains desktop `12`; latest CDP selector did not expose a stable class marker
-- Long tasks during measured interaction: `1`
-- Task duration delta: `0.561s`
-- Script duration delta: `0.074s`
-- Layout duration delta: `0.007s`
-- Style recalculation duration delta: `0.118s`
-- Layout count delta: `25`
-- Style recalculation count delta: `186`
-- Paint events: `74`, total `18.5ms`
-- Raster tasks: `293`, total `222.4ms`
-- Max trace task: `90.2ms`
+- Load event: `561.3ms`
+- FCP: `604ms`
+- LCP: `1244ms`
+- CLS: `0.0104`
+- Long tasks: `6`
+- Maximum task: `244.3ms`
+- Largest task contents: `138.8ms` layout and `91.8ms` style update
+- DOM nodes: `949`
+- JS transfer: `388.8KB`
+- 3D canvas: not mounted
+- SVG bot: mounted
 
-### Blur, Glow, and Autoplay Audit
+The SVG-only mobile behavior works, but mobile still downloads the same
+`388.8KB` of initial JavaScript as desktop, including the chunk containing the
+Three.js bot implementation.
 
-Latest production/browser verification:
+### Home Smooth-Scroll Trace
 
-- Visual blur elements: `0`
-- Background mandala present: no
-- SVG Gaussian blur filters: `0`
-- Canvas `shadowBlur` usage: `0`
-- Remaining box shadows: sharp zero-blur offsets only
-- Radial-gradient nodes: desktop header plus hidden mobile header; active area `84,480px²`
-- Title text after five hover samples: unchanged; scramble now runs only on reveal
-- Code slider positions continued changing through `25s`, beyond the old finite-stop point
-- Portrait filter: `grayscale(1) contrast(1.25)` -> `grayscale(0) contrast(1)` on hover
+Median of three complete down/up wheel traces:
 
-The first glow A/B trace compared the same smooth-scroll sequence with radial backgrounds enabled and disabled:
+- Median trace duration: `5.33s`
+- Main-thread task time: `3136ms`
+- Script: `298.6ms`
+- Style recalculation: `582.1ms`
+- Layout: `63.9ms`
+- Layout count: `88`
+- Style recalculation count: `381`
+- Paint: `1696` events, `323.3ms`
+- Raster: `1403` tasks, `253.6ms`
+- Long tasks: median `1`
+- Maximum task: median `66ms`
 
-- Main-thread task time with radials: `0.796s` and `0.776s`
-- Main-thread task time without radials: `0.791s` and `0.749s`
-- Raster time with radials: `891.8ms` and `946.7ms`
-- Raster time without radials: `735.9ms` and `773.4ms`
+Smooth scrolling remains enabled with `smooth: 0.45`, `effects: false`, and
+touch smoothing reduced to `0.12`. The home page is still the heavier scrolling
+surface because the full content layer, fixed SVG pattern, header geometry, and
+section animations all move through one trace.
 
-The large hero radial had little main-thread impact but consistently increased raster work. It was removed after the trace. The final page keeps only the requested header radial: active radial-gradient area dropped from about `899,525px²` to `84,480px²`.
+### Projects Scroll Trace
 
-### Hover Interaction Micro-profile
+- Trace duration: `3.04s`
+- Main-thread task time: `811.6ms`
+- Script: `76.9ms`
+- Style recalculation: `221.1ms`
+- Layout: `16.2ms`
+- Paint: `113` events, `26.8ms`
+- Raster: `319` tasks, `43ms`
+- Long tasks: `0`
+- Maximum task: `21.5ms`
+- DOM nodes: `387`
 
-Production build, desktop `1440x1000`, four passes across each visible target.
+The projects page is currently in reasonable shape. Its shorter document and
+smaller DOM make scrolling much cheaper than the home page.
 
-Contact section, 12 hover transitions:
+### Mobile Smooth-Scroll Trace
+
+- Trace duration: `6.39s`
+- Main-thread task time: `3900.5ms`
+- Script: `370.6ms`
+- Style recalculation: `608.3ms`
+- Layout: `58.8ms`
+- Paint: `1715` events, `329.2ms`
+- Raster: `1204` tasks, `211.6ms`
+- Long tasks: `0`
+- Maximum task: `36.1ms`
+- Scroll height: `7208px`
+
+This trace covers a taller document than desktop, so totals are not directly
+comparable. Importantly, it has no interaction long tasks and no 3D canvas.
+
+## Remaining Performance Loads
+
+### 1. 3D Bot Bundle and Active Render Loop - High
+
+Relevant code:
+
+- `components/Bot/index.tsx:7` statically imports the 3D scene hook.
+- `components/Bot/useBotScene.ts:2` statically imports all of Three.js.
+- `components/Bot/useBotScene.ts:266` treats an open chat as an active scene.
+- `components/Bot/useBotScene.ts:332` renders and schedules another frame.
+
+Activation trace:
+
+- Duration: `4.52s`
+- Script: `1275.5ms`
+- Main-thread task time: `3434.8ms`
+- Maximum task: `472.9ms`
+- Layout: `105.2ms`
+- Paint: `183.3ms`
+- Raster: `152.9ms`
+- Heap increase: `2.9MB`
+
+Five-second idle comparison:
+
+| State | Script | Task time | Paint | Raster |
+|---|---:|---:|---:|---:|
+| SVG bot, page idle | `96.4ms` | `2446.5ms` | `172.1ms` | `107.3ms` |
+| 3D bot, chat open | `818.7ms` | `3581.4ms` | `207.1ms` | `137ms` |
+| 3D bot, chat closed | `117ms` | `1831.3ms` | not traced | not traced |
+
+The scene's idle path works after the chat closes. It does not engage while the
+chat is open because `chatOpenRef.current` keeps `isActive()` true. Open-chat
+script cost is about `8.5x` the SVG idle baseline.
+
+The largest initial JS chunk is `134.8KB` and contains the bot/Three.js code.
+Because the import is static, mobile users download it even though mobile never
+mounts the 3D scene.
+
+Recommended change:
+
+- Dynamically import the full 3D implementation only after deliberate bot intent.
+- Keep the chat UI and SVG bot in the initial bundle.
+- Do not use `chatOpen` alone as a reason to render at display refresh rate.
+- Render on state changes and run the subtle floating loop at a capped cadence,
+  or pause it after a short entrance while keeping the 3D frame visible.
+
+This preserves the 3D visual while removing its cost from initial/mobile load and
+reducing the open-chat continuous workload.
+
+### 2. Initial Loader and Startup Work - High
+
+Relevant code:
+
+- `app/template.tsx:157` creates the initial GSAP loader timeline.
+- `app/template.tsx:190` updates the counter for `550ms`.
+- `app/template.tsx:215` fades in the full content.
+- `app/template.tsx:223` fades out the overlay.
+
+The loader itself is finite and much lighter than its original implementation,
+but it overlaps hydration, ScrollTrigger setup, hero animation, and other initial
+effects. The result is `10` long tasks and a `561.2ms` maximum task before the
+hero heading becomes LCP at `2.136s`.
+
+Recommended change:
+
+- Keep the visual loader, but make it CSS-driven and avoid per-value counter DOM
+  writes during hydration.
+- Initialize below-fold ScrollTriggers after LCP or during idle time.
+- Split the optional bot/Three.js chunk, which also reduces startup parse work.
+- Keep later route transitions as the existing short content fade.
+
+### 3. Code Comparison Autoplay - Medium/High Continuous Cost
+
+Relevant code:
+
+- `components/HeroSectionComponents/CodeDisplay.tsx:244` writes `left`.
+- `components/HeroSectionComponents/CodeDisplay.tsx:247` writes `clipPath`.
+- `components/HeroSectionComponents/CodeDisplay.tsx:265` caps painting at 30fps.
+- `components/HeroSectionComponents/CodeDisplay.tsx:313` continues the RAF loop.
+
+Five-second top-versus-bottom idle A/B:
+
+| Position | Script | Style | Layout | Layout count |
+|---|---:|---:|---:|---:|
+| Hero/code display visible | `75.3ms` | `211.5ms` | `41.3ms` | `125` |
+| Code display offscreen | `58ms` | `129.9ms` | `0ms` | `0` |
+
+Visibility pausing works. While visible, changing `left` and `clipPath` produces
+about `25` layouts per second.
+
+Recommended change:
+
+- Keep continuous left/right autoplay.
+- Move the handle with `transform: translate3d(...)`.
+- Replace the animated `clipPath` with a transform-based cover/reveal layer.
+- Keep the existing 30fps cap and visibility pause.
+
+### 4. Contact Information Hover - Medium, Bounded
+
+Relevant code:
+
+- `components/ContactSectionComponents/InfoItem.tsx:19` animates card styles.
+- `components/ContactSectionComponents/InfoItem.tsx:23` fades a full-card gradient.
+- `components/ContactSectionComponents/InfoItem.tsx:27` starts a wide shimmer.
+
+Twelve enter/leave cycles:
 
 - Long tasks: `0`
-- Max task: `47.0ms`
-- Layout count: `13`
-- Paint: `253` events, `35.8ms`
-- Raster: `226` tasks, `155.6ms`
+- Maximum task: `23.7ms`
+- Script: `92.6ms`
+- Style recalculation: `344.2ms`
+- Layout: `14.9ms`
+- Paint: `894` events, `160.4ms`
+- Raster: `12` tasks, `7.6ms`
 
-Equal-length idle trace at the Contact section:
+Equal-area idle:
+
+- Script: `57.1ms`
+- Style recalculation: `96.2ms`
+- Layout: `0ms`
+- Paint: `8` events, `1.7ms`
+
+The hover remains responsive, but the full-card gradient and `200%` shimmer layer
+cause real paint work. Keep the lift, icon scale, border, and color response.
+The shimmer should be pre-rasterized/promoted or replaced by a smaller
+transform-only accent.
+
+### 5. Project Card Hover - Medium, Bounded
+
+Relevant code:
+
+- `components/ProjectCard.tsx:33` moves the card.
+- `components/ProjectCard.tsx:42` scales the image.
+- `components/ProjectCard.tsx:45` fades the full image overlay.
+- `components/ProjectCard.tsx:52` reveals the call to action.
+
+Twelve enter/leave cycles:
 
 - Long tasks: `0`
-- Max task: `48.6ms`
-- Layout count: `18`
-- Paint: `252` events, `49.0ms`
-- Raster: `280` tasks, `185.4ms`
+- Maximum task: `22.8ms`
+- Script: `93ms`
+- Style recalculation: `296.5ms`
+- Layout: `17.9ms`
+- Paint: `570` events, `146.3ms`
+- Raster: `380` tasks, `50.9ms`
 
-The repeated Contact hovers did not add meaningful paint/raster work above the idle baseline. The remaining paint cost at this section is primarily the continuously moving background pattern behind the card.
+Equal-duration projects idle:
 
-Projects page, 12 project-card hover transitions:
+- Script: `45.6ms`
+- Style recalculation: `72.7ms`
+- Layout: `0ms`
+- Paint/raster: `0ms`
+
+This is not compositor-only in a real hover-capable Chrome session. It is still a
+short, bounded cost with no long tasks. The image filter effect remains removed;
+the current paint comes from the scaled image/full-cover overlay transition.
+
+### 6. Click Spark - Low, Event-Driven
+
+Eight-click stress burst over `5.38s`:
 
 - Long tasks: `0`
-- Max task: `37.2ms`
-- Layout count: `0`
-- Paint: `0` events
-- Raster: `1` task, `0.09ms`
+- Maximum task: `39.7ms`
+- Script: `202.8ms`
+- Canvas visible after completion: no
 
-Project-card hover is now effectively compositor-only in this trace.
+Normalized against the five-second idle trace, the burst adds about `99ms` of
+script, or roughly `12.4ms` per click. Raster variation did not show a reliable
+increase in this run.
 
-### Loader, Click Spark, and Bot Audit
+The implementation correctly:
 
-Initial loader before -> after:
+- Starts RAF only while sparks exist.
+- Caps rapid bursts at `64` sparks.
+- Hides the canvas after completion.
+- Has no idle animation cost.
 
-- Visible overlay duration: `904ms` -> `583ms`
-- Maximum task: `140.1ms` -> `85.7ms`
-- Long tasks: `5` -> `3`
-- Raster time: `361.2ms` -> `336.0ms`
-- Hidden infinite flower animation: active -> removed
-- Subsequent client route transition: full loader -> `222ms` content fade with no overlay
+No further change is currently necessary.
 
-Optimized ClickSpark:
+### 7. Remaining Global Animation Tickers - Low/Medium
 
-- Idle canvas display: `none`
-- Eight-click stress burst versus equal idle trace:
-  - Script: `54.5ms` versus `21.9ms`
-  - Raster: `300.5ms` versus `151.7ms`
-  - Long tasks: `0`
-- This is about `4ms` additional script and `19ms` additional raster per click in the stress trace, with no idle animation cost.
+`components/HeroSectionComponents/HireBadge.tsx:12` starts an infinite GSAP
+pulse with `repeat: -1`. It continues even when the hero is offscreen. This is
+small visually, but it keeps GSAP's ticker and style updates active.
 
-Bot command/behavior verification:
+Recommended change:
 
-- Same-page Contact command position error: `0px`
-- Cross-page Contact command position error: `0px`
-- Label-based synthetic button command clicked the exact requested element.
-- Global mousemove, touchmove, scroll-speed, route-change jump, and scroll-derived suggestion behaviors are removed.
-- Header shrink samples are monotonic from `1440px` to `864px`; the previous undershoot/correction is gone.
+- Pause the pulse with IntersectionObserver when the badge is offscreen.
+- Prefer a short periodic pulse with a delay rather than a continuous tween.
 
-## Fixed / Improved Areas
+### 8. Smooth Scroll and Fixed Background - Medium Structural Cost
 
-1. 3D bot no longer mounts on hover.
-   - It remains SVG until deliberate click/open intent.
-   - Mobile stays SVG-only.
-   - 3D eye canvas is seeded immediately so the first 3D render has visible eyes.
-   - 3D renderer idles instead of running a permanent render loop.
+Relevant code:
 
-2. Click spark canvas no longer loops while idle.
-   - It starts `requestAnimationFrame` only when sparks exist.
-   - It stops as soon as the spark list is empty.
-   - Its full-screen blend canvas uses `display: none` between bursts.
-   - Reduced-motion users get no click listener, and rapid bursts are capped at `64` sparks.
+- `components/SmoothScroller.tsx:27` transforms the smooth content layer.
+- `components/GlobalBackground.tsx:32` transforms a `120% x 150%` fixed SVG.
+- `components/GlobalBackground.tsx:38` coalesces background updates through RAF.
 
-3. Project page hover/filter costs were reduced.
-   - Grid transitions no longer animate `filter: blur(...)`.
-   - Project card images no longer animate brightness/contrast/blur filters.
-   - The old page-wide mousemove parallax listener was removed.
+Both implementations are already throttled sensibly, and smooth scrolling is a
+deliberate quality requirement. The structural cost remains visible in the home
+scroll trace because a large smooth content surface and a large fixed patterned
+surface move together.
 
-4. Meteors were disabled.
-   - They were previously reduced from `30` to `12` on desktop.
-   - They are now fully disabled for the current visual/performance comparison.
+Recommended change:
 
-5. All visual blur implementations were removed.
-   - Removed CSS blur and backdrop-filter utilities.
-   - Removed SVG Gaussian blur filters from the loader and mobile bot.
-   - Removed canvas `shadowBlur` from 3D bot eyes.
-   - Removed blurred box/drop shadows; only sharp zero-blur offsets remain.
-   - Bright bot eyes now use stronger solid strokes instead.
+- Keep ScrollSmoother.
+- Test a static background pattern as an A/B before changing the design.
+- If motion must remain, reduce the pattern layer's overscan and movement range.
 
-6. Scroll system was made lighter while keeping smooth scroll.
-   - ScrollSmoother is retained.
-   - ScrollSmoother `effects` disabled.
-   - Background no longer uses ScrollTrigger scrub.
-   - Background flower/mandala and all of its animation/listener code were removed.
-   - Background still has parallax motion.
+## Verified Improvements Still Active
 
-7. Hero code comparison is continuous and visibility-aware.
-   - Autoplay pauses when offscreen, when the tab is hidden, and while the user is interacting.
-   - Autoplay respects reduced motion.
-   - Autoplay paints at a capped cadence instead of every browser frame.
-   - Autoplay now reverses continuously instead of stopping after a few sweeps.
+- Smooth scrolling remains enabled.
+- ScrollSmoother effects are disabled.
+- Background mandala/flower and scrubbed background animation are removed.
+- Blur and backdrop-filter implementations: `0`.
+- SVG Gaussian blur filters: `0`.
+- Canvas `shadowBlur` usage: `0`.
+- Meteors: disabled.
+- Ambient Sparkles canvases: disabled.
+- ClickSpark: hidden and stopped while idle.
+- Mobile bot: SVG-only with no 3D canvas.
+- 3D canvas: pointer-transparent, bot controls receive hover/click events.
+- Page-wide bot mouse, scroll, and route reactions: removed.
+- Project image filter animation: removed.
+- Title scrambling: reveal-only.
+- Header shrink: monotonic.
+- Bot command targeting and measured section scrolling: corrected.
 
-8. Continuous Sparkles canvases were disabled.
-   - The hero slider Sparkles canvas is now disabled.
-   - ClickSpark is restored as an event-driven effect and remains hidden while idle.
-   - Active ambient canvas count remains `0` before activating the 3D bot.
+## Recommended Implementation Order
 
-9. Pointer-heavy hover effects were throttled.
-   - Magnetic title text now caches character positions and coalesces updates through `requestAnimationFrame`.
-   - Journey cards cache their card rect on enter and write spotlight CSS variables through one frame callback.
+1. Lazy-load the entire 3D bot/Three.js implementation after deliberate intent.
+2. Stop full-rate 3D rendering merely because the chat is open.
+3. Convert CodeDisplay `left`/`clipPath` animation to transform-based movement.
+4. Reduce loader hydration overlap and defer below-fold ScrollTrigger setup.
+5. Simplify or pre-promote Contact and project full-surface hover layers.
+6. Pause the HireBadge pulse offscreen.
+7. A/B test a static or smaller moving background while retaining ScrollSmoother.
 
-10. Contact card and form interaction costs were reduced.
-   - Removed the redundant backdrop blur from the opaque Contact card.
-   - Removed the large card shadow and hover-animated shadows.
-   - The section entrance now runs once instead of reversing and replaying.
-   - Removed the nested Contact Information GSAP timeline.
-   - Contact items and the submit button use short, explicit transform/color/opacity transitions.
-   - Hover sheen is finite instead of an infinite animation.
-
-11. Site-wide hover paths were made snappier.
-   - Desktop header hover no longer uses React state, layout reads, and GSAP tweens.
-   - Project cards no longer rerender React state on pointer enter/leave.
-   - Project image, overlay, and call-to-action hover use transform/opacity only.
-   - Repeated skill and journey hover shadows were replaced with borders, transforms, and flat gradient layers.
-   - Portrait grayscale/contrast hover was restored as an intentional local paint effect.
-   - Section-title scramble runs once on reveal and no longer reruns on hover.
-   - Hero social tooltip is anchored to its icon, so it no longer follows page-wide mouse movement.
-
-12. Decorative particles are disabled for comparison.
-   - Desktop meteor count dropped from `12` to `0`.
-   - Ambient canvas count dropped from `2` to `0`.
-   - Script time in the matching scroll trace moved from `176ms` to a particle-free median of `161ms`, about `9%` lower.
-   - The baseline trace had `16` long tasks with an `80.6ms` maximum; repeated particle-free traces had a median of `0` long tasks and a `36.2ms` median maximum.
-   - Total raster time remained noisy (`1.21s` baseline versus `1.27s` to `1.61s` particle-free), so the particles were not the dominant scroll raster cost.
-
-13. Loader, bot targeting, and header motion were corrected.
-   - Loader flower animation is finite and owned by the transition timeline.
-   - Later route changes use a short content fade instead of replaying the loader.
-   - Bot section scrolling uses measured header offset, `ScrollSmoother.offset()`, and final position correction.
-   - Bot can resolve explicit click/press/select commands by visible DOM label.
-   - Bot ambient mouse, scroll, and page-change reactions were removed.
-   - Header geometry now animates as one numeric GSAP motion without competing CSS constraints.
-
-## Remaining Load Areas
-
-1. Home page raster work is still the largest active cost.
-   - The latest home trace still shows `1883` raster tasks and `1294.2ms` total raster time during wheel scrolling.
-   - This is much lower than before, but still the dominant cost.
-   - The remaining load is mostly the total moving visual surface: smooth content transform, fixed background pattern, and hero animation layers.
-
-2. Hero code comparison is improved, but `clipPath` is still not ideal.
-   - The autoplay is continuous and visibility-aware.
-   - It still updates `left` and `clipPath` while running.
-   - A transform-based reveal would likely reduce paint/raster further, but needs careful visual matching.
-
-3. Smooth scrolling itself has a cost.
-   - Keeping it means the whole content layer is transformed during scroll.
-   - Current settings are lighter, but smooth scrolling plus multiple fixed/animated decorative layers still increases paint/raster work on the home page.
-
-4. Portrait filter hover has a deliberate local paint cost.
-   - Grayscale/contrast interpolation requires repainting the portrait while hovered.
-   - It affects one bounded image for `300ms`, rather than a full-screen or continuously animated layer.
-   - Four enter/leave cycles produced `218.3ms` raster time versus `58.2ms` in an equal idle trace.
-   - That is roughly `20ms` additional raster work per transition, with `0` long tasks and a `27.3ms` maximum task.
-
-5. Contact-area idle paint remains tied to global decoration.
-   - The focused trace found no meaningful paint/raster increase from repeated Contact hovers.
-   - The equivalent idle trace remained busy because the full-screen background pattern continues behind the section.
-
-## Recommended Next Pass
-
-1. Consider a transform-based `CodeDisplay` reveal.
-   - The current autoplay is capped and pauses offscreen.
-   - Replacing `clipPath` would be the next deeper improvement if the visual can be matched closely.
-
-2. Consider making the geometric background pattern static.
-   - Its current passive, frame-coalesced parallax is lighter than before.
-   - Removing that last background scroll transform would trade a small amount of depth for lower raster work.
-
-3. Re-profile again after a reveal or background-pattern change.
-   - The projects page is now in decent shape.
-   - The home page is where the remaining performance budget is being spent.
+The first three items offer the largest likely gain without reducing the visible
+quality of the portfolio.
