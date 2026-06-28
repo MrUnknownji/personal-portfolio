@@ -6,6 +6,7 @@ export default function GlobalBackground() {
   const bgRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number | null>(null);
   const maxScrollRef = useRef(0);
+  const lastUpdateRef = useRef(0);
 
   useEffect(() => {
     if (!bgRef.current) return;
@@ -22,11 +23,17 @@ export default function GlobalBackground() {
       );
     };
 
-    const update = () => {
+    const update = (timestamp = performance.now()) => {
+      if (timestamp - lastUpdateRef.current < 1000 / 30) {
+        frameRef.current = requestAnimationFrame(update);
+        return;
+      }
+
       frameRef.current = null;
+      lastUpdateRef.current = timestamp;
       const maxScroll = maxScrollRef.current;
       const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
-      const y = Math.max(-15, Math.min(0, progress * -15));
+      const y = Math.max(-5, Math.min(0, progress * -5));
 
       if (bgRef.current) {
         bgRef.current.style.transform = `translate3d(0, ${y}%, 0)`;
@@ -62,7 +69,7 @@ export default function GlobalBackground() {
     <div className="fixed inset-0 z-[-10] overflow-hidden pointer-events-none bg-background">
       <div
         ref={bgRef}
-        className="absolute top-[-20%] left-[-10%] w-[120%] h-[150%] opacity-[0.07] will-change-transform"
+        className="absolute top-[-10%] left-[-4%] w-[108%] h-[120%] opacity-[0.07] will-change-transform contain-paint"
       >
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>

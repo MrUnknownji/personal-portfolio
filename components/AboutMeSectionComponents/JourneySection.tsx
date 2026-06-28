@@ -2,6 +2,7 @@ import { CSSProperties, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useDeferredAnimation } from "@/hooks/useDeferredAnimation";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,9 +37,11 @@ const JourneySection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   const progressLineRef = useRef<HTMLDivElement>(null);
+  const animationReady = useDeferredAnimation(containerRef, "700px 0px");
 
   useGSAP(
     () => {
+      if (!animationReady) return;
       if (!containerRef.current || !lineRef.current || !progressLineRef.current)
         return;
 
@@ -153,7 +156,11 @@ const JourneySection = () => {
         cleanupMouseListeners.forEach((cleanup) => cleanup());
       };
     },
-    { scope: containerRef },
+    {
+      scope: containerRef,
+      dependencies: [animationReady],
+      revertOnUpdate: true,
+    },
   );
 
   return (

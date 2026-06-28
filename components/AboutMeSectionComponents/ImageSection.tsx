@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useDeferredAnimation } from "@/hooks/useDeferredAnimation";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,9 +19,11 @@ const ImageSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const imageWrapperRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const animationReady = useDeferredAnimation(containerRef);
 
   useGSAP(
     () => {
+      if (!animationReady) return;
       if (
         !containerRef.current ||
         !imageWrapperRef.current ||
@@ -55,7 +58,11 @@ const ImageSection = () => {
         "<",
       );
     },
-    { scope: containerRef },
+    {
+      scope: containerRef,
+      dependencies: [animationReady],
+      revertOnUpdate: true,
+    },
   );
 
   return (

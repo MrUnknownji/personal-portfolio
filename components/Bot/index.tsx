@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
-import gsap from "gsap";
 import { chatWithBot } from "@/app/actions/chat";
-import { useBotScene } from "./useBotScene";
-import { useBotEyes, EyeState } from "./useBotEyes";
 import { useBotInteractions } from "./useBotInteractions";
 import { BotChat } from "./BotChat";
 import { useBotCommands } from "./useBotCommands";
+import type { EyeState } from "./types";
 
 type KryptonContextMenu = {
   x: number;
@@ -19,17 +18,10 @@ type KryptonContextMenu = {
 
 type BotVisualMode = "svg" | "three";
 
-function supportsWebGL() {
-  try {
-    const canvas = document.createElement("canvas");
-    return !!(
-      window.WebGLRenderingContext &&
-      (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
-    );
-  } catch {
-    return false;
-  }
-}
+const ThreeBotVisual = dynamic(() => import("./ThreeBotVisual"), {
+  ssr: false,
+  loading: () => null,
+});
 
 function SvgBotVisual() {
   return (
@@ -193,22 +185,22 @@ export default function Bot() {
   const [contextMenu, setContextMenu] = useState<KryptonContextMenu>(null);
   const [visualMode, setVisualMode] = useState<BotVisualMode>("svg");
   const [canUse3D, setCanUse3D] = useState(false);
-  const [idleReadyFor3D, setIdleReadyFor3D] = useState(false);
   const [hasVisualIntent, setHasVisualIntent] = useState(false);
+  const [isThreeReady, setIsThreeReady] = useState(false);
+  const [isBotHovered, setIsBotHovered] = useState(false);
 
   const isHoveredRef = useRef(false);
-  const isProcessingRef = useRef(false);
-  const isCooldownRef = useRef(false);
-  const chatOpenRef = useRef(false);
+  const eyeStateRef = useRef(eyeState);
   const inputRef = useRef(input);
   const timeoutsRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
-  const nextBlinkTimeRef = useRef(2);
   const [isGlobalModalOpen, setIsGlobalModalOpen] = useState(false);
   const isGlobalModalOpenRef = useRef(false);
   const handleSceneUnavailable = useCallback(() => {
     setCanUse3D(false);
     setVisualMode("svg");
+    setIsThreeReady(false);
   }, []);
+  const handleSceneReady = useCallback(() => setIsThreeReady(true), []);
 
   const scheduleTimeout = (callback: () => void, delay: number) => {
     const timeout = setTimeout(() => {
@@ -236,39 +228,20 @@ export default function Bot() {
       "(prefers-reduced-motion: reduce)",
     ).matches;
 
-    if (isMobile || reduceMotion || !supportsWebGL()) {
+    if (isMobile || reduceMotion) {
       setCanUse3D(false);
       setVisualMode("svg");
       return;
     }
 
     setCanUse3D(true);
-
-    const win = window as Window & {
-      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-
-    let idleId: number | null = null;
-    const timeoutId = window.setTimeout(() => setIdleReadyFor3D(true), 3000);
-
-    if (win.requestIdleCallback) {
-      idleId = win.requestIdleCallback(() => setIdleReadyFor3D(true), {
-        timeout: 2500,
-      });
-    }
-
-    return () => {
-      window.clearTimeout(timeoutId);
-      if (idleId !== null && win.cancelIdleCallback) {
-        win.cancelIdleCallback(idleId);
-      }
-    };
   }, []);
 
   useEffect(() => {
-    setVisualMode(canUse3D && idleReadyFor3D && hasVisualIntent ? "three" : "svg");
-  }, [canUse3D, hasVisualIntent, idleReadyFor3D]);
+    const nextMode = canUse3D && hasVisualIntent ? "three" : "svg";
+    setVisualMode(nextMode);
+    if (nextMode === "svg") setIsThreeReady(false);
+  }, [canUse3D, hasVisualIntent]);
 
   useEffect(() => {
     const checkModal = () => {
@@ -295,36 +268,8 @@ export default function Bot() {
   }, [input]);
 
   useEffect(() => {
-    chatOpenRef.current = chatOpen;
-  }, [chatOpen]);
-
-  useEffect(() => {
-    isProcessingRef.current = isProcessing;
-  }, [isProcessing]);
-
-  useEffect(() => {
-    isCooldownRef.current = isCooldown;
-  }, [isCooldown]);
-
-  const { eyeContextRef, eyeCanvasRef, eyeTextureRef, clockRef } =
-    useBotScene({
-      containerRef,
-      isHoveredRef,
-      isProcessingRef,
-      isCooldownRef,
-      chatOpenRef,
-      isGlobalModalOpenRef,
-      enabled: visualMode === "three",
-      onUnavailable: handleSceneUnavailable,
-    });
-
-  const { eyeStateRef } = useBotEyes({
-    eyeContextRef,
-    eyeCanvasRef,
-    eyeTextureRef,
-    eyeState,
-    clockRef,
-  });
+    eyeStateRef.current = eyeState;
+  }, [eyeState]);
 
   const {
     handleMouseEnter: interactionMouseEnter,
@@ -347,18 +292,30 @@ export default function Bot() {
   });
 
   useEffect(() => {
-    const checkBlink = () => {
-      if (isGlobalModalOpen) return;
-      const t = clockRef.current.getElapsedTime();
-      if (
-        eyeState === "open" &&
-        !isRightClickingRef.current &&
-        !isProcessing &&
-        !isCooldown &&
-        t > nextBlinkTimeRef.current
-      ) {
+    if (
+      visualMode !== "three" ||
+      isGlobalModalOpen ||
+      eyeState !== "open" ||
+      isRightClickingRef.current ||
+      isProcessing ||
+      isCooldown
+    ) {
+      return;
+    }
+
+    const blinkTimeout = window.setTimeout(
+      () => {
+        if (
+          eyeStateRef.current !== "open" ||
+          isRightClickingRef.current ||
+          isProcessing ||
+          isCooldown
+        ) {
+          return;
+        }
+
         setEyeState("closed");
-        gsap.delayedCall(0.15, () => {
+        scheduleTimeout(() => {
           if (
             eyeStateRef.current === "closed" &&
             !isRightClickingRef.current &&
@@ -367,30 +324,32 @@ export default function Bot() {
           ) {
             setEyeState("open");
           }
-          nextBlinkTimeRef.current = t + 3 + Math.random() * 4;
-        });
-      }
-    };
+        }, 150);
+      },
+      3000 + Math.random() * 4000,
+    );
 
-    gsap.ticker.add(checkBlink);
-    return () => gsap.ticker.remove(checkBlink);
+    return () => window.clearTimeout(blinkTimeout);
   }, [
-    clockRef,
     eyeState,
-    eyeStateRef,
     isCooldown,
     isGlobalModalOpen,
     isProcessing,
     isRightClickingRef,
+    visualMode,
   ]);
 
   const handleMouseEnter = () => {
+    isHoveredRef.current = true;
+    setIsBotHovered(true);
     if (visualMode === "three") {
       interactionMouseEnter();
     }
   };
 
   const handleMouseLeave = () => {
+    isHoveredRef.current = false;
+    setIsBotHovered(false);
     interactionMouseLeave();
     if (!chatOpen && !isProcessing && !isCooldown) {
       setBubbleText(null);
@@ -400,7 +359,6 @@ export default function Bot() {
   const openChat = (message = "Ask me about projects, skills, or hiring.") => {
     setHasVisualIntent(true);
     setChatOpen(true);
-    isHoveredRef.current = true;
     setEyeState("happy");
     setBubbleText(message);
   };
@@ -410,7 +368,6 @@ export default function Bot() {
     setBubbleText("Okay, I will stay nearby.");
     scheduleTimeout(() => {
       setChatOpen(false);
-      isHoveredRef.current = false;
       setBubbleText(null);
       if (eyeStateRef.current === "sad") setEyeState("open");
     }, 1500);
@@ -577,7 +534,7 @@ export default function Bot() {
     return ["Show projects", "Summarize Sandeep", "Go to contact"];
   }, [activeProject]);
 
-  const isMinimized = !chatOpen && !isHoveredRef.current;
+  const isMinimized = !chatOpen && !isBotHovered;
   const menuLeft =
     typeof window === "undefined" || !contextMenu
       ? 0
@@ -628,8 +585,18 @@ export default function Bot() {
         onDoubleClick={handleDoubleClick}
         onClick={handleContainerClick}
       >
-        {visualMode === "svg" && (
+        {(visualMode === "svg" || !isThreeReady) && (
           <SvgBotVisual />
+        )}
+        {visualMode === "three" && (
+          <ThreeBotVisual
+            containerRef={containerRef}
+            active={isBotHovered || isProcessing || isCooldown}
+            eyeState={eyeState}
+            isGlobalModalOpenRef={isGlobalModalOpenRef}
+            onReady={handleSceneReady}
+            onUnavailable={handleSceneUnavailable}
+          />
         )}
       </div>
 

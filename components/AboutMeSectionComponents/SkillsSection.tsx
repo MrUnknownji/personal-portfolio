@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SkillsData, HeroSectionSkills } from "@/data/data";
 import Title from "@/components/ui/Title";
+import { useDeferredAnimation } from "@/hooks/useDeferredAnimation";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,9 +12,11 @@ const SkillsSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const coreSkillsRef = useRef<HTMLDivElement>(null);
   const techSkillsRef = useRef<HTMLDivElement>(null);
+  const animationReady = useDeferredAnimation(containerRef, "700px 0px");
 
   useGSAP(
     () => {
+      if (!animationReady) return;
       if (
         !containerRef.current ||
         !coreSkillsRef.current ||
@@ -59,7 +62,11 @@ const SkillsSection = () => {
         ease: "power2.out",
       });
     },
-    { scope: containerRef },
+    {
+      scope: containerRef,
+      dependencies: [animationReady],
+      revertOnUpdate: true,
+    },
   );
 
   return (

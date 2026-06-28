@@ -1,14 +1,13 @@
 import { useEffect, useRef } from 'react';
-import * as THREE from 'three';
-
-export type EyeState = 'open' | 'closed' | 'happy' | 'angry' | 'surprised' | 'thinking' | 'error' | 'dizzy' | 'confused' | 'sad';
+import type { CanvasTexture, Clock } from 'three';
+import type { EyeState } from './types';
 
 interface UseBotEyesProps {
     eyeContextRef: React.MutableRefObject<CanvasRenderingContext2D | null>;
     eyeCanvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
-    eyeTextureRef: React.MutableRefObject<THREE.CanvasTexture | null>;
+    eyeTextureRef: React.MutableRefObject<CanvasTexture | null>;
     eyeState: EyeState;
-    clockRef: React.MutableRefObject<THREE.Clock>;
+    clockRef: React.MutableRefObject<Clock>;
 }
 
 export const useBotEyes = ({

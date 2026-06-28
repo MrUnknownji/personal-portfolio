@@ -9,14 +9,44 @@ const HireBadge = () => {
 
   useGSAP(
     () => {
-      gsap.to(pulseRef.current, {
+      const pulse = pulseRef.current;
+      const badge = badgeRef.current;
+      if (!pulse || !badge) return;
+
+      gsap.set(pulse, { scale: 1, opacity: 0.8 });
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return;
+      }
+
+      const tween = gsap.to(pulse, {
         scale: 3,
         opacity: 0,
-        duration: 2,
+        duration: 1.4,
         repeat: -1,
+        repeatDelay: 0.8,
         ease: "power1.out",
         transformOrigin: "center",
+        paused: true,
       });
+
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting && !document.hidden) {
+            tween.restart();
+          } else {
+            tween.pause(0);
+            gsap.set(pulse, { scale: 1, opacity: 0.8 });
+          }
+        },
+        { threshold: 0.1 },
+      );
+      observer.observe(badge);
+
+      return () => {
+        observer.disconnect();
+        tween.kill();
+      };
     },
     { scope: badgeRef },
   );

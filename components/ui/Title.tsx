@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { HyperText } from "@/components/ui/HyperText";
+import { useDeferredAnimation } from "@/hooks/useDeferredAnimation";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -25,12 +26,14 @@ const Title: React.FC<TitleProps> = ({
   const titleRef = useRef<HTMLHeadingElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
   const glowBarRef = useRef<SVGSVGElement>(null);
+  const animationReady = useDeferredAnimation(containerRef, "700px 0px");
 
   const subtitleWords = typeof subtitle === "string" ? subtitle.split(" ") : [];
   const isStringSubtitle = typeof subtitle === "string";
 
   useGSAP(
     () => {
+      if (!animationReady) return;
       const ctx = gsap.context(() => {
         if (titleRef.current) {
           gsap.fromTo(
@@ -111,7 +114,11 @@ const Title: React.FC<TitleProps> = ({
 
       return () => ctx.revert();
     },
-    { scope: containerRef },
+    {
+      scope: containerRef,
+      dependencies: [animationReady, isStringSubtitle],
+      revertOnUpdate: true,
+    },
   );
 
   return (

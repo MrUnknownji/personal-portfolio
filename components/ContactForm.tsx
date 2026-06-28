@@ -7,6 +7,7 @@ import ContactInfo from "./ContactSectionComponents/ContactInfo";
 import Form from "./ContactSectionComponents/Form";
 import ThankYouDialog from "./ThankYouDialog";
 import Title from "./ui/Title";
+import { useDeferredAnimation } from "@/hooks/useDeferredAnimation";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,9 +15,11 @@ const ContactForm: React.FC = () => {
   const [isThankYouOpen, setIsThankYouOpen] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const animationReady = useDeferredAnimation(sectionRef, "700px 0px");
 
   useGSAP(
     () => {
+      if (!animationReady) return;
       if (!containerRef.current) return;
 
       gsap.fromTo(
@@ -38,7 +41,11 @@ const ContactForm: React.FC = () => {
         },
       );
     },
-    { scope: sectionRef },
+    {
+      scope: sectionRef,
+      dependencies: [animationReady],
+      revertOnUpdate: true,
+    },
   );
 
   const handleFormSubmitSuccess = () => {

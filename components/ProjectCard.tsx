@@ -30,7 +30,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
       data-krypton-summary={`${project.title}: ${project.shortDescription} Built with ${project.technologies.join(", ")}.`}
       className="project-card group relative bg-card rounded-xl overflow-hidden cursor-pointer border border-border
                  transition-[transform,border-color] duration-150 ease-out
-                 hover:-translate-y-1 hover:border-primary/60"
+                 hover:-translate-y-1 hover:border-primary/60 transform-gpu will-change-transform"
       onClick={onClick}
       onKeyDown={handleKeyDown}
     >
@@ -39,17 +39,18 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
           src={project.image}
           alt={project.title}
           fill
-          className="object-cover transition-transform duration-200 ease-out group-hover:scale-[1.04]"
+          className="object-cover transition-transform duration-200 ease-out group-hover:scale-[1.04] transform-gpu will-change-transform"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
-        <div className="absolute inset-0 bg-black opacity-[0.12] pointer-events-none transition-opacity duration-150 group-hover:opacity-60" />
+        <div className="absolute inset-0 bg-black opacity-[0.12] pointer-events-none transition-opacity duration-150 group-hover:opacity-60 transform-gpu will-change-[opacity]" />
 
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <span
             className="flex items-center gap-2 text-base font-bold text-white px-6 py-3 rounded-full
                        bg-primary/20 border-2 border-primary/60 opacity-0 translate-y-3 scale-95
                        transition-[transform,opacity] duration-150 ease-out
-                       group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100"
+                       group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100
+                       transform-gpu will-change-[transform,opacity]"
           >
             View Project <FiArrowUpRight className="w-5 h-5" />
           </span>

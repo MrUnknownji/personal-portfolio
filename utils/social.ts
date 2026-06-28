@@ -70,6 +70,7 @@ export function createCacheHeaders(): Headers {
 // In-memory cache
 let cachedStats: SocialStats | null = null;
 let lastFetchTime = 0;
+let pendingStats: Promise<SocialStats> | null = null;
 
 export async function fetchSocialStats(): Promise<SocialStats> {
   const currentTime = Date.now();
@@ -79,27 +80,33 @@ export async function fetchSocialStats(): Promise<SocialStats> {
     return cachedStats;
   }
 
-  try {
-    const response = await fetch("/api/social/stats");
+  if (pendingStats) return pendingStats;
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch social stats");
+  pendingStats = (async () => {
+    try {
+      const response = await fetch("/api/social/stats");
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch social stats");
+      }
+
+      const data = await response.json();
+
+      cachedStats = {
+        github: data.github || FALLBACK_DATA.github,
+        linkedin: data.linkedin || FALLBACK_DATA.linkedin,
+        twitter: data.twitter || FALLBACK_DATA.twitter,
+      };
+
+      lastFetchTime = Date.now();
+
+      return cachedStats;
+    } catch {
+      return cachedStats || FALLBACK_DATA;
+    } finally {
+      pendingStats = null;
     }
+  })();
 
-    const data = await response.json();
-
-    // Update cache
-    cachedStats = {
-      github: data.github || FALLBACK_DATA.github,
-      linkedin: data.linkedin || FALLBACK_DATA.linkedin,
-      twitter: data.twitter || FALLBACK_DATA.twitter,
-    };
-
-    lastFetchTime = currentTime;
-
-    return cachedStats;
-  } catch (error) {
-    // Return last cached data if available, otherwise fallback data
-    return cachedStats || FALLBACK_DATA;
-  }
+  return pendingStats;
 }

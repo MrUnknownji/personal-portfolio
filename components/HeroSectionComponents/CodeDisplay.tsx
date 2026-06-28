@@ -230,7 +230,8 @@ const CodeCompare = ({
   const sliderRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const sliderLineRef = useRef<HTMLDivElement>(null);
-  const beforePanelRef = useRef<HTMLDivElement>(null);
+  const revealViewportRef = useRef<HTMLDivElement>(null);
+  const revealPanelRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const sliderPositionRef = useRef(initialSliderPercentage);
   const isHoveredRef = useRef(false);
@@ -240,11 +241,15 @@ const CodeCompare = ({
 
   const updateSliderVisual = useCallback((percent: number) => {
     sliderPositionRef.current = percent;
+    const position = `${percent}%`;
     if (sliderLineRef.current) {
-      sliderLineRef.current.style.left = `${percent}%`;
+      sliderLineRef.current.style.transform = `translate3d(${position}, 0, 0)`;
     }
-    if (beforePanelRef.current) {
-      beforePanelRef.current.style.clipPath = `inset(0 ${100 - percent}% 0 0)`;
+    if (revealViewportRef.current) {
+      revealViewportRef.current.style.transform = `translate3d(${position}, 0, 0)`;
+    }
+    if (revealPanelRef.current) {
+      revealPanelRef.current.style.transform = `translate3d(-${position}, 0, 0)`;
     }
   }, []);
 
@@ -484,43 +489,50 @@ const CodeCompare = ({
         >
           <div
             ref={sliderLineRef}
-            className="h-full w-[2px] absolute top-0 m-auto z-30 bg-gradient-to-b from-transparent via-primary to-transparent"
+            className="absolute inset-0 z-30 w-full pointer-events-none will-change-transform"
             style={{
-              left: `${initialSliderPercentage}%`,
-              top: "0",
+              transform: `translate3d(${initialSliderPercentage}%, 0, 0)`,
               zIndex: 40,
             }}
           >
-            <div className="w-32 h-full [mask-image:radial-gradient(80px_at_left,white,transparent)] absolute top-1/2 -translate-y-1/2 left-0 bg-gradient-to-r from-primary/60 via-transparent to-transparent z-20" />
-            <div className="w-16 h-1/2 [mask-image:radial-gradient(40px_at_left,white,transparent)] absolute top-1/2 -translate-y-1/2 left-0 bg-gradient-to-r from-accent/80 via-transparent to-transparent z-10" />
-            {showHandlebar && (
-              <div className="h-10 w-6 rounded-lg top-1/2 -translate-y-1/2 bg-[#111] border border-primary/70 z-30 -right-3 absolute flex items-center justify-center">
-                <div className="flex gap-1">
-                  <div className="w-[1.5px] h-4 bg-primary/80 rounded-full" />
-                  <div className="w-[1.5px] h-4 bg-primary/80 rounded-full" />
+            <div className="absolute inset-y-0 left-0 w-[2px] bg-gradient-to-b from-transparent via-primary to-transparent">
+              <div className="w-32 h-full [mask-image:radial-gradient(80px_at_left,white,transparent)] absolute top-1/2 -translate-y-1/2 left-0 bg-gradient-to-r from-primary/60 via-transparent to-transparent z-20" />
+              <div className="w-16 h-1/2 [mask-image:radial-gradient(40px_at_left,white,transparent)] absolute top-1/2 -translate-y-1/2 left-0 bg-gradient-to-r from-accent/80 via-transparent to-transparent z-10" />
+              {showHandlebar && (
+                <div className="h-10 w-6 rounded-lg top-1/2 -translate-y-1/2 bg-[#111] border border-primary/70 z-30 -right-3 absolute flex items-center justify-center">
+                  <div className="flex gap-1">
+                    <div className="w-[1.5px] h-4 bg-primary/80 rounded-full" />
+                    <div className="w-[1.5px] h-4 bg-primary/80 rounded-full" />
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-
-          <div className="overflow-hidden w-full h-full relative z-20 pointer-events-none">
-            <div
-              ref={beforePanelRef}
-              className="absolute inset-0 z-20 rounded-xl w-full h-full select-none overflow-hidden"
-              style={{
-                clipPath: `inset(0 ${100 - initialSliderPercentage}% 0 0)`,
-              }}
-            >
-              <CodePanel lines={BEFORE_CODE} label="problem.ts" icon={FiCode} />
+              )}
             </div>
           </div>
 
-          <div className="absolute top-0 left-0 z-[19] rounded-xl w-full h-full select-none">
-            <CodePanel
-              lines={AFTER_CODE}
-              label="solution.ts"
-              icon={FiTerminal}
-            />
+          <div className="absolute inset-0 z-[19] rounded-xl w-full h-full select-none pointer-events-none">
+            <CodePanel lines={BEFORE_CODE} label="problem.ts" icon={FiCode} />
+          </div>
+
+          <div
+            ref={revealViewportRef}
+            className="absolute inset-0 z-20 rounded-xl w-full h-full select-none overflow-hidden pointer-events-none will-change-transform"
+            style={{
+              transform: `translate3d(${initialSliderPercentage}%, 0, 0)`,
+            }}
+          >
+            <div
+              ref={revealPanelRef}
+              className="absolute inset-0 w-full h-full will-change-transform"
+              style={{
+                transform: `translate3d(-${initialSliderPercentage}%, 0, 0)`,
+              }}
+            >
+              <CodePanel
+                lines={AFTER_CODE}
+                label="solution.ts"
+                icon={FiTerminal}
+              />
+            </div>
           </div>
         </div>
       </div>

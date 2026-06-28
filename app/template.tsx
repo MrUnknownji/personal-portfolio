@@ -5,12 +5,16 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { useGSAP } from "@gsap/react";
+import { fetchSocialStats } from "@/utils/social";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 }
 
 let hasPlayedInitialLoader = false;
+const INITIAL_READY_EVENT = "portfolio:initial-ready";
+const MINIMUM_LOADER_MS = 520;
+const MAXIMUM_LOADER_MS = 650;
 
 function scrollToCurrentHash(duration = 0.65) {
   if (!window.location.hash) return;
@@ -111,6 +115,77 @@ function createFlowerAnimation(overlay: HTMLDivElement) {
   return timeline;
 }
 
+const wait = (duration: number) =>
+  new Promise<void>((resolve) => window.setTimeout(resolve, duration));
+
+async function decodeCriticalImages() {
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+  );
+
+  const images = Array.from(document.images).filter((image) => {
+    const rect = image.getBoundingClientRect();
+    return (
+      image.fetchPriority === "high" ||
+      image.loading === "eager" ||
+      rect.top < window.innerHeight * 1.25
+    );
+  });
+
+  await Promise.allSettled(
+    images.map(async (image) => {
+      if (!image.complete) {
+        await new Promise<void>((resolve) => {
+          image.addEventListener("load", () => resolve(), { once: true });
+          image.addEventListener("error", () => resolve(), { once: true });
+        });
+      }
+      if (typeof image.decode === "function") {
+        await image.decode().catch(() => undefined);
+      }
+    }),
+  );
+}
+
+async function waitForCriticalReadiness(onProgress: (value: number) => void) {
+  const startedAt = performance.now();
+  let completed = 0;
+  let acceptProgress = true;
+  const tasks = [
+    document.fonts.ready,
+    fetchSocialStats(),
+    decodeCriticalImages(),
+  ];
+
+  const trackedTasks = tasks.map((task) =>
+    Promise.resolve(task)
+      .catch(() => undefined)
+      .finally(() => {
+        completed += 1;
+        if (acceptProgress) {
+          onProgress(10 + Math.round((completed / tasks.length) * 80));
+        }
+      }),
+  );
+
+  await Promise.race([
+    Promise.allSettled(trackedTasks),
+    wait(MAXIMUM_LOADER_MS),
+  ]);
+  acceptProgress = false;
+
+  const elapsed = performance.now() - startedAt;
+  if (elapsed < MINIMUM_LOADER_MS) {
+    await wait(MINIMUM_LOADER_MS - elapsed);
+  }
+  onProgress(100);
+}
+
+function signalInitialReady() {
+  document.documentElement.dataset.portfolioReady = "true";
+  window.dispatchEvent(new Event(INITIAL_READY_EVENT));
+}
+
 export default function Template({ children }: { children: React.ReactNode }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
@@ -150,27 +225,48 @@ export default function Template({ children }: { children: React.ReactNode }) {
         return () => routeFade.kill();
       }
 
-      const counter = { value: 0 };
-      let lastCounterValue = -1;
+      let cancelled = false;
       let flowerTimeline: gsap.core.Timeline | null = null;
+      let exitTimeline: gsap.core.Timeline | null = null;
+      let lastProgress = -1;
 
-      const tl = gsap.timeline({
-        onStart: () => {
-          bodyStyle.cursor = "wait";
-          bodyStyle.overflow = "hidden";
-          overlay.style.pointerEvents = "auto";
+      const setProgress = (value: number) => {
+        if (cancelled || value === lastProgress) return;
+        counterEl.textContent = `${value}%`;
+        lastProgress = value;
+      };
 
-          if ("scrollRestoration" in history) {
-            history.scrollRestoration = "manual";
-          }
+      bodyStyle.cursor = "wait";
+      bodyStyle.overflow = "hidden";
+      overlay.style.pointerEvents = "auto";
 
-          window.scrollTo(0, 0);
-          flowerTimeline = createFlowerAnimation(overlay);
-        },
-        onComplete: () => {
-          hasPlayedInitialLoader = true;
-          flowerTimeline?.kill();
-          flowerTimeline = null;
+      if ("scrollRestoration" in history) {
+        history.scrollRestoration = "manual";
+      }
+
+      window.scrollTo(0, 0);
+      flowerTimeline = createFlowerAnimation(overlay);
+      setProgress(10);
+
+      gsap.set(overlay, { opacity: 1, display: "flex" });
+      gsap.set(contentRef.current, { opacity: 0 });
+      gsap.to(counterEl, { opacity: 1, duration: 0.16 });
+      gsap.to(contentRef.current, {
+        opacity: 1,
+        duration: 0.32,
+        delay: 0.08,
+        ease: "power2.out",
+      });
+
+      void waitForCriticalReadiness(setProgress).then(() => {
+        if (cancelled || !contentRef.current) return;
+
+        exitTimeline = gsap.timeline({
+          onComplete: () => {
+            if (cancelled) return;
+            hasPlayedInitialLoader = true;
+            flowerTimeline?.kill();
+            flowerTimeline = null;
 
           if (!window.location.hash) {
             window.scrollTo(0, 0);
@@ -181,64 +277,18 @@ export default function Template({ children }: { children: React.ReactNode }) {
           overlay.style.display = "none";
           overlay.style.pointerEvents = "none";
           ScrollTrigger.refresh();
-
+          signalInitialReady();
           scrollToCurrentHash();
-        },
-        defaults: { ease: "power2.inOut" },
+          },
+        });
+        exitTimeline
+          .to(counterEl, { opacity: 0, duration: 0.12 }, 0)
+          .to(overlay, { opacity: 0, duration: 0.22 }, 0.04);
       });
 
-      const counterDuration = 0.55;
-      const contentFadeInDelay = 0.1;
-      const overlayFadeOutDelay = 0.46;
-      const overlayFadeOutDuration = 0.22;
-
-      tl.set(overlay, { opacity: 1, display: "flex" })
-        .set(contentRef.current, { opacity: 0 })
-        .set(counterEl, { textContent: "0%", opacity: 0 })
-        .to(counterEl, { opacity: 1, duration: 0.16 }, 0)
-        .to(
-          counter,
-          {
-            value: 100,
-            duration: counterDuration,
-            ease: "power1.out",
-            onUpdate: () => {
-              const nextValue = Math.floor(counter.value);
-              if (nextValue !== lastCounterValue) {
-                counterEl.textContent = nextValue + "%";
-                lastCounterValue = nextValue;
-              }
-            },
-          },
-          0,
-        )
-        .to(
-          contentRef.current,
-          {
-            opacity: 1,
-            duration: 0.32,
-          },
-          contentFadeInDelay,
-        )
-        .to(
-          overlay,
-          {
-            opacity: 0,
-            duration: overlayFadeOutDuration,
-          },
-          overlayFadeOutDelay,
-        )
-        .to(
-          counterEl,
-          {
-            opacity: 0,
-            duration: overlayFadeOutDuration * 0.5,
-          },
-          `-=${overlayFadeOutDuration * 0.3}`,
-        );
-
       return () => {
-        tl.kill();
+        cancelled = true;
+        exitTimeline?.kill();
         flowerTimeline?.kill();
         gsap.killTweensOf([overlay, contentRef.current, counterEl]);
         bodyStyle.cursor = "";

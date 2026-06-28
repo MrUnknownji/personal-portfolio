@@ -9,6 +9,7 @@ import LazyBot from "@/components/LazyBot";
 import ClickSpark from "@/components/ui/ClickSpark";
 import DynamicCursor from "@/components/ui/DynamicCursor";
 import GlobalBackground from "@/components/GlobalBackground";
+import InitialLoader from "@/components/InitialLoader";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -68,6 +69,7 @@ export default function RootLayout({
   return (
     <html className={`${outfit.variable} ${poppins.variable}`} lang="en">
       <body className="bg-transparent text-foreground" suppressHydrationWarning>
+        <InitialLoader />
         <GlobalBackground />
         <Header />
 

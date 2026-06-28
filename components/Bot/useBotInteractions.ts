@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { EyeState } from "./useBotEyes";
+import type { EyeState } from "./types";
 
 interface UseBotInteractionsProps {
   containerRef: React.RefObject<HTMLDivElement | null>;

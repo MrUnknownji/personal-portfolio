@@ -8,6 +8,7 @@ import Title from "./ui/Title";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useDeferredAnimation } from "@/hooks/useDeferredAnimation";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,9 +16,11 @@ const AboutMe = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const pinContainerRef = useRef<HTMLDivElement>(null);
+  const animationReady = useDeferredAnimation(containerRef, "800px 0px");
 
   useGSAP(
     () => {
+      if (!animationReady) return;
       if (!gridRef.current || !pinContainerRef.current) return;
 
       const mm = gsap.matchMedia();
@@ -48,7 +51,11 @@ const AboutMe = () => {
         mm.revert();
       };
     },
-    { scope: containerRef },
+    {
+      scope: containerRef,
+      dependencies: [animationReady],
+      revertOnUpdate: true,
+    },
   );
 
   return (

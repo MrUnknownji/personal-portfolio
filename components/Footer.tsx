@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { useGSAP } from "@gsap/react";
 import { FiArrowUpRight } from "react-icons/fi";
+import { useDeferredAnimation } from "@/hooks/useDeferredAnimation";
 
 gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
@@ -38,6 +39,7 @@ const Footer = () => {
   const currentYear: number = new Date().getFullYear();
   const pathname = usePathname();
   const router = useRouter();
+  const animationReady = useDeferredAnimation(footerRef);
 
   const scrollToElement = useCallback((elementId: string) => {
     if (!elementId) {
@@ -85,6 +87,7 @@ const Footer = () => {
 
   useGSAP(
     () => {
+      if (!animationReady) return;
       const elementsToAnimate = gsap.utils.toArray<HTMLElement>(
         footerRef.current?.querySelectorAll(
           ".animate-copyright, .animate-links, .animate-built-with",
@@ -116,7 +119,11 @@ const Footer = () => {
         force3D: true,
       });
     },
-    { scope: footerRef },
+    {
+      scope: footerRef,
+      dependencies: [animationReady],
+      revertOnUpdate: true,
+    },
   );
 
   return (
