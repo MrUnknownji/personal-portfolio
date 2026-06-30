@@ -2,12 +2,29 @@ type BotProject = {
   id: number;
   title: string;
   technologies: readonly string[];
-  demoLink: string;
+  demoLink?: string;
   githubLink: string;
   featured: true;
 };
 
 export const botProjects: readonly BotProject[] = [
+  {
+    id: 11,
+    title: "Mirror Wallpapers",
+    technologies: [
+      "React Native",
+      "Expo",
+      "TypeScript",
+      "Next.js",
+      "FastAPI",
+      "Supabase",
+      "Gemini API",
+      "Cloudinary",
+      "Razorpay",
+    ],
+    githubLink: "https://github.com/MrUnknownji/mirror-app",
+    featured: true,
+  },
   {
     id: 9,
     title: "BidStrike",

@@ -805,9 +805,113 @@ export const projects: Project[] = [
       },
     ],
   },
+  // Mirror Wallpapers
+  {
+    id: 11,
+    title: "Mirror Wallpapers",
+    shortDescription:
+      "An AI-powered wallpaper ecosystem pairing an Expo mobile experience with a full operations console.",
+    longDescription:
+      "Mirror Wallpapers is an end-to-end wallpaper platform for discovering coordinated lock and home screen pairs, browsing standalone designs, previewing wallpapers in context, and accessing credit-based AI creation. Its Next.js admin console manages generation, catalog approval, style presets, subscription settings, and cost and reliability analytics across the same Supabase-backed product.",
+    image:
+      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828909/portfolio/projects/mirror-wallpapers/mirror-admin-pairs.png",
+    technologies: [
+      "React Native",
+      "Expo",
+      "TypeScript",
+      "Next.js",
+      "FastAPI",
+      "Supabase",
+      "Gemini API",
+      "Cloudinary",
+      "Razorpay",
+      "Tailwind CSS",
+    ],
+    features: [
+      "Curated lock and home wallpaper pairs alongside a standalone wallpaper catalog",
+      "Full-screen lock and home previews with native Android wallpaper application",
+      "Search, filters, favorites, generation history, and cross-device account sync",
+      "Credit-based AI generation with style presets, quality tiers, and resolution controls",
+      "Subscription tiers and one-time credit packs with server-verified Razorpay payments",
+      "Admin workflows for generation, approval, catalog management, and remote configuration",
+      "Operational analytics for generation success, failure rates, spend, and cost guardrails",
+    ],
+    githubLink: "https://github.com/MrUnknownji/mirror-app",
+    category: "Full Stack",
+    gallery: [
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828909/portfolio/projects/mirror-wallpapers/mirror-admin-pairs.png",
+        alt: "Mirror admin catalog showing approved lock and home wallpaper pairs",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828972/portfolio/projects/mirror-wallpapers/mirror-mobile-explore.png",
+        alt: "Mirror mobile discovery screen with featured wallpaper pairs",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828978/portfolio/projects/mirror-wallpapers/mirror-mobile-pair-lock.png",
+        alt: "Red Crescent Ronin wallpaper shown as a full-screen lock screen preview",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828983/portfolio/projects/mirror-wallpapers/mirror-mobile-pair-home.png",
+        alt: "Matching Red Crescent Ronin home screen wallpaper preview",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828987/portfolio/projects/mirror-wallpapers/mirror-mobile-singles.png",
+        alt: "Mirror mobile catalog of standalone wallpapers",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828989/portfolio/projects/mirror-wallpapers/mirror-mobile-upgrade.png",
+        alt: "Mirror Pro subscription tiers and AI generation benefits",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828991/portfolio/projects/mirror-wallpapers/mirror-admin-generate.png",
+        alt: "Mirror admin AI generation workspace for wallpaper pairs and singles",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828993/portfolio/projects/mirror-wallpapers/mirror-admin-styles.png",
+        alt: "Mirror admin style preset management grid",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828997/portfolio/projects/mirror-wallpapers/mirror-admin-singles.png",
+        alt: "Mirror admin catalog for approving and managing standalone wallpapers",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828999/portfolio/projects/mirror-wallpapers/mirror-admin-analytics.png",
+        alt: "Mirror admin analytics for generation reliability, spend, and cost risk",
+      },
+    ],
+    featured: true,
+    caseStudy: {
+      problem:
+        "Most wallpaper apps treat lock and home screens as unrelated downloads, while AI generation, catalog curation, subscriptions, and operational visibility live in disconnected tools.",
+      solution:
+        "Mirror combines coordinated wallpaper pairs and standalone designs in one mobile experience, backed by an admin console that manages generation, approval, styles, pricing, and reliability from the same product data.",
+      architecture: [
+        "Expo and React Native deliver the mobile catalog, previews, account flows, purchases, and Android wallpaper integration.",
+        "A Next.js admin console uses authenticated server routes for catalog curation, remote settings, payment operations, and analytics.",
+        "FastAPI orchestrates Gemini image generation, deduplication, storage, and generation logging.",
+        "Supabase provides authentication and relational product data, while Cloudinary serves the approved image catalog.",
+      ],
+      tradeoffs: [
+        "Native wallpaper application and payment SDKs provide a better Android experience but cannot be fully represented by the Expo web build.",
+        "AI generation quality and cost require explicit model tiers, credit controls, deduplication, and operational monitoring.",
+        "Supporting Cloudinary, R2, and legacy Supabase Storage improves deployment flexibility but adds configuration and deletion-path complexity.",
+      ],
+    },
+  },
 ];
 
-export const selectedProjectIds = [9, 8, 7, 1, 10] as const;
+export const selectedProjectIds = [11, 9, 8, 7, 1, 10] as const;
 
 const selectedProjectIdSet = new Set<number>(selectedProjectIds);
 
@@ -903,7 +1007,7 @@ export const selectedProjects: Project[] = selectedProjectIds.flatMap((id) => {
       ...project,
       title: projectTitleOverrides[id] || project.title,
       featured: true,
-      caseStudy: projectCaseStudies[id],
+      caseStudy: projectCaseStudies[id] || project.caseStudy,
     },
   ];
 });
