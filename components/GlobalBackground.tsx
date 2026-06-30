@@ -1,74 +1,10 @@
-"use client";
-
-import { useEffect, useRef } from "react";
+import GlobalBackgroundMotion from "./GlobalBackgroundMotion";
 
 export default function GlobalBackground() {
-  const bgRef = useRef<HTMLDivElement>(null);
-  const frameRef = useRef<number | null>(null);
-  const maxScrollRef = useRef(0);
-  const lastUpdateRef = useRef(0);
-
-  useEffect(() => {
-    if (!bgRef.current) return;
-
-    const reduceMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (reduceMotion) return;
-
-    const updateScrollBounds = () => {
-      maxScrollRef.current = Math.max(
-        0,
-        document.documentElement.scrollHeight - window.innerHeight,
-      );
-    };
-
-    const update = (timestamp = performance.now()) => {
-      if (timestamp - lastUpdateRef.current < 1000 / 30) {
-        frameRef.current = requestAnimationFrame(update);
-        return;
-      }
-
-      frameRef.current = null;
-      lastUpdateRef.current = timestamp;
-      const maxScroll = maxScrollRef.current;
-      const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
-      const y = Math.max(-5, Math.min(0, progress * -5));
-
-      if (bgRef.current) {
-        bgRef.current.style.transform = `translate3d(0, ${y}%, 0)`;
-      }
-    };
-
-    const requestUpdate = () => {
-      if (frameRef.current === null) {
-        frameRef.current = requestAnimationFrame(update);
-      }
-    };
-
-    const handleResize = () => {
-      updateScrollBounds();
-      requestUpdate();
-    };
-
-    updateScrollBounds();
-    update();
-    window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("scroll", requestUpdate);
-      window.removeEventListener("resize", handleResize);
-      if (frameRef.current !== null) {
-        cancelAnimationFrame(frameRef.current);
-      }
-    };
-  }, []);
-
   return (
     <div className="fixed inset-0 z-[-10] overflow-hidden pointer-events-none bg-background">
       <div
-        ref={bgRef}
+        id="global-background-pattern"
         className="absolute top-[-10%] left-[-4%] w-[108%] h-[120%] opacity-[0.07] will-change-transform contain-paint"
       >
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -129,6 +65,7 @@ export default function GlobalBackground() {
       <div className="absolute bottom-0 left-0 w-full h-[30vh] bg-gradient-to-t from-background to-transparent pointer-events-none" />
       <div className="absolute top-0 left-0 w-[10vw] h-full bg-gradient-to-r from-background to-transparent pointer-events-none" />
       <div className="absolute top-0 right-0 w-[10vw] h-full bg-gradient-to-l from-background to-transparent pointer-events-none" />
+      <GlobalBackgroundMotion />
     </div>
   );
 }

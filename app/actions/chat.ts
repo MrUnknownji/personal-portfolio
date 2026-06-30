@@ -1,6 +1,7 @@
 "use server";
 
-import { projects, selectedProjects, SkillsData } from "@/data/data";
+import { projects, selectedProjects } from "@/data/data";
+import { SkillsData } from "@/data/skills";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL =

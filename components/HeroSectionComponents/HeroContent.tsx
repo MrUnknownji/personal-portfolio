@@ -2,7 +2,6 @@
 import { useRef } from "react";
 import { gsap } from "gsap";
 import HireBadge from "./HireBadge";
-import HeroText from "./HeroText";
 import ViewProjectsButton from "./ViewProjectsButton";
 import SocialLinks from "./SocialLinks";
 import { useGSAP } from "@gsap/react";
@@ -25,7 +24,7 @@ const ANIMATION_CONFIG = {
   EASE: "power3.out",
 } as const;
 
-const HeroContent = () => {
+const HeroContent = ({ children }: { children: React.ReactNode }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
@@ -74,7 +73,7 @@ const HeroContent = () => {
           <HireBadge />
         </div>
         <div className="hero-text" style={{ opacity: 0 }}>
-          <HeroText />
+          {children}
         </div>
       </div>
 

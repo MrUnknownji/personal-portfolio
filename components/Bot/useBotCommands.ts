@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { selectedProjects as projects } from "@/data/data";
+import { botProjects as projects } from "@/data/bot-projects";
 
 type ActiveProject = {
   id: number;

@@ -20,15 +20,40 @@ const COOLDOWN_MS = 1000;
 
 export const Title = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const titleFillRef = useRef<HTMLSpanElement>(null);
+  const wavePathRef = useRef<SVGPathElement>(null);
+  const motifRef = useRef<SVGGElement>(null);
+  const fillProgressRef = useRef({ value: 0 });
+  const hasStartedThemeChangesRef = useRef(false);
   const [currentTheme, setCurrentTheme] = useState(3);
   const [prevTheme, setPrevTheme] = useState<number | null>(null);
   const [isOnCooldown, setIsOnCooldown] = useState(false);
-  const [fillProgress, setFillProgress] = useState(0);
-  const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const applyFillProgress = useCallback((progress: number) => {
+    const clampedProgress = Math.max(0, Math.min(100, progress));
+
+    if (titleFillRef.current) {
+      titleFillRef.current.style.clipPath =
+        `inset(0 ${100 - clampedProgress}% 0 0)`;
+    }
+    if (wavePathRef.current) {
+      wavePathRef.current.style.strokeDashoffset = String(
+        500 - (clampedProgress / 100) * 500,
+      );
+    }
+    if (motifRef.current) {
+      motifRef.current.style.transform =
+        `scale(${0.3 + (clampedProgress / 100) * 0.7})`;
+      motifRef.current.style.opacity = String(clampedProgress / 100);
+    }
+  }, []);
 
   useGSAP(() => {
     if (!containerRef.current) return;
 
+    fillProgressRef.current.value = 0;
+    applyFillProgress(0);
     const tl = gsap.timeline();
 
     tl.from(containerRef.current, {
@@ -37,18 +62,47 @@ export const Title = () => {
       duration: 1,
       ease: "power3.out",
     }).to(
-      {},
+      fillProgressRef.current,
       {
+        value: 100,
         duration: 1.5,
         ease: "power2.inOut",
-        onUpdate: function () {
-          const progress = this.progress() * 100;
-          setFillProgress(progress);
-        },
+        onUpdate: () =>
+          applyFillProgress(fillProgressRef.current.value),
       },
       "-=0.5",
     );
-  }, []);
+
+    return () => tl.kill();
+  }, [applyFillProgress]);
+
+  useGSAP(
+    () => {
+      if (!hasStartedThemeChangesRef.current) {
+        hasStartedThemeChangesRef.current = true;
+        return;
+      }
+
+      gsap.killTweensOf(fillProgressRef.current);
+      fillProgressRef.current.value = 0;
+      applyFillProgress(0);
+
+      const tween = gsap.to(fillProgressRef.current, {
+        value: 100,
+        duration: 0.8,
+        ease: "power2.out",
+        onUpdate: () =>
+          applyFillProgress(fillProgressRef.current.value),
+        onComplete: () => setPrevTheme(null),
+      });
+
+      return () => tween.kill();
+    },
+    {
+      dependencies: [currentTheme, applyFillProgress],
+      scope: containerRef,
+    },
+  );
 
   const handleHover = useCallback(() => {
     if (isOnCooldown) return;
@@ -63,18 +117,6 @@ export const Title = () => {
     cooldownTimerRef.current = setTimeout(() => {
       setIsOnCooldown(false);
     }, COOLDOWN_MS);
-
-    gsap.to(
-      { val: 0 },
-      {
-        val: 100,
-        duration: 0.8,
-        ease: "power2.out",
-        onUpdate: function () {
-          setFillProgress(this.targets()[0].val);
-        },
-      },
-    );
   }, [currentTheme, isOnCooldown]);
 
   useEffect(() => {
@@ -129,6 +171,7 @@ export const Title = () => {
           )}
 
           <span
+            ref={titleFillRef}
             className="absolute top-0 left-0 w-full -bottom-4"
             style={{
               backgroundImage: `linear-gradient(to right, ${theme.colors[0]}, ${theme.colors[1]}, ${theme.colors[2]})`,
@@ -136,7 +179,7 @@ export const Title = () => {
               backgroundClip: "text",
               WebkitTextFillColor: "transparent",
 
-              clipPath: `inset(0 ${100 - fillProgress}% 0 0)`,
+              clipPath: "inset(0 100% 0 0)",
             }}
           >
             Sandeep Kumar
@@ -241,21 +284,23 @@ export const Title = () => {
         {/* --- CURRENT THEME STATE (ANIMATING IN) --- */}
         {/* Animated Sweep Line */}
         <path
+          ref={wavePathRef}
           d="M 0 8 C 80 8 130 8 160 18 C 175 23 185 28 200 28 C 215 28 225 23 240 18 C 270 8 320 8 400 8"
           stroke={`url(#wave-gradient-${currentTheme})`}
           strokeWidth="2.5"
           fill="none"
           strokeLinecap="round"
           strokeDasharray="500"
-          strokeDashoffset={500 - (fillProgress / 100) * 500}
+          strokeDashoffset="500"
         />
 
         {/* Animated Lotus Bloom Motif */}
         <g
+          ref={motifRef}
           style={{
             transformOrigin: "200px 16px",
-            transform: `scale(${0.3 + (fillProgress / 100) * 0.7})`,
-            opacity: fillProgress / 100,
+            transform: "scale(0.3)",
+            opacity: 0,
           }}
         >
           {/* Vertical Drop Diamond/Petal */}

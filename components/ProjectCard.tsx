@@ -1,11 +1,12 @@
 import React, { memo } from "react";
 import Image from "next/image";
-import { Project } from "@/types/Project";
+import { ProjectSummary } from "@/types/Project";
 import { FiArrowUpRight, FiStar } from "react-icons/fi";
 
 interface ProjectCardProps {
-  project: Project;
+  project: ProjectSummary;
   onClick: () => void;
+  onIntent?: () => void;
 }
 
 const TECH_TAGS_MAX = 3;
@@ -13,6 +14,7 @@ const TECH_TAGS_MAX = 3;
 const ProjectCardComponent: React.FC<ProjectCardProps> = ({
   project,
   onClick,
+  onIntent,
 }) => {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -33,6 +35,9 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
                  hover:-translate-y-1 hover:border-primary/60 transform-gpu will-change-transform"
       onClick={onClick}
       onKeyDown={handleKeyDown}
+      onFocus={onIntent}
+      onPointerDown={onIntent}
+      onPointerEnter={onIntent}
     >
       <div className="relative h-52 md:h-64 overflow-hidden">
         <Image

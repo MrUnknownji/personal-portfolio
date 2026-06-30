@@ -117,6 +117,7 @@
 
 html {
   overflow-x: hidden;
+  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -342,7 +343,6 @@ textarea:-webkit-autofill:active {
 .core-skill-card,
 .tech-category,
 .group\/container,
-[style*="transform"],
 .transform-gpu {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -350,11 +350,66 @@ textarea:-webkit-autofill:active {
   -moz-osx-font-smoothing: grayscale;
 }
 
-* {
-  -webkit-transform-style: preserve-3d;
-  transform-style: flat;
-}
+@media (hover: hover) and (pointer: fine) {
+  html,
+  body,
+  .cursor-auto,
+  .cursor-default {
+    cursor: url("/cursors/normal.svg") 4 4, auto !important;
+  }
 
-* {
-  text-rendering: optimizeLegibility;
+  a,
+  button,
+  [role="button"],
+  label,
+  input[type="submit"],
+  input[type="button"],
+  .cursor-pointer,
+  .skill-chip,
+  .card,
+  .bot-trigger,
+  [onClick] {
+    cursor: url("/cursors/pointer.svg") 10 2, pointer !important;
+  }
+
+  .cursor-text,
+  input:not([type="button"]):not([type="submit"]):not([type="range"]):not(
+      [type="checkbox"]
+    ):not([type="radio"]),
+  textarea,
+  [contenteditable="true"],
+  .prose p:not(.cursor-pointer):not([onclick]),
+  .prose span:not(.cursor-pointer):not([onclick]) {
+    cursor: url("/cursors/text.svg") 16 16, text !important;
+  }
+
+  .cursor-col-resize,
+  .react-resizable-handle-e,
+  .react-resizable-handle-w,
+  .code-resizer-handle {
+    cursor: url("/cursors/resize-h.svg") 16 16, col-resize !important;
+  }
+
+  .cursor-row-resize,
+  .react-resizable-handle-s,
+  .react-resizable-handle-n {
+    cursor: url("/cursors/resize-v.svg") 16 16, row-resize !important;
+  }
+
+  .cursor-not-allowed,
+  :disabled,
+  [aria-disabled="true"],
+  fieldset:disabled * {
+    cursor: url("/cursors/disabled.svg") 16 16, not-allowed !important;
+  }
+
+  .cursor-wait,
+  [aria-busy="true"] {
+    cursor: url("/cursors/loading.svg") 16 16, wait !important;
+  }
+
+  .cursor-move,
+  .cursor-all-scroll {
+    cursor: move !important;
+  }
 }

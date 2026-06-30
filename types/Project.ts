@@ -28,3 +28,14 @@ export interface Project {
   featured?: boolean;
   caseStudy?: ProjectCaseStudy;
 }
+
+export type ProjectSummary = Pick<
+  Project,
+  | "id"
+  | "title"
+  | "shortDescription"
+  | "image"
+  | "technologies"
+  | "category"
+  | "featured"
+>;

@@ -1,4 +1,3 @@
-"use client";
 import { Title } from "./Title";
 import { MagneticText } from "./MagneticText";
 

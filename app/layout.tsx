@@ -4,10 +4,8 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SmoothScroller from "@/components/SmoothScroller";
-import Template from "./template";
 import LazyBot from "@/components/LazyBot";
 import ClickSpark from "@/components/ui/ClickSpark";
-import DynamicCursor from "@/components/ui/DynamicCursor";
 import GlobalBackground from "@/components/GlobalBackground";
 import InitialLoader from "@/components/InitialLoader";
 
@@ -25,9 +23,10 @@ const outfit = Outfit({
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  weight: "400",
   variable: "--font-poppins",
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -75,14 +74,13 @@ export default function RootLayout({
 
         <SmoothScroller>
           <main className="relative min-h-screen">
-            <Template>{children}</Template>
+            {children}
           </main>
           <Footer />
         </SmoothScroller>
         <LazyBot />
 
         <ClickSpark />
-        <DynamicCursor />
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
-"use client";
 import HeroContent from "./HeroSectionComponents/HeroContent";
 import CodeDisplay from "./HeroSectionComponents/CodeDisplay";
+import HeroText from "./HeroSectionComponents/HeroText";
 
 const HeroSection = () => {
   return (
@@ -16,7 +16,9 @@ const HeroSection = () => {
 
         <div className="relative z-10 flex flex-col lg:flex-row gap-12 lg:gap-16 h-full justify-center items-center">
           <div className="z-10 w-full h-full lg:w-1/2">
-            <HeroContent />
+            <HeroContent>
+              <HeroText />
+            </HeroContent>
           </div>
           <div
             className="z-[1] w-full lg:w-1/2 lg:block hidden"

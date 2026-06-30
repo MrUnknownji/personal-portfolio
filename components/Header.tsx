@@ -4,7 +4,6 @@ import React, { useRef, useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { FiMenu, FiX, FiArrowRight } from "react-icons/fi";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
@@ -24,6 +23,7 @@ const Header = () => {
   const mobileNavRef = useRef<HTMLElement>(null);
   const logoTextRef = useRef<HTMLSpanElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const isScrolledRef = useRef(false);
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -33,7 +33,11 @@ const Header = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const nextIsScrolled = window.scrollY > 50;
+      if (nextIsScrolled === isScrolledRef.current) return;
+
+      isScrolledRef.current = nextIsScrolled;
+      setIsScrolled(nextIsScrolled);
     };
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -171,12 +175,11 @@ const Header = () => {
     >
       <nav
         ref={desktopNavRef}
-        className={cn(
-          "hidden lg:flex w-full mx-auto items-center justify-between px-6 py-3 transition-colors duration-200 bg-[radial-gradient(circle_at_50%_0%,rgb(25,17,12),rgb(10,10,10)_72%)]",
+        className={`hidden lg:flex w-full mx-auto items-center justify-between px-6 py-3 transition-colors duration-200 bg-[radial-gradient(circle_at_50%_0%,rgb(25,17,12),rgb(10,10,10)_72%)] ${
           isScrolled
             ? "border border-border/70"
-            : "border border-transparent border-b-white/10",
-        )}
+            : "border border-transparent border-b-white/10"
+        }`}
       >
         <Link
           href="/"
@@ -226,12 +229,11 @@ const Header = () => {
 
       <nav
         ref={mobileNavRef}
-        className={cn(
-          "lg:hidden w-full mx-auto flex flex-col px-4 py-3 transition-colors duration-200 bg-[radial-gradient(circle_at_50%_0%,rgb(25,17,12),rgb(10,10,10)_72%)]",
+        className={`lg:hidden w-full mx-auto flex flex-col px-4 py-3 transition-colors duration-200 bg-[radial-gradient(circle_at_50%_0%,rgb(25,17,12),rgb(10,10,10)_72%)] ${
           isScrolled || isMobileMenuOpen
             ? "border border-border/70"
-            : "border border-transparent border-b-white/10",
-        )}
+            : "border border-transparent border-b-white/10"
+        }`}
       >
         <div className="flex items-center justify-between w-full">
           <Link

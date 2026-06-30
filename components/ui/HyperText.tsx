@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useRef } from "react";
 
 type CharacterSet = string[] | readonly string[];
 
@@ -32,102 +31,98 @@ export function HyperText({
   animateOnHover = false,
   characterSet = DEFAULT_CHARACTER_SET,
 }: HyperTextProps) {
-  const [displayText, setDisplayText] = useState<string[]>(() =>
-    children.split(""),
-  );
-  const [isAnimating, setIsAnimating] = useState(false);
-  const iterationCount = useRef(0);
   const elementRef = useRef<HTMLElement>(null);
   const startTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const handleAnimationTrigger = () => {
-    if (animateOnHover && !isAnimating) {
-      iterationCount.current = 0;
-      setIsAnimating(true);
-    }
-  };
+  const animationFrameRef = useRef<number | null>(null);
+  const isAnimatingRef = useRef(false);
+  const triggerAnimationRef = useRef<() => void>(() => undefined);
 
   useEffect(() => {
-    if (!startOnView) {
-      startTimeoutRef.current = setTimeout(() => {
-        setIsAnimating(true);
-      }, delay);
-      return () => {
-        if (startTimeoutRef.current) clearTimeout(startTimeoutRef.current);
-      };
-    }
+    const element = elementRef.current;
+    if (!element) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          startTimeoutRef.current = setTimeout(() => {
-            setIsAnimating(true);
-          }, delay);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1, rootMargin: "-20% 0px -20% 0px" },
-    );
-
-    if (elementRef.current) {
-      observer.observe(elementRef.current);
-    }
-
-    return () => {
-      observer.disconnect();
-      if (startTimeoutRef.current) clearTimeout(startTimeoutRef.current);
+    const stopAnimation = () => {
+      if (animationFrameRef.current !== null) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      isAnimatingRef.current = false;
     };
-  }, [delay, startOnView]);
 
-  useEffect(() => {
-    if (!isAnimating) return;
+    const startAnimation = () => {
+      if (isAnimatingRef.current) return;
 
-    const maxIterations = children.length;
-    const startTime = performance.now();
-    let lastTextUpdate = 0;
-    let animationFrameId: number;
+      isAnimatingRef.current = true;
+      const maxIterations = children.length;
+      const startTime = performance.now();
+      let lastTextUpdate = 0;
 
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
+      const animate = (currentTime: number) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const iteration = progress * maxIterations;
 
-      iterationCount.current = progress * maxIterations;
-
-      if (currentTime - lastTextUpdate >= 1000 / 30 || progress === 1) {
-        setDisplayText(
-          children
+        if (currentTime - lastTextUpdate >= 1000 / 30 || progress === 1) {
+          element.textContent = children
             .split("")
             .map((letter, index) =>
               letter === " "
                 ? " "
-                : index <= iterationCount.current
+                : index <= iteration
                   ? children[index]
                   : characterSet[getRandomInt(characterSet.length)],
-            ),
-        );
-        lastTextUpdate = currentTime;
-      }
+            )
+            .join("");
+          lastTextUpdate = currentTime;
+        }
 
-      if (progress < 1) {
-        animationFrameId = requestAnimationFrame(animate);
-      } else {
-        setDisplayText(children.split(""));
-        setIsAnimating(false);
-      }
+        if (progress < 1) {
+          animationFrameRef.current = requestAnimationFrame(animate);
+        } else {
+          element.textContent = children;
+          animationFrameRef.current = null;
+          isAnimatingRef.current = false;
+        }
+      };
+
+      animationFrameRef.current = requestAnimationFrame(animate);
     };
 
-    animationFrameId = requestAnimationFrame(animate);
+    triggerAnimationRef.current = startAnimation;
 
-    return () => cancelAnimationFrame(animationFrameId);
-  }, [children, duration, isAnimating, characterSet]);
+    let observer: IntersectionObserver | null = null;
+    if (!startOnView) {
+      startTimeoutRef.current = setTimeout(startAnimation, delay);
+    } else {
+      observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) return;
+          startTimeoutRef.current = setTimeout(startAnimation, delay);
+          observer?.disconnect();
+          observer = null;
+        },
+        { threshold: 0.1, rootMargin: "-20% 0px -20% 0px" },
+      );
+      observer.observe(element);
+    }
+
+    return () => {
+      observer?.disconnect();
+      if (startTimeoutRef.current) clearTimeout(startTimeoutRef.current);
+      stopAnimation();
+      element.textContent = children;
+    };
+  }, [characterSet, children, delay, duration, startOnView]);
 
   return (
     <Component
       ref={elementRef}
-      className={cn("inline-block whitespace-nowrap", className)}
-      onMouseEnter={animateOnHover ? handleAnimationTrigger : undefined}
+      className={`inline-block whitespace-nowrap ${className || ""}`}
+      onMouseEnter={
+        animateOnHover ? () => triggerAnimationRef.current() : undefined
+      }
     >
-      {displayText.join("")}
+      {children}
     </Component>
   );
 }

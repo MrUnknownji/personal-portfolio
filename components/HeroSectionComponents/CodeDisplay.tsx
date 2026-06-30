@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
-import { cn } from "@/lib/utils";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { FiCode, FiTerminal } from "react-icons/fi";
@@ -233,10 +232,12 @@ const CodeCompare = ({
   const revealViewportRef = useRef<HTMLDivElement>(null);
   const revealPanelRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
+  const autoplayTimeoutRef = useRef<number | null>(null);
   const sliderPositionRef = useRef(initialSliderPercentage);
   const isHoveredRef = useRef(false);
   const isInViewRef = useRef(true);
   const resumeAutoplayRef = useRef<(() => void) | null>(null);
+  const stopAutoplayRef = useRef<(() => void) | null>(null);
   const autoplayProgressRef = useRef(initialSliderPercentage);
 
   const updateSliderVisual = useCallback((percent: number) => {
@@ -274,11 +275,23 @@ const CodeCompare = ({
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
       }
+      if (autoplayTimeoutRef.current !== null) {
+        clearTimeout(autoplayTimeoutRef.current);
+        autoplayTimeoutRef.current = null;
+      }
     };
 
     const scheduleAutoplayFrame = () => {
-      if (rafRef.current !== null) return;
-      rafRef.current = requestAnimationFrame(animate);
+      if (
+        rafRef.current !== null ||
+        autoplayTimeoutRef.current !== null
+      ) {
+        return;
+      }
+      autoplayTimeoutRef.current = window.setTimeout(() => {
+        autoplayTimeoutRef.current = null;
+        rafRef.current = requestAnimationFrame(animate);
+      }, frameInterval);
     };
 
     const animate = (currentTime: number) => {
@@ -332,6 +345,7 @@ const CodeCompare = ({
     };
 
     resumeAutoplayRef.current = resumeAutoplay;
+    stopAutoplayRef.current = stopAutoplayFrame;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -364,6 +378,7 @@ const CodeCompare = ({
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       observer.disconnect();
       resumeAutoplayRef.current = null;
+      stopAutoplayRef.current = null;
       stopAutoplayFrame();
     };
   }, [
@@ -396,10 +411,7 @@ const CodeCompare = ({
 
   const handleMouseEnter = () => {
     isHoveredRef.current = true;
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
+    stopAutoplayRef.current?.();
   };
 
   const handleMouseLeave = () => {
@@ -473,10 +485,7 @@ const CodeCompare = ({
       >
         <div
           ref={sliderRef}
-          className={cn(
-            "code-resizer-handle w-full h-full overflow-hidden rounded-xl border border-white/10",
-            className,
-          )}
+          className={`code-resizer-handle w-full h-full overflow-hidden rounded-xl border border-white/10 ${className || ""}`}
           style={{ position: "relative" }}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}

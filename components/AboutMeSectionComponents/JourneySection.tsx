@@ -1,4 +1,4 @@
-import { CSSProperties, useRef } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -96,65 +96,6 @@ const JourneySection = () => {
         },
       );
 
-      const cleanupMouseListeners: Array<() => void> = [];
-
-      items.forEach((item) => {
-        const card = item.querySelector(".journey-card") as HTMLElement;
-        if (!card) return;
-        let rect: DOMRect | null = null;
-        let frameId: number | null = null;
-        let pendingX = 0;
-        let pendingY = 0;
-
-        const writeMousePosition = () => {
-          frameId = null;
-          card.style.setProperty("--mouse-x", `${pendingX}px`);
-          card.style.setProperty("--mouse-y", `${pendingY}px`);
-        };
-
-        const measureCard = () => {
-          rect = card.getBoundingClientRect();
-        };
-
-        const handleMouseMove = (e: MouseEvent) => {
-          if (!rect) {
-            measureCard();
-          }
-
-          if (!rect) return;
-
-          pendingX = e.clientX - rect.left;
-          pendingY = e.clientY - rect.top;
-
-          if (frameId === null) {
-            frameId = requestAnimationFrame(writeMousePosition);
-          }
-        };
-
-        const handleMouseLeave = () => {
-          rect = null;
-          if (frameId !== null) {
-            cancelAnimationFrame(frameId);
-            frameId = null;
-          }
-        };
-
-        card.addEventListener("mouseenter", measureCard);
-        card.addEventListener("mousemove", handleMouseMove);
-        card.addEventListener("mouseleave", handleMouseLeave);
-        cleanupMouseListeners.push(() => {
-          if (frameId !== null) {
-            cancelAnimationFrame(frameId);
-          }
-          card.removeEventListener("mouseenter", measureCard);
-          card.removeEventListener("mousemove", handleMouseMove);
-          card.removeEventListener("mouseleave", handleMouseLeave);
-        });
-      });
-
-      return () => {
-        cleanupMouseListeners.forEach((cleanup) => cleanup());
-      };
     },
     {
       scope: containerRef,
@@ -196,12 +137,6 @@ const JourneySection = () => {
               {/* Card */}
               <div
                 className="journey-card relative bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 md:p-8 transition-[transform,border-color] duration-150 overflow-hidden transform-gpu group-hover:-translate-y-1 group-hover:border-primary/40 z-10"
-                style={
-                  {
-                    "--mouse-x": "0px",
-                    "--mouse-y": "0px",
-                  } as CSSProperties
-                }
               >
                 {/* Inner Ambient Glow */}
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none" />

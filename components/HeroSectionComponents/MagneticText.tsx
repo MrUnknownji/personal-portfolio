@@ -44,12 +44,16 @@ export const MagneticText = ({
         });
       };
 
+      gsap.set(chars, { willChange: "transform" });
       gsap.from(charElements, {
         y: 20,
         opacity: 0,
         duration: 0.8,
         stagger: 0.02,
         ease: "power3.out",
+        onComplete: () => {
+          gsap.set(chars, { clearProps: "willChange" });
+        },
       });
 
       if (prefersReducedMotion) return;
@@ -121,11 +125,19 @@ export const MagneticText = ({
           duration: 0.5,
           ease: "elastic.out(1, 0.3)",
           overwrite: "auto",
+          onComplete: () => {
+            gsap.set(chars, { clearProps: "willChange" });
+          },
         });
       };
 
+      const handleMouseEnter = () => {
+        gsap.set(chars, { willChange: "transform" });
+        measureChars();
+      };
+
       measureChars();
-      el.addEventListener("mouseenter", measureChars);
+      el.addEventListener("mouseenter", handleMouseEnter);
       el.addEventListener("mousemove", handleMouseMove);
       el.addEventListener("mouseleave", handleMouseLeave);
       window.addEventListener("resize", measureChars);
@@ -134,7 +146,7 @@ export const MagneticText = ({
         if (rafId !== null) {
           cancelAnimationFrame(rafId);
         }
-        el.removeEventListener("mouseenter", measureChars);
+        el.removeEventListener("mouseenter", handleMouseEnter);
         el.removeEventListener("mousemove", handleMouseMove);
         el.removeEventListener("mouseleave", handleMouseLeave);
         window.removeEventListener("resize", measureChars);
@@ -149,7 +161,7 @@ export const MagneticText = ({
         <span
           key={index}
           className="char inline-block cursor-default"
-          style={{ position: "relative", willChange: "transform" }}
+          style={{ position: "relative" }}
         >
           {char === " " ? "\u00A0" : char}
         </span>

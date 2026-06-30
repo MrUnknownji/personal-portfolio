@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
@@ -35,44 +35,10 @@ function scrollToCurrentHash(duration = 0.65) {
   });
 }
 
-function getOrCreateOverlay(): HTMLDivElement {
-  let overlay = document.getElementById(
+function getOverlay(): HTMLDivElement | null {
+  return document.getElementById(
     "page-transition-overlay",
   ) as HTMLDivElement | null;
-  if (!overlay) {
-    overlay = document.createElement("div");
-    overlay.id = "page-transition-overlay";
-    overlay.className =
-      "fixed top-0 left-0 w-screen h-dvh flex items-center justify-center bg-background flex-col pointer-events-none";
-    overlay.style.cssText =
-      "position:fixed;top:0;left:0;width:100vw;height:100dvh;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9999;pointer-events:none;opacity:1;background-color:hsl(25 11% 6%);";
-    overlay.innerHTML = `
-      <div class="bloom-flower" style="position:relative;width:7rem;height:7rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;pointer-events:none;">
-        <svg viewBox="-10 0 120 100" style="width:100%;height:100%;overflow:visible;">
-          <defs>
-            <linearGradient id="lotusGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%" stop-color="#ff5500" />
-              <stop offset="50%" stop-color="#ff8c00" />
-              <stop offset="100%" stop-color="#ffcc00" />
-            </linearGradient>
-          </defs>
-          <g transform="translate(50, 70)">
-            <circle class="center-glow" cx="0" cy="-10" r="15" fill="#ff8c00" transform="translate(0,-10) scale(0)" opacity="0" />
-            <path class="petal" d="M0,0 C15,-15 20,-40 0,-60 C-20,-40 -15,-15 0,0 Z" fill="url(#lotusGrad)" opacity="0.85" transform="scale(0)" />
-            <path class="petal" d="M0,0 C15,-15 20,-40 0,-60 C-20,-40 -15,-15 0,0 Z" fill="url(#lotusGrad)" opacity="0.85" transform="scale(0)" />
-            <path class="petal" d="M0,0 C15,-15 20,-40 0,-60 C-20,-40 -15,-15 0,0 Z" fill="url(#lotusGrad)" opacity="0.85" transform="scale(0)" />
-            <path class="petal" d="M0,0 C15,-15 20,-40 0,-60 C-20,-40 -15,-15 0,0 Z" fill="url(#lotusGrad)" opacity="0.85" transform="scale(0)" />
-            <path class="petal" d="M0,0 C15,-15 20,-40 0,-60 C-20,-40 -15,-15 0,0 Z" fill="url(#lotusGrad)" opacity="0.85" transform="scale(0)" />
-            <path class="petal" d="M0,0 C15,-15 20,-40 0,-60 C-20,-40 -15,-15 0,0 Z" fill="url(#lotusGrad)" opacity="0.85" transform="scale(0)" />
-            <path class="petal" d="M0,0 C15,-15 20,-40 0,-60 C-20,-40 -15,-15 0,0 Z" fill="url(#lotusGrad)" opacity="0.85" transform="scale(0)" />
-          </g>
-        </svg>
-      </div>
-      <span class="counter-text" style="font-family:'Outfit',sans-serif;font-weight:300;font-size:3.5rem;background:linear-gradient(to right,hsl(28 100% 60%),hsl(2 50% 51%),hsl(28 100% 60%));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;pointer-events:none;user-select:none;">0%</span>
-    `;
-    document.body.appendChild(overlay);
-  }
-  return overlay;
 }
 
 function createFlowerAnimation(overlay: HTMLDivElement) {
@@ -188,19 +154,27 @@ function signalInitialReady() {
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const contentRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useGSAP(
     () => {
-      if (!contentRef.current || !mounted) return;
+      if (!contentRef.current) return;
 
-      const overlay = getOrCreateOverlay();
+      const overlay = getOverlay();
+      if (!overlay) {
+        gsap.set(contentRef.current, { opacity: 1 });
+        hasPlayedInitialLoader = true;
+        signalInitialReady();
+        return;
+      }
+
       const counterEl = overlay.querySelector(".counter-text") as HTMLElement;
-      if (!counterEl) return;
+      if (!counterEl) {
+        gsap.set(contentRef.current, { opacity: 1 });
+        overlay.style.display = "none";
+        hasPlayedInitialLoader = true;
+        signalInitialReady();
+        return;
+      }
 
       gsap.killTweensOf([overlay, contentRef.current, counterEl]);
       const bodyStyle = document.body.style;
@@ -249,14 +223,8 @@ export default function Template({ children }: { children: React.ReactNode }) {
       setProgress(10);
 
       gsap.set(overlay, { opacity: 1, display: "flex" });
-      gsap.set(contentRef.current, { opacity: 0 });
+      gsap.set(contentRef.current, { opacity: 1 });
       gsap.to(counterEl, { opacity: 1, duration: 0.16 });
-      gsap.to(contentRef.current, {
-        opacity: 1,
-        duration: 0.32,
-        delay: 0.08,
-        ease: "power2.out",
-      });
 
       void waitForCriticalReadiness(setProgress).then(() => {
         if (cancelled || !contentRef.current) return;
@@ -268,17 +236,17 @@ export default function Template({ children }: { children: React.ReactNode }) {
             flowerTimeline?.kill();
             flowerTimeline = null;
 
-          if (!window.location.hash) {
-            window.scrollTo(0, 0);
-          }
+            if (!window.location.hash) {
+              window.scrollTo(0, 0);
+            }
 
-          bodyStyle.cursor = "";
-          bodyStyle.overflow = "";
-          overlay.style.display = "none";
-          overlay.style.pointerEvents = "none";
-          ScrollTrigger.refresh();
-          signalInitialReady();
-          scrollToCurrentHash();
+            bodyStyle.cursor = "";
+            bodyStyle.overflow = "";
+            overlay.style.display = "none";
+            overlay.style.pointerEvents = "none";
+            ScrollTrigger.refresh();
+            signalInitialReady();
+            scrollToCurrentHash();
           },
         });
         exitTimeline
@@ -296,7 +264,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
         overlay.style.pointerEvents = "none";
       };
     },
-    { dependencies: [children, mounted] },
+    { dependencies: [children] },
   );
 
   return (

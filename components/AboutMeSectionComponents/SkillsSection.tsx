@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { SkillsData, HeroSectionSkills } from "@/data/data";
+import { SkillsData, HeroSectionSkills } from "@/data/skills";
 import Title from "@/components/ui/Title";
 import { useDeferredAnimation } from "@/hooks/useDeferredAnimation";
 

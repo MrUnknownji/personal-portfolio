@@ -80,16 +80,32 @@ const ClickSpark: React.FC<ClickSparkProps> = ({ children }) => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    let resizeFrame: number | null = null;
 
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      resizeFrame = null;
+      if (
+        canvas.width !== window.innerWidth ||
+        canvas.height !== window.innerHeight
+      ) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    };
+
+    const scheduleResize = () => {
+      if (resizeFrame === null) {
+        resizeFrame = requestAnimationFrame(resizeCanvas);
+      }
     };
 
     resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("resize", scheduleResize);
 
-    return () => window.removeEventListener("resize", resizeCanvas);
+    return () => {
+      window.removeEventListener("resize", scheduleResize);
+      if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+    };
   }, []);
 
   useEffect(() => {

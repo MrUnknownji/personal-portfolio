@@ -87,19 +87,34 @@ export const useBotScene = ({
             camera.updateProjectionMatrix();
         }
 
+        let resizeFrame: number | null = null;
+        let lastWidth = container?.clientWidth ?? 0;
+        let lastHeight = container?.clientHeight ?? 0;
+
         const updateSize = () => {
+            resizeFrame = null;
             if (container && renderer && camera) {
                 const width = container.clientWidth;
                 const height = container.clientHeight;
-                renderer.setSize(width, height);
+                if (width !== lastWidth || height !== lastHeight) {
+                    renderer.setSize(width, height);
+                    camera.aspect = width / height;
+                    camera.updateProjectionMatrix();
+                    lastWidth = width;
+                    lastHeight = height;
+                }
                 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-                camera.aspect = width / height;
-                camera.updateProjectionMatrix();
                 renderer.render(scene, camera);
             }
         };
 
-        window.addEventListener('resize', updateSize);
+        const scheduleResize = () => {
+            if (resizeFrame === null) {
+                resizeFrame = requestAnimationFrame(updateSize);
+            }
+        };
+
+        window.addEventListener('resize', scheduleResize);
 
         // Lights
         scene.add(new AmbientLight(0xffffff, 0.3));
@@ -179,9 +194,24 @@ export const useBotScene = ({
             return mesh;
         };
 
-        createEmblemLayer(new RingGeometry(0.34, 0.43, 6), 0, "chestOuter", 0xff9233);
-        createEmblemLayer(new RingGeometry(0.18, 0.29, 6), 0.005, "chestMiddle", 0xd4af37);
-        createEmblemLayer(new CircleGeometry(0.1, 12), 0.010, "chestCenter", 0xffcc66);
+        const chestOuter = createEmblemLayer(
+            new RingGeometry(0.34, 0.43, 6),
+            0,
+            "chestOuter",
+            0xff9233,
+        );
+        const chestMiddle = createEmblemLayer(
+            new RingGeometry(0.18, 0.29, 6),
+            0.005,
+            "chestMiddle",
+            0xd4af37,
+        );
+        const chestCenter = createEmblemLayer(
+            new CircleGeometry(0.1, 12),
+            0.010,
+            "chestCenter",
+            0xffcc66,
+        );
 
         const headPivot = new Group();
         headPivot.position.y = 3.5;
@@ -282,6 +312,7 @@ export const useBotScene = ({
         baseRingGroup.add(baseRing);
 
         const frameInterval = 1000 / 24;
+        const targetScaleVector = new Vector3();
         let activeUntil = performance.now() + 1200;
         let disposed = false;
 
@@ -307,39 +338,28 @@ export const useBotScene = ({
             robot.position.y = Math.sin(t * 1.2) * 0.1 - 0.2;
             robot.rotation.z = Math.sin(t * 0.8) * 0.02;
 
-            const baseRing = robot.getObjectByName("baseRing");
-            if (baseRing) {
-                baseRing.rotation.y = t * 0.5; // Slowly spin
-                baseRing.position.y = -0.6 + Math.sin(t * 2) * 0.05; // Gentle float independent of breathing
-            }
+            baseRingGroup.rotation.y = t * 0.5; // Slowly spin
+            baseRingGroup.position.y = -0.6 + Math.sin(t * 2) * 0.05; // Gentle float independent of breathing
 
             // Animate SVG chest emblem layers independently
-            const chestOuter = robot.getObjectByName("chestOuter");
-            if (chestOuter) chestOuter.rotation.z = -t * 0.2; // Counter-clockwise, slow
+            chestOuter.rotation.z = -t * 0.2; // Counter-clockwise, slow
 
-            const chestMiddle = robot.getObjectByName("chestMiddle");
-            if (chestMiddle) chestMiddle.rotation.z = t * 0.6; // Clockwise, faster
+            chestMiddle.rotation.z = t * 0.6; // Clockwise, faster
 
-            const chestCenter = robot.getObjectByName("chestCenter");
-            if (chestCenter) {
-                chestCenter.rotation.z = -t * 0.8; // Continuous counter-clockwise rotation
-                const scaleWobble = 1 + Math.sin(t * 3) * 0.03; // Slight pulsing
-                chestCenter.scale.set(scaleWobble, scaleWobble, scaleWobble);
-            }
+            chestCenter.rotation.z = -t * 0.8; // Continuous counter-clockwise rotation
+            const scaleWobble = 1 + Math.sin(t * 3) * 0.03; // Slight pulsing
+            chestCenter.scale.set(scaleWobble, scaleWobble, scaleWobble);
 
             // Animate Cloak Billowing effect
-            const cloakGrp = robot.getObjectByName("cloakGroup");
-            if (cloakGrp) {
-                // Subtle flow like cloth in air
-                const billowZ = Math.sin(t * 1.5) * 0.02;
-                const billowX = Math.cos(t * 1.2) * 0.01;
-                cloakGrp.scale.z = 1 + billowZ;
-                cloakGrp.scale.x = 1 + billowX;
-            }
+            const billowZ = Math.sin(t * 1.5) * 0.02;
+            const billowX = Math.cos(t * 1.2) * 0.01;
+            cloakGroup.scale.z = 1 + billowZ;
+            cloakGroup.scale.x = 1 + billowX;
 
             const baseScale = active ? 1.0 : 0.6;
             const targetScale = baseScale + Math.sin(t * 2) * 0.02;
-            robot.scale.lerp(new Vector3(targetScale, targetScale, targetScale), 0.1);
+            targetScaleVector.set(targetScale, targetScale, targetScale);
+            robot.scale.lerp(targetScaleVector, 0.1);
 
             renderer.render(scene, camera);
             scheduleFrame();
@@ -358,7 +378,8 @@ export const useBotScene = ({
         return () => {
             disposed = true;
             wakeSceneRef.current = null;
-            window.removeEventListener('resize', updateSize);
+            window.removeEventListener('resize', scheduleResize);
+            if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
             if (requestRef.current) cancelAnimationFrame(requestRef.current);
             if (frameTimeoutRef.current) clearTimeout(frameTimeoutRef.current);
             if (container && renderer.domElement) {

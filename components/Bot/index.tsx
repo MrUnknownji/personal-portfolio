@@ -18,7 +18,19 @@ type KryptonContextMenu = {
 
 type BotVisualMode = "svg" | "three";
 
-const ThreeBotVisual = dynamic(() => import("./ThreeBotVisual"), {
+let threeBotVisualPromise: ReturnType<typeof importThreeBotVisual> | null =
+  null;
+
+function importThreeBotVisual() {
+  return import("./ThreeBotVisual");
+}
+
+function loadThreeBotVisual() {
+  threeBotVisualPromise ??= importThreeBotVisual();
+  return threeBotVisualPromise;
+}
+
+const ThreeBotVisual = dynamic(loadThreeBotVisual, {
   ssr: false,
   loading: () => null,
 });
@@ -193,6 +205,7 @@ export default function Bot() {
   const eyeStateRef = useRef(eyeState);
   const inputRef = useRef(input);
   const timeoutsRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+  const hasScheduledThreePreloadRef = useRef(false);
   const [isGlobalModalOpen, setIsGlobalModalOpen] = useState(false);
   const isGlobalModalOpenRef = useRef(false);
   const handleSceneUnavailable = useCallback(() => {
@@ -342,6 +355,15 @@ export default function Bot() {
   const handleMouseEnter = () => {
     isHoveredRef.current = true;
     setIsBotHovered(true);
+    if (canUse3D && !hasScheduledThreePreloadRef.current) {
+      hasScheduledThreePreloadRef.current = true;
+      const preload = () => void loadThreeBotVisual();
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(preload, { timeout: 250 });
+      } else {
+        scheduleTimeout(preload, 100);
+      }
+    }
     if (visualMode === "three") {
       interactionMouseEnter();
     }
