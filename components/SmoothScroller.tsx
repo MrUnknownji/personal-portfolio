@@ -22,12 +22,12 @@ export default function SmoothScroller({
     const isTouch = window.matchMedia("(hover: none), (pointer: coarse)")
       .matches;
 
-    if (reduceMotion || ScrollSmoother.get()) return;
+    if (reduceMotion || isTouch || ScrollSmoother.get()) return;
 
     const smoother = ScrollSmoother.create({
-      smooth: isTouch ? 0.18 : 0.45,
+      smooth: 0.45,
       effects: false,
-      smoothTouch: isTouch ? 0.12 : 0,
+      smoothTouch: 0,
       normalizeScroll: false,
     });
 
