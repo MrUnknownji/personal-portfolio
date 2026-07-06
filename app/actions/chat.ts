@@ -3,6 +3,7 @@
 import { projects, selectedProjects } from "@/data/data";
 import { SkillsData } from "@/data/skills";
 
+const GEMINI_AI_STUDIO_API_KEY = process.env.GEMINI_AI_STUDIO_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL =
   process.env.GEMINI_MODEL || "gemini-3.1-flash-lite-preview";
@@ -64,7 +65,12 @@ export async function chatWithBot(prompt: string) {
   const localAnswer = getLocalPortfolioAnswer(prompt);
   if (localAnswer) return localAnswer;
 
-  if (!GEMINI_API_KEY) {
+  const geminiApiKeys = [
+    GEMINI_AI_STUDIO_API_KEY,
+    GEMINI_API_KEY,
+  ].filter((key): key is string => Boolean(key));
+
+  if (geminiApiKeys.length === 0) {
     return "Ask me about Sandeep's projects, skills, experience, availability, or contact details. I can answer those instantly.";
   }
 
@@ -128,28 +134,32 @@ export async function chatWithBot(prompt: string) {
     ],
   };
 
-  try {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  for (const apiKey of geminiApiKeys) {
+    try {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.error?.message || `API Error ${response.status}`,
-      );
+      if (!response.ok) {
+        throw new Error(`Gemini API Error ${response.status}`);
+      }
+
+      const data = await response.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (text) {
+        return text;
+      }
+
+      throw new Error("Gemini response was empty");
+    } catch {
+      continue;
     }
-
-    const data = await response.json();
-    return (
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "System response was empty. Ask me about Sandeep's projects or skills."
-    );
-  } catch {
-    return "My cloud brain is unavailable right now, but Sandeep's portfolio is fully online. Try asking about projects, skills, or contact details.";
   }
+
+  return "My cloud brain is unavailable right now, but Sandeep's portfolio is fully online. Try asking about projects, skills, or contact details.";
 }

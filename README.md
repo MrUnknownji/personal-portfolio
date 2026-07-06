@@ -77,6 +77,7 @@ GITHUB_TOKEN=
 TWITTER_BEARER_TOKEN=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
+GEMINI_AI_STUDIO_API_KEY=
 GEMINI_API_KEY=
 GEMINI_MODEL=gemini-3.1-flash-lite-preview
 ```
@@ -109,7 +110,9 @@ admin-dashboard integration.
 - Deploy on Vercel or another Node-capable Next.js host.
 - Configure `MONGO_DB_URI` in the production environment.
 - Add `NEXT_PUBLIC_SITE_URL` so metadata resolves with the production origin.
-- Add `GEMINI_API_KEY` only if Krypton should use the remote Gemini fallback.
+- Add `GEMINI_AI_STUDIO_API_KEY` for Krypton's preferred free Gemini fallback.
+- Add `GEMINI_API_KEY` as the paid fallback if the AI Studio key is unavailable
+  or over quota.
 
 ## Known Limitations
 
