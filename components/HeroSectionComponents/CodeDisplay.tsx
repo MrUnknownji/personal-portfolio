@@ -1,7 +1,5 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback, memo } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
 import { FiCode, FiTerminal } from "react-icons/fi";
 
 const BEFORE_CODE = [
@@ -192,7 +190,7 @@ const CodePanel = memo(
         <div className="flex flex-col gap-0.5">
           {lines.map((item) => (
             <div key={item.line} className="flex gap-4">
-              <div className="w-5 text-right text-gray-600 select-none text-xs">
+              <div className="w-5 text-right text-gray-400 select-none text-xs">
                 {item.line}
               </div>
               <div className="text-gray-300 whitespace-nowrap">
@@ -252,6 +250,7 @@ const CodeCompare = ({
     if (revealPanelRef.current) {
       revealPanelRef.current.style.transform = `translate3d(-${position}, 0, 0)`;
     }
+    sliderRef.current?.setAttribute("aria-valuenow", String(Math.round(percent)));
   }, []);
 
   useEffect(() => {
@@ -388,27 +387,6 @@ const CodeCompare = ({
     updateSliderVisual,
   ]);
 
-  useGSAP(
-    () => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      gsap.fromTo(
-        container,
-        { rotateY: 15, rotateX: -5, opacity: 0, scale: 0.95 },
-        {
-          rotateY: 8,
-          rotateX: 0,
-          opacity: 1,
-          scale: 1,
-          duration: 1.2,
-          ease: "power3.out",
-        },
-      );
-    },
-    { scope: containerRef },
-  );
-
   const handleMouseEnter = () => {
     isHoveredRef.current = true;
     stopAutoplayRef.current?.();
@@ -451,54 +429,67 @@ const CodeCompare = ({
     [slideMode, isDragging, updateSliderVisual],
   );
 
-  const handleMouseDown = useCallback(
-    () => handleStart(),
-    [handleStart],
-  );
-  const handleMouseUp = useCallback(() => handleEnd(), [handleEnd]);
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => handleMove(e.clientX),
-    [handleMove],
-  );
-  const handleTouchStart = useCallback(
-    (e: React.TouchEvent) => {
-      if (!autoplay) handleStart();
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const step = event.shiftKey ? 10 : 5;
+      let nextValue = sliderPositionRef.current;
+
+      if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+        nextValue -= step;
+      } else if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+        nextValue += step;
+      } else if (event.key === "Home") {
+        nextValue = 0;
+      } else if (event.key === "End") {
+        nextValue = 100;
+      } else {
+        return;
+      }
+
+      event.preventDefault();
+      stopAutoplayRef.current?.();
+      updateSliderVisual(Math.max(0, Math.min(100, nextValue)));
     },
-    [handleStart, autoplay],
-  );
-  const handleTouchEnd = useCallback(() => {
-    if (!autoplay) handleEnd();
-  }, [handleEnd, autoplay]);
-  const handleTouchMove = useCallback(
-    (e: React.TouchEvent) => {
-      if (!autoplay) handleMove(e.touches[0].clientX);
-    },
-    [handleMove, autoplay],
+    [updateSliderVisual],
   );
 
   return (
-    <div className="relative flex-1 w-full max-w-xl mx-auto h-[420px] perspective-1000">
+    <div className="relative flex-1 w-full max-w-xl mx-auto h-[420px]">
       <div
         ref={containerRef}
-        className="w-full h-full transform-gpu will-change-transform"
-        style={{ transformStyle: "preserve-3d", opacity: 0 }}
+        className="w-full h-full"
       >
         <div
           ref={sliderRef}
           className={`code-resizer-handle w-full h-full overflow-hidden rounded-xl border border-white/10 ${className || ""}`}
           style={{ position: "relative" }}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          onMouseEnter={handleMouseEnter}
-          onMouseDown={handleMouseDown}
-          onMouseUp={handleMouseUp}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          onTouchMove={handleTouchMove}
+          role="slider"
+          tabIndex={0}
+          aria-label="Compare problem and solution code"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(initialSliderPercentage)}
+          aria-valuetext="Percentage of solution code revealed"
+          onKeyDown={handleKeyDown}
+          onPointerEnter={handleMouseEnter}
+          onPointerLeave={handleMouseLeave}
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture(event.pointerId);
+            handleStart();
+            handleMove(event.clientX);
+          }}
+          onPointerUp={(event) => {
+            if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+              event.currentTarget.releasePointerCapture(event.pointerId);
+            }
+            handleEnd();
+          }}
+          onPointerCancel={handleEnd}
+          onPointerMove={(event) => handleMove(event.clientX)}
         >
           <div
             ref={sliderLineRef}
-            className="absolute inset-0 z-30 w-full pointer-events-none will-change-transform"
+            className="absolute inset-0 z-30 w-full pointer-events-none"
             style={{
               transform: `translate3d(${initialSliderPercentage}%, 0, 0)`,
               zIndex: 40,
@@ -524,14 +515,14 @@ const CodeCompare = ({
 
           <div
             ref={revealViewportRef}
-            className="absolute inset-0 z-20 rounded-xl w-full h-full select-none overflow-hidden pointer-events-none will-change-transform"
+            className="absolute inset-0 z-20 rounded-xl w-full h-full select-none overflow-hidden pointer-events-none"
             style={{
               transform: `translate3d(${initialSliderPercentage}%, 0, 0)`,
             }}
           >
             <div
               ref={revealPanelRef}
-              className="absolute inset-0 w-full h-full will-change-transform"
+              className="absolute inset-0 w-full h-full"
               style={{
                 transform: `translate3d(-${initialSliderPercentage}%, 0, 0)`,
               }}

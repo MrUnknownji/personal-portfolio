@@ -1,10 +1,9 @@
-"use client";
 import Link from "next/link";
 import { FiArrowRight } from "react-icons/fi";
 
 const ViewProjectsButton = () => {
   return (
-    <Link href="/my-projects" className="group relative inline-block">
+    <Link href="/my-projects" prefetch={false} className="group relative inline-block">
       <div
         className="relative overflow-hidden rounded-full bg-card border border-white/5
                    transition-[transform,border-color] duration-150 ease-out group-hover:border-primary/50 group-hover:-translate-y-0.5"

@@ -1,349 +1,38 @@
-"use client";
-import { useRef, useCallback, useState, useEffect } from "react";
-import { gsap } from "gsap";
-import { useGSAP } from "@gsap/react";
-
-interface GradientTheme {
-  name: string;
-  colors: string[];
-}
-
-const GRADIENT_THEMES: GradientTheme[] = [
-  { name: "orange-base", colors: ["#ff9233", "#ffc899", "#ff9233"] },
-  { name: "sunset", colors: ["#ff7e5f", "#feb47b", "#ff7e5f"] },
-  { name: "gold", colors: ["#ffd700", "#ffdf00", "#d4af37"] },
-  { name: "peach", colors: ["#ffeaa7", "#fdcb6e", "#ffe0b2"] },
-  { name: "sand", colors: ["#e8d1b5", "#f4e0c6", "#e8d1b5"] },
-];
-
-const COOLDOWN_MS = 1000;
-
 export const Title = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const titleFillRef = useRef<HTMLSpanElement>(null);
-  const wavePathRef = useRef<SVGPathElement>(null);
-  const motifRef = useRef<SVGGElement>(null);
-  const fillProgressRef = useRef({ value: 0 });
-  const hasStartedThemeChangesRef = useRef(false);
-  const [currentTheme, setCurrentTheme] = useState(3);
-  const [prevTheme, setPrevTheme] = useState<number | null>(null);
-  const [isOnCooldown, setIsOnCooldown] = useState(false);
-  const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const applyFillProgress = useCallback((progress: number) => {
-    const clampedProgress = Math.max(0, Math.min(100, progress));
-
-    if (titleFillRef.current) {
-      titleFillRef.current.style.clipPath =
-        `inset(0 ${100 - clampedProgress}% 0 0)`;
-    }
-    if (wavePathRef.current) {
-      wavePathRef.current.style.strokeDashoffset = String(
-        500 - (clampedProgress / 100) * 500,
-      );
-    }
-    if (motifRef.current) {
-      motifRef.current.style.transform =
-        `scale(${0.3 + (clampedProgress / 100) * 0.7})`;
-      motifRef.current.style.opacity = String(clampedProgress / 100);
-    }
-  }, []);
-
-  useGSAP(() => {
-    if (!containerRef.current) return;
-
-    fillProgressRef.current.value = 0;
-    applyFillProgress(0);
-    const tl = gsap.timeline();
-
-    tl.from(containerRef.current, {
-      opacity: 0,
-      y: 20,
-      duration: 1,
-      ease: "power3.out",
-    }).to(
-      fillProgressRef.current,
-      {
-        value: 100,
-        duration: 1.5,
-        ease: "power2.inOut",
-        onUpdate: () =>
-          applyFillProgress(fillProgressRef.current.value),
-      },
-      "-=0.5",
-    );
-
-    return () => tl.kill();
-  }, [applyFillProgress]);
-
-  useGSAP(
-    () => {
-      if (!hasStartedThemeChangesRef.current) {
-        hasStartedThemeChangesRef.current = true;
-        return;
-      }
-
-      gsap.killTweensOf(fillProgressRef.current);
-      fillProgressRef.current.value = 0;
-      applyFillProgress(0);
-
-      const tween = gsap.to(fillProgressRef.current, {
-        value: 100,
-        duration: 0.8,
-        ease: "power2.out",
-        onUpdate: () =>
-          applyFillProgress(fillProgressRef.current.value),
-        onComplete: () => setPrevTheme(null),
-      });
-
-      return () => tween.kill();
-    },
-    {
-      dependencies: [currentTheme, applyFillProgress],
-      scope: containerRef,
-    },
-  );
-
-  const handleHover = useCallback(() => {
-    if (isOnCooldown) return;
-
-    setPrevTheme(currentTheme);
-
-    const nextTheme = (currentTheme + 1) % GRADIENT_THEMES.length;
-    setCurrentTheme(nextTheme);
-
-    setIsOnCooldown(true);
-    if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
-    cooldownTimerRef.current = setTimeout(() => {
-      setIsOnCooldown(false);
-    }, COOLDOWN_MS);
-  }, [currentTheme, isOnCooldown]);
-
-  useEffect(() => {
-    return () => {
-      if (cooldownTimerRef.current) {
-        clearTimeout(cooldownTimerRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    // Only auto-play if on a touch device (no hover capability)
-    const isTouchDevice = window.matchMedia(
-      "(hover: none) and (pointer: coarse)",
-    ).matches;
-    if (!isTouchDevice) return;
-
-    const intervalId = setInterval(() => {
-      handleHover();
-    }, 4500); // Trigger slightly longer than the cooldown
-
-    return () => clearInterval(intervalId);
-  }, [handleHover]);
-
-  const theme = GRADIENT_THEMES[currentTheme];
-  const oldTheme = prevTheme !== null ? GRADIENT_THEMES[prevTheme] : null;
-
   return (
-    <div
-      ref={containerRef}
-      className="relative overflow-visible py-2 pb-8 w-fit"
-      onMouseEnter={handleHover}
-    >
-      <div className="relative">
-        <h1 className="hero-title relative font-bold text-4xl md:text-5xl lg:text-7xl tracking-tight cursor-pointer select-none">
-          <span className="text-neutral-700">Sandeep Kumar</span>
-
-          {oldTheme && (
-            <span
-              className="absolute top-0 left-0 w-full -bottom-4"
-              style={{
-                backgroundImage: `linear-gradient(to right, ${oldTheme.colors[0]}, ${oldTheme.colors[1]}, ${oldTheme.colors[2]})`,
-                WebkitBackgroundClip: "text",
-                backgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-
-                clipPath: "inset(0 0 0 0)",
-              }}
-            >
-              Sandeep Kumar
-            </span>
-          )}
-
-          <span
-            ref={titleFillRef}
-            className="absolute top-0 left-0 w-full -bottom-4"
-            style={{
-              backgroundImage: `linear-gradient(to right, ${theme.colors[0]}, ${theme.colors[1]}, ${theme.colors[2]})`,
-              WebkitBackgroundClip: "text",
-              backgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-
-              clipPath: "inset(0 100% 0 0)",
-            }}
-          >
-            Sandeep Kumar
-          </span>
-        </h1>
-      </div>
+    <div className="relative w-fit overflow-visible pb-8 pt-2">
+      <h1 className="hero-title bg-gradient-to-r from-[#ffeaa7] via-[#fdcb6e] to-[#ffe0b2] bg-clip-text text-4xl font-bold tracking-tight text-transparent md:text-5xl lg:text-7xl">
+        Sandeep Kumar
+      </h1>
 
       <svg
-        className="absolute left-0 w-full mt-1 overflow-visible pointer-events-none"
+        className="pointer-events-none absolute left-0 mt-1 w-full overflow-visible"
         height="36"
         viewBox="0 0 400 36"
         preserveAspectRatio="none"
         style={{ top: "100%", transform: "translateY(-24px)" }}
+        aria-hidden="true"
       >
         <defs>
-          <linearGradient
-            id={`wave-gradient-${currentTheme}`}
-            x1="0%"
-            y1="0%"
-            x2="100%"
-            y2="0%"
-          >
-            <stop offset="0%" stopColor={theme.colors[0]} />
-            <stop offset="50%" stopColor={theme.colors[1]} />
-            <stop offset="100%" stopColor={theme.colors[2]} />
+          <linearGradient id="hero-title-wave" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#ffeaa7" />
+            <stop offset="50%" stopColor="#fdcb6e" />
+            <stop offset="100%" stopColor="#ffe0b2" />
           </linearGradient>
-
-          {oldTheme && prevTheme !== null && (
-            <linearGradient
-              id={`wave-gradient-${prevTheme}`}
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="0%"
-            >
-              <stop offset="0%" stopColor={oldTheme.colors[0]} />
-              <stop offset="50%" stopColor={oldTheme.colors[1]} />
-              <stop offset="100%" stopColor={oldTheme.colors[2]} />
-            </linearGradient>
-          )}
         </defs>
-
-        {/* --- PREVIOUS THEME STATE (FULLY DRAWN / FADING OUT) --- */}
-        {oldTheme && prevTheme !== null && (
-          <g>
-            {/* Elegant Main Swash */}
-            <path
-              d="M 0 8 C 80 8 130 8 160 18 C 175 23 185 28 200 28 C 215 28 225 23 240 18 C 270 8 320 8 400 8"
-              stroke={`url(#wave-gradient-${prevTheme})`}
-              strokeWidth="2.5"
-              fill="none"
-              strokeLinecap="round"
-            />
-            {/* Blooming Lotus Core */}
-            <g
-              style={{
-                transformOrigin: "200px 16px",
-                transform: "scale(1)",
-                opacity: 1,
-              }}
-            >
-              <path
-                d="M 200 4 C 196 14 196 22 200 34 C 204 22 204 14 200 4 Z"
-                fill={`url(#wave-gradient-${prevTheme})`}
-              />
-              <path
-                d="M 200 26 C 185 26 176 16 178 8 C 184 16 192 22 200 26 Z"
-                fill={`url(#wave-gradient-${prevTheme})`}
-              />
-              <path
-                d="M 200 26 C 215 26 224 16 222 8 C 216 16 208 22 200 26 Z"
-                fill={`url(#wave-gradient-${prevTheme})`}
-              />
-              <circle
-                cx="165"
-                cy="18"
-                r="2.5"
-                fill={`url(#wave-gradient-${prevTheme})`}
-              />
-              <circle
-                cx="235"
-                cy="18"
-                r="2.5"
-                fill={`url(#wave-gradient-${prevTheme})`}
-              />
-              <circle
-                cx="150"
-                cy="12"
-                r="1.5"
-                fill={`url(#wave-gradient-${prevTheme})`}
-              />
-              <circle
-                cx="250"
-                cy="12"
-                r="1.5"
-                fill={`url(#wave-gradient-${prevTheme})`}
-              />
-            </g>
-          </g>
-        )}
-
-        {/* --- CURRENT THEME STATE (ANIMATING IN) --- */}
-        {/* Animated Sweep Line */}
         <path
-          ref={wavePathRef}
           d="M 0 8 C 80 8 130 8 160 18 C 175 23 185 28 200 28 C 215 28 225 23 240 18 C 270 8 320 8 400 8"
-          stroke={`url(#wave-gradient-${currentTheme})`}
+          stroke="url(#hero-title-wave)"
           strokeWidth="2.5"
           fill="none"
           strokeLinecap="round"
-          strokeDasharray="500"
-          strokeDashoffset="500"
         />
-
-        {/* Animated Lotus Bloom Motif */}
-        <g
-          ref={motifRef}
-          style={{
-            transformOrigin: "200px 16px",
-            transform: "scale(0.3)",
-            opacity: 0,
-          }}
-        >
-          {/* Vertical Drop Diamond/Petal */}
-          <path
-            d="M 200 4 C 196 14 196 22 200 34 C 204 22 204 14 200 4 Z"
-            fill={`url(#wave-gradient-${currentTheme})`}
-          />
-
-          {/* Sweeping Side Petals */}
-          <path
-            d="M 200 26 C 185 26 176 16 178 8 C 184 16 192 22 200 26 Z"
-            fill={`url(#wave-gradient-${currentTheme})`}
-          />
-          <path
-            d="M 200 26 C 215 26 224 16 222 8 C 216 16 208 22 200 26 Z"
-            fill={`url(#wave-gradient-${currentTheme})`}
-          />
-
-          {/* Orbiting Bindis (Dots) */}
-          <circle
-            cx="165"
-            cy="18"
-            r="2.5"
-            fill={`url(#wave-gradient-${currentTheme})`}
-          />
-          <circle
-            cx="235"
-            cy="18"
-            r="2.5"
-            fill={`url(#wave-gradient-${currentTheme})`}
-          />
-          <circle
-            cx="150"
-            cy="12"
-            r="1.5"
-            fill={`url(#wave-gradient-${currentTheme})`}
-          />
-          <circle
-            cx="250"
-            cy="12"
-            r="1.5"
-            fill={`url(#wave-gradient-${currentTheme})`}
-          />
+        <g fill="url(#hero-title-wave)">
+          <path d="M 200 4 C 196 14 196 22 200 34 C 204 22 204 14 200 4 Z" />
+          <path d="M 200 26 C 185 26 176 16 178 8 C 184 16 192 22 200 26 Z" />
+          <path d="M 200 26 C 215 26 224 16 222 8 C 216 16 208 22 200 26 Z" />
+          <path d="M 165 15.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" />
+          <path d="M 235 15.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Z" />
         </g>
       </svg>
     </div>

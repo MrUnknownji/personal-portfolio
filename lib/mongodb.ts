@@ -17,9 +17,15 @@ export function getMongoClient() {
     const client = new MongoClient(uri, {
       maxPoolSize: 5,
       serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+      waitQueueTimeoutMS: 5000,
     });
 
-    globalForMongo.mongoClientPromise = client.connect();
+    globalForMongo.mongoClientPromise = client.connect().catch((error) => {
+      globalForMongo.mongoClientPromise = undefined;
+      void client.close().catch(() => undefined);
+      throw error;
+    });
   }
 
   return globalForMongo.mongoClientPromise;

@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback } from "react";
-import { ScrollSmoother } from "gsap/ScrollSmoother";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { botProjects as projects } from "@/data/bot-projects";
+import { SOCIAL_PROFILES } from "@/data/social";
 
 type ActiveProject = {
   id: number;
@@ -38,73 +37,26 @@ export function useBotCommands({
     });
   }, []);
 
-  const isPageReady = useCallback(() => {
-    const overlay = document.getElementById("page-transition-overlay");
-    return !overlay || window.getComputedStyle(overlay).display === "none";
-  }, []);
-
-  const runWhenReady = useCallback(
-    (task: () => boolean, maxAttempts = 50) => {
-      let attempts = 0;
-
-      const attempt = () => {
-        attempts += 1;
-        if ((!isPageReady() || !task()) && attempts < maxAttempts) {
-          window.setTimeout(attempt, 100);
-        }
-      };
-
-      attempt();
-    },
-    [isPageReady],
-  );
-
   const scrollElementPrecisely = useCallback(
     (target: Element, hash?: string) => {
       const headerHeight =
         document.querySelector("header")?.getBoundingClientRect().height ?? 64;
       const topOffset = Math.round(headerHeight + 20);
 
-      ScrollTrigger.refresh();
-      const smoother = ScrollSmoother.get();
-
-      if (smoother) {
-        smoother.paused(false);
-        smoother.scrollTo(
-          Math.max(0, smoother.offset(target, `top ${topOffset}px`)),
-          true,
-        );
-      } else {
-        window.scrollTo({
-          top: Math.max(
-            0,
-            window.scrollY + target.getBoundingClientRect().top - topOffset,
-          ),
-          behavior: "smooth",
-        });
-      }
+      window.scrollTo({
+        top: Math.max(
+          0,
+          window.scrollY + target.getBoundingClientRect().top - topOffset,
+        ),
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ? "auto"
+          : "smooth",
+      });
 
       if (hash) {
         window.history.replaceState(null, "", hash);
       }
 
-      window.setTimeout(() => {
-        const correction = target.getBoundingClientRect().top - topOffset;
-        if (Math.abs(correction) < 3) return;
-
-        const currentSmoother = ScrollSmoother.get();
-        if (currentSmoother) {
-          currentSmoother.scrollTo(
-            Math.max(0, currentSmoother.scrollTop() + correction),
-            true,
-          );
-        } else {
-          window.scrollTo({
-            top: Math.max(0, window.scrollY + correction),
-            behavior: "smooth",
-          });
-        }
-      }, 900);
     },
     [],
   );
@@ -119,48 +71,19 @@ export function useBotCommands({
       };
 
       if (pathname !== "/") {
-        router.push("/");
-        runWhenReady(runScroll);
-      } else if (isPageReady()) {
-        runScroll();
+        router.push(`/${hash}`);
       } else {
-        runWhenReady(runScroll);
+        runScroll();
       }
     },
-    [
-      isPageReady,
-      pathname,
-      router,
-      runWhenReady,
-      scrollElementPrecisely,
-    ],
+    [pathname, router, scrollElementPrecisely],
   );
 
   const openProjectDetails = useCallback(
     (projectId: number) => {
-      const dispatchOpen = () => {
-        window.dispatchEvent(
-          new CustomEvent("portfolio:open-project", {
-            detail: { id: projectId },
-          }),
-        );
-      };
-
-      if (pathname !== "/my-projects") {
-        router.push("/my-projects");
-        runWhenReady(() => {
-          if (!document.querySelector('[data-krypton-context="project"]')) {
-            return false;
-          }
-          dispatchOpen();
-          return true;
-        });
-        return;
-      }
-
-      dispatchOpen();
+      router.push(`/my-projects/${projectId}`);
     },
-    [pathname, router, runWhenReady],
+    [router],
   );
 
   const clickTargetByLabel = useCallback(
@@ -279,7 +202,6 @@ export function useBotCommands({
 
         if (pathname !== "/") {
           router.push("/");
-          runWhenReady(openHome);
         } else {
           openHome();
         }
@@ -322,7 +244,7 @@ export function useBotCommands({
 
       if (/\bgithub\b/.test(normalizedPrompt)) {
         window.open(
-          "https://github.com/MrUnknownji",
+          SOCIAL_PROFILES.github.href,
           "_blank",
           "noopener,noreferrer",
         );
@@ -346,7 +268,6 @@ export function useBotCommands({
       openProjectDetails,
       pathname,
       router,
-      runWhenReady,
       scrollElementPrecisely,
       scrollToTarget,
     ],

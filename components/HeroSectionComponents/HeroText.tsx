@@ -12,7 +12,7 @@ const HeroText = () => {
         >
           Full Stack Developer
         </MagneticText>
-        <div className="relative pl-4 border-l-2 border-white/10 py-1">
+        <div className="relative hidden border-l-2 border-white/10 py-1 pl-4 sm:block">
           <MagneticText
             as="p"
             className="hero-description text-neutral-400 text-base md:text-lg leading-relaxed max-w-2xl select-none font-light italic"

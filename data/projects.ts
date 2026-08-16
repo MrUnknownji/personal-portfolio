@@ -1,4 +1,4 @@
-import { Project, ProjectCaseStudy } from "@/types/Project";
+import type { Project, ProjectCaseStudy } from "@/types/Project";
 
 export const projects: Project[] = [
   //AudioVibes

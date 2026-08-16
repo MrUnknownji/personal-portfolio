@@ -7,14 +7,16 @@ import {
   FiLinkedin,
 } from "react-icons/fi";
 import { FaXTwitter } from "react-icons/fa6";
+import { SITE_CONFIG } from "@/data/site";
+import { SOCIAL_PROFILES } from "@/data/social";
 import InfoItem from "./InfoItem";
 
 const CONTACT_INFO = [
   {
     icon: <FiMail className="w-5 h-5" />,
     label: "Email",
-    value: "sandeepkhati788@gmail.com",
-    link: "mailto:sandeepkhati788@gmail.com",
+    value: SITE_CONFIG.email,
+    link: `mailto:${SITE_CONFIG.email}`,
   },
   {
     icon: <FiPhone className="w-5 h-5" />,
@@ -34,17 +36,17 @@ const SOCIAL_LINKS = [
   {
     icon: <FiGithub className="w-5 h-5" />,
     label: "GitHub",
-    link: "https://github.com/MrUnknownji",
+    link: SOCIAL_PROFILES.github.href,
   },
   {
     icon: <FiLinkedin className="w-5 h-5" />,
     label: "LinkedIn",
-    link: "https://linkedin.com/in/sandeep-kumar-sk1707",
+    link: SOCIAL_PROFILES.linkedin.href,
   },
   {
     icon: <FaXTwitter className="w-5 h-5" />,
     label: "X",
-    link: "https://twitter.com/MrUnknownG786",
+    link: SOCIAL_PROFILES.twitter.href,
   },
 ] as const;
 

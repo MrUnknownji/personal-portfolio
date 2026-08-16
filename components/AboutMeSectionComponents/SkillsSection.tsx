@@ -1,82 +1,14 @@
-import React, { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SkillsData, HeroSectionSkills } from "@/data/skills";
 import Title from "@/components/ui/Title";
-import { useDeferredAnimation } from "@/hooks/useDeferredAnimation";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const SkillsSection = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const coreSkillsRef = useRef<HTMLDivElement>(null);
-  const techSkillsRef = useRef<HTMLDivElement>(null);
-  const animationReady = useDeferredAnimation(containerRef, "700px 0px");
-
-  useGSAP(
-    () => {
-      if (!animationReady) return;
-      if (
-        !containerRef.current ||
-        !coreSkillsRef.current ||
-        !techSkillsRef.current
-      )
-        return;
-
-      const coreSkillCards = gsap.utils.toArray<HTMLDivElement>(
-        ".core-skill-card-wrapper",
-        coreSkillsRef.current,
-      );
-      const categories = gsap.utils.toArray<HTMLDivElement>(
-        ".tech-category-wrapper",
-        techSkillsRef.current,
-      );
-
-      gsap.set(coreSkillCards, { opacity: 0, y: 30 });
-      gsap.set(categories, { opacity: 0, y: 40 });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 80%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      tl.to(
-        coreSkillCards,
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          stagger: 0.08,
-          ease: "power2.out",
-        },
-        0.2,
-      ).to(categories, {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: "power2.out",
-      });
-    },
-    {
-      scope: containerRef,
-      dependencies: [animationReady],
-      revertOnUpdate: true,
-    },
-  );
-
   return (
     <div
       id="skills"
-      ref={containerRef}
       data-krypton-context="skills"
       data-krypton-title="Skills and Technologies"
       data-krypton-summary="Sandeep works across React, Next.js, TypeScript, Tailwind CSS, Node.js, Express, MongoDB, APIs, and deployment tooling."
-      className="space-y-16 relative py-10"
+      className="relative scroll-mt-24 space-y-16 py-10"
     >
       {/* Section Title */}
       <Title
@@ -86,15 +18,15 @@ const SkillsSection = () => {
       />
 
       {/* Core Competencies */}
-      <div ref={coreSkillsRef} className="space-y-6">
-        <h4 className="text-lg font-medium text-muted-foreground text-center uppercase tracking-wider flex items-center justify-center gap-3">
+      <div className="space-y-6">
+        <h3 className="text-lg font-medium text-muted-foreground text-center uppercase tracking-wider flex items-center justify-center gap-3">
           <span className="w-8 h-px bg-border"></span>
           Core Competencies
           <span className="w-8 h-px bg-border"></span>
-        </h4>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 max-w-5xl mx-auto px-4">
-          {HeroSectionSkills.map((skill, index) => (
-            <div key={index} className="core-skill-card-wrapper">
+        </h3>
+        <div data-reveal-group className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 max-w-5xl mx-auto px-4">
+          {HeroSectionSkills.map((skill) => (
+            <div key={skill.text} data-reveal="up" className="core-skill-card-wrapper">
               <div
                 className="core-skill-card group relative h-full rounded-2xl p-5 overflow-hidden
                            bg-[#0f0f0f] border border-white/5
@@ -134,23 +66,23 @@ const SkillsSection = () => {
       </div>
 
       {/* Tech Stack */}
-      <div ref={techSkillsRef} className="space-y-6">
-        <h4 className="text-lg font-medium text-muted-foreground text-center uppercase tracking-wider flex items-center justify-center gap-3">
+      <div className="space-y-6">
+        <h3 className="text-lg font-medium text-muted-foreground text-center uppercase tracking-wider flex items-center justify-center gap-3">
           <span className="w-8 h-px bg-border"></span>
           Technical Stack
           <span className="w-8 h-px bg-border"></span>
-        </h4>
-        <div className="grid gap-6 sm:grid-cols-2 max-w-5xl mx-auto px-4">
+        </h3>
+        <div data-reveal-group className="grid gap-6 sm:grid-cols-2 max-w-5xl mx-auto px-4">
           {Object.entries(SkillsData).map(([category, skills]) => (
-            <div key={category} className="tech-category-wrapper">
+            <div key={category} data-reveal="up" className="tech-category-wrapper">
               <div className="tech-category group/cat relative h-full bg-[#0a0a0a] border border-white/5 rounded-2xl p-7 overflow-hidden transition-[transform,border-color] duration-150 hover:border-primary/40 hover:-translate-y-0.5">
                 {/* Subtle top sweeping accent */}
                 <div className="absolute top-0 inset-x-0 h-0.5 bg-linear-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover/cat:opacity-100 transition-[transform,opacity] duration-200 ease-out group-hover/cat:scale-x-100 scale-x-0 origin-left" />
 
-                <h5 className="text-xl font-bold capitalize text-foreground/90 mb-6 flex items-center gap-3 group-hover/cat:text-white transition-colors duration-300">
+                <h4 className="text-xl font-bold capitalize text-foreground/90 mb-6 flex items-center gap-3 group-hover/cat:text-white transition-colors duration-300">
                   <span className="w-1.5 h-6 bg-linear-to-b from-primary to-primary/40 rounded-full"></span>
                   {category.replace(/([A-Z])/g, " $1").trim()}
-                </h5>
+                </h4>
 
                 <div className="flex flex-wrap gap-3">
                   {skills.map((skill) => (

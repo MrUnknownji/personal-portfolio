@@ -189,8 +189,8 @@ Before editing, inspect the current files in `/home/unknown/web/personal-portfol
 At the time this prompt was created, the portfolio’s project source of truth is code, not MongoDB:
 
 - project type: `types/Project.ts`;
-- complete records: `data/data.tsx`;
-- selected/featured ordering: `selectedProjectIds` in `data/data.tsx`;
+- complete records: `data/projects.ts`;
+- selected/featured ordering: `selectedProjectIds` in `data/projects.ts`;
 - lightweight bot command metadata: `data/bot-projects.ts`;
 - MongoDB is used for contact-form submissions, not project records.
 

@@ -1,20 +1,15 @@
 "use client";
 import React, { useRef, useState, useCallback } from "react";
-import gsap from "gsap";
 import { FiSend } from "react-icons/fi";
+import {
+  CONTACT_FIELD_LIMITS,
+  validateContactRequest,
+  type ContactFormValues,
+} from "@/lib/contactValidation";
 
 interface FormProps {
   onSubmitSuccess: () => void;
 }
-
-type ContactFormValues = {
-  name: string;
-  email: string;
-  category: string;
-  subject: string;
-  message: string;
-  company: string;
-};
 
 const initialFormValues: ContactFormValues = {
   name: "",
@@ -25,8 +20,6 @@ const initialFormValues: ContactFormValues = {
   company: "",
 };
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,29 +28,10 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
     useState<ContactFormValues>(initialFormValues);
 
   const formRef = useRef<HTMLFormElement>(null);
-  const submitButtonRef = useRef<HTMLButtonElement>(null);
-
   const validateForm = useCallback(() => {
-    const newErrors: Record<string, string> = {};
-
-    if (formValues.name.trim().length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
-    }
-    if (!EMAIL_PATTERN.test(formValues.email.trim())) {
-      newErrors.email = "Enter a valid email address";
-    }
-    if (formValues.category.trim().length < 2) {
-      newErrors.category = "Category is required";
-    }
-    if (formValues.subject.trim().length < 3) {
-      newErrors.subject = "Subject is required";
-    }
-    if (formValues.message.trim().length < 10) {
-      newErrors.message = "Message must be at least 10 characters";
-    }
-
+    const { errors: newErrors } = validateContactRequest(formValues);
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   }, [formValues]);
 
   const handleFieldChange = (
@@ -80,20 +54,20 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm() || isSubmitting) return;
+    if (isSubmitting) return;
+
+    const validationErrors = validateForm();
+    const firstInvalidField = Object.keys(validationErrors)[0];
+    if (firstInvalidField) {
+      formRef.current
+        ?.querySelector<HTMLElement>(`[name="${firstInvalidField}"]`)
+        ?.focus();
+      return;
+    }
 
     setIsSubmitting(true);
 
     try {
-      if (submitButtonRef.current) {
-        gsap.to(submitButtonRef.current, {
-          scale: 0.98,
-          duration: 0.1,
-          yoyo: true,
-          repeat: 1,
-        });
-      }
-
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -148,6 +122,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
     return (
       <label
+        htmlFor={`contact-${fieldName}`}
         className={`absolute left-0 transition-all duration-200 pointer-events-none
           ${
             isFocused || hasValue
@@ -183,6 +158,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         <div className="grid gap-8 sm:grid-cols-2">
           <div className="relative">
             <input
+              id="contact-name"
               type="text"
               name="name"
               value={formValues.name}
@@ -194,10 +170,13 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
               }
               disabled={isSubmitting}
               autoComplete="name"
+              maxLength={CONTACT_FIELD_LIMITS.name}
+              aria-invalid={Boolean(errors.name)}
+              aria-describedby={errors.name ? "contact-name-error" : undefined}
             />
             {renderFloatingLabel("name", "Name")}
             {errors.name && (
-              <span className="absolute -bottom-5 left-0 text-xs text-red-400">
+              <span id="contact-name-error" className="absolute -bottom-5 left-0 text-xs text-red-400">
                 {errors.name}
               </span>
             )}
@@ -205,6 +184,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
           <div className="relative">
             <input
+              id="contact-email"
               type="email"
               name="email"
               value={formValues.email}
@@ -216,10 +196,13 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
               }
               disabled={isSubmitting}
               autoComplete="email"
+              maxLength={CONTACT_FIELD_LIMITS.email}
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? "contact-email-error" : undefined}
             />
             {renderFloatingLabel("email", "Email")}
             {errors.email && (
-              <span className="absolute -bottom-5 left-0 text-xs text-red-400">
+              <span id="contact-email-error" className="absolute -bottom-5 left-0 text-xs text-red-400">
                 {errors.email}
               </span>
             )}
@@ -228,6 +211,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
         <div className="relative">
           <input
+            id="contact-category"
             type="text"
             name="category"
             value={formValues.category}
@@ -239,10 +223,13 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
             }
             disabled={isSubmitting}
             autoComplete="off"
+            maxLength={CONTACT_FIELD_LIMITS.category}
+            aria-invalid={Boolean(errors.category)}
+            aria-describedby={errors.category ? "contact-category-error" : undefined}
           />
           {renderFloatingLabel("category", "Category (e.g., Project Inquiry)")}
           {errors.category && (
-            <span className="absolute -bottom-5 left-0 text-xs text-red-400">
+            <span id="contact-category-error" className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.category}
             </span>
           )}
@@ -250,6 +237,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
         <div className="relative">
           <input
+            id="contact-subject"
             type="text"
             name="subject"
             value={formValues.subject}
@@ -261,10 +249,13 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
             }
             disabled={isSubmitting}
             autoComplete="off"
+            maxLength={CONTACT_FIELD_LIMITS.subject}
+            aria-invalid={Boolean(errors.subject)}
+            aria-describedby={errors.subject ? "contact-subject-error" : undefined}
           />
           {renderFloatingLabel("subject", "Subject")}
           {errors.subject && (
-            <span className="absolute -bottom-5 left-0 text-xs text-red-400">
+            <span id="contact-subject-error" className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.subject}
             </span>
           )}
@@ -272,6 +263,7 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
         <div className="relative">
           <textarea
+            id="contact-message"
             name="message"
             rows={4}
             value={formValues.message}
@@ -282,10 +274,13 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
               handleFieldChange("message", event.target.value)
             }
             disabled={isSubmitting}
+            maxLength={CONTACT_FIELD_LIMITS.message}
+            aria-invalid={Boolean(errors.message)}
+            aria-describedby={errors.message ? "contact-message-error" : undefined}
           />
           {renderFloatingLabel("message", "Your Message...")}
           {errors.message && (
-            <span className="absolute -bottom-5 left-0 text-xs text-red-400">
+            <span id="contact-message-error" className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.message}
             </span>
           )}
@@ -299,10 +294,9 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
 
         <div className="pt-6">
           <button
-            ref={submitButtonRef}
             type="submit"
-          disabled={isSubmitting}
-          className="group relative w-full bg-primary text-[#0a0a0a] font-bold tracking-widest uppercase py-4 px-6 rounded-xl
+            disabled={isSubmitting}
+            className="group relative w-full bg-primary text-[#0a0a0a] font-bold tracking-widest uppercase py-4 px-6 rounded-xl
                        flex items-center justify-center gap-3 transition-[transform,background-color,opacity] duration-150 overflow-hidden
                        hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
           >

@@ -1,11 +1,9 @@
 "use client";
-import React, { useRef, useState, useCallback, useEffect } from "react";
-import { createPortal } from "react-dom";
-import gsap from "gsap";
-import { ScrollSmoother } from "gsap/ScrollSmoother";
-import { useGSAP } from "@gsap/react";
-import { FiCheck, FiCopy, FiX, FiArrowRight } from "react-icons/fi";
+
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { FiArrowRight, FiCheck, FiCopy, FiX } from "react-icons/fi";
 import Link from "next/link";
+import { Dialog } from "@/components/ui/Dialog";
 
 interface ThankYouDialogProps {
   isOpen: boolean;
@@ -18,210 +16,104 @@ const ThankYouDialog = ({
   onClose,
   email = "your@email.com",
 }: ThankYouDialogProps) => {
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
   const copyResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isEmailCopied, setIsEmailCopied] = useState(false);
-  const [isVisible, setIsVisible] = useState(isOpen);
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const handleCopyEmail = useCallback(() => {
-    navigator.clipboard
-      .writeText(email)
-      .then(() => {
-        setIsEmailCopied(true);
-        if (copyResetTimerRef.current) {
-          clearTimeout(copyResetTimerRef.current);
-        }
-        copyResetTimerRef.current = setTimeout(() => {
-          setIsEmailCopied(false);
-          copyResetTimerRef.current = null;
-        }, 2000);
-      })
-      .catch(() => {
+  const handleCopyEmail = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(email);
+      setIsEmailCopied(true);
+      if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current);
+      copyResetTimerRef.current = setTimeout(() => {
         setIsEmailCopied(false);
-      });
+        copyResetTimerRef.current = null;
+      }, 2_000);
+    } catch {
+      setIsEmailCopied(false);
+    }
   }, [email]);
 
   useEffect(() => {
     return () => {
-      if (copyResetTimerRef.current) {
-        clearTimeout(copyResetTimerRef.current);
-      }
+      if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current);
     };
   }, []);
 
-  const startCloseProcess = useCallback(() => {
-    if (!overlayRef.current || !dialogRef.current || !isVisible) return;
-
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setIsVisible(false);
-        onClose();
-      },
-    });
-
-    tl.to(dialogRef.current, {
-      opacity: 0,
-      scale: 0.9,
-      y: 20,
-      duration: 0.3,
-      ease: "power2.in",
-    }).to(
-      overlayRef.current,
-      {
-        opacity: 0,
-        duration: 0.3,
-        ease: "power2.in",
-      },
-      "<",
-    );
-  }, [onClose, isVisible]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && isVisible) startCloseProcess();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isVisible, startCloseProcess]);
-
-  useEffect(() => {
-    if (isOpen) setIsVisible(true);
-    else if (isVisible) startCloseProcess();
-  }, [isOpen, isVisible, startCloseProcess]);
-
-  useEffect(() => {
-    const smoother = ScrollSmoother.get();
-    if (isVisible) {
-      document.body.style.overflow = "hidden";
-      if (smoother) {
-        smoother.paused(true);
-      }
-    } else {
-      document.body.style.overflow = "";
-      if (smoother) {
-        smoother.paused(false);
-      }
-    }
-    return () => {
-      document.body.style.overflow = "";
-      if (smoother) {
-        smoother.paused(false);
-      }
-    };
-  }, [isVisible]);
-
-  useGSAP(() => {
-    if (!isVisible || !overlayRef.current || !dialogRef.current) return;
-
-    const ctx = gsap.context(() => {
-      gsap.set(overlayRef.current, { opacity: 0 });
-      gsap.set(dialogRef.current, { opacity: 0, scale: 0.9, y: 20 });
-
-      const tl = gsap.timeline();
-      tl.to(overlayRef.current, {
-        opacity: 1,
-        duration: 0.4,
-        ease: "power3.out",
-      }).to(
-        dialogRef.current,
-        {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          duration: 0.5,
-          ease: "back.out(1.2)",
-        },
-        "-=0.2",
-      );
-    }, dialogRef);
-
-    return () => ctx.revert();
-  }, [isVisible]);
-
-  if (!isVisible && !isOpen) return null;
-  if (!mounted) return null;
-
-  const dialogContent = (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
-      role="dialog"
-      aria-modal="true"
+  return (
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      ariaLabelledBy={titleId}
+      ariaDescribedBy={descriptionId}
+      className="w-full max-w-lg px-4 sm:px-0"
     >
-      <div
-        ref={overlayRef}
+      <button
+        type="button"
         className="fixed inset-0 bg-black/90"
-        onClick={startCloseProcess}
+        onClick={onClose}
+        aria-label="Close confirmation dialog"
+        tabIndex={-1}
       />
 
-      <div
-        ref={dialogRef}
-        className="relative z-[101] w-full max-w-lg bg-[#0a0a0a] rounded-3xl overflow-hidden border border-white/10"
-      >
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
+      <div className="relative z-[101] w-full overflow-hidden rounded-3xl border border-white/10 bg-[#0a0a0a]">
+        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
 
-        <div className="p-8 sm:p-10 text-center space-y-8">
-          <div className="mx-auto w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-6 relative group">
-            <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping opacity-20" />
-            <FiCheck className="w-10 h-10 text-primary" />
+        <div className="space-y-8 p-8 text-center sm:p-10">
+          <div className="relative mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-primary/10">
+            <FiCheck className="size-10 text-primary" aria-hidden="true" />
           </div>
 
           <div className="space-y-3">
-            <h3 className="text-3xl font-bold text-white tracking-tight">
+            <h2 id={titleId} className="text-3xl font-bold tracking-tight text-white">
               Message Sent
-            </h3>
-            <p className="text-neutral-400 text-lg leading-relaxed">
+            </h2>
+            <p id={descriptionId} className="text-lg leading-relaxed text-neutral-300">
               Thanks for reaching out. I&apos;ll review your message and get
               back to you as soon as possible.
             </p>
           </div>
 
-          <div className="bg-white/5 rounded-xl p-4 flex items-center justify-between gap-4 border border-white/5 hover:border-white/10 transition-colors">
-            <span className="text-neutral-300 font-mono text-sm truncate">
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-4">
+            <span className="truncate font-mono text-sm text-neutral-200">
               {email}
             </span>
             <button
+              type="button"
               onClick={handleCopyEmail}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors text-primary relative group"
-              title="Copy Email"
+              className="min-h-11 min-w-11 rounded-lg p-2 text-primary transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               aria-label="Copy email address"
             >
               {isEmailCopied ? <FiCheck /> : <FiCopy />}
-              <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                {isEmailCopied ? "Copied!" : "Copy"}
-              </span>
             </button>
+            <span className="sr-only" role="status" aria-live="polite">
+              {isEmailCopied ? "Email address copied" : ""}
+            </span>
           </div>
 
-          <div className="pt-2">
-            <Link
-              href="/my-projects"
-              onClick={startCloseProcess}
-              className="w-full px-6 py-3 rounded-xl bg-primary text-black font-bold hover:bg-primary/90 transition-all duration-300 flex items-center justify-center gap-2 group"
-            >
-              View Work
-              <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
+          <Link
+            href="/my-projects"
+            onClick={onClose}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-black transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+          >
+            View Work
+            <FiArrowRight aria-hidden="true" />
+          </Link>
         </div>
 
         <button
-          onClick={startCloseProcess}
-          className="absolute top-4 right-4 p-2 text-neutral-500 hover:text-white transition-colors rounded-full hover:bg-white/10"
+          type="button"
+          data-autofocus
+          onClick={onClose}
+          className="absolute right-4 top-4 min-h-11 min-w-11 rounded-full p-2 text-neutral-300 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           aria-label="Close dialog"
         >
-          <FiX className="w-5 h-5" />
+          <FiX className="size-5" />
         </button>
       </div>
-    </div>
+    </Dialog>
   );
-
-  return createPortal(dialogContent, document.body);
 };
 
 export default ThankYouDialog;

@@ -1,5 +1,5 @@
 import HeroContent from "./HeroSectionComponents/HeroContent";
-import CodeDisplay from "./HeroSectionComponents/CodeDisplay";
+import DesktopCodeDisplay from "./HeroSectionComponents/DesktopCodeDisplay";
 import HeroText from "./HeroSectionComponents/HeroText";
 
 const HeroSection = () => {
@@ -8,8 +8,7 @@ const HeroSection = () => {
       <div
         className="w-full max-w-7xl mx-auto relative rounded-[2.5rem] p-8 md:p-10 lg:p-16
                    bg-[#0a0a0a]/95 z-10
-                   border border-white/5 overflow-hidden
-                   transform-gpu"
+                   border border-white/5 overflow-hidden"
       >
         {/* Subtle geometric top accent */}
         <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
@@ -20,11 +19,8 @@ const HeroSection = () => {
               <HeroText />
             </HeroContent>
           </div>
-          <div
-            className="z-[1] w-full lg:w-1/2 lg:block hidden"
-            style={{ transform: "translateZ(50px)" }}
-          >
-            <CodeDisplay />
+          <div className="z-[1] hidden w-full lg:block lg:w-1/2">
+            <DesktopCodeDisplay />
           </div>
         </div>
       </div>
