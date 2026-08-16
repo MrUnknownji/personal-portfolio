@@ -1,7 +1,7 @@
 # Sandeep Kumar Portfolio
 
 A production-focused personal portfolio built with Next.js App Router,
-TypeScript, Tailwind CSS, GSAP, Three.js, and MongoDB-backed contact handling.
+TypeScript, Tailwind CSS, Three.js, and MongoDB-backed contact handling.
 
 The site is designed to present a small set of selected projects as real product
 work, not just visual demos. It includes animated landing sections, a searchable
@@ -18,12 +18,11 @@ configured.
 
 - Curated selected-work page with search, category filters, project modals,
   screenshot galleries, source links, live demo links, and case-study notes.
-- Real contact API route with server-side validation, basic spam honeypot,
-  rate limiting, MongoDB persistence, and user-facing loading/error states.
-- Three.js/GSAP assistant bot with local navigation commands, project actions,
+- Real contact API route with shared validation, a spam honeypot, durable
+  IP/email rate limits, retention controls, and user-facing error states.
+- Intent-loaded Three.js assistant bot with local navigation commands, project actions,
   contextual right-click summaries, and optional Gemini fallback.
-- Social stats API routes with graceful fallback behavior when external tokens
-  are not configured.
+- Server-rendered social profile links that do not depend on client JavaScript.
 - Responsive App Router layout with animated hero, about, skills, contact, and
   footer sections.
 
@@ -47,10 +46,10 @@ portfolio experience is intentionally limited to stronger selected work.
 
 ```text
 app/
-  api/contact/route.ts       MongoDB-backed contact submissions
-  api/social/*/route.ts      Optional social stat endpoints with fallbacks
+  api/contact/route.ts       Validated, rate-limited contact submissions
+  api/projects/[id]/route.ts On-demand selected project details
   actions/chat.ts            Krypton local/Gemini response action
-  my-projects/page.tsx       Curated project gallery
+  my-projects/[id]/          Indexable project case-study pages
 
 components/
   Bot/                       Three.js assistant scene, chat UI, interactions
@@ -58,10 +57,12 @@ components/
   ContactSectionComponents/  Contact form and contact information
 
 data/
-  data.tsx                   Skills, selected projects, archive data
+  projects.ts               Selected projects and archive data
+  site.ts                   Shared identity/contact configuration
 
 lib/
-  mongodb.ts                 Cached MongoDB client
+  mongodb.ts                 Recoverable cached MongoDB client
+  server/rateLimit.ts        Atomic MongoDB-backed request quotas
 ```
 
 ## Environment
@@ -72,9 +73,9 @@ store submissions.
 ```bash
 MONGO_DB_URI=
 MONGO_DB_NAME=portfolio
+RATE_LIMIT_HASH_SECRET=
+CONTACT_RETENTION_DAYS=365
 
-GITHUB_TOKEN=
-TWITTER_BEARER_TOKEN=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 GEMINI_AI_STUDIO_API_KEY=
@@ -90,6 +91,10 @@ pnpm lint
 pnpm typecheck
 pnpm build
 pnpm start
+pnpm test
+pnpm test:e2e
+pnpm audit:prod
+pnpm db:indexes
 ```
 
 ## Contact Flow
@@ -97,7 +102,7 @@ pnpm start
 1. The client form validates name, email, category, subject, and message.
 2. `/api/contact` repeats validation on the server.
 3. A hidden honeypot field silently drops obvious bot submissions.
-4. A simple per-IP/email rate limit blocks repeated abuse.
+4. Independent atomic per-IP and per-email limits block repeated abuse across instances.
 5. Valid messages are stored in the `contact_messages` MongoDB collection with
    status, user-agent, hashed IP, and timestamps.
 
@@ -109,20 +114,14 @@ admin-dashboard integration.
 
 - Deploy on Vercel or another Node-capable Next.js host.
 - Configure `MONGO_DB_URI` in the production environment.
+- Configure a strong, independent `RATE_LIMIT_HASH_SECRET` and run `pnpm db:indexes` during deployment.
 - Add `NEXT_PUBLIC_SITE_URL` so metadata resolves with the production origin.
 - Add `GEMINI_AI_STUDIO_API_KEY` for Krypton's preferred free Gemini fallback.
 - Add `GEMINI_API_KEY` as the paid fallback if the AI Studio key is unavailable
   or over quota.
 
-## Known Limitations
+## Quality gates
 
-- Contact messages are persisted, but there is no admin inbox UI yet.
-- Social routes rely on optional tokens and return fallback data when missing.
-- Case-study notes are concise in-modal summaries, not separate long-form pages.
-
-## Roadmap
-
-- Add email notifications for new contact submissions.
-- Add an authenticated admin view for MongoDB contact messages.
-- Add Lighthouse/accessibility evidence to the README after production audits.
-- Split more of the bot command and navigation logic into dedicated hooks.
+Pull requests run dependency auditing, lint, strict type checking, unit tests,
+production build, Playwright desktop/mobile flows, axe accessibility checks, and
+Lighthouse budgets. Project details also have server-rendered, shareable routes.

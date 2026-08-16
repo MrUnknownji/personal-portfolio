@@ -1,239 +1,227 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect, memo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FiGithub, FiLinkedin } from "react-icons/fi";
 import { FaXTwitter } from "react-icons/fa6";
-import { SocialLink } from "../../types/social";
-import { fetchSocialStats } from "../../utils/social";
-import SocialInfoBox from "./SocialInfoBox";
+import { SOCIAL_PROFILES } from "@/data/social";
+import type {
+  SocialPlatform,
+  SocialProfileStats,
+  SocialStatsResponse,
+} from "@/types/social";
+import SocialInfoBox, { type SocialInfoLink } from "./SocialInfoBox";
 
-let cachedStats: Awaited<ReturnType<typeof fetchSocialStats>> | null = null;
+const PROFILE_IMAGE =
+  "https://res.cloudinary.com/dfwgprzxo/image/upload/c_fill,g_face,w_104,h_104,q_auto,f_auto/v1767790586/sandeep_bgqjpb.png";
 
-const ANIMATION_CONFIG = {
-  INFO_BOX: {
-    SHOW: { DURATION: 0.2, EASE: "back.out(1.7)" },
-    HIDE: { DURATION: 0.15, EASE: "power2.in" },
+const baseLinks = [
+  {
+    platform: "github",
+    href: SOCIAL_PROFILES.github.href,
+    label: "GitHub",
+    username: SOCIAL_PROFILES.github.username,
+    description: "Check out my open source projects",
+    color: "#ff9233",
+    profileImage: PROFILE_IMAGE,
+    stats: [
+      { label: "Repos", value: "—" },
+      { label: "Followers", value: "—" },
+      { label: "Stars", value: "—" },
+    ],
+    icon: FiGithub,
   },
-} as const;
-
-const SocialLinkItem = memo(
-  ({
-    link,
-    index,
-    isActive,
-    onMouseEnter,
-    onMouseLeave,
-  }: {
-    link: SocialLink;
-    index: number;
-    isActive: boolean;
-    onMouseEnter: (
-      event: React.MouseEvent<HTMLAnchorElement>,
-      index: number,
-    ) => void;
-    onMouseLeave: () => void;
-  }) => {
-    return (
-      <a
-        href={link.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group relative flex items-center justify-center w-12 h-12 rounded-xl
-                 bg-[#111] border border-white/10
-                 transition-[transform,border-color] duration-150 ease-out z-10
-                 hover:-translate-y-0.5"
-        style={{
-          borderColor: isActive ? link.color : "",
-        }}
-        onMouseEnter={(event) => onMouseEnter(event, index)}
-        onMouseLeave={onMouseLeave}
-        aria-label={`Open ${link.label}`}
-      >
-        <div
-          className="text-muted-foreground transition-transform duration-150 group-hover:scale-105 relative z-10"
-          style={{ color: isActive ? link.color : undefined }}
-        >
-          {React.cloneElement(
-            link.icon as React.ReactElement<{ className?: string }>,
-            { className: "w-5 h-5" },
-          )}
-        </div>
-      </a>
-    );
+  {
+    platform: "linkedin",
+    href: SOCIAL_PROFILES.linkedin.href,
+    label: "LinkedIn",
+    username: "Sandeep Kumar",
+    description: "Connect with me professionally",
+    color: "#ff9233",
+    profileImage: PROFILE_IMAGE,
+    stats: [
+      { label: "Connections", value: "—" },
+      { label: "Posts", value: "—" },
+      { label: "Impressions", value: "—" },
+    ],
+    icon: FiLinkedin,
   },
-);
+  {
+    platform: "twitter",
+    href: SOCIAL_PROFILES.twitter.href,
+    label: "X",
+    username: `@${SOCIAL_PROFILES.twitter.username}`,
+    description: "Tech insights and updates",
+    color: "#ff9233",
+    profileImage: PROFILE_IMAGE,
+    stats: [
+      { label: "Followers", value: "—" },
+      { label: "Posts", value: "—" },
+      { label: "Following", value: "—" },
+    ],
+    icon: FaXTwitter,
+  },
+] as const satisfies ReadonlyArray<
+  SocialInfoLink & {
+    platform: SocialPlatform;
+    href: string;
+    icon: typeof FiGithub;
+  }
+>;
 
-SocialLinkItem.displayName = "SocialLinkItem";
+let cachedSocialStats: SocialStatsResponse | null = null;
+let socialStatsRequest: Promise<SocialStatsResponse> | null = null;
 
-const SocialLinks = () => {
-  const [activeLink, setActiveLink] = useState<number | null>(null);
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [infoBoxPosition, setInfoBoxPosition] = useState({
-    x: 0,
-    top: 0,
-    bottom: 0,
-  });
-  const [infoBoxOpacity, setInfoBoxOpacity] = useState(0);
+function requestSocialStats() {
+  if (cachedSocialStats) return Promise.resolve(cachedSocialStats);
+  socialStatsRequest ??= fetch("/api/social/stats")
+    .then((response) => {
+      if (!response.ok) throw new Error("Could not load social metrics");
+      return response.json() as Promise<SocialStatsResponse>;
+    })
+    .then((response) => {
+      cachedSocialStats = response;
+      return response;
+    })
+    .finally(() => {
+      socialStatsRequest = null;
+    });
+  return socialStatsRequest;
+}
 
-  const hideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+function formatMetric(value: number | null) {
+  if (value === null) return "—";
+  if (value < 1_000) return new Intl.NumberFormat("en-US").format(value);
+  return new Intl.NumberFormat("en-US", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(value);
+}
 
-  useEffect(() => {
-    const initializeSocialLinks = async () => {
-      setIsLoading(true);
-      try {
-        const stats = cachedStats ?? (await fetchSocialStats());
-        cachedStats = stats;
-        const links: SocialLink[] = [
-          {
-            icon: <FiGithub className="w-5 h-5" />,
-            label: "GitHub",
-            href: "https://github.com/MrUnknownji",
-            bgColor: "rgba(255, 146, 51, 0)",
-            hoverBgColor: "rgba(255, 146, 51, 0.1)",
-            iconColor: "rgb(209, 213, 219)",
-            hoverIconColor: "#ff9233",
-            color: "#ff9233",
-            description: "Check out my open source projects",
-            stats: [
-              {
-                label: "Repos",
-                value: stats.github?.public_repos?.toString() || "20+",
-              },
-              {
-                label: "Followers",
-                value: stats.github?.followers?.toString() || "100+",
-              },
-              { label: "Stars", value: "50+" },
-            ],
-            profileImage: stats.github?.profileImage || "",
-            username: stats.github?.username || "MrUnknownji",
-          },
-          {
-            icon: <FiLinkedin className="w-5 h-5" />,
-            label: "LinkedIn",
-            href: "https://linkedin.com/in/sandeep-kumar-sk1707",
-            bgColor: "rgba(255, 146, 51, 0)",
-            hoverBgColor: "rgba(255, 146, 51, 0.1)",
-            iconColor: "rgb(209, 213, 219)",
-            hoverIconColor: "#ff9233",
-            color: "#ff9233",
-            description: "Connect with me professionally",
-            stats: [
-              {
-                label: "Connections",
-                value: stats.linkedin?.connections || "500+",
-              },
-              {
-                label: "Posts",
-                value: stats.linkedin?.posts?.toString() || "25+",
-              },
-              { label: "Views", value: "1k+" },
-            ],
-            profileImage: stats.linkedin?.profileImage || "",
-            username: stats.linkedin?.name || "sandeep-kumar-sk1707",
-          },
-          {
-            icon: <FaXTwitter className="w-5 h-5" />,
-            label: "X",
-            href: "https://twitter.com/MrUnknownG786",
-            bgColor: "rgba(255, 146, 51, 0)",
-            hoverBgColor: "rgba(255, 146, 51, 0.1)",
-            iconColor: "rgb(209, 213, 219)",
-            hoverIconColor: "#ff9233",
-            color: "#ff9233",
-            description: "Tech insights and updates",
-            stats: [
-              {
-                label: "Followers",
-                value: stats.twitter?.followers?.toString() || "250+",
-              },
-              {
-                label: "Tweets",
-                value: stats.twitter?.tweets?.toString() || "500+",
-              },
-              { label: "Likes", value: "1k+" },
-            ],
-            profileImage: stats.twitter?.profileImage || "",
-            username: stats.twitter?.name || "MrUnknownG786",
-          },
-        ];
-        setSocialLinks(links);
-      } catch {
-        setSocialLinks([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    initializeSocialLinks();
+function withLiveProfile<T extends (typeof baseLinks)[number]>(
+  link: T,
+  profile: SocialProfileStats | undefined,
+): T {
+  if (!profile) return link;
+
+  return {
+    ...link,
+    username: profile.username || link.username,
+    profileImage: profile.profileImage || link.profileImage,
+    stats: profile.stats.map((metric) => ({
+      label: metric.label,
+      value: formatMetric(metric.value),
+    })),
+  } as T;
+}
+
+type Position = { x: number; top: number; bottom: number };
+
+export default function SocialLinks() {
+  const [socialStats, setSocialStats] = useState<SocialStatsResponse | null>(
+    cachedSocialStats,
+  );
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [cardVisible, setCardVisible] = useState(false);
+  const [position, setPosition] = useState<Position>({ x: 0, top: 0, bottom: 0 });
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasRequestedStatsRef = useRef(Boolean(cachedSocialStats));
+  const mountedRef = useRef(true);
+
+  const loadSocialStats = useCallback(() => {
+    if (hasRequestedStatsRef.current) return;
+    hasRequestedStatsRef.current = true;
+    void requestSocialStats()
+      .then((response) => {
+        if (mountedRef.current) setSocialStats(response);
+      })
+      .catch(() => {
+        // Keep unavailable metrics as dashes if the local API itself is down.
+      });
   }, []);
 
-  const handleMouseEnter = useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>, index: number) => {
-      const rect = event.currentTarget.getBoundingClientRect();
-      setInfoBoxPosition({
-        x: rect.left + rect.width / 2,
-        top: rect.top,
-        bottom: rect.bottom,
-      });
-
-      if (hideTimeoutRef.current) {
-        clearTimeout(hideTimeoutRef.current);
-        hideTimeoutRef.current = null;
-      }
-      setActiveLink(index);
-      setInfoBoxOpacity(1);
-    },
-    [],
+  const links = useMemo(
+    () =>
+      baseLinks.map((link) =>
+        withLiveProfile(link, socialStats?.profiles[link.platform]),
+      ),
+    [socialStats],
   );
 
-  const handleMouseLeave = useCallback(() => {
-    setInfoBoxOpacity(0);
+  const showCard = useCallback((element: HTMLAnchorElement, index: number) => {
+    loadSocialStats();
+    if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
+    const rect = element.getBoundingClientRect();
+    setPosition({
+      x: rect.left + rect.width / 2,
+      top: rect.top,
+      bottom: rect.bottom,
+    });
+    setActiveIndex(index);
+    setCardVisible(true);
+  }, [loadSocialStats]);
+
+  const hideCard = useCallback(() => {
+    setCardVisible(false);
     hideTimeoutRef.current = setTimeout(() => {
-      setActiveLink(null);
+      setActiveIndex(null);
       hideTimeoutRef.current = null;
-    }, ANIMATION_CONFIG.INFO_BOX.HIDE.DURATION * 1000);
+    }, 180);
   }, []);
 
   useEffect(() => {
+    mountedRef.current = true;
+    const closeCard = () => {
+      setCardVisible(false);
+      setActiveIndex(null);
+    };
+    window.addEventListener("scroll", closeCard, { passive: true });
+    window.addEventListener("resize", closeCard);
     return () => {
+      mountedRef.current = false;
+      window.removeEventListener("scroll", closeCard);
+      window.removeEventListener("resize", closeCard);
       if (hideTimeoutRef.current) clearTimeout(hideTimeoutRef.current);
     };
   }, []);
 
+  const activeLink = activeIndex === null ? null : links[activeIndex];
+
   return (
-    <div className="relative flex items-center gap-3">
-      {isLoading
-        ? [1, 2, 3].map((_, i) => (
-            <div
-              key={i}
-              className="w-10 h-10 rounded-full bg-white/5 animate-pulse"
-            />
-          ))
-        : socialLinks.map((link, index) => (
-            <SocialLinkItem
-              key={link.label}
-              link={link}
-              index={index}
-              isActive={activeLink === index}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            />
-          ))}
+    <>
+      <nav aria-label="Social profiles" className="flex items-center gap-3">
+        {links.map(({ href, label, description, color, icon: Icon }, index) => {
+          const isActive = activeIndex === index;
+          return (
+            <a
+              key={label}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Open ${label}: ${description}`}
+              onPointerEnter={(event) => showCard(event.currentTarget, index)}
+              onPointerLeave={hideCard}
+              onFocus={(event) => showCard(event.currentTarget, index)}
+              onBlur={hideCard}
+              className="group relative z-10 flex size-12 items-center justify-center rounded-xl border bg-[#111] transition-[transform,border-color] duration-150 ease-out hover:-translate-y-0.5 focus-visible:-translate-y-0.5"
+              style={{ borderColor: isActive ? color : "rgba(255,255,255,0.1)" }}
+            >
+              <Icon
+                className="size-5 text-muted-foreground transition-[transform,color] duration-150 group-hover:scale-105"
+                style={{ color: isActive ? color : undefined }}
+                aria-hidden="true"
+              />
+            </a>
+          );
+        })}
+      </nav>
 
-      {activeLink !== null &&
-        socialLinks.length > 0 &&
-        socialLinks[activeLink] && (
-          <div className="pointer-events-none absolute left-0 top-full mt-4 z-50">
-            <SocialInfoBox
-              socialLink={socialLinks[activeLink]}
-              position={infoBoxPosition}
-              opacity={infoBoxOpacity}
-            />
-          </div>
-        )}
-    </div>
+      {activeLink && (
+        <SocialInfoBox
+          socialLink={activeLink}
+          position={position}
+          visible={cardVisible}
+        />
+      )}
+    </>
   );
-};
-
-export default SocialLinks;
+}

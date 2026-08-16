@@ -1,97 +1,20 @@
-import React, { useRef } from "react";
 import Image from "next/image";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useDeferredAnimation } from "@/hooks/useDeferredAnimation";
-
-gsap.registerPlugin(ScrollTrigger);
-
-const ANIMATION_CONFIG = {
-  REVEAL_DURATION: 1.0,
-  REVEAL_EASE: "power2.out",
-  IMAGE_SCALE_START: 1.1,
-  IMAGE_DURATION: 1.2,
-  IMAGE_EASE: "power2.out",
-} as const;
 
 const ImageSection = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const imageWrapperRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
-  const animationReady = useDeferredAnimation(containerRef);
-
-  useGSAP(
-    () => {
-      if (!animationReady) return;
-      if (
-        !containerRef.current ||
-        !imageWrapperRef.current ||
-        !imageRef.current
-      )
-        return;
-
-      gsap.set(imageWrapperRef.current, { opacity: 0, scale: 0.95 });
-      gsap.set(imageRef.current, { scale: ANIMATION_CONFIG.IMAGE_SCALE_START });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 75%",
-          end: "bottom 25%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      tl.to(imageWrapperRef.current, {
-        opacity: 1,
-        scale: 1,
-        duration: ANIMATION_CONFIG.REVEAL_DURATION,
-        ease: ANIMATION_CONFIG.REVEAL_EASE,
-      }).to(
-        imageRef.current,
-        {
-          scale: 1,
-          duration: ANIMATION_CONFIG.IMAGE_DURATION,
-          ease: ANIMATION_CONFIG.IMAGE_EASE,
-        },
-        "<",
-      );
-    },
-    {
-      scope: containerRef,
-      dependencies: [animationReady],
-      revertOnUpdate: true,
-    },
-  );
-
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full max-w-md mx-auto lg:max-w-none group cursor-pointer"
-    >
-      {/* Decorative Frame */}
-      <div className="absolute -inset-3 border border-border rounded-xl z-0 transition-[transform,border-color] duration-150 ease-out group-hover:border-primary/40 group-hover:scale-[1.015]" />
-      <div className="absolute -inset-3 border border-white/5 rounded-xl z-0 rotate-2 opacity-50 transition-[transform,opacity,border-color] duration-150 ease-out group-hover:rotate-3 group-hover:opacity-100 group-hover:border-primary/20" />
+    <div className="group relative mx-auto w-full max-w-sm cursor-default">
+      <div className="absolute -inset-3 z-0 rounded-xl border border-border transition-[transform,border-color] group-hover:scale-[1.015] group-hover:border-primary/40" />
+      <div className="absolute -inset-3 z-0 rotate-2 rounded-xl border border-white/5 opacity-50 transition-[transform,opacity,border-color] group-hover:rotate-3 group-hover:border-primary/20 group-hover:opacity-100" />
 
-      <div
-        ref={imageWrapperRef}
-        className="relative aspect-square w-full rounded-lg overflow-hidden bg-card z-10
-                   ring-1 ring-border"
-      >
+      <div className="relative z-10 aspect-square w-full overflow-hidden rounded-lg bg-card ring-1 ring-border">
         <Image
-          ref={imageRef}
-          src={
-            "https://res.cloudinary.com/dfwgprzxo/image/upload/v1767790586/sandeep_bgqjpb.png"
-          }
+          src="https://res.cloudinary.com/dfwgprzxo/image/upload/v1767790586/sandeep_bgqjpb.png"
           alt="Portrait of Sandeep Kumar"
           fill
-          sizes="(max-width: 1023px) 90vw, 30vw"
+          sizes="(max-width: 640px) 90vw, 384px"
           className="portrait-filter object-cover object-top"
         />
-
-        {/* Overlay Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-70 group-hover:opacity-40 transition-opacity duration-150" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-70 transition-opacity group-hover:opacity-40" />
       </div>
     </div>
   );

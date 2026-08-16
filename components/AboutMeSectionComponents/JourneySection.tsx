@@ -1,11 +1,3 @@
-import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useDeferredAnimation } from "@/hooks/useDeferredAnimation";
-
-gsap.registerPlugin(ScrollTrigger);
-
 const journeyData = [
   {
     year: "2020",
@@ -17,151 +9,54 @@ const journeyData = [
     year: "2023",
     title: "Completed Graduation",
     description:
-      "Successfully completed my graduation in BSc with Computer Science, building a strong foundation in algorithms and data structures.",
+      "Completed a BSc in Computer Science, building a strong foundation in algorithms and data structures.",
   },
   {
     year: "2024",
     title: "Joined TCS",
     description:
-      "Started working as an Developer in TCS. Gained professional experience in large-scale enterprise applications and agile workflows.",
+      "Started working as a developer at TCS, gaining professional experience with large-scale enterprise applications and agile workflows.",
   },
   {
     year: "2025",
     title: "Working and Learning",
     description:
-      "Continuing to grow as a developer, exploring advanced backend architectures, cloud technologies, and contributing to open source.",
+      "Continued growing as a developer, exploring advanced backend architectures, cloud technologies, and open-source work.",
   },
 ];
 
 const JourneySection = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const lineRef = useRef<HTMLDivElement>(null);
-  const progressLineRef = useRef<HTMLDivElement>(null);
-  const animationReady = useDeferredAnimation(containerRef, "700px 0px");
-
-  useGSAP(
-    () => {
-      if (!animationReady) return;
-      if (!containerRef.current || !lineRef.current || !progressLineRef.current)
-        return;
-
-      const items = gsap.utils.toArray(".journey-item") as HTMLElement[];
-      const dots = gsap.utils.toArray(".journey-dot") as HTMLElement[];
-
-      gsap.set(items, { opacity: 0, x: 50 });
-      gsap.set(dots, { scale: 0, opacity: 0 });
-
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top 80%",
-          end: "bottom 20%",
-          toggleActions: "play none none reverse",
-        },
-      });
-
-      items.forEach((item, index) => {
-        const dot = dots[index];
-
-        tl.to(dot, {
-          scale: 1,
-          opacity: 1,
-          duration: 0.4,
-          ease: "back.out(1.7)",
-        }).to(
-          item,
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.6,
-            ease: "power3.out",
-          },
-          "-=0.2",
-        );
-      });
-
-      gsap.fromTo(
-        progressLineRef.current,
-        { scaleY: 0 },
-        {
-          scaleY: 1,
-          ease: "none",
-          transformOrigin: "top",
-          scrollTrigger: {
-            trigger: containerRef.current,
-            start: "top 60%",
-            end: "bottom 60%",
-            scrub: 1,
-          },
-        },
-      );
-
-    },
-    {
-      scope: containerRef,
-      dependencies: [animationReady],
-      revertOnUpdate: true,
-    },
-  );
-
   return (
-    <div ref={containerRef} className="relative py-10">
-      <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-12 text-left pb-2">
+    <div className="relative py-10">
+      <h3 className="mb-12 bg-gradient-to-r from-primary to-accent bg-clip-text pb-2 text-left text-3xl font-bold tracking-tight text-transparent sm:text-4xl md:text-5xl" data-reveal="up">
         My Journey
       </h3>
 
-      <div className="relative pl-6 md:pl-10">
-        {/* Base Line */}
-        <div
-          ref={lineRef}
-          className="absolute left-[11px] md:left-[19px] top-2 bottom-2 w-[2px] bg-white/10 rounded-full"
-        />
+      <div className="relative">
+        <div className="absolute bottom-2 left-[9px] top-2 w-0.5 rounded-full bg-gradient-to-b from-primary via-accent to-primary" aria-hidden="true" />
 
-        {/* Progress Line */}
-        <div
-          ref={progressLineRef}
-          className="absolute left-[11px] md:left-[19px] top-2 bottom-2 w-[2px] bg-gradient-to-b from-primary via-accent to-primary rounded-full origin-top"
-        />
-
-        <div className="flex flex-col gap-12">
-          {journeyData.map((item, index) => (
-            <div
-              key={index}
-              className="journey-item relative pl-8 md:pl-12 group"
-            >
-              {/* Timeline Dot */}
-              <div className="journey-dot absolute left-0 md:left-[9px] top-8 w-5 h-5 rounded-full border border-white/20 bg-[#0a0a0a] z-10 flex items-center justify-center group-hover:border-primary transition-colors duration-150">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors duration-150" />
+        <div className="flex flex-col gap-12" data-reveal-group>
+          {journeyData.map((item) => (
+            <div key={item.year} className="group relative pl-8 md:pl-12">
+              <div className="absolute left-0 top-8 z-20 flex size-5 items-center justify-center rounded-full border border-white/20 bg-[#0a0a0a] transition-colors group-hover:border-primary" aria-hidden="true">
+                <div className="size-1.5 rounded-full bg-primary" />
               </div>
 
-              {/* Card */}
-              <div
-                className="journey-card relative bg-[#0a0a0a] border border-white/5 rounded-2xl p-6 md:p-8 transition-[transform,border-color] duration-150 overflow-hidden transform-gpu group-hover:-translate-y-1 group-hover:border-primary/40 z-10"
-              >
-                {/* Inner Ambient Glow */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none" />
-
-                {/* Shimmer Sweep Effect */}
-                <div
-                  className="absolute inset-0 -translate-x-[150%] skew-x-12 group-hover:animate-[shimmer_650ms_ease-out_1]
-                             bg-gradient-to-r from-transparent via-white/5 to-transparent pointer-events-none"
-                  style={{ width: "200%" }}
-                />
-
+              <article data-reveal="right" className="relative z-10 overflow-hidden rounded-2xl border border-white/5 bg-[#0a0a0a] p-6 transition-[transform,border-color] group-hover:-translate-y-1 group-hover:border-primary/40 md:p-8">
                 <div className="relative z-10">
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
-                    <h4 className="text-xl md:text-2xl font-bold tracking-wide text-foreground/90 group-hover:text-white transition-colors duration-300">
+                  <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                    <h4 className="text-xl font-bold tracking-wide text-foreground/90 md:text-2xl">
                       {item.title}
                     </h4>
-                    <span className="inline-flex items-center justify-center px-4 py-1.5 text-sm font-bold tracking-widest uppercase rounded-full bg-white/5 text-primary border border-white/10 group-hover:bg-primary/20 group-hover:border-primary/50 transition-[background-color,border-color] duration-150">
+                    <span className="inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-bold uppercase tracking-widest text-primary">
                       {item.year}
                     </span>
                   </div>
-                  <p className="text-muted-foreground text-base md:text-lg leading-relaxed group-hover:text-foreground/80 transition-colors duration-300 font-light">
+                  <p className="text-base font-light leading-relaxed text-muted-foreground md:text-lg">
                     {item.description}
                   </p>
                 </div>
-              </div>
+              </article>
             </div>
           ))}
         </div>

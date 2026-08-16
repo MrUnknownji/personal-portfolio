@@ -1,0 +1,24 @@
+{
+  "ci": {
+    "collect": {
+      "startServerCommand": "pnpm start -p 3101",
+      "startServerReadyPattern": "Ready",
+      "url": [
+        "http://127.0.0.1:3101/",
+        "http://127.0.0.1:3101/my-projects"
+      ],
+      "numberOfRuns": 3
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.8 }],
+        "categories:accessibility": ["error", { "minScore": 0.95 }],
+        "largest-contentful-paint": ["error", { "maxNumericValue": 3200 }],
+        "total-blocking-time": ["error", { "maxNumericValue": 600 }],
+        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.1 }],
+        "resource-summary:script:size": ["error", { "maxNumericValue": 300000 }]
+      }
+    },
+    "upload": { "target": "temporary-public-storage" }
+  }
+}

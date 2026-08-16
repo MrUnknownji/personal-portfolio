@@ -10,28 +10,16 @@ import {
 } from "react-icons/fi";
 import { Dialog } from "@/components/ui/Dialog";
 import { MediaItem } from "@/types/Project";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 
 interface MediaGalleryProps {
   items: MediaItem[];
 }
 
-const PREVIEW_ANIMATION_CONFIG = {
-  DURATION_FAST: 0.2,
-  DURATION_NORMAL: 0.4,
-  EASE_IN: "power3.in",
-  EASE_OUT: "power3.out",
-  SCALE_CLOSE: 0.9,
-  SCALE_OPEN: 0.95,
-} as const;
-
 export const MediaGallery = ({ items }: MediaGalleryProps) => {
+  const [visibleCount, setVisibleCount] = useState(6);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isVideoError, setIsVideoError] = useState(false);
-  const previewOverlayRef = useRef<HTMLDivElement>(null);
-  const previewContentRef = useRef<HTMLDivElement>(null);
   const thumbnailStripRef = useRef<HTMLDivElement>(null);
 
   const handleNext = useCallback(() => {
@@ -45,33 +33,8 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
   }, [items.length]);
 
   const handleClosePreviewAnimation = useCallback(() => {
-    if (!previewContentRef.current || !previewOverlayRef.current) {
-      setIsPreviewOpen(false);
-      setSelectedIndex(-1);
-      return;
-    }
-
-    const tl = gsap.timeline({
-      onComplete: () => {
-        setIsPreviewOpen(false);
-        setSelectedIndex(-1);
-      },
-    });
-
-    tl.to(previewContentRef.current, {
-      opacity: 0,
-      scale: PREVIEW_ANIMATION_CONFIG.SCALE_CLOSE,
-      duration: PREVIEW_ANIMATION_CONFIG.DURATION_FAST,
-      ease: PREVIEW_ANIMATION_CONFIG.EASE_IN,
-    }).to(
-      previewOverlayRef.current,
-      {
-        opacity: 0,
-        duration: PREVIEW_ANIMATION_CONFIG.DURATION_FAST,
-        ease: PREVIEW_ANIMATION_CONFIG.EASE_IN,
-      },
-      "<",
-    );
+    setIsPreviewOpen(false);
+    setSelectedIndex(-1);
   }, []);
 
   const openPreview = (index: number) => {
@@ -85,7 +48,6 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
       if (!isPreviewOpen) return;
       if (e.key === "ArrowRight") handleNext();
       if (e.key === "ArrowLeft") handlePrev();
-      if (e.key === "Escape") handleClosePreviewAnimation();
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -94,9 +56,9 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
 
   useEffect(() => {
     if (isPreviewOpen && thumbnailStripRef.current && selectedIndex >= 0) {
-      const activeThumb = thumbnailStripRef.current.children[
-        selectedIndex
-      ] as HTMLElement;
+      const activeThumb = thumbnailStripRef.current.querySelector<HTMLElement>(
+        `[data-media-index="${selectedIndex}"]`,
+      );
       if (activeThumb) {
         activeThumb.scrollIntoView({
           behavior: "smooth",
@@ -107,45 +69,18 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
     }
   }, [selectedIndex, isPreviewOpen]);
 
-  useEffect(() => {
-    if (isPreviewOpen) {
-      setIsVideoError(false);
-    }
-  }, [selectedIndex, isPreviewOpen]);
-
-  useGSAP(
-    () => {
-      if (isPreviewOpen) {
-        gsap.set(previewOverlayRef.current, { opacity: 0 });
-        gsap.set(previewContentRef.current, {
-          opacity: 0,
-          scale: PREVIEW_ANIMATION_CONFIG.SCALE_OPEN,
-        });
-
-        const tl = gsap.timeline();
-
-        tl.to(previewOverlayRef.current, {
-          opacity: 1,
-          duration: PREVIEW_ANIMATION_CONFIG.DURATION_NORMAL,
-          ease: PREVIEW_ANIMATION_CONFIG.EASE_OUT,
-        }).to(
-          previewContentRef.current,
-          {
-            opacity: 1,
-            scale: 1,
-            duration: PREVIEW_ANIMATION_CONFIG.DURATION_NORMAL,
-            ease: "back.out(1.2)",
-          },
-          "<+=0.1",
-        );
-      }
-    },
-    { dependencies: [isPreviewOpen] },
-  );
-
   if (!items || items.length === 0) {
     return null;
   }
+
+  const visibleItems = items.slice(0, visibleCount);
+  const thumbnailStart = Math.max(
+    0,
+    Math.min(selectedIndex - 3, items.length - 7),
+  );
+  const thumbnailItems = items
+    .map((item, index) => ({ item, index }))
+    .slice(thumbnailStart, thumbnailStart + 7);
 
   return (
     <div className="mt-8 pt-6 border-t border-border">
@@ -154,9 +89,9 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
         Gallery
       </h4>
       <div className="grid grid-cols-2 gap-3">
-        {items.map((item, index) => (
+        {visibleItems.map((item, index) => (
           <button
-            key={index}
+            key={item.src}
             onClick={() => openPreview(index)}
             className={`
               relative rounded-xl overflow-hidden border border-border bg-card group focus:outline-none
@@ -203,10 +138,24 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
         ))}
       </div>
 
-      <Dialog open={isPreviewOpen} onClose={handleClosePreviewAnimation}>
+      {items.length > 6 && (
+        <button
+          type="button"
+          className="mt-4 min-h-11 rounded-full border border-primary/30 px-5 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          onClick={() => setVisibleCount((count) => (count > 6 ? 6 : items.length))}
+          aria-expanded={visibleCount > 6}
+        >
+          {visibleCount > 6 ? "Show fewer gallery items" : `Show ${items.length - 6} more`}
+        </button>
+      )}
+
+      <Dialog
+        open={isPreviewOpen}
+        onClose={handleClosePreviewAnimation}
+        ariaLabel="Project media preview"
+      >
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6 md:p-10">
           <div
-            ref={previewOverlayRef}
             className="fixed inset-0 bg-background/95"
             onClick={handleClosePreviewAnimation}
           />
@@ -215,11 +164,12 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
              Using aspect-video max-width or fixed height to prevent layout shifts.
           */}
           <div
-            ref={previewContentRef}
             className="relative z-[70] w-full max-w-6xl h-[50vh] md:h-[80vh] bg-card rounded-xl flex flex-col overflow-hidden border border-border"
             onClick={(e) => e.stopPropagation()}
           >
             <button
+              type="button"
+              data-autofocus
               onClick={handleClosePreviewAnimation}
               className="absolute top-4 right-4 p-2.5 text-foreground/50 hover:text-foreground bg-background/50 hover:bg-background rounded-full z-20 transition-all duration-300 border border-border hover:scale-105"
               aria-label="Close media preview"
@@ -261,6 +211,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
                       alt={items[selectedIndex].alt || "Preview Image"}
                       fill
                       className="object-contain"
+                      sizes="(max-width: 768px) 100vw, 80vw"
                     />
                   </div>
                 ) : selectedIndex >= 0 &&
@@ -275,6 +226,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
                       key={items[selectedIndex].src}
                       src={items[selectedIndex].src}
                       controls
+                      preload="metadata"
                       onError={() => setIsVideoError(true)}
                       className="w-full h-full object-contain outline-none max-w-5xl mx-auto"
                     >
@@ -300,15 +252,17 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
               {/* Thumbnail Strip */}
               <div
                 ref={thumbnailStripRef}
-                className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent px-2"
+                className="flex gap-3 overflow-x-auto pb-2 px-2 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin]"
                 style={{ scrollBehavior: "smooth" }}
               >
-                {items.map((item, index) => (
+                {thumbnailItems.map(({ item, index }) => (
                   <button
-                    key={index}
+                    key={item.src}
+                    data-media-index={index}
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedIndex(index);
+                      setIsVideoError(false);
                     }}
                     aria-label={`Open thumbnail ${index + 1}`}
                     className={`

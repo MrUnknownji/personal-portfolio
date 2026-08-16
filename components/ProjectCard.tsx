@@ -7,6 +7,7 @@ interface ProjectCardProps {
   project: ProjectSummary;
   onClick: () => void;
   onIntent?: () => void;
+  priority?: boolean;
 }
 
 const TECH_TAGS_MAX = 3;
@@ -15,26 +16,18 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
   project,
   onClick,
   onIntent,
+  priority = false,
 }) => {
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      onClick();
-    }
-  };
-
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       data-krypton-context="project"
       data-krypton-title={project.title}
       data-krypton-summary={`${project.title}: ${project.shortDescription} Built with ${project.technologies.join(", ")}.`}
-      className="project-card group relative bg-card rounded-xl overflow-hidden cursor-pointer border border-border
+      className="project-card group relative h-full w-full bg-card rounded-xl overflow-hidden cursor-pointer border border-border text-left
                  transition-[transform,border-color] duration-150 ease-out
-                 hover:-translate-y-1 hover:border-primary/60 transform-gpu will-change-transform"
+                 hover:-translate-y-1 hover:border-primary/60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
       onClick={onClick}
-      onKeyDown={handleKeyDown}
       onFocus={onIntent}
       onPointerDown={onIntent}
       onPointerEnter={onIntent}
@@ -44,10 +37,11 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
           src={project.image}
           alt={project.title}
           fill
-          className="object-cover transition-transform duration-200 ease-out group-hover:scale-[1.04] transform-gpu will-change-transform"
+          priority={priority}
+          className="object-cover transition-transform duration-200 ease-out group-hover:scale-[1.04]"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
-        <div className="absolute inset-0 bg-black opacity-[0.12] pointer-events-none transition-opacity duration-150 group-hover:opacity-60 transform-gpu will-change-[opacity]" />
+        <div className="absolute inset-0 bg-black opacity-[0.12] pointer-events-none transition-opacity duration-150 group-hover:opacity-60" />
 
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <span
@@ -55,7 +49,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
                        bg-primary/20 border-2 border-primary/60 opacity-0 translate-y-3 scale-95
                        transition-[transform,opacity] duration-150 ease-out
                        group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100
-                       transform-gpu will-change-[transform,opacity]"
+                       "
           >
             View Project <FiArrowUpRight className="w-5 h-5" />
           </span>
@@ -96,7 +90,7 @@ const ProjectCardComponent: React.FC<ProjectCardProps> = ({
           )}
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 
