@@ -2,6 +2,9 @@
   "name": "personal-portfolio",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24.19.0 <25"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -11,8 +14,9 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:all": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:e2e",
+    "audit:all": "pnpm audit",
     "audit:prod": "pnpm audit --prod",
-    "lighthouse": "lhci autorun",
+    "lighthouse": "node scripts/run-lighthouse.mjs",
     "db:indexes": "node --env-file-if-exists=.env scripts/setup-database-indexes.mjs"
   },
   "dependencies": {
@@ -28,15 +32,15 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
-    "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.62.1",
-    "@types/node": "^24.2.1",
+    "@types/node": "^24.13.3",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
-    "eslint": "^9.33.0",
+    "eslint": "^9.39.5",
     "eslint-config-next": "16.3.1",
-    "typescript": "^5.9.2",
+    "lighthouse": "13.4.1",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.10"
   },
-  "packageManager": "pnpm@9.15.2+sha512.93e57b0126f0df74ce6bff29680394c0ba54ec47246b9cf321f0121d8d9bb03f750a705f24edc3c1180853afd7c2c3b94196d0a3d53d3e069d9e2793ef11f321"
+  "packageManager": "pnpm@11.22.0+sha512.1ff870c4c6133dfd88fb2afc46dd13d47f09c9794b438c6fdb47ca98caf3bc16381ee0be93a091b8e3824cf01f889f46d7d9e20910fb0be1ab0fb5baa80dd621"
 }

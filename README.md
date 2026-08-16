@@ -85,6 +85,8 @@ GEMINI_MODEL=gemini-3.1-flash-lite-preview
 
 ## Commands
 
+Use Node.js 24.19.0 (the version in `.nvmrc`) and pnpm 11.22.0.
+
 ```bash
 pnpm dev
 pnpm lint
@@ -93,7 +95,9 @@ pnpm build
 pnpm start
 pnpm test
 pnpm test:e2e
+pnpm audit:all
 pnpm audit:prod
+pnpm lighthouse
 pnpm db:indexes
 ```
 

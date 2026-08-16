@@ -13,13 +13,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.15.2
+          version: 11.22.0
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 24.19.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm audit:prod
+      - run: pnpm audit:all
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
