@@ -1,14 +1,11 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import dynamic from "next/dynamic";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { chatWithBot } from "@/app/actions/chat";
-import { useBotInteractions } from "./useBotInteractions";
 import { BotChat } from "./BotChat";
 import { useBotCommands } from "./useBotCommands";
-import type { EyeState } from "./types";
 import { useModalState } from "@/components/modalState";
 
 type KryptonContextMenu = {
@@ -18,35 +15,7 @@ type KryptonContextMenu = {
   label: string;
 } | null;
 
-type BotVisualMode = "svg" | "three";
-const BOT_3D_QUERY = "(min-width: 768px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)";
-
-const subscribeToBotCapability = (callback: () => void) => {
-  const query = window.matchMedia(BOT_3D_QUERY);
-  query.addEventListener("change", callback);
-  return () => query.removeEventListener("change", callback);
-};
-
-const getBotCapability = () => window.matchMedia(BOT_3D_QUERY).matches;
-
-let threeBotVisualPromise: ReturnType<typeof importThreeBotVisual> | null =
-  null;
-
-function importThreeBotVisual() {
-  return import("./ThreeBotVisual");
-}
-
-function loadThreeBotVisual() {
-  threeBotVisualPromise ??= importThreeBotVisual();
-  return threeBotVisualPromise;
-}
-
-const ThreeBotVisual = dynamic(loadThreeBotVisual, {
-  ssr: false,
-  loading: () => null,
-});
-
-function SvgBotVisual() {
+function BotVisual() {
   return (
     <div className="absolute inset-0 flex items-center justify-center">
       <div
@@ -69,7 +38,6 @@ function SvgBotVisual() {
 }
 
 export default function Bot({ initiallyOpen = false }: { initiallyOpen?: boolean }) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   const { activeProject, isModalOpen: isGlobalModalOpen } = useModalState();
@@ -80,27 +48,11 @@ export default function Bot({ initiallyOpen = false }: { initiallyOpen?: boolean
   const [bubbleText, setBubbleText] = useState<string | null>(
     initiallyOpen ? "Ask me about projects, skills, or hiring." : null,
   );
-  const [eyeState, setEyeState] = useState<EyeState>("open");
   const [contextMenu, setContextMenu] = useState<KryptonContextMenu>(null);
-  const canUse3D = useSyncExternalStore(
-    subscribeToBotCapability,
-    getBotCapability,
-    () => false,
-  );
-  const [sceneUnavailable, setSceneUnavailable] = useState(false);
-  const [hasVisualIntent, setHasVisualIntent] = useState(false);
-  const [isBotHovered, setIsBotHovered] = useState(false);
 
   const isHoveredRef = useRef(false);
-  const eyeStateRef = useRef(eyeState);
   const inputRef = useRef(input);
   const timeoutsRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
-  const hasScheduledThreePreloadRef = useRef(false);
-  const isGlobalModalOpenRef = useRef(false);
-  const handleSceneUnavailable = useCallback(() => {
-    setSceneUnavailable(true);
-  }, []);
-  const handleSceneReady = useCallback(() => undefined, []);
 
   const scheduleTimeout = (callback: () => void, delay: number) => {
     const timeout = setTimeout(() => {
@@ -120,34 +72,9 @@ export default function Bot({ initiallyOpen = false }: { initiallyOpen?: boolean
     };
   }, []);
 
-  const visualMode: BotVisualMode =
-    canUse3D && hasVisualIntent && !sceneUnavailable ? "three" : "svg";
-
-  useEffect(() => {
-    isGlobalModalOpenRef.current = isGlobalModalOpen;
-  }, [isGlobalModalOpen]);
-
   useEffect(() => {
     inputRef.current = input;
   }, [input]);
-
-  useEffect(() => {
-    eyeStateRef.current = eyeState;
-  }, [eyeState]);
-
-  const {
-    handleMouseEnter: interactionMouseEnter,
-    handleMouseLeave: interactionMouseLeave,
-    isRightClickingRef,
-  } = useBotInteractions({
-    containerRef,
-    setEyeState,
-    isProcessing,
-    isCooldown,
-    isHoveredRef,
-    setBubbleText,
-    enabled: visualMode === "three",
-  });
 
   const { handleLocalCommand } = useBotCommands({
     activeProject,
@@ -155,102 +82,34 @@ export default function Bot({ initiallyOpen = false }: { initiallyOpen?: boolean
     router,
   });
 
-  useEffect(() => {
-    if (
-      visualMode !== "three" ||
-      isGlobalModalOpen ||
-      eyeState !== "open" ||
-      isRightClickingRef.current ||
-      isProcessing ||
-      isCooldown
-    ) {
-      return;
-    }
-
-    const blinkTimeout = window.setTimeout(
-      () => {
-        if (
-          eyeStateRef.current !== "open" ||
-          isRightClickingRef.current ||
-          isProcessing ||
-          isCooldown
-        ) {
-          return;
-        }
-
-        setEyeState("closed");
-        scheduleTimeout(() => {
-          if (
-            eyeStateRef.current === "closed" &&
-            !isRightClickingRef.current &&
-            !isProcessing &&
-            !isCooldown
-          ) {
-            setEyeState("open");
-          }
-        }, 150);
-      },
-      3000 + Math.random() * 4000,
-    );
-
-    return () => window.clearTimeout(blinkTimeout);
-  }, [
-    eyeState,
-    isCooldown,
-    isGlobalModalOpen,
-    isProcessing,
-    isRightClickingRef,
-    visualMode,
-  ]);
-
   const handleMouseEnter = () => {
     isHoveredRef.current = true;
-    setIsBotHovered(true);
     if (!chatOpen && !isProcessing && !isCooldown) {
       setBubbleText("Click me to chat.");
-    }
-    if (canUse3D && !hasScheduledThreePreloadRef.current) {
-      hasScheduledThreePreloadRef.current = true;
-      const preload = () => void loadThreeBotVisual();
-      if (typeof window.requestIdleCallback === "function") {
-        window.requestIdleCallback(preload, { timeout: 250 });
-      } else {
-        scheduleTimeout(preload, 100);
-      }
-    }
-    if (visualMode === "three") {
-      interactionMouseEnter();
     }
   };
 
   const handleMouseLeave = () => {
     isHoveredRef.current = false;
-    setIsBotHovered(false);
-    interactionMouseLeave();
     if (!chatOpen && !isProcessing && !isCooldown) {
       setBubbleText(null);
     }
   };
 
   const openChat = (message = "Ask me about projects, skills, or hiring.") => {
-    setHasVisualIntent(true);
     setChatOpen(true);
-    setEyeState("happy");
     setBubbleText(message);
   };
 
   const closeChat = () => {
-    setEyeState("sad");
     setBubbleText("Okay, I will stay nearby.");
     scheduleTimeout(() => {
       setChatOpen(false);
       setBubbleText(null);
-      if (eyeStateRef.current === "sad") setEyeState("open");
     }, 1500);
   };
 
   const handleContainerClick = () => {
-    setHasVisualIntent(true);
     if (chatOpen) {
       closeChat();
       return;
@@ -265,11 +124,9 @@ export default function Bot({ initiallyOpen = false }: { initiallyOpen?: boolean
   };
 
   const handleDoubleClick = () => {
-    setEyeState("angry");
     setBubbleText("Hey! Personal space! 🤖");
     scheduleTimeout(() => {
       setBubbleText(null);
-      setEyeState("open");
     }, 2000);
   };
 
@@ -279,51 +136,19 @@ export default function Bot({ initiallyOpen = false }: { initiallyOpen?: boolean
     const userMsg = prompt.trim();
     setInput("");
     setIsProcessing(true);
-    setEyeState("thinking");
     setBubbleText("Thinking...");
 
     try {
       const response =
         handleLocalCommand(userMsg) || (await chatWithBot(userMsg));
       setBubbleText(response);
-
-      const lowerResp = response.toLowerCase();
-      if (
-        lowerResp.includes("sorry") ||
-        lowerResp.includes("unfortunately") ||
-        lowerResp.includes("sad") ||
-        lowerResp.includes("apologize") ||
-        lowerResp.includes("can't") ||
-        lowerResp.includes("cannot")
-      ) {
-        setEyeState("sad");
-      } else if (
-        lowerResp.includes("wow") ||
-        lowerResp.includes("awesome") ||
-        lowerResp.includes("great") ||
-        lowerResp.includes("cool")
-      ) {
-        setEyeState("surprised");
-      } else if (
-        lowerResp.includes("love") ||
-        lowerResp.includes("happy") ||
-        lowerResp.includes("glad")
-      ) {
-        setEyeState("happy");
-      } else {
-        setEyeState("open");
-      }
     } catch {
       setBubbleText("I could not process that request.");
-      setEyeState("error");
     } finally {
       setIsProcessing(false);
       setIsCooldown(true);
       scheduleTimeout(() => {
         setIsCooldown(false);
-        if (["happy", "sad", "surprised"].includes(eyeStateRef.current)) {
-          setEyeState("open");
-        }
         if (!isHoveredRef.current && !inputRef.current) {
           setChatOpen(false);
         }
@@ -431,22 +256,11 @@ export default function Bot({ initiallyOpen = false }: { initiallyOpen?: boolean
       />
 
       <div
-        ref={containerRef}
-        className={`group relative z-10 flex h-full w-full items-center justify-center ${visualMode === "svg" ? "cursor-pointer" : ""}`}
+        className="group relative z-10 flex h-full w-full cursor-pointer items-center justify-center"
         style={{ pointerEvents: "auto" }}
       >
-        {chatOpen ? <SvgBotVisual /> : (
+        {chatOpen ? <BotVisual /> : (
           <Image src="/bot-mark.svg" alt="" width={42} height={42} className="size-11" />
-        )}
-        {chatOpen && visualMode === "three" && (
-          <ThreeBotVisual
-            containerRef={containerRef}
-            active={isBotHovered || isProcessing || isCooldown}
-            eyeState={eyeState}
-            isGlobalModalOpenRef={isGlobalModalOpenRef}
-            onReady={handleSceneReady}
-            onUnavailable={handleSceneUnavailable}
-          />
         )}
         <button
           type="button"

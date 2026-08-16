@@ -2,6 +2,10 @@
 
 Date: 2026-06-28
 
+> Historical measurement note: the deferred 3D assistant described in this
+> report was subsequently removed completely. The current assistant uses a
+> static optimized PNG and does not ship Three.js or create a WebGL scene.
+
 ## Test Setup
 
 - Build: production (`pnpm build`, `next start -p 3001`)

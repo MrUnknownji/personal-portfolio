@@ -1,7 +1,7 @@
 # Sandeep Kumar Portfolio
 
 A production-focused personal portfolio built with Next.js App Router,
-TypeScript, Tailwind CSS, Three.js, and MongoDB-backed contact handling.
+TypeScript, Tailwind CSS, and MongoDB-backed contact handling.
 
 The site is designed to present a small set of selected projects as real product
 work, not just visual demos. It includes animated landing sections, a searchable
@@ -20,8 +20,8 @@ configured.
   screenshot galleries, source links, live demo links, and case-study notes.
 - Real contact API route with shared validation, a spam honeypot, durable
   IP/email rate limits, retention controls, and user-facing error states.
-- Intent-loaded Three.js assistant bot with local navigation commands, project actions,
-  contextual right-click summaries, and optional Gemini fallback.
+- Lightweight image-based assistant bot with local navigation commands, project
+  actions, contextual right-click summaries, and optional Gemini fallback.
 - Server-rendered social profile links that do not depend on client JavaScript.
 - Responsive App Router layout with animated hero, about, skills, contact, and
   footer sections.
@@ -52,7 +52,7 @@ app/
   my-projects/[id]/          Indexable project case-study pages
 
 components/
-  Bot/                       Three.js assistant scene, chat UI, interactions
+  Bot/                       Lightweight assistant visual, chat UI, commands
   ProjectModal*              Gallery, tech stack, expandable case-study notes
   ContactSectionComponents/  Contact form and contact information
 
