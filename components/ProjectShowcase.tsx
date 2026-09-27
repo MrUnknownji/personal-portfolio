@@ -10,7 +10,6 @@ const bidSteps = ["₹4,250", "₹4,300", "₹4,450", "SOLD"];
 
 function ShowcaseRow({ project, index }: { project: Project; index: number }) {
   const router = useRouter();
-  const [active, setActive] = useState(false);
   const [frame, setFrame] = useState(0);
   const [outgoingFrame, setOutgoingFrame] = useState<number | null>(null);
   const frameRef = useRef(0);
@@ -18,12 +17,6 @@ function ShowcaseRow({ project, index }: { project: Project; index: number }) {
   const kind = project.showcaseVariant;
   const frames = project.showcaseFrames ?? [];
   const currentFrame = frames[frame] ?? frames[0];
-
-  useEffect(() => {
-    if (!active || kind !== "bid" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const timer = window.setInterval(() => setBidStep((current) => (current + 1) % bidSteps.length), 850);
-    return () => window.clearInterval(timer);
-  }, [active, kind]);
 
   useEffect(() => {
     if (outgoingFrame === null) return;
@@ -47,15 +40,15 @@ function ShowcaseRow({ project, index }: { project: Project; index: number }) {
   };
 
   return (
-    <article className={`showcase-row showcase-${kind ?? "generic"}`} data-offset-project onPointerMove={selectFrame} onPointerEnter={() => { setActive(true); router.prefetch(`/my-projects/${project.id}`); }} onPointerLeave={() => { setActive(false); setBidStep(0); }} onFocus={() => { setActive(true); router.prefetch(`/my-projects/${project.id}`); }} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setActive(false); }}>
+    <article className={`showcase-row showcase-${kind ?? "generic"}`} data-offset-project onPointerEnter={() => router.prefetch(`/my-projects/${project.id}`)} onFocus={() => router.prefetch(`/my-projects/${project.id}`)}>
       <div className="showcase-head"><span>0{index + 1} / {project.category}</span><span>{project.year}</span></div>
       <div className="showcase-main">
         <div className="showcase-copy"><ViewTransition name={`project-title-${project.id}`} share="project-morph" default="none"><h3>{project.title}</h3></ViewTransition><p>{project.shortDescription}</p><span className="showcase-tech">{project.technologies.slice(0, 4).join(" · ")}</span><Link href={`/my-projects/${project.id}`}>Explore case study <span aria-hidden="true">↗</span></Link></div>
         <ViewTransition name={`project-media-${project.id}`} share="project-morph" default="none"><div className="showcase-media">
           <Link className="showcase-media-link" href={`/my-projects/${project.id}`} aria-label={`View ${project.title} case study`} />
-          {kind === "omni" && <><div className="showcase-browser" data-offset-depth><div className="showcase-browser-top"><span>● ● ●</span><span>{project.title} / {currentFrame?.label}</span></div>{outgoingFrame !== null && frames[outgoingFrame] && <Image className="showcase-browser-frame showcase-browser-frame-outgoing" src={frames[outgoingFrame].src} alt="" fill sizes="(max-width: 900px) 90vw, 50vw" /> }<Image key={currentFrame?.src || project.image} className="showcase-browser-frame showcase-browser-frame-current" src={currentFrame?.src || project.image} alt={currentFrame?.alt || `${project.title} interface`} fill sizes="(max-width: 900px) 90vw, 50vw" /></div><div className="showcase-media-controls" aria-label={`${project.title} preview screens`}>{frames.map((item, position) => <button key={item.label} type="button" aria-pressed={frame === position} onClick={() => changeFrame(position)}>{item.label}</button>)}</div></>}
-          {kind === "mirror" && <><div className="showcase-wallpapers" data-offset-depth>{frames.map((item, position) => <div className="showcase-wallpaper" key={item.src} style={{ "--item": position } as CSSProperties}><Image src={item.src} alt={item.alt} fill sizes="(max-width: 900px) 28vw, 16vw" /></div>)}</div><span className="showcase-media-caption">{frames.map((item) => item.label).join(" → ")}</span></>}
-          {kind === "bid" && <><div className="showcase-bid-screen" data-offset-depth><Image src={project.image} alt={`${project.title} interface preview`} fill sizes="(max-width: 900px) 90vw, 50vw" /></div><div className="showcase-bid-ticker" aria-hidden="true"><span>LIVE BID / INTERACTION SKETCH</span><strong>{bidSteps[bidStep]}</strong></div></>}
+          {kind === "omni" && <><div className="showcase-browser" onPointerMove={selectFrame}><div className="showcase-browser-top"><span>● ● ●</span><span>{project.title} / {currentFrame?.label}</span></div>{outgoingFrame !== null && frames[outgoingFrame] && <Image className="showcase-browser-frame showcase-browser-frame-outgoing" src={frames[outgoingFrame].src} alt="" fill sizes="(max-width: 900px) 90vw, 50vw" /> }<Image key={currentFrame?.src || project.image} className="showcase-browser-frame showcase-browser-frame-current" src={currentFrame?.src || project.image} alt={currentFrame?.alt || `${project.title} interface`} fill sizes="(max-width: 900px) 90vw, 50vw" /></div><div className="showcase-media-controls" aria-label={`${project.title} preview screens`}>{frames.map((item, position) => <button key={item.label} type="button" aria-pressed={frame === position} onClick={() => changeFrame(position)}>{item.label}</button>)}</div></>}
+          {kind === "mirror" && <><div className="showcase-wallpapers">{frames.map((item, position) => <div className="showcase-wallpaper" key={item.src} data-active={frame === position} style={{ "--item": position } as CSSProperties}><Image src={item.src} alt={item.alt} fill sizes="(max-width: 900px) 28vw, 16vw" /></div>)}</div><div className="showcase-media-controls" aria-label="Mirror product preview steps">{frames.map((item, position) => <button key={item.label} type="button" aria-pressed={frame === position} onClick={() => changeFrame(position)}>{item.label}</button>)}</div></>}
+          {kind === "bid" && <><div className="showcase-bid-screen"><Image src={project.image} alt={`${project.title} interface preview`} fill sizes="(max-width: 900px) 90vw, 50vw" /></div><div className="showcase-bid-ticker"><span>Bid update / interaction sketch</span><strong aria-live="polite">{bidSteps[bidStep]}</strong><button type="button" onClick={() => setBidStep((current) => (current + 1) % bidSteps.length)} aria-label="Preview next bid update">Next bid ↗</button></div></>}
           {!kind && <div className="showcase-bid-screen" data-offset-depth><Image src={project.image} alt={`${project.title} interface preview`} fill sizes="(max-width: 900px) 90vw, 50vw" /></div>}
         </div></ViewTransition>
       </div>
@@ -64,5 +57,5 @@ function ShowcaseRow({ project, index }: { project: Project; index: number }) {
 }
 
 export default function ProjectShowcase({ projects }: { projects: Project[] }) {
-  return <section className="offset-work" id="work" data-build-file="ProjectShowcase.tsx" aria-labelledby="work-title"><div className="offset-work-rail" aria-hidden="true"><span>01 / Selected work</span></div><div className="offset-work-inner"><header className="offset-work-header" data-offset-reveal><span className="offset-kicker">Work / 001—003</span><h2 id="work-title">Ideas made<br />usable<span>.</span></h2><p>Move through the work. Each preview shows a different part of the product.</p></header>{projects.map((project, index) => <ShowcaseRow key={project.id} project={project} index={index} />)}<Link className="offset-more-work" href="/my-projects">Browse all projects <span aria-hidden="true">↗</span></Link></div></section>;
+  return <section className="offset-work" id="work" data-build-file="ProjectShowcase.tsx" data-build-note="Three products, three kinds of interaction. Open a case study to see the constraints and decisions behind each one." aria-labelledby="work-title"><div className="offset-work-rail" aria-hidden="true"><span>01 / Selected work</span></div><div className="offset-work-inner"><header className="offset-work-header" data-offset-reveal><span className="offset-kicker">Work / 001—003</span><h2 id="work-title">Work that<br />holds up<span>.</span></h2><p>Real-time bidding, a paired-wallpaper product, and an end-to-end store. Explore the product, then the decisions behind it.</p></header>{projects.map((project, index) => <ShowcaseRow key={project.id} project={project} index={index} />)}<Link className="offset-more-work" href="/my-projects">Browse all projects <span aria-hidden="true">↗</span></Link></div></section>;
 }

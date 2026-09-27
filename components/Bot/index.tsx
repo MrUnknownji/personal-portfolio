@@ -136,7 +136,7 @@ export default function Bot({ initiallyOpen = false }: { initiallyOpen?: boolean
 
   const suggestions = useMemo(() => activeProject
     ? [`Summarize ${activeProject.title}`, "Open live demo", "Open GitHub"]
-    : ["Show projects", "Summarize Sandeep", "Go to contact"], [activeProject]);
+    : ["Show projects", "Summarize BidStrike", "Summarize Mirror Wallpapers", "Go to contact"], [activeProject]);
 
   const onSend = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); void runPrompt(input); };
   const contextLeft = contextPrompt ? Math.max(12, Math.min(contextPrompt.x, window.innerWidth - 270)) : 0;
@@ -146,8 +146,9 @@ export default function Bot({ initiallyOpen = false }: { initiallyOpen?: boolean
     {chatOpen && <div className="krypton-panel" ref={panelRef} role="region" aria-label="Krypton portfolio assistant">
       <BotChat messages={messages} input={input} inputRef={inputRef} messagesRef={messagesRef} isProcessing={isProcessing} suggestions={suggestions} onInput={setInput} onSend={onSend} onClose={() => void closeChat()} onSuggestion={(suggestion) => void runPrompt(suggestion)} />
     </div>}
-    <button ref={launcherRef} type="button" className="krypton-launcher" onClick={() => chatOpen ? void closeChat() : setChatOpen(true)} aria-label={chatOpen ? "Close Krypton assistant" : "Open Krypton assistant"} aria-expanded={chatOpen}>
+    <button ref={launcherRef} type="button" className="krypton-launcher" onClick={() => chatOpen ? void closeChat() : setChatOpen(true)} aria-label={chatOpen ? "Close Krypton assistant" : "Ask about Sandeep's work"} aria-expanded={chatOpen}>
       <KryptonMark />
+      {!chatOpen && <span>Ask about my work</span>}
     </button>
     {contextPrompt && <div className="krypton-context" style={{ left: contextLeft, top: contextTop }} onClick={(event) => event.stopPropagation()}><button type="button" onClick={() => { const prompt = contextPrompt.prompt; setContextPrompt(null); void runPrompt(prompt); }}>{contextPrompt.label} ↗</button></div>}
   </div>;

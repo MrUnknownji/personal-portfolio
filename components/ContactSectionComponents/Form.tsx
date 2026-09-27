@@ -210,58 +210,6 @@ const Form: React.FC<FormProps> = ({ onSubmitSuccess }) => {
         </div>
 
         <div className="relative">
-          <input
-            id="contact-category"
-            type="text"
-            name="category"
-            value={formValues.category}
-            className={getInputClasses("category", !!errors.category)}
-            onFocus={() => setFocusedField("category")}
-            onBlur={() => setFocusedField(null)}
-            onChange={(event) =>
-              handleFieldChange("category", event.target.value)
-            }
-            disabled={isSubmitting}
-            autoComplete="off"
-            maxLength={CONTACT_FIELD_LIMITS.category}
-            aria-invalid={Boolean(errors.category)}
-            aria-describedby={errors.category ? "contact-category-error" : undefined}
-          />
-          {renderFloatingLabel("category", "Category (e.g., Project Inquiry)")}
-          {errors.category && (
-            <span id="contact-category-error" className="absolute -bottom-5 left-0 text-xs text-red-400">
-              {errors.category}
-            </span>
-          )}
-        </div>
-
-        <div className="relative">
-          <input
-            id="contact-subject"
-            type="text"
-            name="subject"
-            value={formValues.subject}
-            className={getInputClasses("subject", !!errors.subject)}
-            onFocus={() => setFocusedField("subject")}
-            onBlur={() => setFocusedField(null)}
-            onChange={(event) =>
-              handleFieldChange("subject", event.target.value)
-            }
-            disabled={isSubmitting}
-            autoComplete="off"
-            maxLength={CONTACT_FIELD_LIMITS.subject}
-            aria-invalid={Boolean(errors.subject)}
-            aria-describedby={errors.subject ? "contact-subject-error" : undefined}
-          />
-          {renderFloatingLabel("subject", "Subject")}
-          {errors.subject && (
-            <span id="contact-subject-error" className="absolute -bottom-5 left-0 text-xs text-red-400">
-              {errors.subject}
-            </span>
-          )}
-        </div>
-
-        <div className="relative">
           <textarea
             id="contact-message"
             name="message"

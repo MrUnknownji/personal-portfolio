@@ -5,8 +5,8 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 const milestones = [
   { year: "2020", title: "First builds", detail: "Mostly broken. Enough to keep going." },
   { year: "2023", title: "Computer Science", detail: "BSc. Learning why things work." },
-  { year: "2024", title: "Developer at TCS", detail: "Joined in 2024." },
-  { year: "Now", title: "Keep exploring", detail: "Web, mobile and creative code." },
+  { year: "2024", title: "Developer at TCS", detail: "Professional development alongside independent product work." },
+  { year: "Now", title: "Build across mediums", detail: "Web and mobile products, motion, and visual stories." },
 ];
 
 const desktopWave = "M -70 125 C -20 175 25 205 85 205 C 200 205 220 75 340 75 C 465 75 520 245 640 245 C 770 245 785 110 850 110 C 920 110 970 75 1070 110";

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Dialog } from "@/components/ui/Dialog";
 import { applyPortfolioSettings, portfolioPalettes, readPortfolioSettings } from "@/components/PortfolioPreferences";
 
 const studies = [
   { number: "001", title: "Motion type", medium: "Typography / Interaction", note: "Tune the spacing here, then see it travel through the portfolio." },
-  { number: "002", title: "Signal paths", medium: "SVG / Systems", note: "One network, three ways to get a signal from input to output." },
+  { number: "002", title: "Signal paths", medium: "SVG / Systems", note: "Explore a route, then send a sample bid through a simplified event flow." },
   { number: "003", title: "Color study", medium: "Color / Contrast", note: "Choose an accent. It follows you into the work and case studies." },
 ] as const;
 
@@ -39,6 +39,11 @@ export default function CreativeLab() {
   const [route, setRoute] = useState(0);
   const [signalPreviewActive, setSignalPreviewActive] = useState(false);
   const [palette, setPalette] = useState(0);
+  const [sampleBid, setSampleBid] = useState(4250);
+  const [bidPhase, setBidPhase] = useState<"ready" | "sending" | "synced">("ready");
+  const bidTimer = useRef<number | null>(null);
+
+  useEffect(() => () => { if (bidTimer.current !== null) window.clearTimeout(bidTimer.current); }, []);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -62,11 +67,24 @@ export default function CreativeLab() {
     setSpacing(0);
     setPalette(0);
     setRoute(0);
+    setSampleBid(4250);
+    setBidPhase("ready");
+    if (bidTimer.current !== null) window.clearTimeout(bidTimer.current);
     applyPortfolioSettings({ spacing: 0, palette: 0 });
   };
 
+  const sendSampleBid = () => {
+    if (bidPhase === "sending") return;
+    setBidPhase("sending");
+    bidTimer.current = window.setTimeout(() => {
+      setSampleBid((current) => current + 50);
+      setBidPhase("synced");
+      bidTimer.current = null;
+    }, 550);
+  };
+
   return (
-    <section className="offset-lab" id="lab" data-build-file="CreativeLab.tsx" aria-labelledby="lab-title">
+    <section className="offset-lab" id="lab" data-build-file="CreativeLab.tsx" data-build-note="The lab is a place to inspect how type, events, and color respond to input." aria-labelledby="lab-title">
       <div className="offset-wrap">
         <div className="offset-lab-heading" data-offset-reveal>
           <span className="offset-kicker">02 / The lab</span>
@@ -103,6 +121,11 @@ export default function CreativeLab() {
             {open === 1 && <div className="offset-lab-signal-play">
               <SignalDiagram route={route} />
               <div className="offset-lab-route-bar"><span>{routes[route].detail}</span><div className="offset-lab-route-controls">{routes.map((item, index) => <button type="button" key={item.name} aria-pressed={route === index} onClick={() => setRoute(index)}>{item.name}</button>)}</div></div>
+              <div className="lab-bid-flow">
+                <div><span className="offset-kicker">BidStrike / interaction model</span><h3>One bid. Two views.</h3><p>This sketch shows the feedback a bidder needs while an event moves from submission to a shared price. It is a local demonstration, separate from the live product.</p></div>
+                <div className="lab-bid-states" aria-live="polite"><span>Bidder / {bidPhase === "sending" ? "sending…" : `₹${sampleBid.toLocaleString("en-IN")}`}</span><span>Shared view / {bidPhase === "sending" ? `₹${sampleBid.toLocaleString("en-IN")}` : `₹${sampleBid.toLocaleString("en-IN")}`}</span></div>
+                <div className="lab-bid-actions"><button type="button" onClick={sendSampleBid} aria-disabled={bidPhase === "sending"}>Place sample bid +₹50 ↗</button><span role="status">{bidPhase === "ready" ? "Ready to bid" : bidPhase === "sending" ? "Submitting the new bid" : "Both views show the updated price"}</span></div>
+              </div>
             </div>}
             {open === 2 && <div className="offset-lab-palette-play" style={{ "--study-color": portfolioPalettes[palette].accent } as CSSProperties}>
               <div className="offset-ink-strips">{portfolioPalettes.map((color, index) => <button type="button" key={color.name} aria-label={`Use ${color.name} accent`} aria-pressed={palette === index} onClick={() => changePalette(index)} style={{ "--ink": color.accent } as CSSProperties}><span>{color.name}</span><i aria-hidden="true">{palette === index ? "●" : "○"}</i></button>)}</div>

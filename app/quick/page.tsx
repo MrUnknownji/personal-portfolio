@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { selectedProjects } from "@/data/projects";
 import { SITE_CONFIG } from "@/data/site";
+import PrintProfile from "@/components/PrintProfile";
 
 export const metadata: Metadata = {
   title: "Quick View",
@@ -40,7 +41,7 @@ export default function QuickView() {
       <section id="education" className="quick-view-section" aria-labelledby="quick-background-title">
         <div className="quick-view-section-heading"><span>Background</span><h2 id="quick-background-title">Experience &amp; education</h2></div>
         <div className="quick-view-facts"><p><strong>2024—Now</strong><span>Developer at TCS</span></p><p><strong>2023</strong><span>BSc Computer Science</span></p></div>
-        <a className="quick-view-more" href={`mailto:${SITE_CONFIG.email}?subject=R%C3%A9sum%C3%A9%20request`}>Request résumé <span aria-hidden="true">↗</span></a>
+        <div className="quick-view-profile-actions"><PrintProfile /><a className="quick-view-more" href={`mailto:${SITE_CONFIG.email}?subject=R%C3%A9sum%C3%A9%20request`}>Request full résumé <span aria-hidden="true">↗</span></a></div>
       </section>
 
       <section id="contact" className="quick-view-contact" aria-labelledby="quick-contact-title">

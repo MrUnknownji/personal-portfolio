@@ -7,13 +7,13 @@ import { selectedProjects } from "@/data/projects";
 const stages = [
   { title: "Idea", note: "Find the useful flow.", tools: [] },
   { title: "Interface", note: "Make the flow legible.", tools: ["React Native", "Next.js", "TypeScript"] },
-  { title: "Interaction", note: "Give feedback a purpose.", tools: ["GSAP", "Anime.js", "SVG"] },
+  { title: "Interaction", note: "Give feedback a purpose.", tools: ["CSS motion", "Anime.js", "SVG"] },
   { title: "Systems", note: "Keep the product in sync.", tools: ["Pusher", "PostgreSQL", "Supabase"] },
   { title: "Delivery", note: "Put it in people's hands.", tools: [] },
 ] as const;
 
 const projectEvidence = selectedProjects.filter((project) => [9, 11, 10].includes(project.id));
-const labTools = new Set(["GSAP", "Anime.js", "SVG"]);
+const labTools = new Set(["CSS motion", "Anime.js", "SVG"]);
 
 export default function HowIBuild() {
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
@@ -23,7 +23,7 @@ export default function HowIBuild() {
   const related = (technologies: string[]) => !activeTool || technologies.includes(activeTool);
 
   return (
-    <section id="skills" className="offset-toolkit" aria-labelledby="how-i-build-title" data-build-file="HowIBuild.tsx" data-offset-reveal>
+    <section id="skills" className="offset-toolkit" aria-labelledby="how-i-build-title" data-build-file="HowIBuild.tsx" data-build-note="Each technology points to a project where it has a specific job." data-offset-reveal>
       <div className="offset-toolkit-heading"><span className="offset-kicker">04 / How I build</span><h3 id="how-i-build-title">From idea<br />to shipped<span>.</span></h3><p>Follow a tool to the work that uses it.</p></div>
       <div className="build-map" aria-label="How I build, from idea to delivery">
         {stages.map((stage, index) => <div className="build-map-stage" key={stage.title}>

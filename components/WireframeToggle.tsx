@@ -12,7 +12,7 @@ export default function WireframeToggle() {
   }, [enabled]);
 
   return <>
-    <button className="offset-wireframe-trigger" type="button" aria-pressed={enabled} onClick={() => setEnabled(!enabled)}>{enabled ? "Close file view ×" : "Don't click ↗"}</button>
-    {enabled && createPortal(<button className="offset-wireframe-exit" type="button" onClick={() => setEnabled(false)}>Rebuild the page ×</button>, document.body)}
+    <button className="offset-wireframe-trigger" type="button" aria-pressed={enabled} onClick={() => setEnabled(!enabled)}>{enabled ? "Close build file ×" : "Open build file ↗"}</button>
+    {enabled && createPortal(<button className="offset-wireframe-exit" type="button" onClick={() => setEnabled(false)}>Close build file ×</button>, document.body)}
   </>;
 }

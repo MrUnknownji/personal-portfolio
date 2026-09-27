@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { selectedProjects } from "@/data/projects";
 
 const links = [
-  { label: "Work", href: "/my-projects" },
+  { label: "Projects", href: "/my-projects" },
   { label: "Lab", href: "/#lab" },
   { label: "About", href: "/#about" },
   { label: "Build", href: "/#skills" },
@@ -76,8 +76,7 @@ export default function Header() {
     let attempts = 0;
     const revealSection = () => {
       const section = document.getElementById(sectionId);
-      const motionPending = window.matchMedia("(min-width: 900px) and (prefers-reduced-motion: no-preference)").matches && !document.querySelector(".offset-motion-enabled");
-      if ((!section || motionPending) && attempts++ < 120) {
+      if (!section && attempts++ < 120) {
         frame = requestAnimationFrame(revealSection);
         return;
       }
@@ -124,12 +123,12 @@ export default function Header() {
         <Link href="/" className="print-brand" onClick={() => setOpen(false)} aria-label="Sandeep Kumar homepage">Sandeep Kumar <span>Full-stack developer</span></Link>
         <span className="print-header-section" aria-live="off">{sectionLabel}</span>
         <nav className="print-desktop-nav" aria-label="Primary navigation">{navigationLinks.map((link, index) => <Link href={link.href} key={link.label} onClick={(event) => handleNav(event, link.href)} onPointerEnter={(event) => { if (event.pointerType !== "touch" && pathname !== "/quick") setPreview(link.label); }} onPointerMove={movePreview} onPointerLeave={() => setPreview(null)}><span>0{index + 1}</span>{link.label}</Link>)}</nav>
-        <nav className="print-view-switch" aria-label="Portfolio view"><span>View</span><Link href="/" aria-current={pathname === "/quick" ? undefined : "page"}>Experience</Link><Link href="/quick" aria-current={pathname === "/quick" ? "page" : undefined}>Quick</Link></nav>
+        <nav className="print-view-switch" aria-label="Portfolio view"><span>View</span><Link href="/" aria-current={pathname === "/quick" ? undefined : "page"}>Experience</Link><Link href="/quick" aria-current={pathname === "/quick" ? "page" : undefined}>Quick profile</Link></nav>
         <span className="print-availability"><i /> Available for opportunities</span>
         <button className="print-menu-button" ref={menuButton} type="button" aria-expanded={open} aria-controls="print-mobile-nav" aria-label={open ? "Close navigation menu" : "Open navigation menu"} onClick={() => setOpen(!open)}>{open ? "Close −" : "Menu +"}</button>
       </div>
       {open && <nav id="print-mobile-nav" className="print-mobile-nav" aria-label="Mobile navigation">{navigationLinks.map((link) => <Link href={link.href} key={link.label} onClick={(event) => handleNav(event, link.href)}>{link.label}<span aria-hidden="true">↗</span></Link>)}</nav>}
-      <div ref={previewRef} className="print-nav-preview" data-visible={!!preview} aria-hidden="true">{preview === "Work" && <><Image src={selectedProjects[0].image} alt="" fill sizes="220px" /><span>Selected work / 06 projects</span></>}{preview === "Lab" && <><strong>LAB / 001</strong><span>Experiments in motion and form</span></>}{preview === "About" && <><Image src="/images/sandeep-cutout-640.webp" alt="" fill unoptimized sizes="220px" /><span>Sandeep / Punjab, India</span></>}{preview === "Build" && <><strong>IDEA → SHIP</strong><span>Tools connected to real work</span></>}{preview === "Contact" && <><strong>AVAILABLE ●</strong><span>Punjab, India</span></>}</div>
+      <div ref={previewRef} className="print-nav-preview" data-visible={!!preview} aria-hidden="true">{preview === "Projects" && <><Image src={selectedProjects[0].image} alt="" fill sizes="220px" /><span>Selected work / 06 projects</span></>}{preview === "Lab" && <><strong>LAB / 001</strong><span>Experiments in motion and form</span></>}{preview === "About" && <><Image src="/images/sandeep-cutout-640.webp" alt="" fill unoptimized sizes="220px" /><span>Sandeep / Punjab, India</span></>}{preview === "Build" && <><strong>IDEA → SHIP</strong><span>Tools connected to real work</span></>}{preview === "Contact" && <><strong>AVAILABLE ●</strong><span>Punjab, India</span></>}</div>
     </header>
   );
 }

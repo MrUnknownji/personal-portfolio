@@ -1,5 +1,5 @@
-import Image from "next/image";
 import type { Metadata } from "next";
+import MotionPiece from "@/components/MotionPiece";
 
 export const metadata: Metadata = {
   title: "Motion & Visual Work",
@@ -21,12 +21,6 @@ export default function MotionPage() {
       <h1 id="motion-title">Stories in<br />motion<span>.</span></h1>
       <div className="motion-page-intro"><p>Technology stories told through research, pacing, and visuals. Selected videos from CruxLog.</p><a href="https://www.youtube.com/@cruxlog" target="_blank" rel="noopener noreferrer">Visit the channel ↗</a></div>
     </header>
-    <div className="motion-page-grid">
-      {videos.map((video, index) => <a className="motion-page-piece" href={`https://www.youtube.com/watch?v=${video.id}`} key={video.id} target="_blank" rel="noopener noreferrer" aria-label={`Watch ${video.title} on YouTube`}>
-        <div className="motion-page-image"><Image src={`https://i.ytimg.com/vi/${video.id}/hq720.jpg`} alt="" fill sizes="(max-width: 760px) 100vw, 48vw" /><span>{video.duration}</span></div>
-        <div className="motion-page-piece-meta"><span>CRUXLOG / {String(index + 1).padStart(2, "0")}</span><span>WATCH ↗</span></div>
-        <h2>{video.title}</h2>
-      </a>)}
-    </div>
+    <div className="motion-page-grid">{videos.map((video, index) => <MotionPiece key={video.id} {...video} index={index} />)}</div>
   </section>;
 }

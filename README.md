@@ -3,9 +3,10 @@
 A production-focused personal portfolio built with Next.js App Router,
 TypeScript, Tailwind CSS, and MongoDB-backed contact handling.
 
-The site is designed to present a small set of selected projects as real product
-work, not just visual demos. It includes animated landing sections, a searchable
-project gallery, rich project modals, and Krypton, an interactive portfolio
+The site presents six selected products through dedicated case studies. Each
+study connects the problem, a design or engineering decision, curated screens,
+and source or demo evidence. The project index is searchable, and the homepage
+includes an interactive build-file view, a small lab, and Krypton, a portfolio
 assistant that can answer local portfolio questions or use Gemini when
 configured.
 
@@ -16,15 +17,15 @@ configured.
 
 ## Features
 
-- Curated selected-work page with search, category filters, project modals,
-  screenshot galleries, source links, live demo links, and case-study notes.
+- Curated selected-work page with search, category filters, full case-study
+  routes, inspectable screenshot galleries, source links, and live demos.
 - Real contact API route with shared validation, a spam honeypot, durable
   IP/email rate limits, retention controls, and user-facing error states.
 - Lightweight image-based assistant bot with local navigation commands, project
   actions, contextual right-click summaries, and optional Gemini fallback.
 - Server-rendered social profile links that do not depend on client JavaScript.
-- Responsive App Router layout with animated hero, about, skills, contact, and
-  footer sections.
+- Responsive App Router layout with a direct path into the work, an explanatory
+  build-file view, interactive studies, contact, and a printable quick profile.
 
 ## Selected Projects
 
@@ -47,7 +48,6 @@ portfolio experience is intentionally limited to stronger selected work.
 ```text
 app/
   api/contact/route.ts       Validated, rate-limited contact submissions
-  api/projects/[id]/route.ts On-demand selected project details
   actions/chat.ts            Krypton local/Gemini response action
   my-projects/[id]/          Indexable project case-study pages
 
@@ -58,6 +58,7 @@ components/
 
 data/
   projects.ts               Selected projects and archive data
+  projectStories.ts          Decisions and curated media for case studies
   site.ts                   Shared identity/contact configuration
 
 lib/

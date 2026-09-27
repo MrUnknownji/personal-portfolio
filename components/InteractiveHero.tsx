@@ -7,7 +7,7 @@ const buildingLetters = [..."Building"];
 
 export default function InteractiveHero() {
   return (
-    <section className="offset-hero" data-offset-hero data-build-file="InteractiveHero.tsx" aria-labelledby="home-title">
+    <section className="offset-hero" data-offset-hero data-build-file="InteractiveHero.tsx" data-build-note="The opening connects my work in interfaces, systems, and motion to three projects you can inspect." aria-labelledby="home-title">
       <div className="offset-hero-band" data-offset-band aria-hidden="true" />
       <div className="offset-hero-heading" data-offset-heading>
         <div className="offset-hero-file-head"><span className="offset-kicker">Full-stack developer · Creative coder · Punjab, India</span><span>File / 2026</span></div>
@@ -27,19 +27,13 @@ export default function InteractiveHero() {
         <div className="offset-portrait-annotations" aria-hidden="true"><span>01 / Developer</span><span>02 / Motion</span><span>03 / Systems</span></div>
       </div>
       <div className="offset-hero-canvas" data-offset-note>
-        <span className="offset-canvas-label">Currently / on the desk</span>
-        <div><span>Building</span><strong>Web Video Editor</strong></div>
-        <div><span>Learning</span><strong>System design</strong></div>
-        <div><span>Exploring</span><strong>Creative development</strong></div>
-        <Link href="#work">Explore selected work <span aria-hidden="true">↗</span></Link>
+        <span className="offset-canvas-label">What I make / 2026</span>
+        <p>Web and mobile products shaped around clear interfaces, responsive systems, and useful motion.</p>
+        <div><span>Real-time product</span><strong>BidStrike</strong></div>
+        <div><span>Mobile + AI</span><strong>Mirror Wallpapers</strong></div>
+        <Link href="#work">See the work <span aria-hidden="true">↗</span></Link>
       </div>
-      <div className="offset-hero-foot" data-offset-foot><span>Design / Development / Delivery</span><WireframeToggle /><span>Scroll to see it take shape ↓</span></div>
-      <div className="offset-intro-stage" data-offset-intro>
-        <span className="offset-kicker">The build file / 01</span>
-        <h2>Selected<br />work<span>.</span></h2>
-        <p>Three products. Three different problems to solve.</p>
-        <span className="offset-intro-next">Open the work ↓</span>
-      </div>
+      <div className="offset-hero-foot" data-offset-foot><span>Design / Development / Delivery</span><WireframeToggle /><span>Selected work ↓</span></div>
     </section>
   );
 }

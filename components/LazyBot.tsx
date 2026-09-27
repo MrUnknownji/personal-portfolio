@@ -19,9 +19,10 @@ export default function LazyBot() {
       onClick={() => setIsActivated(true)}
       onPointerEnter={() => void loadBot()}
       onFocus={() => void loadBot()}
-      aria-label="Ask Krypton portfolio assistant"
+      aria-label="Ask about Sandeep's work"
     >
       <KryptonMark />
+      <span>Ask about my work</span>
     </button>
   );
 }

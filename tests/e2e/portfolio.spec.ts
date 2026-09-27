@@ -5,10 +5,10 @@ test("home presents work and contact with accessible structure", async ({ page }
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: /Sandeep.*Kumar/ })).toBeVisible();
-  await expect(page.getByRole("heading", { name: /Ideas made.*usable/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Work that.*holds up/ })).toBeVisible();
   await expect(page.locator(".showcase-row").first()).toHaveClass(/showcase-bid/);
-  await expect(page.getByRole("navigation", { name: "Portfolio view" }).getByRole("link", { name: "Quick" })).toHaveAttribute("href", "/quick");
-  await expect(page.getByRole("link", { name: /Request résumé/ })).toHaveAttribute("href", /mailto:/);
+  await expect(page.getByRole("navigation", { name: "Portfolio view" }).getByRole("link", { name: "Quick profile" })).toHaveAttribute("href", "/quick");
+  await expect(page.getByRole("link", { name: /Request full résumé/ })).toHaveAttribute("href", /mailto:/);
   await expect(page.locator(".print-header-time")).toHaveCount(0);
   await expect(page.getByLabel("Name")).toBeVisible();
   await expect(page.getByLabel("Email")).toBeVisible();
@@ -17,14 +17,12 @@ test("home presents work and contact with accessible structure", async ({ page }
   expect(results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact || ""))).toEqual([]);
 });
 
-test("desktop hero stays pinned through its opening transition", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name.includes("mobile"), "Desktop scroll transition check");
+test("hero moves directly into selected work", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes("mobile"), "Desktop composition check");
   await page.goto("/");
-  await expect(page.locator(".offset-hero").locator("..")).toHaveClass(/pin-spacer/);
-  await page.evaluate(() => window.scrollTo(0, 600));
-  await expect.poll(() => page.locator(".offset-hero").evaluate((hero) => Math.round(hero.getBoundingClientRect().top))).toBe(72);
-  await expect.poll(() => page.locator(".offset-hero").evaluate((hero) => getComputedStyle(hero.parentElement!.parentElement!).transform)).toBe("none");
-  await expect.poll(() => page.locator(".offset-section-index-ink > span").first().evaluate((ink) => getComputedStyle(ink).visibility)).toBe("hidden");
+  await expect(page.locator(".offset-hero").locator("..")).not.toHaveClass(/pin-spacer/);
+  await expect(page.getByRole("link", { name: "See the work" })).toHaveAttribute("href", "#work");
+  await expect(page.locator(".offset-intro-stage")).toHaveCount(0);
 });
 
 test("desktop file details stay aligned without covering the portrait", async ({ page }, testInfo) => {
@@ -49,7 +47,6 @@ test("desktop file details stay aligned without covering the portrait", async ({
       cardTop: rect(".offset-field-stop-1 > div").top,
       secondConnectorEnd: secondStop.getBoundingClientRect().top + Number.parseFloat(secondConnector.top) + Number.parseFloat(secondConnector.height),
       secondCardTop: rect(".offset-field-stop-2 > div").top,
-      inkBackground: getComputedStyle(document.querySelector(".offset-section-index-ink > span")!).backgroundColor,
       triggerRight: rect(".offset-wireframe-trigger").right,
       portraitLeft: portrait.left,
       leftNote: rect(".offset-portrait-annotations span:nth-child(2)").left,
@@ -63,7 +60,6 @@ test("desktop file details stay aligned without covering the portrait", async ({
   expect(details.connectorEnd - details.cardTop).toBeLessThan(12);
   expect(details.secondConnectorEnd - details.secondCardTop).toBeGreaterThanOrEqual(0);
   expect(details.secondConnectorEnd - details.secondCardTop).toBeLessThan(3);
-  expect(details.inkBackground).toBe("rgba(0, 0, 0, 0)");
   expect(details.triggerRight).toBeLessThan(details.portraitLeft);
   expect(details.leftNote).toBeGreaterThanOrEqual(details.portraitLeft);
   expect(details.rightNote).toBeGreaterThan(details.portraitLeft + details.portraitWidth * .7);
@@ -77,21 +73,18 @@ test("timeline draws when reached from an About link", async ({ page }) => {
   await expect.poll(() => page.locator(".offset-field-path-ribbon:visible").getAttribute("d")).toMatch(/^M /);
 });
 
-test("project index filters, searches, and opens details", async ({ page }) => {
+test("project index filters, searches, and opens the full case study", async ({ page }) => {
   await page.goto("/my-projects");
   await page.getByRole("button", { name: "Web App", exact: true }).click();
-  await expect(page.locator(".animate-filter-grid")).toBeVisible();
-  await expect(page.getByRole("button", { name: /BidStrike/ })).toBeVisible();
-  await page.getByRole("button", { name: /BidStrike/ }).click();
-  const dialog = page.getByRole("dialog", { name: "BidStrike" });
-  await expect(dialog).toBeVisible();
-  await expect(page.getByRole("button", { name: "Close project details" })).toBeFocused();
-  await page.keyboard.press("Escape");
-  await expect(dialog).toBeHidden();
+  await expect(page.getByRole("link", { name: /BidStrike/ })).toBeVisible();
+  await page.getByRole("link", { name: /BidStrike/ }).click();
+  await expect(page).toHaveURL(/\/my-projects\/9$/);
+  await expect(page.getByRole("heading", { level: 1, name: /BidStrike/ })).toBeVisible();
+  await page.goBack();
   await page.getByRole("searchbox", { name: "Search projects" }).fill("no-such-project");
   await expect(page.getByText("No matching work.")).toBeVisible();
   await page.getByRole("button", { name: /Clear filters/ }).click();
-  await expect(page.getByRole("button", { name: /Mirror Wallpapers/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Mirror Wallpapers/ })).toBeVisible();
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact || ""))).toEqual([]);
 });
@@ -101,6 +94,10 @@ test("case study keeps its project links accessible while reading", async ({ pag
   await expect(page.getByRole("heading", { level: 1, name: /Mirror Wallpapers/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "What needed solving" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: /Mirror Wallpapers project links/ }).getByRole("link", { name: /Source code/ })).toBeVisible();
+  await expect(page.locator(".study-gallery figure")).toHaveCount(5);
+  await expect(page.locator(".study-gallery figure").nth(0)).toContainText("lock screen");
+  await expect(page.locator(".study-gallery figure").nth(1)).toContainText("home screen");
+  await expect(page.getByRole("link", { name: /Open OmniMart case study/ })).toHaveAttribute("href", "/my-projects/10");
   await page.goto("/my-projects/10");
   const actions = page.getByRole("navigation", { name: /OmniMart project links/ });
   await expect(actions.getByRole("link", { name: /Live demo/ })).toBeVisible();
@@ -151,7 +148,11 @@ test("work previews and lab studies respond to visitors", async ({ page }) => {
   await expect(activePath).not.toHaveAttribute("d", directPath!);
   await signal.getByRole("button", { name: "Loop" }).click();
   await expect(signal.getByText(/Scenic path/)).toBeVisible();
+  await signal.getByRole("button", { name: /Place sample bid/ }).click();
+  await expect(signal.getByRole("status")).toContainText("Both views show the updated price");
+  await expect(signal.locator(".lab-bid-states")).toContainText("₹4,300");
   await page.keyboard.press("Escape");
+  await expect(signal).toBeHidden();
   await page.getByRole("button", { name: "Open Color study experiment" }).click();
   await page.getByRole("button", { name: "Use Sage accent" }).click();
   await page.keyboard.press("Escape");
@@ -176,7 +177,8 @@ test("video work has four direct pieces and opens from the About role", async ({
   await expect(page).toHaveURL(/\/motion$/);
   await expect(page.getByRole("heading", { level: 1, name: /Stories in.*motion/ })).toBeVisible();
   await expect(page.locator(".motion-page-piece")).toHaveCount(4);
-  await expect(page.locator(".motion-page-piece").first()).toHaveAttribute("href", /youtube\.com\/watch\?v=/);
+  await expect(page.locator(".motion-page-piece").first().getByRole("button", { name: /Play/ })).toBeVisible();
+  await expect(page.locator(".motion-page-piece").first().getByRole("link", { name: /Watch on YouTube/ })).toHaveAttribute("href", /youtube\.com\/watch\?v=/);
 });
 
 test("quick view offers a direct reading path back to the experience", async ({ page }) => {
@@ -186,41 +188,37 @@ test("quick view offers a direct reading path back to the experience", async ({ 
   await expect(page.locator(".quick-view-projects article").first()).toContainText("BidStrike");
   await expect(page.getByRole("heading", { name: "Experience & education" })).toBeVisible();
   await expect(page.getByText("Developer at TCS")).toBeVisible();
-  await expect(page.getByRole("link", { name: /Request résumé/ })).toHaveAttribute("href", /mailto:/);
+  await expect(page.getByRole("button", { name: /Save quick profile as PDF/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Request full résumé/ })).toHaveAttribute("href", /mailto:/);
   await page.getByRole("navigation", { name: "Portfolio view" }).getByRole("link", { name: "Experience" }).click();
   await expect(page).toHaveURL(/\/$/);
 });
 
-test("wireframe view reveals and restores the build structure", async ({ page }) => {
+test("build file view reveals and restores section decisions", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "Don't click" }).click();
+  await page.getByRole("button", { name: "Open build file" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-wireframe", "true");
-  await expect(page.getByRole("button", { name: "Rebuild the page" })).toBeVisible();
-  await page.getByRole("button", { name: "Rebuild the page" }).click();
+  await expect(page.locator(".offset-work")).toHaveAttribute("data-build-note", /Three products/);
+  await expect(page.getByRole("button", { name: "Close build file" }).first()).toBeVisible();
+  await page.getByRole("button", { name: "Close build file" }).first().click();
   await expect(page.locator("html")).toHaveAttribute("data-wireframe", "false");
 });
 
-test("desktop work strip scrubs across its full width and preview opens its case study", async ({ page }, testInfo) => {
+test("desktop work preview has stable text and opens its case study", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name.includes("mobile"), "Mouse interaction check");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await expect.poll(() => page.locator(".offset-section-index-ink > span").first().evaluate((element) => element.style.getPropertyValue("--orange-clip-top"))).not.toBe("");
   const row = page.locator(".showcase-omni");
   await row.scrollIntoViewIfNeeded();
   const bounds = await row.boundingBox();
   expect(bounds).not.toBeNull();
-  await page.mouse.move(70, bounds!.y + 100);
   const idleHead = await row.locator(".showcase-head").boundingBox();
   await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + 100);
-  await expect.poll(async () => (await row.locator(".showcase-head").boundingBox())!.x).toBeCloseTo(idleHead!.x + 32, 0);
-  expect((await row.boundingBox())!.width).toBe(bounds!.width);
-  await page.mouse.move(70, bounds!.y + 100);
   await expect.poll(async () => (await row.locator(".showcase-head").boundingBox())!.x).toBeCloseTo(idleHead!.x, 0);
-  for (const [fraction, label] of [[0.1, "Home"], [0.35, "Product"], [0.6, "Cart"], [0.9, "Checkout"]] as const) {
-    await page.mouse.move(bounds!.x + bounds!.width * fraction, bounds!.y + 100);
-    await expect(row.locator(".showcase-browser-top")).toContainText(label);
-  }
+  expect((await row.boundingBox())!.width).toBe(bounds!.width);
+  await row.getByRole("button", { name: "Cart", exact: true }).click();
+  await expect(row.locator(".showcase-browser-top")).toContainText("Cart");
   await row.getByRole("link", { name: "View OmniMart case study" }).click();
   await expect(page).toHaveURL(/\/my-projects\/10$/);
 });
@@ -228,30 +226,40 @@ test("desktop work strip scrubs across its full width and preview opens its case
 test("desktop navigation reaches home sections from work", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name.includes("mobile"), "Desktop navigation check");
   await page.goto("/");
-  await page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: "Work" }).click();
+  await page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: "Projects" }).click();
   await expect(page).toHaveURL(/\/my-projects$/);
   await page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: "About" }).click();
   await expect(page).toHaveURL(/\/#about$/);
   await expect(page.locator("#about")).toBeInViewport();
-  await page.getByRole("navigation", { name: "Page sections" }).getByRole("link", { name: "Jump to How I build" }).click();
+  await page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: "Build" }).click();
   await expect(page).toHaveURL(/\/#skills$/);
   await expect(page.locator("#skills")).toBeInViewport();
 });
 
-test("returning to the unanchored home page starts at the top", async ({ page }) => {
+test("the home link starts at the top and browser Back keeps reading position", async ({ page }, testInfo) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  const openProjects = async () => {
+    if (testInfo.project.name.includes("mobile")) {
+      await page.getByRole("button", { name: "Open navigation menu" }).click();
+      await page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("link", { name: "Projects" }).click();
+    } else {
+      await page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: "Projects" }).click();
+    }
+  };
   await page.goto("/", { waitUntil: "networkidle" });
   await page.locator("#about").evaluate((section) => section.scrollIntoView({ behavior: "instant", block: "start" }));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
-  await page.goto("/my-projects");
+  await openProjects();
   await page.getByRole("link", { name: "Sandeep Kumar homepage" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await page.locator("#about").scrollIntoViewIfNeeded();
-  await page.goto("/my-projects");
+  await expect(page.locator("#about")).toBeInViewport();
+  await openProjects();
+  await expect(page).toHaveURL(/\/my-projects$/);
   await page.goBack();
   await expect(page).toHaveURL(/\/$/);
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await expect(page.locator("#about")).toBeInViewport();
 });
 
 test("color study preview and contact email respond on hover", async ({ page }, testInfo) => {
@@ -277,7 +285,7 @@ test("build map connects tools to project evidence", async ({ page }) => {
   await page.getByRole("button", { name: "PostgreSQL" }).click();
   await expect(page.locator(".build-evidence-links a", { hasText: "BidStrike" })).toHaveAttribute("data-related", "true");
   await expect(page.locator(".build-evidence-links a", { hasText: "Mirror Wallpapers" })).toHaveAttribute("data-related", "false");
-  await page.getByRole("button", { name: "GSAP" }).click();
+  await page.getByRole("button", { name: "CSS motion" }).click();
   await expect(page.locator(".build-evidence-links a", { hasText: "The Lab" })).toHaveAttribute("data-related", "true");
   const clearance = await page.evaluate(() => {
     const caption = document.querySelector(".offset-field-stop-3 > div")!.getBoundingClientRect();
@@ -291,11 +299,11 @@ test("mobile menu closes on Escape and restores focus", async ({ page }, testInf
   test.skip(!testInfo.project.name.includes("mobile"), "Mobile navigation check");
   await page.goto("/");
   await page.getByRole("button", { name: "Open navigation menu" }).click();
-  await expect(page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("link", { name: "Work" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("link", { name: "Projects" })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("button", { name: "Open navigation menu" })).toBeFocused();
   await page.getByRole("button", { name: "Open navigation menu" }).click();
-  await page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("link", { name: "Work" }).click();
+  await page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("link", { name: "Projects" }).click();
   await expect(page).toHaveURL(/\/my-projects$/);
 });
 
@@ -309,10 +317,10 @@ test("all main routes fit the viewport", async ({ page }) => {
 
 test("footer assistant opens on demand", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Ask Krypton portfolio assistant" }).click();
+  await page.getByRole("button", { name: "Ask about Sandeep's work" }).click();
   await expect(page.getByRole("button", { name: "Close chat" })).toBeVisible();
-  await page.getByRole("button", { name: /Summarize Sandeep/ }).click();
-  await expect(page.getByRole("log", { name: "Krypton conversation" })).toContainText("full-stack developer in Punjab");
+  await page.getByRole("button", { name: /Summarize BidStrike/ }).click();
+  await expect(page.getByRole("log", { name: "Krypton conversation" })).toContainText("BidStrike");
   await page.getByRole("button", { name: "Close chat" }).click();
   await expect(page.getByRole("region", { name: "Krypton portfolio assistant" })).toBeHidden();
 });

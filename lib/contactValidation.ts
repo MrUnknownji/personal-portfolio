@@ -34,8 +34,8 @@ export function validateContactRequest(body: ContactRequestBody) {
   const values: ContactFormValues = {
     name: normalizeText(body.name),
     email: normalizeText(body.email).toLowerCase(),
-    category: normalizeText(body.category),
-    subject: normalizeText(body.subject),
+    category: normalizeText(body.category) || "Portfolio inquiry",
+    subject: normalizeText(body.subject) || "Portfolio message",
     message: normalizeText(body.message),
     company: normalizeText(body.company),
   };

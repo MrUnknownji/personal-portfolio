@@ -38,10 +38,21 @@ describe("validateContactRequest", () => {
     expect(Object.keys(result.errors)).toEqual([
       "name",
       "email",
-      "category",
       "subject",
       "message",
     ]);
+  });
+
+  it("accepts the short contact form and supplies useful routing labels", () => {
+    const result = validateContactRequest({
+      name: "A visitor",
+      email: "visitor@example.com",
+      message: "I would like to discuss a project.",
+    });
+
+    expect(result.errors).toEqual({});
+    expect(result.values.category).toBe("Portfolio inquiry");
+    expect(result.values.subject).toBe("Portfolio message");
   });
 
   it("enforces the same maximum lengths used by the client", () => {

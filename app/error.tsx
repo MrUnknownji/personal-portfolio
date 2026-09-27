@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 
 export default function ErrorPage({
   error,
@@ -14,12 +15,12 @@ export default function ErrorPage({
   }, [error.digest]);
 
   return (
-    <section className="flex min-h-screen items-center justify-center px-4 py-32" aria-labelledby="error-title">
-      <div className="max-w-xl text-center">
-        <p className="mb-4 text-sm font-bold uppercase tracking-widest text-primary">Something went wrong</p>
-        <h1 id="error-title" className="text-4xl font-bold tracking-tight text-foreground">This page could not be loaded</h1>
-        <p className="mt-5 text-muted-foreground">Your data is safe. Try loading the page again.</p>
-        <button type="button" onClick={reset} className="mt-8 rounded-xl bg-primary px-6 py-3 font-bold text-dark focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">Try again</button>
+    <section className="portfolio-state offset-wrap" aria-labelledby="error-title">
+      <div>
+        <span className="offset-kicker">Build file / Error</span>
+        <h1 id="error-title">This page<br />didn&apos;t load<span>.</span></h1>
+        <p>Try loading it again. If the problem continues, the project index is still available.</p>
+        <div className="portfolio-state-actions"><button type="button" onClick={reset}>Try again ↗</button><Link href="/my-projects">Explore projects ↗</Link></div>
       </div>
     </section>
   );
