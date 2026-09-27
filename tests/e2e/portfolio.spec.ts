@@ -181,6 +181,13 @@ test("video work has four direct pieces and opens from the About role", async ({
   await expect(page.locator(".motion-page-piece").first().getByRole("link", { name: /Watch on YouTube/ })).toHaveAttribute("href", /youtube\.com\/watch\?v=/);
 });
 
+test("video player is permitted by the page security policy", async ({ page }) => {
+  const response = await page.goto("/motion");
+  expect(response?.headers()["content-security-policy"]).toContain("frame-src https://www.youtube-nocookie.com");
+  await page.locator(".motion-page-piece").first().getByRole("button", { name: /Play/ }).click();
+  await expect(page.locator(".motion-page-piece").first().locator("iframe")).toHaveAttribute("src", /youtube-nocookie\.com\/embed\//);
+});
+
 test("quick view offers a direct reading path back to the experience", async ({ page }) => {
   await page.goto("/quick");
   await expect(page.getByRole("heading", { level: 1, name: /Sandeep.*Kumar/ })).toBeVisible();

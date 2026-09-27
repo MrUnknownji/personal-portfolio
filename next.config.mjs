@@ -11,6 +11,7 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self' data:",
   "img-src 'self' data: blob: https://placehold.co https://res.cloudinary.com https://avatars.githubusercontent.com https://pbs.twimg.com https://media.licdn.com https://i.ytimg.com",
+  "frame-src https://www.youtube-nocookie.com",
   "media-src 'self' blob: https://res.cloudinary.com",
   `connect-src 'self'${isDevelopment ? " ws: wss:" : ""}`,
   "upgrade-insecure-requests",
