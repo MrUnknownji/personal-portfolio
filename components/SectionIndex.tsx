@@ -7,7 +7,7 @@ const sections = [
   { id: "work", label: "Work" },
   { id: "lab", label: "Lab" },
   { id: "about", label: "About" },
-  { id: "skills", label: "Toolkit" },
+  { id: "skills", label: "How I build" },
   { id: "contact", label: "Contact" },
 ];
 
@@ -26,7 +26,12 @@ export default function SectionIndex() {
         }, 0);
         setActive(current);
 
-        const orangeAreas = [...document.querySelectorAll<HTMLElement>(".offset-hero-band, .offset-work-rail, .offset-contact-direct")]
+        const intro = document.querySelector<HTMLElement>("[data-offset-intro]");
+        const introOpacity = intro ? Number.parseFloat(getComputedStyle(intro).opacity) : 0;
+        const orangeAreas = [
+          ...(introOpacity < .45 ? [...document.querySelectorAll<HTMLElement>(".offset-hero-band")] : []),
+          ...document.querySelectorAll<HTMLElement>(".offset-work-rail, .offset-contact-direct"),
+        ]
           .map((element) => element.getBoundingClientRect());
         inkRef.current?.querySelectorAll<HTMLElement>(":scope > span").forEach((item) => {
           const rect = item.getBoundingClientRect();
@@ -36,9 +41,11 @@ export default function SectionIndex() {
             height: Math.max(0, Math.min(rect.bottom, area.bottom) - Math.max(rect.top, area.top)),
           })).sort((first, second) => second.width * second.height - first.width * first.height)[0];
           if (!overlap || !overlap.width || !overlap.height) {
+            item.style.visibility = "hidden";
             item.style.setProperty("--orange-clip-top", `${rect.height}px`);
             return;
           }
+          item.style.visibility = "visible";
           item.style.setProperty("--orange-clip-top", `${Math.max(0, overlap.area.top - rect.top)}px`);
           item.style.setProperty("--orange-clip-right", `${Math.max(0, rect.right - overlap.area.right)}px`);
           item.style.setProperty("--orange-clip-bottom", `${Math.max(0, rect.bottom - overlap.area.bottom)}px`);

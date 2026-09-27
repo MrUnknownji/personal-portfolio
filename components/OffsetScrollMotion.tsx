@@ -23,12 +23,16 @@ export default function OffsetScrollMotion() {
       const note = document.querySelector<HTMLElement>("[data-offset-note]");
       const foot = document.querySelector<HTMLElement>("[data-offset-foot]");
       const intro = document.querySelector<HTMLElement>("[data-offset-intro]");
-      if (!hero || !band || !heading || !portrait || !note || !foot || !intro) return;
+      const building = document.querySelector<HTMLElement>('[data-offset-word="building"]');
+      const beyond = document.querySelector<HTMLElement>('[data-offset-word="beyond"]');
+      const brief = document.querySelector<HTMLElement>('[data-offset-word="brief"]');
+      if (!hero || !band || !heading || !portrait || !note || !foot || !intro || !building || !beyond || !brief) return;
 
       gsap.registerPlugin(ScrollTrigger);
       const media = gsap.matchMedia();
       media.add("(min-width: 900px) and (prefers-reduced-motion: no-preference)", () => {
         gsap.set(intro, { autoAlpha: 0, y: 48 });
+        gsap.set(portrait, { clipPath: "inset(0% 0% 0% 0%)" });
         hero.classList.add("offset-motion-enabled");
         let pointerFrame = 0;
         let pointerX = 0;
@@ -56,7 +60,7 @@ export default function OffsetScrollMotion() {
           scrollTrigger: {
             trigger: hero,
             start: "top top+=72",
-            end: "+=105%",
+            end: "+=85%",
             pin: true,
             scrub: 0.7,
             anticipatePin: 1,
@@ -64,10 +68,13 @@ export default function OffsetScrollMotion() {
           },
         });
         timeline
-          .to(band, { scaleX: 5.8, duration: 1, ease: "none" }, 0)
-          .to([heading, note, foot], { y: -85, autoAlpha: 0, duration: 0.35, ease: "none" }, 0.1)
-          .to(portrait, { xPercent: -55, yPercent: 12, autoAlpha: 0, duration: 0.55, ease: "none" }, 0.12)
-          .to(intro, { y: 0, autoAlpha: 1, duration: 0.38, ease: "none" }, 0.38);
+          .to(band, { scaleX: 5.8, duration: .6, ease: "none" }, 0)
+          .to(building, { yPercent: -105, autoAlpha: 0, duration: .35, ease: "none" }, .03)
+          .to(beyond, { xPercent: 14, yPercent: -12, duration: .42, ease: "none" }, .04)
+          .to(brief, { xPercent: 50, autoAlpha: 0, duration: .4, ease: "none" }, .1)
+          .to(portrait, { xPercent: -24, clipPath: "inset(0 26% 0 26%)", autoAlpha: 0, duration: .48, ease: "none" }, .12)
+          .to([heading, note, foot], { autoAlpha: 0, duration: .2, ease: "none" }, .34)
+          .to(intro, { y: 0, autoAlpha: 1, duration: .45, ease: "none" }, .4);
 
         gsap.utils.toArray<HTMLElement>("[data-offset-project]").forEach((item) => {
           gsap.fromTo(item, { y: 48, opacity: 0.65 }, {
@@ -91,6 +98,28 @@ export default function OffsetScrollMotion() {
             },
           });
         });
+
+        const mirror = document.querySelector<HTMLElement>(".showcase-mirror");
+        if (mirror) {
+          gsap.utils.toArray<HTMLElement>(".showcase-wallpaper", mirror).forEach((phone, index) => {
+            gsap.fromTo(phone, { xPercent: (index - 1) * -8, rotation: (index - 1) * 2 }, {
+              xPercent: (index - 1) * 8,
+              rotation: (index - 1) * 3,
+              ease: "none",
+              scrollTrigger: { trigger: mirror, start: "top 90%", end: "bottom 30%", scrub: .45 },
+            });
+          });
+        }
+
+        const bidScreen = document.querySelector<HTMLElement>(".showcase-bid-screen");
+        const bidRow = bidScreen?.closest<HTMLElement>(".showcase-bid");
+        if (bidScreen && bidRow) {
+          gsap.fromTo(bidScreen, { clipPath: "inset(7% 7% 7% 7%)" }, {
+            clipPath: "inset(0% 0% 0% 0%)",
+            ease: "none",
+            scrollTrigger: { trigger: bidRow, start: "top 85%", end: "center 35%", scrub: .45 },
+          });
+        }
 
         gsap.utils.toArray<HTMLElement>("[data-offset-reveal], .offset-lab-card, .offset-profile-roles a, .offset-skills-list > div").forEach((item) => {
           gsap.fromTo(item, { y: 30, opacity: 0.7 }, {

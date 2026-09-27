@@ -10,28 +10,27 @@ const links = [
   { label: "Work", href: "/my-projects" },
   { label: "Lab", href: "/#lab" },
   { label: "About", href: "/#about" },
-  { label: "Toolkit", href: "/#skills" },
+  { label: "Build", href: "/#skills" },
   { label: "Contact", href: "/#contact" },
+];
+const quickLinks = [
+  { label: "Projects", href: "#projects" },
+  { label: "Skills", href: "#skills" },
+  { label: "Education", href: "#education" },
+  { label: "Contact", href: "#contact" },
 ];
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [compact, setCompact] = useState(false);
   const [sectionLabel, setSectionLabel] = useState("00 / INTRO");
-  const [time, setTime] = useState("--:-- IST");
   const [preview, setPreview] = useState<string | null>(null);
   const menuButton = useRef<HTMLButtonElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   const pendingSection = useRef<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
-
-  useEffect(() => {
-    const updateTime = () => setTime(`${new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date())} IST`);
-    updateTime();
-    const timer = window.setInterval(updateTime, 60_000);
-    return () => window.clearInterval(timer);
-  }, []);
+  const navigationLinks = pathname === "/quick" ? quickLinks : links;
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -43,9 +42,9 @@ export default function Header() {
         if (Math.abs(y - lastY) > 7) setCompact(y > 260 && y > lastY);
         lastY = y;
         if (pathname === "/") {
-          const sections = [["contact", "05 / CONTACT"], ["skills", "04 / TOOLKIT"], ["about", "03 / ABOUT"], ["lab", "02 / LAB"], ["work", "01 / WORK"]] as const;
+          const sections = [["contact", "05 / CONTACT"], ["skills", "04 / HOW I BUILD"], ["about", "03 / ABOUT"], ["lab", "02 / LAB"], ["work", "01 / WORK"]] as const;
           setSectionLabel(sections.find(([id]) => (document.getElementById(id)?.getBoundingClientRect().top ?? Infinity) < 180)?.[1] || "00 / INTRO");
-        } else setSectionLabel(pathname === "/my-projects" ? "01 / ARCHIVE" : "01 / CASE STUDY");
+        } else setSectionLabel(pathname === "/my-projects" ? "01 / ARCHIVE" : pathname === "/motion" ? "MOTION / VISUAL WORK" : pathname === "/quick" ? "QUICK / VIEW" : "01 / CASE STUDY");
         frame = 0;
       });
     };
@@ -123,14 +122,14 @@ export default function Header() {
     <header className="print-header" data-compact={compact}>
       <div className="print-topbar">
         <Link href="/" className="print-brand" onClick={() => setOpen(false)} aria-label="Sandeep Kumar homepage">Sandeep Kumar <span>Full-stack developer</span></Link>
-        <span className="print-header-time">{time}</span>
         <span className="print-header-section" aria-live="off">{sectionLabel}</span>
-        <nav className="print-desktop-nav" aria-label="Primary navigation">{links.map((link, index) => <Link href={link.href} key={link.label} onClick={(event) => handleNav(event, link.href)} onPointerEnter={(event) => { if (event.pointerType !== "touch") setPreview(link.label); }} onPointerMove={movePreview} onPointerLeave={() => setPreview(null)}><span>0{index + 1}</span>{link.label}</Link>)}</nav>
+        <nav className="print-desktop-nav" aria-label="Primary navigation">{navigationLinks.map((link, index) => <Link href={link.href} key={link.label} onClick={(event) => handleNav(event, link.href)} onPointerEnter={(event) => { if (event.pointerType !== "touch" && pathname !== "/quick") setPreview(link.label); }} onPointerMove={movePreview} onPointerLeave={() => setPreview(null)}><span>0{index + 1}</span>{link.label}</Link>)}</nav>
+        <nav className="print-view-switch" aria-label="Portfolio view"><span>View</span><Link href="/" aria-current={pathname === "/quick" ? undefined : "page"}>Experience</Link><Link href="/quick" aria-current={pathname === "/quick" ? "page" : undefined}>Quick</Link></nav>
         <span className="print-availability"><i /> Available for opportunities</span>
         <button className="print-menu-button" ref={menuButton} type="button" aria-expanded={open} aria-controls="print-mobile-nav" aria-label={open ? "Close navigation menu" : "Open navigation menu"} onClick={() => setOpen(!open)}>{open ? "Close −" : "Menu +"}</button>
       </div>
-      {open && <nav id="print-mobile-nav" className="print-mobile-nav" aria-label="Mobile navigation">{links.map((link) => <Link href={link.href} key={link.label} onClick={(event) => handleNav(event, link.href)}>{link.label}<span aria-hidden="true">↗</span></Link>)}</nav>}
-      <div ref={previewRef} className="print-nav-preview" data-visible={!!preview} aria-hidden="true">{preview === "Work" && <><Image src={selectedProjects[0].image} alt="" fill sizes="220px" /><span>Selected work / 06 projects</span></>}{preview === "Lab" && <><strong>LAB / 001</strong><span>Experiments in motion and form</span></>}{preview === "About" && <><Image src="/images/sandeep-cutout-640.webp" alt="" fill unoptimized sizes="220px" /><span>Sandeep / Punjab, India</span></>}{preview === "Toolkit" && <><strong>SEE → RUN → SHIP</strong><span>Interface / Systems / Delivery</span></>}{preview === "Contact" && <><strong>AVAILABLE ●</strong><span>Punjab, India / {time}</span></>}</div>
+      {open && <nav id="print-mobile-nav" className="print-mobile-nav" aria-label="Mobile navigation">{navigationLinks.map((link) => <Link href={link.href} key={link.label} onClick={(event) => handleNav(event, link.href)}>{link.label}<span aria-hidden="true">↗</span></Link>)}</nav>}
+      <div ref={previewRef} className="print-nav-preview" data-visible={!!preview} aria-hidden="true">{preview === "Work" && <><Image src={selectedProjects[0].image} alt="" fill sizes="220px" /><span>Selected work / 06 projects</span></>}{preview === "Lab" && <><strong>LAB / 001</strong><span>Experiments in motion and form</span></>}{preview === "About" && <><Image src="/images/sandeep-cutout-640.webp" alt="" fill unoptimized sizes="220px" /><span>Sandeep / Punjab, India</span></>}{preview === "Build" && <><strong>IDEA → SHIP</strong><span>Tools connected to real work</span></>}{preview === "Contact" && <><strong>AVAILABLE ●</strong><span>Punjab, India</span></>}</div>
     </header>
   );
 }

@@ -29,13 +29,14 @@ export function readPortfolioSettings(): PortfolioSettings {
 export function applyPortfolioSettings(settings: PortfolioSettings) {
   const root = document.documentElement;
   const color = portfolioPalettes[settings.palette] || portfolioPalettes[0];
+  const siteSpacing = Math.max(-2, Math.min(4, settings.spacing));
   root.style.setProperty("--offset-orange", color.accent);
   root.style.setProperty("--primary", color.ink);
   root.style.setProperty("--accent", color.ink);
   root.style.setProperty("--ring", color.ink);
   root.style.setProperty("--scrollbar-thumb-hover", color.ink);
-  root.style.setProperty("--portfolio-tracking", `${settings.spacing / 7}px`);
-  root.style.setProperty("--portfolio-label-tracking", `${settings.spacing / 22}px`);
+  root.style.setProperty("--portfolio-tracking", `${siteSpacing / 7}px`);
+  root.style.setProperty("--portfolio-label-tracking", `${siteSpacing / 22}px`);
   root.dataset.portfolioPalette = color.name.toLowerCase();
   try { localStorage.setItem(storageKey, JSON.stringify(settings)); } catch { /* Storage can be disabled. */ }
 }

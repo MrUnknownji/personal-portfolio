@@ -7,7 +7,7 @@ export default function Loading() {
         <div className="print-loading-panel print-loading-panel-paper" aria-hidden="true" />
         <div className="print-loading-panel print-loading-panel-orange" aria-hidden="true" />
         <div className="print-loading-content">
-          <span className="print-loading-overline">Independent developer / Punjab, India</span>
+          <span className="print-loading-overline">Full-stack developer · Creative coder · Punjab, India</span>
           <strong>SANDEEP<br />KUMAR<span>.</span></strong>
           <div className="print-loading-side"><span>PORTFOLIO / 2026</span><span>MAKING THE NEXT VIEW</span><i aria-hidden="true" /></div>
           <div className="print-loading-foot"><span>DESIGN / DEVELOPMENT / DELIVERY</span><span>LOADING ↗</span></div>

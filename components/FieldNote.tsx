@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 const milestones = [
-  { year: "2020", title: "First builds", detail: "Learning by making things." },
-  { year: "2023", title: "Computer Science", detail: "BSc, then deeper into systems." },
-  { year: "2024", title: "Into production", detail: "Joined TCS as a developer." },
+  { year: "2020", title: "First builds", detail: "Mostly broken. Enough to keep going." },
+  { year: "2023", title: "Computer Science", detail: "BSc. Learning why things work." },
+  { year: "2024", title: "Developer at TCS", detail: "Joined in 2024." },
   { year: "Now", title: "Keep exploring", detail: "Web, mobile and creative code." },
 ];
 
@@ -111,7 +111,7 @@ export default function FieldNote() {
 
   return (
     <div className="offset-field-note" ref={ref} data-visible={visible}>
-      <div className="offset-field-note-head"><span>A short history</span><span>2020 → Today</span></div>
+      <div className="offset-field-note-head"><span>Field notes</span><span>2020 → Today</span></div>
       <div className="offset-field-path" aria-label="Sandeep's journey from 2020 to today">
         <svg className="offset-field-desktop-path" viewBox="0 0 1000 350" preserveAspectRatio="none" aria-hidden="true">
           <defs>

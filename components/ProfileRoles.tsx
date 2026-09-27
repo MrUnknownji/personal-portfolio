@@ -9,7 +9,7 @@ const roles = [
   { name: "Full-stack developer", detail: "Interface ↔ API ↔ Data", href: "#work", preview: "full" },
   { name: "Creative coder", detail: "Motion with a purpose ↗", href: "#lab", preview: "creative" },
   { name: "System thinker", detail: "Real-time architecture ↗", href: "/my-projects/9", preview: "systems" },
-  { name: "Occasional video maker", detail: "Frames / rhythm / story ▣", href: "#lab", preview: "video" },
+  { name: "Occasional video maker", detail: "Frames / rhythm / story ▣", href: "/motion", preview: "video" },
 ] as const;
 
 export default function ProfileRoles() {

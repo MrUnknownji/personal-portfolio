@@ -6,6 +6,9 @@ export type MediaItem = {
   alt?: string;
 };
 
+export type ShowcaseVariant = "bid" | "mirror" | "omni";
+export type ShowcaseFrame = { label: string; src: string; alt: string };
+
 export type ProjectCaseStudy = {
   problem: string;
   solution: string;
@@ -24,6 +27,9 @@ export interface Project {
   demoLink?: string;
   githubLink?: string;
   category: string;
+  year?: number;
+  showcaseVariant?: ShowcaseVariant;
+  showcaseFrames?: ShowcaseFrame[];
   gallery?: MediaItem[];
   featured?: boolean;
   caseStudy?: ProjectCaseStudy;

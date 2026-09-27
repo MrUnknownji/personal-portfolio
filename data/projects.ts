@@ -498,7 +498,7 @@ export const projects: Project[] = [
   {
     id: 9,
     title: "BidStrike",
-    shortDescription: "A real-time AI-powered auction platform for seamless bidding experiences.",
+    shortDescription: "Bidding needs a current price. I built live bid updates, auction dashboards, and AI price suggestions around the same flow.",
     longDescription: "BidStrike is a sophisticated auction platform designed for speed and reliability. It features real-time bidding updates, AI-driven price suggestions, and a comprehensive dashboard for tracking active auctions and notifications.",
     image: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855178/Bid-Strike-Light-Home.png",
     technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Pusher", "Prisma", "PostgreSQL"],
@@ -513,6 +513,8 @@ export const projects: Project[] = [
     demoLink: "https://bid-strike.vercel.app/",
     githubLink: "https://github.com/MrUnknownji/bid-strike",
     category: "Web App",
+    year: 2026,
+    showcaseVariant: "bid",
     gallery: [
       {
         type: "image",
@@ -682,7 +684,7 @@ export const projects: Project[] = [
   {
     id: 10,
     title: "OmniMart",
-    shortDescription: "A premium AI-enhanced e-commerce platform with a sophisticated editorial design.",
+    shortDescription: "Shopping needs discovery and checkout to work together. I built product browsing, cart and checkout flows, and admin screens for catalog and orders.",
     longDescription: "OmniMart redefines the online shopping experience with a focus on high-end aesthetics and AI-driven personalization. It features a robust admin panel, seamless checkout flow, and a dynamic search system designed for luxury retail.",
     image: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124896/OmniMart-Light-Web-Home.png",
     technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Redux", "Stripe", "AI Personalization"],
@@ -697,6 +699,14 @@ export const projects: Project[] = [
     demoLink: "https://omni-mart-orpin.vercel.app/",
     githubLink: "https://github.com/MrUnknownji/omni-mart",
     category: "Web App",
+    year: 2026,
+    showcaseVariant: "omni",
+    showcaseFrames: [
+      { label: "Home", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124896/OmniMart-Light-Web-Home.png", alt: "OmniMart Web Home (Light)" },
+      { label: "Product", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124876/OmniMart-Dark-Web-Product2.png", alt: "OmniMart Product Detail View" },
+      { label: "Cart", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124869/OmniMart-Dark-Web-Cart.png", alt: "OmniMart Shopping Cart (Dark)" },
+      { label: "Checkout", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124871/OmniMart-Dark-Web-Checkout.png", alt: "OmniMart Web Checkout (Dark)" },
+    ],
     gallery: [
       {
         type: "image",
@@ -810,7 +820,7 @@ export const projects: Project[] = [
     id: 11,
     title: "Mirror Wallpapers",
     shortDescription:
-      "An AI-powered wallpaper ecosystem pairing an Expo mobile experience with a full operations console.",
+      "AI wallpapers need curation as well as creation. I built paired mobile previews and an admin console for approval, credits, and generation costs.",
     longDescription:
       "Mirror Wallpapers is an end-to-end wallpaper platform for discovering coordinated lock and home screen pairs, browsing standalone designs, previewing wallpapers in context, and accessing credit-based AI creation. Its Next.js admin console manages generation, catalog approval, style presets, subscription settings, and cost and reliability analytics across the same Supabase-backed product.",
     image:
@@ -838,6 +848,13 @@ export const projects: Project[] = [
     ],
     githubLink: "https://github.com/MrUnknownji/mirror-app",
     category: "Full Stack",
+    year: 2026,
+    showcaseVariant: "mirror",
+    showcaseFrames: [
+      { label: "Discovery", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828972/portfolio/projects/mirror-wallpapers/mirror-mobile-explore.png", alt: "Mirror mobile discovery screen with featured wallpaper pairs" },
+      { label: "Lock screen", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828978/portfolio/projects/mirror-wallpapers/mirror-mobile-pair-lock.png", alt: "Red Crescent Ronin wallpaper shown as a full-screen lock screen preview" },
+      { label: "Home screen", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828983/portfolio/projects/mirror-wallpapers/mirror-mobile-pair-home.png", alt: "Matching Red Crescent Ronin home screen wallpaper preview" },
+    ],
     gallery: [
       {
         type: "image",
@@ -911,7 +928,7 @@ export const projects: Project[] = [
   },
 ];
 
-export const selectedProjectIds = [11, 9, 8, 7, 1, 10] as const;
+export const selectedProjectIds = [9, 11, 10, 8, 7, 1] as const;
 
 const selectedProjectIdSet = new Set<number>(selectedProjectIds);
 

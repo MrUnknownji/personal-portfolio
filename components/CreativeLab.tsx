@@ -24,6 +24,7 @@ function SignalDiagram({ route, compact = false }: { route: number; compact?: bo
       <path className="offset-signal-idle" d={routes[1].path} />
       <path className="offset-signal-idle" d={routes[2].path} />
       <path key={route} className="offset-signal-active" d={routes[route].path} />
+      <circle className="offset-signal-pulse" r={compact ? 7 : 6}><animateMotion key={route} path={routes[route].path} dur={compact ? "1.5s" : "1.2s"} repeatCount={compact ? "indefinite" : "1"} fill="freeze" /></circle>
       {[[48, 126], [220, 126], [390, 126], [592, 126], [300, 55], [300, 197]].map(([x, y], index) =>
         <circle key={index} className={`offset-signal-node${index === 0 || index === 3 ? " offset-signal-terminal" : ""}`} cx={x} cy={y} r={index === 0 || index === 3 ? 8 : 5} />
       )}
@@ -57,8 +58,15 @@ export default function CreativeLab() {
     applyPortfolioSettings({ spacing, palette: next });
   };
 
+  const resetSettings = () => {
+    setSpacing(0);
+    setPalette(0);
+    setRoute(0);
+    applyPortfolioSettings({ spacing: 0, palette: 0 });
+  };
+
   return (
-    <section className="offset-lab" id="lab" aria-labelledby="lab-title">
+    <section className="offset-lab" id="lab" data-build-file="CreativeLab.tsx" aria-labelledby="lab-title">
       <div className="offset-wrap">
         <div className="offset-lab-heading" data-offset-reveal>
           <span className="offset-kicker">02 / The lab</span>
@@ -79,23 +87,25 @@ export default function CreativeLab() {
       </div>
       <Dialog open={open !== null} onClose={() => setOpen(null)} ariaLabel={open === null ? undefined : `${studies[open].title} experiment`} className="offset-lab-dialog">
         <div className="offset-lab-dialog-inner">
-          <button type="button" className="offset-lab-close" data-autofocus onClick={() => setOpen(null)}>Close ×</button>
+          <div className="offset-lab-dialog-actions">
+            <button type="button" className="offset-lab-reset" onClick={resetSettings}>Reset site ↺</button>
+            <button type="button" className="offset-lab-close" data-autofocus onClick={() => setOpen(null)}>Close ×</button>
+          </div>
           {open !== null && <>
             <span className="offset-kicker">LAB / {studies[open].number} / {studies[open].medium}</span>
             <h2>{studies[open].title}<span>.</span></h2>
             <p>{studies[open].note}</p>
             {open === 0 && <div className="offset-lab-type-play">
-              <strong style={{ letterSpacing: `${spacing}px` }}>SHIFT</strong>
+              <div className="offset-lab-type-samples" aria-hidden="true">{[0, .33, .66, 1].map((fraction, index) => <strong key={index} style={{ letterSpacing: `${spacing * fraction}px` }}>BUILD</strong>)}</div>
               <label>Letter spacing <input type="range" min="-7" max="22" value={spacing} onChange={(event) => changeSpacing(Number(event.target.value))} /></label>
-              <span className="offset-lab-applied">Applied across the portfolio / {spacing > 0 ? "+" : ""}{spacing}</span>
+              <span className="offset-lab-applied">Preview / {spacing > 0 ? "+" : ""}{spacing}px · Site-wide spacing stays within a readable range</span>
             </div>}
             {open === 1 && <div className="offset-lab-signal-play">
               <SignalDiagram route={route} />
               <div className="offset-lab-route-bar"><span>{routes[route].detail}</span><div className="offset-lab-route-controls">{routes.map((item, index) => <button type="button" key={item.name} aria-pressed={route === index} onClick={() => setRoute(index)}>{item.name}</button>)}</div></div>
             </div>}
             {open === 2 && <div className="offset-lab-palette-play" style={{ "--study-color": portfolioPalettes[palette].accent } as CSSProperties}>
-              <strong>ONE<br />ACCENT.</strong>
-              <div>{portfolioPalettes.map((color, index) => <button type="button" key={color.name} aria-label={`Use ${color.name} accent`} aria-pressed={palette === index} onClick={() => changePalette(index)} style={{ background: color.accent }} />)}</div>
+              <div className="offset-ink-strips">{portfolioPalettes.map((color, index) => <button type="button" key={color.name} aria-label={`Use ${color.name} accent`} aria-pressed={palette === index} onClick={() => changePalette(index)} style={{ "--ink": color.accent } as CSSProperties}><span>{color.name}</span><i aria-hidden="true">{palette === index ? "●" : "○"}</i></button>)}</div>
               <span className="offset-lab-palette-name">{portfolioPalettes[palette].name} / Applied sitewide</span>
             </div>}
           </>}
