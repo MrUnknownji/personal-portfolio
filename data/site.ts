@@ -4,5 +4,5 @@ export const SITE_CONFIG = {
   role: "Full Stack Developer",
   email: "sandeepkhati788@gmail.com",
   description:
-    "Full stack developer building performant web, mobile, and AI-powered product experiences.",
+    "Full stack developer turning ideas into considered web and mobile products.",
 } as const;

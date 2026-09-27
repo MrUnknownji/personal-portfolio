@@ -353,7 +353,7 @@ textarea:-webkit-autofill:active {
   body,
   .cursor-auto,
   .cursor-default {
-    cursor: url("/cursors/normal.svg") 4 4, auto !important;
+    cursor: url("/cursors/normal.svg") 8 8, auto !important;
   }
 
   a,

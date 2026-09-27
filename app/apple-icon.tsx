@@ -9,17 +9,18 @@ export default function AppleIcon() {
       <div
         style={{
           alignItems: "center",
-          background: "#12100e",
-          color: "#ff9233",
+          background: "#19191a",
+          color: "#f3f0eb",
           display: "flex",
           fontSize: 96,
-          fontWeight: 800,
+          fontFamily: "Arial, sans-serif",
+          fontWeight: 900,
           height: "100%",
           justifyContent: "center",
           width: "100%",
         }}
       >
-        SK
+        <span style={{ borderLeft: "14px solid #e9702c", paddingLeft: 12 }}>SK</span>
       </div>
     ),
     size,

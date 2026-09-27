@@ -60,6 +60,10 @@ function getLocalPortfolioAnswer(prompt: string) {
     return "I am Krypton, Sandeep's portfolio assistant. Ask me about his projects, skills, experience, or how to contact him.";
   }
 
+  if (/\b(summarize sandeep|who is sandeep|tell me about sandeep)\b/.test(normalizedPrompt)) {
+    return "Sandeep is a full-stack developer in Punjab, India. He builds web and mobile products, explores motion and creative code, and works as a developer at TCS.";
+  }
+
   if (/\b(who am i|my name)\b/.test(normalizedPrompt)) {
     return "You are a visitor exploring Sandeep's portfolio. I can help you find the right project, skill, or contact detail.";
   }

@@ -83,7 +83,7 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
     .slice(thumbnailStart, thumbnailStart + 7);
 
   return (
-    <div className="mt-8 pt-6 border-t border-border">
+    <div className="print-media-gallery mt-8 pt-6 border-t border-border">
       <h4 className="text-lg font-medium text-foreground/90 mb-4 flex items-center gap-2">
         <span className="w-1.5 h-4 bg-primary rounded-full inline-block"></span>
         Gallery
@@ -164,9 +164,10 @@ export const MediaGallery = ({ items }: MediaGalleryProps) => {
              Using aspect-video max-width or fixed height to prevent layout shifts.
           */}
           <div
-            className="relative z-[70] w-full max-w-6xl h-[50vh] md:h-[80vh] bg-card rounded-xl flex flex-col overflow-hidden border border-border"
+            className="print-media-viewer relative z-[70] w-full max-w-6xl h-[70vh] md:h-[84vh] bg-card flex flex-col overflow-hidden border border-border"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="print-media-viewer-top"><span>PROJECT / IMAGE VIEWER</span><span>USE ← → TO BROWSE</span></div>
             <button
               type="button"
               data-autofocus

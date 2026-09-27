@@ -44,7 +44,7 @@ const ProjectModal = ({ project, isOpen, onClose }: ProjectModalProps) => {
         data-krypton-context="project"
         data-krypton-title={project.title}
         data-krypton-summary={`${project.title}: ${project.shortDescription} Features include ${project.features.slice(0, 3).join(", ")}.`}
-        className="relative z-50 flex flex-col
+        className="print-project-modal relative z-50 flex flex-col
                      bg-card border-x border-b border-t-[3px] border-t-primary border-x-border border-b-border
                      h-dvh w-full
                      md:max-w-6xl md:h-[85vh] md:max-h-[850px]

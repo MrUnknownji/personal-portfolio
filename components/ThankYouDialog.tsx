@@ -51,38 +51,37 @@ const ThankYouDialog = ({
     >
       <button
         type="button"
-        className="fixed inset-0 bg-black/90"
+        className="fixed inset-0 bg-black/70"
         onClick={onClose}
         aria-label="Close confirmation dialog"
         tabIndex={-1}
       />
 
-      <div className="relative z-[101] w-full overflow-hidden rounded-3xl border border-white/10 bg-[#0a0a0a]">
-        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
+      <div className="relative z-[101] w-full overflow-hidden border border-[#19191b] bg-[#f3f0eb] text-[#19191b]">
+        <div className="absolute inset-x-0 top-0 h-2 bg-[var(--offset-orange)]" />
 
         <div className="space-y-8 p-8 text-center sm:p-10">
-          <div className="relative mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-primary/10">
-            <FiCheck className="size-10 text-primary" aria-hidden="true" />
+          <div className="relative mx-auto mb-6 flex size-16 items-center justify-center border border-[#19191b] bg-[var(--offset-orange)]">
+            <FiCheck className="size-9 text-[#19191b]" aria-hidden="true" />
           </div>
 
           <div className="space-y-3">
-            <h2 id={titleId} className="text-3xl font-bold tracking-tight text-white">
-              Message Sent
+            <h2 id={titleId} className="font-[family-name:var(--font-display)] text-5xl font-extrabold uppercase leading-none">
+              Message transmitted.
             </h2>
-            <p id={descriptionId} className="text-lg leading-relaxed text-neutral-300">
-              Thanks for reaching out. I&apos;ll review your message and get
-              back to you as soon as possible.
+            <p id={descriptionId} className="text-lg leading-relaxed">
+              I&apos;ll take it from here. Thanks for reaching out.
             </p>
           </div>
 
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-white/10 bg-white/5 p-4">
-            <span className="truncate font-mono text-sm text-neutral-200">
+          <div className="flex items-center justify-between gap-4 border border-[#19191b] p-4">
+            <span className="truncate font-mono text-sm">
               {email}
             </span>
             <button
               type="button"
               onClick={handleCopyEmail}
-              className="min-h-11 min-w-11 rounded-lg p-2 text-primary transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="min-h-11 min-w-11 p-2 text-[var(--primary)] transition-colors hover:bg-[#e9e4dd] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
               aria-label="Copy email address"
             >
               {isEmailCopied ? <FiCheck /> : <FiCopy />}
@@ -95,7 +94,7 @@ const ThankYouDialog = ({
           <Link
             href="/my-projects"
             onClick={onClose}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-bold text-black transition-colors hover:bg-primary/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+            className="flex w-full items-center justify-center gap-2 bg-[var(--offset-orange)] px-6 py-3 font-bold text-[#19191b] transition-[filter] hover:brightness-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--primary)]"
           >
             View Work
             <FiArrowRight aria-hidden="true" />
@@ -106,7 +105,7 @@ const ThankYouDialog = ({
           type="button"
           data-autofocus
           onClick={onClose}
-          className="absolute right-4 top-4 min-h-11 min-w-11 rounded-full p-2 text-neutral-300 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          className="absolute right-4 top-4 min-h-11 min-w-11 p-2 transition-colors hover:bg-[#e9e4dd] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)]"
           aria-label="Close dialog"
         >
           <FiX className="size-5" />

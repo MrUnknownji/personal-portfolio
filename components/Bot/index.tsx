@@ -1,299 +1,154 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import Image from "next/image";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { chatWithBot } from "@/app/actions/chat";
-import { BotChat } from "./BotChat";
-import { useBotCommands } from "./useBotCommands";
 import { useModalState } from "@/components/modalState";
+import BotChat, { type BotMessage } from "./BotChat";
+import KryptonMark from "./KryptonMark";
+import { useBotCommands } from "./useBotCommands";
 
-type KryptonContextMenu = {
-  x: number;
-  y: number;
-  prompt: string;
-  label: string;
-} | null;
-
-function BotVisual() {
-  return (
-    <div className="absolute inset-0 flex items-center justify-center">
-      <div
-        aria-hidden="true"
-        className="absolute bottom-[10%] left-1/2 h-5 w-28 -translate-x-1/2 scale-y-50 rounded-[50%] bg-primary/35 blur-xl sm:bottom-[11%] sm:w-36"
-      />
-      <div
-        aria-hidden="true"
-        className="absolute bottom-[11%] left-1/2 h-px w-16 -translate-x-1/2 bg-primary/60 blur-[2px] sm:bottom-[12%] sm:w-20"
-      />
-      <Image
-        src="/bot.png"
-        alt="Krypton assistant"
-        width={300}
-        height={300}
-        className="relative z-10 size-56 object-contain drop-shadow-[0_14px_18px_rgba(255,122,26,0.14)] sm:size-72"
-      />
-    </div>
-  );
-}
+type ContextPrompt = { x: number; y: number; prompt: string; label: string } | null;
 
 export default function Bot({ initiallyOpen = false }: { initiallyOpen?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { activeProject, isModalOpen: isGlobalModalOpen } = useModalState();
+  const { activeProject, isModalOpen } = useModalState();
+  const { handleLocalCommand } = useBotCommands({ activeProject, pathname, router });
   const [chatOpen, setChatOpen] = useState(initiallyOpen);
   const [input, setInput] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isCooldown, setIsCooldown] = useState(false);
-  const [bubbleText, setBubbleText] = useState<string | null>(
-    initiallyOpen ? "Ask me about projects, skills, or hiring." : null,
-  );
-  const [contextMenu, setContextMenu] = useState<KryptonContextMenu>(null);
+  const [messages, setMessages] = useState<BotMessage[]>([{ id: 0, role: "assistant", text: "Hi, I’m Krypton. I can help you find a project, a skill, or the way to get in touch." }]);
+  const [contextPrompt, setContextPrompt] = useState<ContextPrompt>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const nextId = useRef(1);
+  const busyRef = useRef(false);
+  const closingRef = useRef(false);
 
-  const isHoveredRef = useRef(false);
-  const inputRef = useRef(input);
-  const timeoutsRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
-
-  const scheduleTimeout = (callback: () => void, delay: number) => {
-    const timeout = setTimeout(() => {
-      timeoutsRef.current = timeoutsRef.current.filter((item) => {
-        return item !== timeout;
-      });
-      callback();
-    }, delay);
-    timeoutsRef.current.push(timeout);
-    return timeout;
+  const addMessage = (role: BotMessage["role"], text: string) => {
+    setMessages((current) => [...current, { id: nextId.current++, role, text }]);
   };
 
-  useEffect(() => {
-    return () => {
-      timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
-      timeoutsRef.current = [];
+  const closeChat = useCallback(async () => {
+    if (closingRef.current || !chatOpen) return;
+    closingRef.current = true;
+    const finish = () => {
+      setChatOpen(false);
+      closingRef.current = false;
+      launcherRef.current?.focus();
     };
+    const panel = panelRef.current;
+    if (!panel || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
+    try {
+      const { animate } = await import("animejs");
+      animate(panel, { opacity: [1, 0], translateY: [0, 18], duration: 240, ease: "inQuad", onComplete: finish });
+    } catch { finish(); }
+  }, [chatOpen]);
+
+  useEffect(() => {
+    const launcher = launcherRef.current;
+    if (!launcher || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let cancelled = false;
+    void import("animejs").then(({ animate }) => {
+      const mark = launcher.querySelector("svg");
+      if (!cancelled && mark) animate(mark, { opacity: [0, 1], scale: [.75, 1], duration: 420, ease: "outCubic" });
+    });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
-    inputRef.current = input;
-  }, [input]);
-
-  const { handleLocalCommand } = useBotCommands({
-    activeProject,
-    pathname,
-    router,
-  });
-
-  const handleMouseEnter = () => {
-    isHoveredRef.current = true;
-    if (!chatOpen && !isProcessing && !isCooldown) {
-      setBubbleText("Click me to chat.");
+    if (!chatOpen) return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const focusFrame = requestAnimationFrame(() => inputRef.current?.focus());
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      panel.style.opacity = "1";
+      panel.style.transform = "none";
+      return () => cancelAnimationFrame(focusFrame);
     }
-  };
+    let cancelled = false;
+    void import("animejs").then(({ animate }) => {
+      if (!cancelled) animate(panel, { opacity: [0, 1], translateY: [20, 0], scale: [.98, 1], duration: 430, ease: "outCubic" });
+    });
+    return () => { cancelled = true; cancelAnimationFrame(focusFrame); };
+  }, [chatOpen]);
 
-  const handleMouseLeave = () => {
-    isHoveredRef.current = false;
-    if (!chatOpen && !isProcessing && !isCooldown) {
-      setBubbleText(null);
-    }
-  };
+  useEffect(() => {
+    const log = messagesRef.current;
+    if (!log) return;
+    log.scrollTop = log.scrollHeight;
+    if (messages.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const latest = log.querySelector(".krypton-message:last-child");
+    if (!latest) return;
+    let cancelled = false;
+    void import("animejs").then(({ animate }) => {
+      if (!cancelled) animate(latest, { opacity: [0, 1], translateY: [8, 0], duration: 270, ease: "outCubic" });
+    });
+    return () => { cancelled = true; };
+  }, [messages, chatOpen]);
 
-  const openChat = (message = "Ask me about projects, skills, or hiring.") => {
-    setChatOpen(true);
-    setBubbleText(message);
-  };
+  useEffect(() => {
+    const onContextMenu = (event: MouseEvent) => {
+      const target = (event.target as HTMLElement | null)?.closest<HTMLElement>("[data-krypton-context]");
+      if (!target) return;
+      event.preventDefault();
+      const title = target.dataset.kryptonTitle || target.dataset.kryptonContext || "this section";
+      const summary = target.dataset.kryptonSummary || `Summarize ${title} from Sandeep's portfolio.`;
+      setContextPrompt({ x: event.clientX, y: event.clientY, label: `Ask Krypton about ${title}`, prompt: `Give me a concise summary of this portfolio item: ${summary}` });
+    };
+    const dismiss = () => setContextPrompt(null);
+    window.addEventListener("contextmenu", onContextMenu);
+    window.addEventListener("click", dismiss);
+    return () => { window.removeEventListener("contextmenu", onContextMenu); window.removeEventListener("click", dismiss); };
+  }, []);
 
-  const closeChat = () => {
-    setBubbleText("Okay, I will stay nearby.");
-    scheduleTimeout(() => {
-      setChatOpen(false);
-      setBubbleText(null);
-    }, 1500);
-  };
-
-  const handleContainerClick = () => {
-    if (chatOpen) {
-      closeChat();
-      return;
-    }
-
-    openChat();
-  };
-
-  const handleCloseChat = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    closeChat();
-  };
-
-  const handleDoubleClick = () => {
-    setBubbleText("Hey! Personal space! 🤖");
-    scheduleTimeout(() => {
-      setBubbleText(null);
-    }, 2000);
-  };
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (contextPrompt) setContextPrompt(null);
+      else if (chatOpen) void closeChat();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [chatOpen, contextPrompt, closeChat]);
 
   const runPrompt = async (prompt: string) => {
-    if (!prompt.trim() || isProcessing) return;
-
-    const userMsg = prompt.trim();
+    const question = prompt.trim();
+    if (!question || busyRef.current) return;
+    busyRef.current = true;
+    setChatOpen(true);
     setInput("");
+    addMessage("user", question);
     setIsProcessing(true);
-    setBubbleText("Thinking...");
-
     try {
-      const response =
-        handleLocalCommand(userMsg) || (await chatWithBot(userMsg));
-      setBubbleText(response);
+      const answer = handleLocalCommand(question) || await chatWithBot(question);
+      addMessage("assistant", answer);
     } catch {
-      setBubbleText("I could not process that request.");
+      addMessage("assistant", "I could not answer that just now. Try asking about a project or use the contact section.");
     } finally {
+      busyRef.current = false;
       setIsProcessing(false);
-      setIsCooldown(true);
-      scheduleTimeout(() => {
-        setIsCooldown(false);
-        if (!isHoveredRef.current && !inputRef.current) {
-          setChatOpen(false);
-        }
-      }, 3000);
     }
   };
 
-  const handleSend = async () => {
-    await runPrompt(input);
-  };
+  const suggestions = useMemo(() => activeProject
+    ? [`Summarize ${activeProject.title}`, "Open live demo", "Open GitHub"]
+    : ["Show projects", "Summarize Sandeep", "Go to contact"], [activeProject]);
 
-  const handleSuggestionClick = (suggestion: string) => {
-    void runPrompt(suggestion);
-  };
+  const onSend = (event: FormEvent<HTMLFormElement>) => { event.preventDefault(); void runPrompt(input); };
+  const contextLeft = contextPrompt ? Math.max(12, Math.min(contextPrompt.x, window.innerWidth - 270)) : 0;
+  const contextTop = contextPrompt ? Math.max(12, Math.min(contextPrompt.y, window.innerHeight - 60)) : 0;
 
-  useEffect(() => {
-    const handleContextMenu = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      const contextTarget = target?.closest<HTMLElement>(
-        "[data-krypton-context]",
-      );
-
-      if (!contextTarget) return;
-
-      event.preventDefault();
-      const title =
-        contextTarget.dataset.kryptonTitle ||
-        contextTarget.dataset.kryptonContext ||
-        "this section";
-      const summary =
-        contextTarget.dataset.kryptonSummary ||
-        `Summarize ${title} from Sandeep's portfolio.`;
-
-      setContextMenu({
-        x: event.clientX,
-        y: event.clientY,
-        label: `Ask Krypton about ${title}`,
-        prompt: `Give me a concise summary of this portfolio item: ${summary}`,
-      });
-    };
-
-    const handleClick = () => setContextMenu(null);
-    window.addEventListener("contextmenu", handleContextMenu);
-    window.addEventListener("click", handleClick);
-    return () => {
-      window.removeEventListener("contextmenu", handleContextMenu);
-      window.removeEventListener("click", handleClick);
-    };
-  }, []);
-
-  const suggestions = useMemo(() => {
-    if (activeProject) {
-      return [
-        `Summarize ${activeProject.title}`,
-        "Open live demo",
-        "Open GitHub",
-      ];
-    }
-
-    return ["Show projects", "Summarize Sandeep", "Go to contact"];
-  }, [activeProject]);
-
-  const menuLeft =
-    typeof window === "undefined" || !contextMenu
-      ? 0
-      : Math.min(contextMenu.x, window.innerWidth - 240);
-  const menuTop =
-    typeof window === "undefined" || !contextMenu
-      ? 0
-      : Math.min(contextMenu.y, window.innerHeight - 56);
-
-  return (
-    <div
-      className={`fixed z-50 transition-[width,height,bottom,right,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-        chatOpen
-          ? "bottom-16 right-0 h-[320px] w-[min(320px,100vw)] sm:bottom-20 sm:size-[420px]"
-          : "bottom-5 right-5 size-16"
-      }`}
-      style={{
-        pointerEvents: "auto",
-        display: isGlobalModalOpen ? "none" : "block",
-        opacity: isGlobalModalOpen ? 0 : 1,
-      }}
-      onMouseEnter={
-        !isGlobalModalOpen ? handleMouseEnter : undefined
-      }
-      onMouseLeave={
-        !isGlobalModalOpen ? handleMouseLeave : undefined
-      }
-    >
-      {chatOpen && (
-        <div className="absolute -bottom-[200px] -right-[200px] w-[150%] h-[150%] bg-transparent -z-10" />
-      )}
-
-      <BotChat
-        chatOpen={chatOpen}
-        bubbleText={bubbleText}
-        input={input}
-        setInput={setInput}
-        handleSend={handleSend}
-        handleCloseChat={handleCloseChat}
-        isProcessing={isProcessing}
-        suggestions={suggestions}
-        onSuggestionClick={handleSuggestionClick}
-      />
-
-      <div
-        className="group relative z-10 flex h-full w-full cursor-pointer items-center justify-center"
-        style={{ pointerEvents: "auto" }}
-      >
-        {chatOpen ? <BotVisual /> : (
-          <Image src="/bot-mark.svg" alt="" width={42} height={42} className="size-11" />
-        )}
-        <button
-          type="button"
-          className={`absolute inset-0 z-20 rounded-full focus-visible:outline-2 focus-visible:outline-primary ${chatOpen ? "focus-visible:outline-offset-[-16px]" : "border border-primary/40 bg-card/20 shadow-[0_8px_30px_rgba(0,0,0,0.35)] focus-visible:outline-offset-4"}`}
-          onDoubleClick={handleDoubleClick}
-          onClick={handleContainerClick}
-          aria-label={chatOpen ? "Close Krypton assistant" : "Open Krypton assistant"}
-          aria-expanded={chatOpen}
-        />
-      </div>
-
-      {contextMenu && (
-        <div
-          className="fixed z-60 min-w-48 rounded-lg border border-primary/30 bg-card p-1.5"
-          style={{
-            left: menuLeft,
-            top: menuTop,
-          }}
-          onClick={(event) => event.stopPropagation()}
-        >
-          <button
-            type="button"
-            className="w-full rounded-md px-3 py-2 text-left text-sm font-medium text-foreground transition-colors hover:bg-primary hover:text-dark"
-            onClick={() => {
-              setContextMenu(null);
-              openChat("Reading that context...");
-              void runPrompt(contextMenu.prompt);
-            }}
-          >
-            {contextMenu.label}
-          </button>
-        </div>
-      )}
-    </div>
-  );
+  return <div className="krypton-root" style={{ display: isModalOpen ? "none" : undefined }}>
+    {chatOpen && <div className="krypton-panel" ref={panelRef} role="region" aria-label="Krypton portfolio assistant">
+      <BotChat messages={messages} input={input} inputRef={inputRef} messagesRef={messagesRef} isProcessing={isProcessing} suggestions={suggestions} onInput={setInput} onSend={onSend} onClose={() => void closeChat()} onSuggestion={(suggestion) => void runPrompt(suggestion)} />
+    </div>}
+    <button ref={launcherRef} type="button" className="krypton-launcher" onClick={() => chatOpen ? void closeChat() : setChatOpen(true)} aria-label={chatOpen ? "Close Krypton assistant" : "Open Krypton assistant"} aria-expanded={chatOpen}>
+      <KryptonMark />
+    </button>
+    {contextPrompt && <div className="krypton-context" style={{ left: contextLeft, top: contextTop }} onClick={(event) => event.stopPropagation()}><button type="button" onClick={() => { const prompt = contextPrompt.prompt; setContextPrompt(null); void runPrompt(prompt); }}>{contextPrompt.label} ↗</button></div>}
+  </div>;
 }

@@ -1,19 +1,23 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./offset.css";
+import { Barlow_Condensed, DM_Sans, IBM_Plex_Mono } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LazyBot from "@/components/LazyBot";
-import GlobalBackground from "@/components/GlobalBackground";
-import ScrollRevealController from "@/components/ui/ScrollRevealController";
-import ClickSpark from "@/components/ui/ClickSpark";
+import PortfolioPreferences from "@/components/PortfolioPreferences";
 import { SITE_CONFIG } from "@/data/site";
 import { SOCIAL_PROFILES } from "@/data/social";
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0b0908",
+  themeColor: "#f3f0eb",
 };
+
+const displayFont = Barlow_Condensed({ subsets: ["latin"], weight: "800", variable: "--font-display", display: "swap" });
+const bodyFont = DM_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
+const labelFont = IBM_Plex_Mono({ subsets: ["latin"], weight: "500", variable: "--font-label", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -27,12 +31,12 @@ export const metadata: Metadata = {
     template: "%s | Sandeep Kumar",
   },
   description:
-    `Portfolio of ${SITE_CONFIG.name}, a ${SITE_CONFIG.role.toLowerCase()} building performant web, mobile, and AI-powered product experiences.`,
+    `Portfolio of ${SITE_CONFIG.name}, a ${SITE_CONFIG.role.toLowerCase()} building considered web and mobile products.`,
   alternates: { canonical: "/" },
   openGraph: {
     title: "Sandeep Kumar | Full Stack Developer",
     description:
-      "Explore Sandeep Kumar's full stack projects, technical skills, and contact information.",
+      "Explore Sandeep Kumar's selected projects, approach, and contact information.",
     url: "/",
     siteName: "Sandeep Kumar Portfolio",
     type: "website",
@@ -42,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Sandeep Kumar | Full Stack Developer",
     description:
-      "Full stack developer portfolio featuring web, mobile, and AI-powered products.",
+      "Full stack developer portfolio featuring considered web and mobile products.",
     images: ["/opengraph-image"],
   },
   icons: {
@@ -73,19 +77,16 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className="bg-transparent text-foreground" suppressHydrationWarning>
+      <body id="top" className={`${displayFont.variable} ${bodyFont.variable} ${labelFont.variable}`}>
+        <PortfolioPreferences />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personStructuredData) }}
         />
-        <GlobalBackground />
-        <ScrollRevealController />
-        <ClickSpark />
         <Header />
         <main className="relative min-h-screen">{children}</main>
         <Footer />
         <LazyBot />
-
       </body>
     </html>
   );

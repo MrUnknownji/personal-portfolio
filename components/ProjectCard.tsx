@@ -1,98 +1,23 @@
-import React, { memo } from "react";
 import Image from "next/image";
-import { ProjectSummary } from "@/types/Project";
-import { FiArrowUpRight, FiStar } from "react-icons/fi";
+import type { ProjectSummary } from "@/types/Project";
 
 interface ProjectCardProps {
   project: ProjectSummary;
   onClick: () => void;
   onIntent?: () => void;
   priority?: boolean;
+  index?: number;
 }
 
-const TECH_TAGS_MAX = 3;
-
-const ProjectCardComponent: React.FC<ProjectCardProps> = ({
-  project,
-  onClick,
-  onIntent,
-  priority = false,
-}) => {
+export default function ProjectCard({ project, onClick, onIntent, priority = false, index = 0 }: ProjectCardProps) {
+  const preview = project.id === 11 ? "/images/mirror-admin-preview.avif" : project.image;
   return (
-    <button
-      type="button"
-      data-krypton-context="project"
-      data-krypton-title={project.title}
-      data-krypton-summary={`${project.title}: ${project.shortDescription} Built with ${project.technologies.join(", ")}.`}
-      className="project-card group relative h-full w-full bg-card rounded-xl overflow-hidden cursor-pointer border border-border text-left
-                 transition-[transform,border-color] duration-150 ease-out
-                 hover:-translate-y-1 hover:border-primary/60 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-      onClick={onClick}
-      onFocus={onIntent}
-      onPointerDown={onIntent}
-      onPointerEnter={onIntent}
-    >
-      <div className="relative h-52 md:h-64 overflow-hidden">
-        <Image
-          src={project.image}
-          alt={project.title}
-          fill
-          priority={priority}
-          className="object-cover transition-transform duration-200 ease-out group-hover:scale-[1.04]"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
-        <div className="absolute inset-0 bg-black opacity-[0.12] pointer-events-none transition-opacity duration-150 group-hover:opacity-60" />
-
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span
-            className="flex items-center gap-2 text-base font-bold text-white px-6 py-3 rounded-full
-                       bg-primary/20 border-2 border-primary/60 opacity-0 translate-y-3 scale-95
-                       transition-[transform,opacity] duration-150 ease-out
-                       group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100
-                       "
-          >
-            View Project <FiArrowUpRight className="w-5 h-5" />
-          </span>
-        </div>
-      </div>
-
-      <div className="p-6 flex flex-col relative border-t border-border/30">
-        <h3 className="text-2xl font-bold text-foreground mb-3 tracking-tight flex items-start justify-between gap-2">
-          <span className="flex-1">{project.title}</span>
-          {project.featured && (
-            <FiStar className="w-5 h-5 text-primary flex-shrink-0 fill-primary" />
-          )}
-        </h3>
-        <p className="text-muted-foreground text-sm leading-relaxed mb-6 line-clamp-3">
-          {project.shortDescription}
-        </p>
-
-        <div className="mt-auto flex flex-wrap gap-2">
-          {project.technologies.slice(0, TECH_TAGS_MAX).map((tech) => (
-            <span
-              key={tech}
-              className="tech-tag flex items-center px-3 py-1 text-xs font-semibold bg-transparent text-primary border border-primary/50 hover:bg-primary hover:text-dark transition-colors duration-150"
-              style={{
-                boxShadow: "2px 2px 0px var(--primary)",
-                borderRadius: "2px",
-              }}
-            >
-              {tech}
-            </span>
-          ))}
-          {project.technologies.length > TECH_TAGS_MAX && (
-            <span
-              className="tech-tag flex items-center px-3 py-1 text-xs font-semibold bg-foreground/5 text-muted-foreground border border-border hover:border-border/80 transition-colors duration-300"
-              style={{ borderRadius: "2px" }}
-            >
-              +{project.technologies.length - TECH_TAGS_MAX}
-            </span>
-          )}
-        </div>
-      </div>
+    <button type="button" className="print-index-card" onClick={onClick} onFocus={onIntent} onPointerEnter={onIntent} onPointerDown={onIntent} data-krypton-context="project" data-krypton-title={project.title} data-krypton-summary={`${project.title}: ${project.shortDescription} Built with ${project.technologies.join(", ")}.`}>
+      <span className="print-index-card-image"><Image src={preview} alt="" fill unoptimized={project.id === 11} loading={priority ? "eager" : "lazy"} fetchPriority={priority ? "high" : "auto"} sizes="(max-width: 760px) 100vw, 48vw" /></span>
+      <span className="print-index-card-meta">0{index + 1} / {project.category}</span>
+      <span className="print-index-card-title"><span className="print-index-card-name">{project.title}</span><span className="print-index-card-arrow" aria-hidden="true">↗</span></span>
+      <span className="print-index-card-description">{project.shortDescription}</span>
+      <span className="print-index-card-tech">{project.technologies.slice(0, 3).join(" · ")}</span>
     </button>
   );
-};
-
-const ProjectCard = memo(ProjectCardComponent);
-export default ProjectCard;
+}

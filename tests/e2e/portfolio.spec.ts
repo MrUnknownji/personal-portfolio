@@ -1,260 +1,225 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
-test("home renders essential content and labelled contact fields", async ({ page }) => {
+test("home presents work and contact with accessible structure", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-
-  await expect(page.getByRole("heading", { level: 1, name: "Sandeep Kumar" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: /Sandeep.*Kumar/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Ideas made.*usable/ })).toBeVisible();
   await expect(page.getByLabel("Name")).toBeVisible();
   await expect(page.getByLabel("Email")).toBeVisible();
   await expect(page.getByLabel("Your Message...")).toBeVisible();
-
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact || ""))).toEqual([]);
 });
 
-test("project dialog manages focus and limits initial gallery content", async ({ page }) => {
-  await page.goto("/my-projects");
-  const projectButton = page.getByRole("button", { name: /Mirror Wallpapers/ });
-  await projectButton.click();
-
-  const dialog = page.getByRole("dialog", { name: "Mirror Wallpapers" });
-  await expect(dialog).toBeVisible();
-  await expect(page.getByRole("button", { name: "Close project details" })).toBeFocused();
-  await expect(dialog.getByRole("button", { name: /Show \d+ more/ })).toBeVisible();
-
-  await page.keyboard.press("Escape");
-  await expect(dialog).toBeHidden();
-  await expect(projectButton).toBeFocused();
+test("desktop hero stays pinned through its opening transition", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes("mobile"), "Desktop scroll transition check");
+  await page.goto("/");
+  await expect(page.locator(".pin-spacer")).toBeAttached();
+  await page.evaluate(() => window.scrollTo(0, 600));
+  await expect.poll(() => page.locator(".offset-hero").evaluate((hero) => Math.round(hero.getBoundingClientRect().top))).toBe(72);
+  await expect.poll(() => page.locator(".offset-hero").evaluate((hero) => getComputedStyle(hero.parentElement!.parentElement!).transform)).toBe("none");
 });
 
-test("project actions keep a consistent height", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name.includes("mobile"), "Desktop action row check");
-  await page.goto("/my-projects");
-  await page.getByRole("button", { name: /BidStrike/ }).click();
-
-  const dialog = page.getByRole("dialog", { name: "BidStrike" });
-  const actions = [
-    dialog.getByRole("link", { name: "Full Case Study" }),
-    dialog.getByRole("link", { name: "Live Demo" }),
-    dialog.getByRole("link", { name: "Source Code" }),
-  ];
-  await Promise.all(actions.map((action) => expect(action).toBeVisible()));
-
-  const heights = await Promise.all(
-    actions.map(async (action) => (await action.boundingBox())?.height),
-  );
-  expect(new Set(heights).size).toBe(1);
+test("timeline draws when reached from an About link", async ({ page }) => {
+  await page.goto("/#about");
+  await page.locator(".offset-field-path").scrollIntoViewIfNeeded();
+  await expect(page.locator(".offset-field-note")).toHaveAttribute("data-visible", "true");
+  await expect.poll(() => page.locator(".offset-field-path-line:visible").evaluate((line) => getComputedStyle(line).strokeDashoffset)).toBe("0px");
+  await expect.poll(() => page.locator(".offset-field-path-ribbon:visible").getAttribute("d")).toMatch(/^M /);
 });
 
-test("project navigation lands on home page sections", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name.includes("mobile"), "Desktop primary navigation check");
-
-  for (const destination of ["About", "Skills"] as const) {
-    await page.goto("/my-projects");
-    await page
-      .getByRole("navigation", { name: "Primary navigation" })
-      .getByRole("link", { name: destination, exact: true })
-      .click();
-
-    const sectionId = destination.toLowerCase();
-    await expect(page).toHaveURL(new RegExp(`/#${sectionId}$`));
-    await expect
-      .poll(() =>
-        page.locator(`#${sectionId}`).evaluate((element) =>
-          Math.round(element.getBoundingClientRect().top),
-        ),
-      )
-      .toBeLessThan(140);
-  }
-
-  await page.goto("/my-projects");
-  await page.getByRole("button", { name: "Contact Me" }).click();
-  await expect(page).toHaveURL(/\/#contact$/);
-  await expect
-    .poll(() =>
-      page.locator("#contact").evaluate((element) =>
-        Math.round(element.getBoundingClientRect().top),
-      ),
-    )
-    .toBeLessThan(140);
-});
-
-test("project filters animate only after interaction", async ({ page }) => {
+test("project index filters, searches, and opens details", async ({ page }) => {
   await page.goto("/my-projects");
   await page.getByRole("button", { name: "Web App", exact: true }).click();
-
-  const animationName = await page
-    .locator(".animate-filter-grid")
-    .evaluate((element) => getComputedStyle(element).animationName);
-  expect(animationName).toContain("filter-grid-in");
+  await expect(page.locator(".animate-filter-grid")).toBeVisible();
+  await expect(page.getByRole("button", { name: /BidStrike/ })).toBeVisible();
+  await page.getByRole("button", { name: /BidStrike/ }).click();
+  const dialog = page.getByRole("dialog", { name: "BidStrike" });
+  await expect(dialog).toBeVisible();
+  await expect(page.getByRole("button", { name: "Close project details" })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await page.getByRole("searchbox", { name: "Search projects" }).fill("no-such-project");
+  await expect(page.getByText("No matching work.")).toBeVisible();
+  await page.getByRole("button", { name: /Clear filters/ }).click();
+  await expect(page.getByRole("button", { name: /Mirror Wallpapers/ })).toBeVisible();
+  const results = await new AxeBuilder({ page }).analyze();
+  expect(results.violations.filter((violation) => ["serious", "critical"].includes(violation.impact || ""))).toEqual([]);
 });
 
-test("social cards preserve the original layout and choose a visible side", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name.includes("mobile"), "Desktop hover-card geometry check");
-  await page.route("**/api/social/stats", async (route) => {
-    await route.fulfill({
-      contentType: "application/json",
-      body: JSON.stringify({
-        profiles: {
-          github: {
-            username: "MrUnknownji",
-            profileImage: null,
-            status: "live",
-            stats: [
-              { label: "Repos", value: 47 },
-              { label: "Followers", value: 12 },
-              { label: "Stars", value: 86 },
-            ],
-          },
-          linkedin: {
-            username: null,
-            profileImage: null,
-            status: "unavailable",
-            stats: [
-              { label: "Connections", value: null },
-              { label: "Posts", value: null },
-              { label: "Impressions", value: null },
-            ],
-          },
-          twitter: {
-            username: null,
-            profileImage: null,
-            status: "unavailable",
-            stats: [
-              { label: "Followers", value: null },
-              { label: "Posts", value: null },
-              { label: "Following", value: null },
-            ],
-          },
-        },
-        fetchedAt: new Date().toISOString(),
-      }),
-    });
-  });
-  await page.goto("/");
-
-  const github = page.getByRole("link", { name: /Open GitHub/ });
-  await github.hover();
-  const cardText = page.getByText("Check out my open source projects");
-  await expect(cardText).toBeVisible();
-  await expect(page.getByText("47", { exact: true })).toBeVisible();
-
-  const aboveButton = await github.boundingBox();
-  const aboveCard = await cardText.locator("xpath=../../..").boundingBox();
-  expect((aboveCard?.y ?? 0) + (aboveCard?.height ?? 0)).toBeLessThanOrEqual(
-    aboveButton?.y ?? 0,
-  );
-
-  await page.mouse.move(800, 100);
-  await page.evaluate(() => window.scrollTo(0, 500));
-  await github.hover();
-  const belowButton = await github.boundingBox();
-  const belowCard = await cardText.locator("xpath=../../..").boundingBox();
-  expect(belowCard?.y).toBeGreaterThanOrEqual(
-    (belowButton?.y ?? 0) + (belowButton?.height ?? 0),
-  );
+test("case study keeps its project links accessible while reading", async ({ page }, testInfo) => {
+  await page.goto("/my-projects/11");
+  await expect(page.getByRole("heading", { level: 1, name: /Mirror Wallpapers/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "What needed solving" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: /Mirror Wallpapers project links/ }).getByRole("link", { name: /Source code/ })).toBeVisible();
+  await page.goto("/my-projects/10");
+  const actions = page.getByRole("navigation", { name: /OmniMart project links/ });
+  await expect(actions.getByRole("link", { name: /Live demo/ })).toBeVisible();
+  await expect(actions.getByRole("link", { name: /Source code/ })).toBeVisible();
+  await page.evaluate(() => window.scrollTo({ top: 2000, behavior: "instant" }));
+  await expect.poll(() => actions.evaluate((bar) => Math.round(bar.getBoundingClientRect().top))).toBe(testInfo.project.name.includes("mobile") ? 64 : 72);
 });
 
-test("about portrait stays pinned and timeline dots remain centered", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name.includes("mobile"), "Desktop sticky layout check");
+test("signal preview changes route on hover and keyboard focus", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes("mobile"), "Pointer hover check");
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await page
-    .locator('canvas[data-spark-ready="true"]')
-    .waitFor({ state: "attached" });
-
-  await page.locator("#about > div.relative.grid").evaluate((grid) => {
-    document.documentElement.style.setProperty("scroll-behavior", "auto", "important");
-    grid.scrollIntoView({ behavior: "instant" as ScrollBehavior, block: "start" });
-  });
-  await page.waitForTimeout(50);
-  const firstTop = await page
-    .locator('img[alt="Portrait of Sandeep Kumar"]')
-    .evaluate((portrait) => portrait.getBoundingClientRect().top);
-  await page.evaluate(() => {
-    window.scrollBy(0, 180);
-  });
-  await page.waitForTimeout(50);
-  const secondTop = await page
-    .locator('img[alt="Portrait of Sandeep Kumar"]')
-    .evaluate((portrait) => portrait.getBoundingClientRect().top);
-  expect(Math.abs((firstTop ?? 0) - (secondTop ?? 0))).toBeLessThan(2);
-
-  const alignment = await page.evaluate(() => {
-    const line = document.querySelector<HTMLElement>("#about .absolute.bottom-2");
-    const dots = document.querySelectorAll<HTMLElement>("#about .absolute.z-20.flex.size-5");
-    const lineRect = line?.getBoundingClientRect();
-    const lineCenter = lineRect ? lineRect.left + lineRect.width / 2 : 0;
-    return [...dots].map((dot) => {
-      const rect = dot.getBoundingClientRect();
-      return Math.abs(rect.left + rect.width / 2 - lineCenter);
-    });
-  });
-  expect(Math.max(...alignment)).toBeLessThan(1);
+  const card = page.getByRole("button", { name: "Open Signal paths experiment" });
+  const path = card.locator(".offset-signal-active");
+  const idle = await path.getAttribute("d");
+  await card.hover();
+  await expect(path).not.toHaveAttribute("d", idle!);
+  await page.mouse.move(0, 0);
+  await expect(path).toHaveAttribute("d", idle!);
+  await card.focus();
+  await expect(path).not.toHaveAttribute("d", idle!);
 });
 
-test("assistant recenters after closing and keeps its hint onscreen", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name.includes("mobile"), "Explicit narrow viewport regression check");
+test("work previews and lab studies respond to visitors", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
-  await page.getByRole("button", { name: "Open Krypton portfolio assistant" }).click();
-  await page.getByRole("button", { name: "Close chat" }).click();
-  const launcher = page.getByRole("button", { name: "Open Krypton assistant" });
-  await expect(launcher).toBeVisible({ timeout: 3_000 });
+  const omni = page.locator(".showcase-omni");
+  await omni.getByRole("button", { name: "Cart", exact: true }).click();
+  await expect(omni.locator(".showcase-browser-top")).toContainText("Cart");
+  await page.getByRole("button", { name: "Open Motion type experiment" }).click();
+  const lab = page.getByRole("dialog", { name: "Motion type experiment" });
+  await expect(lab).toBeVisible();
+  await expect(lab.getByRole("slider", { name: "Letter spacing" })).toBeVisible();
+  await lab.getByRole("slider", { name: "Letter spacing" }).fill("14");
+  await page.keyboard.press("Escape");
+  await expect(lab).toBeHidden();
+  await page.getByRole("button", { name: "Open Signal paths experiment" }).click();
+  const signal = page.getByRole("dialog", { name: "Signal paths experiment" });
+  const activePath = signal.locator(".offset-signal-active");
+  const directPath = await activePath.getAttribute("d");
+  await signal.getByRole("button", { name: "Detour" }).click();
+  await expect(activePath).not.toHaveAttribute("d", directPath!);
+  await signal.getByRole("button", { name: "Loop" }).click();
+  await expect(signal.getByText(/Scenic path/)).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: "Open Color study experiment" }).click();
+  await page.getByRole("button", { name: "Use Sage accent" }).click();
+  await page.keyboard.press("Escape");
+  await page.goto("/my-projects");
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--offset-orange").trim())).toBe("#7ba78c");
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--portfolio-tracking").trim())).toBe("2px");
+});
 
-  await page.setViewportSize({ width: 285, height: 800 });
-  await launcher.hover();
-  const hint = page.getByRole("status");
-  await expect(hint).toContainText("Click me to chat.");
+test("desktop work strip scrubs across its full width and preview opens its case study", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes("mobile"), "Mouse interaction check");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await expect.poll(() => page.locator(".offset-section-index-ink > span").first().evaluate((element) => element.style.getPropertyValue("--orange-clip-top"))).not.toBe("");
+  const row = page.locator(".showcase-omni");
+  await row.scrollIntoViewIfNeeded();
+  const bounds = await row.boundingBox();
+  expect(bounds).not.toBeNull();
+  await page.mouse.move(70, bounds!.y + 100);
+  const idleHead = await row.locator(".showcase-head").boundingBox();
+  await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + 100);
+  await expect.poll(async () => (await row.locator(".showcase-head").boundingBox())!.x).toBeCloseTo(idleHead!.x + 32, 0);
+  expect((await row.boundingBox())!.width).toBe(bounds!.width);
+  await page.mouse.move(70, bounds!.y + 100);
+  await expect.poll(async () => (await row.locator(".showcase-head").boundingBox())!.x).toBeCloseTo(idleHead!.x, 0);
+  for (const [fraction, label] of [[0.1, "Home"], [0.35, "Product"], [0.6, "Cart"], [0.9, "Checkout"]] as const) {
+    await page.mouse.move(bounds!.x + bounds!.width * fraction, bounds!.y + 100);
+    await expect(row.locator(".showcase-browser-top")).toContainText(label);
+  }
+  await row.getByRole("link", { name: "View OmniMart case study" }).click();
+  await expect(page).toHaveURL(/\/my-projects\/10$/);
+});
 
-  const geometry = await page.evaluate(() => {
-    const button = document.querySelector<HTMLElement>('button[aria-label="Open Krypton assistant"]');
-    const image = document.querySelector<HTMLElement>('img[src*="bot-mark.svg"]');
-    const bubble = document.querySelector<HTMLElement>('[role="status"]');
-    if (!button || !image || !bubble) return null;
-    const buttonRect = button.getBoundingClientRect();
-    const imageRect = image.getBoundingClientRect();
-    const bubbleRect = bubble.getBoundingClientRect();
-    return {
-      centerDelta: Math.abs(
-        buttonRect.left + buttonRect.width / 2 -
-          (imageRect.left + imageRect.width / 2),
-      ),
-      bubbleLeft: bubbleRect.left,
-      bubbleRight: bubbleRect.right,
-      viewportWidth: window.innerWidth,
-    };
+test("desktop navigation reaches home sections from work", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes("mobile"), "Desktop navigation check");
+  await page.goto("/");
+  await page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: "Work" }).click();
+  await expect(page).toHaveURL(/\/my-projects$/);
+  await page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", { name: "About" }).click();
+  await expect(page).toHaveURL(/\/#about$/);
+  await expect(page.locator("#about")).toBeInViewport();
+  await page.getByRole("navigation", { name: "Page sections" }).getByRole("link", { name: "Jump to Toolkit" }).click();
+  await expect(page).toHaveURL(/\/#skills$/);
+  await expect(page.locator("#skills")).toBeInViewport();
+});
+
+test("returning to the unanchored home page starts at the top", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await page.locator("#about").scrollIntoViewIfNeeded();
+  expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
+  await page.goto("/my-projects");
+  await page.getByRole("link", { name: "Sandeep Kumar homepage" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+  await page.locator("#about").scrollIntoViewIfNeeded();
+  await page.goto("/my-projects");
+  await page.goBack();
+  await expect(page).toHaveURL(/\/$/);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+});
+
+test("color study preview and contact email respond on hover", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes("mobile"), "Desktop hover check");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const preview = page.locator(".offset-lab-color-block");
+  await page.getByRole("button", { name: "Open Color study experiment" }).hover();
+  await expect.poll(() => preview.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe("rgb(115, 152, 189)");
+  const email = page.locator(".offset-contact-direct a");
+  await email.hover();
+  await expect.poll(() => email.evaluate((element) => getComputedStyle(element).color)).toBe("rgb(243, 240, 235)");
+});
+
+test("toolkit panels seat their loose screws and About labels clear the next section", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes("mobile"), "Desktop panel geometry check");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/#skills");
+  const panels = page.locator(".offset-toolkit-panel");
+  await expect(panels).toHaveCount(4);
+  const first = panels.first();
+  const loose = first.locator(".offset-toolkit-screw-loose");
+  expect(await first.evaluate((element) => getComputedStyle(element).transform)).not.toBe("matrix(1, 0, 0, 1, 0, 0)");
+  await first.focus();
+  await expect.poll(() => first.evaluate((element) => getComputedStyle(element).transform)).toBe("matrix(1, 0, 0, 1, 0, 0)");
+  await expect.poll(() => loose.evaluate((element) => getComputedStyle(element).transform)).toBe("matrix(1, 0, 0, 1, 0, 0)");
+  await first.blur();
+  expect(await first.evaluate((element) => getComputedStyle(element).transform)).not.toBe("matrix(1, 0, 0, 1, 0, 0)");
+  const clearance = await page.evaluate(() => {
+    const caption = document.querySelector(".offset-field-stop-3 > div")!.getBoundingClientRect();
+    const roles = document.querySelector(".offset-profile-roles")!.getBoundingClientRect();
+    return roles.top - caption.bottom;
   });
-  expect(geometry?.centerDelta).toBeLessThan(1);
-  expect(geometry?.bubbleLeft).toBeGreaterThanOrEqual(0);
-  expect(geometry?.bubbleRight).toBeLessThanOrEqual(geometry?.viewportWidth ?? 0);
+  expect(clearance).toBeGreaterThan(15);
 });
 
-test("clicks render the restored spark canvas", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name.includes("mobile"), "Mouse-only decorative effect");
+test("mobile menu closes on Escape and restores focus", async ({ page }, testInfo) => {
+  test.skip(!testInfo.project.name.includes("mobile"), "Mobile navigation check");
   await page.goto("/");
-  await page
-    .locator('canvas[data-spark-ready="true"]')
-    .waitFor({ state: "attached" });
-  await page.getByRole("heading", { level: 1, name: "Sandeep Kumar" }).click();
-  await expect
-    .poll(async () =>
-      Number(
-        await page
-          .locator('canvas[aria-hidden="true"]')
-          .getAttribute("data-spark-bursts"),
-      ),
-    )
-    .toBeGreaterThan(0);
-});
-
-test("mobile navigation removes closed links from the tab order", async ({ page }, testInfo) => {
-  test.skip(!testInfo.project.name.includes("mobile"), "Mobile-only behavior");
-  await page.goto("/");
-
-  const menuButton = page.getByRole("button", { name: "Open navigation menu" });
-  await menuButton.click();
-  await expect(page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("link", { name: "Projects" })).toBeVisible();
+  await page.getByRole("button", { name: "Open navigation menu" }).click();
+  await expect(page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("link", { name: "Work" })).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("button", { name: "Open navigation menu" })).toBeFocused();
+  await page.getByRole("button", { name: "Open navigation menu" }).click();
+  await page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("link", { name: "Work" }).click();
+  await expect(page).toHaveURL(/\/my-projects$/);
+});
+
+test("all main routes fit the viewport", async ({ page }) => {
+  for (const route of ["/", "/my-projects", "/my-projects/11"]) {
+    await page.goto(route);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow, `${route} horizontal overflow`).toBeLessThanOrEqual(1);
+  }
+});
+
+test("footer assistant opens on demand", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Ask Krypton portfolio assistant" }).click();
+  await expect(page.getByRole("button", { name: "Close chat" })).toBeVisible();
+  await page.getByRole("button", { name: /Summarize Sandeep/ }).click();
+  await expect(page.getByRole("log", { name: "Krypton conversation" })).toContainText("full-stack developer in Punjab");
+  await page.getByRole("button", { name: "Close chat" }).click();
+  await expect(page.getByRole("region", { name: "Krypton portfolio assistant" })).toBeHidden();
 });
