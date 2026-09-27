@@ -16,7 +16,7 @@ test("home presents work and contact with accessible structure", async ({ page }
 test("desktop hero stays pinned through its opening transition", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name.includes("mobile"), "Desktop scroll transition check");
   await page.goto("/");
-  await expect(page.locator(".pin-spacer")).toBeAttached();
+  await expect(page.locator(".offset-hero").locator("..")).toHaveClass(/pin-spacer/);
   await page.evaluate(() => window.scrollTo(0, 600));
   await expect.poll(() => page.locator(".offset-hero").evaluate((hero) => Math.round(hero.getBoundingClientRect().top))).toBe(72);
   await expect.poll(() => page.locator(".offset-hero").evaluate((hero) => getComputedStyle(hero.parentElement!.parentElement!).transform)).toBe("none");

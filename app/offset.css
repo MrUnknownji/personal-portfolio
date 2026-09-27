@@ -180,14 +180,12 @@ body { background: var(--background); color: var(--foreground); font-family: var
 .print-footer-bottom nav { display: flex; flex-wrap: wrap; gap: 23px; }
 .print-footer-bottom a:hover { color: #fff; }
 .krypton-root { position: fixed; inset: 0; z-index: 80; pointer-events: none; }
-.krypton-launcher { position: fixed; right: 24px; bottom: 24px; z-index: 82; display: grid; place-items: center; width: 58px; height: 58px; border: 1px solid var(--offset-dark); background: var(--offset-dark); color: var(--offset-paper); box-shadow: 5px 5px 0 var(--offset-orange); cursor: pointer; pointer-events: auto; transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
-.krypton-launcher:hover, .krypton-launcher:focus-visible { background: var(--offset-orange); color: var(--offset-dark); box-shadow: 2px 2px 0 var(--offset-dark); }
+.krypton-launcher { position: fixed; right: 24px; bottom: 24px; z-index: 82; display: grid; place-items: center; width: 58px; height: 58px; border: 1px solid var(--offset-dark); background: var(--offset-paper); color: var(--offset-dark); box-shadow: 5px 5px 0 var(--offset-orange); cursor: pointer; pointer-events: auto; transition: box-shadow .2s ease; }
+.krypton-launcher:hover, .krypton-launcher:focus-visible { box-shadow: 2px 2px 0 var(--offset-orange); }
 .krypton-mark { display: block; width: 38px; height: 38px; }
-.krypton-launcher:hover .krypton-mark circle:last-child, .krypton-launcher:focus-visible .krypton-mark circle:last-child { fill: var(--offset-paper); }
 .krypton-panel { position: fixed; right: 24px; bottom: 96px; z-index: 81; display: flex; flex-direction: column; width: min(390px, calc(100vw - 48px)); height: min(425px, calc(100dvh - 120px)); min-height: 310px; overflow: hidden; border: 1px solid var(--offset-dark); background: var(--offset-paper); color: var(--offset-dark); box-shadow: 8px 9px 0 var(--offset-dark); opacity: 0; pointer-events: auto; }
 .krypton-panel-head { display: flex; align-items: center; gap: 12px; min-height: 76px; padding: 14px 17px; border-bottom: 1px solid var(--offset-dark); background: var(--offset-orange); }
-.krypton-panel-head .krypton-mark { width: 34px; height: 34px; flex: none; }
-.krypton-panel-head .krypton-mark circle:last-child { fill: var(--offset-paper); }
+.krypton-panel-head .krypton-mark { width: 39px; height: 39px; flex: none; padding: 3px; border: 1px solid var(--offset-dark); background: var(--offset-paper); }
 .krypton-panel-head div { display: grid; gap: 3px; }
 .krypton-panel-head div > span { font: 600 9px var(--font-label), monospace; letter-spacing: .12em; }
 .krypton-panel-head strong { font: 800 34px/.8 var(--font-display), Impact, sans-serif; letter-spacing: -.02em; }

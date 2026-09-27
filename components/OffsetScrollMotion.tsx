@@ -79,6 +79,19 @@ export default function OffsetScrollMotion() {
           });
         });
 
+        gsap.utils.toArray<HTMLElement>("[data-offset-depth]").forEach((visual) => {
+          gsap.fromTo(visual, { y: 16 }, {
+            y: -16,
+            ease: "none",
+            scrollTrigger: {
+              trigger: visual.closest("[data-offset-project]"),
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 0.6,
+            },
+          });
+        });
+
         gsap.utils.toArray<HTMLElement>("[data-offset-reveal], .offset-lab-card, .offset-profile-roles a, .offset-skills-list > div").forEach((item) => {
           gsap.fromTo(item, { y: 30, opacity: 0.7 }, {
             y: 0,
