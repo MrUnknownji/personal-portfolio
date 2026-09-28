@@ -3,6 +3,7 @@ import { ViewTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import ProjectGallery from "@/components/ProjectGallery";
 import { selectedProjects } from "@/data/projects";
 import { projectStories } from "@/data/projectStories";
 
@@ -49,6 +50,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <span className="offset-kicker">Case study / {String(index + 1).padStart(2, "0")} / {project.category}</span>
         <ViewTransition name={`project-title-${project.id}`} share="project-morph" default="none"><h1>{project.title}<span>.</span></h1></ViewTransition>
         <div><p>{project.shortDescription}</p><span>{project.year ? `Built / ${project.year}` : "Selected work"}</span></div>
+        {gallery.length > 0 && <a className="study-screen-jump" href="#screens">Browse product screens <span aria-hidden="true">↓</span></a>}
       </header>
       {story && <dl className="study-facts">
         <div><dt>My contribution</dt><dd>{story.contribution}</dd></div>
@@ -63,12 +65,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         <div><span className="study-marker">02 / The decision</span><h2 id="study-decision-title">Why this<br />approach<span>.</span></h2></div>
         <div><h3>The constraint</h3><p>{story.constraint}</p><h3>The response</h3><p>{story.decision}</p></div>
       </section>}
-      {gallery.length > 0 && <section className="study-evidence" aria-label="Project evidence">
-        <div className="study-evidence-head"><span className="study-marker">{story ? "03" : "02"} / In the product</span><p>Open an image to inspect the full screen.</p></div>
-        <div className="study-gallery">{gallery.map((item, position) => <figure key={item.src}>
-          <a href={item.src} target="_blank" rel="noopener noreferrer" aria-label={`Open full image: ${item.alt || item.caption}`}><Image src={item.src} alt={item.alt || `${project.title} detail ${position + 1}`} fill sizes="(max-width: 760px) 100vw, 50vw" /><span aria-hidden="true">View full image ↗</span></a>
-          <figcaption>Fig. {String(position + 1).padStart(2, "0")} / {item.caption}</figcaption>
-        </figure>)}</div>
+      {gallery.length > 0 && <section className="study-evidence" id="screens" aria-label="Project evidence">
+        <div className="study-evidence-head"><span className="study-marker">{story ? "03" : "02"} / In the product</span><p>Follow the product flow, screen by screen. Open any image to inspect it.</p></div>
+        <ProjectGallery items={gallery} title={project.title} />
       </section>}
       <section className="study-solution"><span className="study-marker">{story ? "04" : "03"} / The response</span><h2>The solution<span>.</span></h2><p>{project.caseStudy?.solution || project.longDescription}</p></section>
       {story && <section className="study-proof"><span className="study-marker">05 / What to inspect</span><h2>Evidence in the work</h2><ol>{story.evidence.map((item) => <li key={item}>{item}</li>)}</ol></section>}

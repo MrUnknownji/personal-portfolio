@@ -25,6 +25,19 @@ test("hero moves directly into selected work", async ({ page }, testInfo) => {
   await expect(page.locator(".offset-intro-stage")).toHaveCount(0);
 });
 
+test("desktop hero shifts without detaching the portrait from the next section", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes("mobile"), "Desktop scroll composition check");
+  await page.goto("/");
+  test.skip(!(await page.evaluate(() => CSS.supports("animation-timeline", "view()"))), "Scroll timelines are unavailable");
+  const band = page.locator(".offset-hero-band");
+  const initial = await band.evaluate((element) => getComputedStyle(element).transform);
+  await page.evaluate(() => window.scrollTo({ top: 360, behavior: "instant" }));
+  await expect.poll(() => band.evaluate((element) => getComputedStyle(element).transform)).not.toBe(initial);
+  const portraitBottom = await page.locator(".offset-hero-portrait picture").evaluate((element) => element.getBoundingClientRect().bottom);
+  const heroBottom = await page.locator(".offset-hero").evaluate((element) => element.getBoundingClientRect().bottom);
+  expect(portraitBottom).toBeGreaterThanOrEqual(heroBottom);
+});
+
 test("desktop file details stay aligned without covering the portrait", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name.includes("mobile"), "Desktop composition check");
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -94,9 +107,9 @@ test("case study keeps its project links accessible while reading", async ({ pag
   await expect(page.getByRole("heading", { level: 1, name: /Mirror Wallpapers/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "What needed solving" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: /Mirror Wallpapers project links/ }).getByRole("link", { name: /Source code/ })).toBeVisible();
-  await expect(page.locator(".study-gallery figure")).toHaveCount(5);
-  await expect(page.locator(".study-gallery figure").nth(0)).toContainText("lock screen");
-  await expect(page.locator(".study-gallery figure").nth(1)).toContainText("home screen");
+  await expect(page.locator(".study-gallery-story figure")).toHaveCount(5);
+  await expect(page.locator(".study-gallery-story figure").nth(0)).toContainText("lock screen");
+  await expect(page.locator(".study-gallery-story figure").nth(1)).toContainText("home screen");
   await expect(page.getByRole("link", { name: /Open OmniMart case study/ })).toHaveAttribute("href", "/my-projects/10");
   await page.goto("/my-projects/10");
   const actions = page.getByRole("navigation", { name: /OmniMart project links/ });
@@ -104,6 +117,41 @@ test("case study keeps its project links accessible while reading", async ({ pag
   await expect(actions.getByRole("link", { name: /Source code/ })).toBeVisible();
   await page.evaluate(() => window.scrollTo({ top: 2000, behavior: "instant" }));
   await expect.poll(() => actions.evaluate((bar) => Math.round(bar.getBoundingClientRect().top))).toBe(testInfo.project.name.includes("mobile") ? 64 : 72);
+});
+
+test("case study pins a compact screen story to vertical scrolling", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes("mobile"), "Pinned sequence is a wide-screen treatment");
+  await page.goto("/my-projects/11");
+  await page.getByRole("link", { name: /Browse product screens/ }).click();
+  await expect(page).toHaveURL(/#screens$/);
+  const story = page.locator(".study-gallery-story");
+  const track = story.locator(".study-gallery-track");
+  await expect(story.locator("figure")).toHaveCount(5);
+  const layout = await story.evaluate((element) => ({ top: element.getBoundingClientRect().top + scrollY, travel: (element as HTMLElement).offsetHeight - element.querySelector<HTMLElement>(".study-gallery-stage")!.offsetHeight }));
+  await page.evaluate((top) => scrollTo({ top, behavior: "instant" }), layout.top - 72);
+  const start = await track.evaluate((element) => getComputedStyle(element).transform);
+  await page.evaluate((top) => scrollTo({ top, behavior: "instant" }), layout.top - 72 + layout.travel * .55);
+  await expect.poll(() => track.evaluate((element) => getComputedStyle(element).transform)).not.toBe(start);
+  await expect.poll(() => story.locator(".study-gallery-stage").evaluate((element) => Math.round(element.getBoundingClientRect().top))).toBe(72);
+  await expect(story.locator("figure").nth(1).getByRole("link", { name: /Open full image/ })).toHaveAttribute("href", /cloudinary/);
+  expect(await story.locator("figure").nth(1).getByRole("link").evaluate((element) => element.getBoundingClientRect().width)).toBeLessThan(800);
+});
+
+test("case study screens stack without motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/my-projects/11");
+  await expect(page.locator(".study-gallery-stage")).toHaveCSS("position", "static");
+  await expect(page.locator(".study-gallery-frame")).toHaveCount(5);
+  await expect(page.getByRole("button", { name: "Next screenshot" })).toHaveCount(0);
+});
+
+test("sticky work rail follows the current project", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name.includes("mobile"), "The mobile rail is deliberately compact");
+  await page.goto("/");
+  await page.locator(".showcase-mirror").scrollIntoViewIfNeeded();
+  await expect(page.locator(".offset-work-rail span")).toContainText("Mirror Wallpapers");
+  await page.locator(".showcase-omni").scrollIntoViewIfNeeded();
+  await expect(page.locator(".offset-work-rail span")).toContainText("OmniMart");
 });
 
 test("signal preview changes route on hover and keyboard focus", async ({ page }, testInfo) => {

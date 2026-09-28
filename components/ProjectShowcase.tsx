@@ -40,7 +40,7 @@ function ShowcaseRow({ project, index }: { project: Project; index: number }) {
   };
 
   return (
-    <article className={`showcase-row showcase-${kind ?? "generic"}`} data-offset-project onPointerEnter={() => router.prefetch(`/my-projects/${project.id}`)} onFocus={() => router.prefetch(`/my-projects/${project.id}`)}>
+    <article className={`showcase-row showcase-${kind ?? "generic"}`} data-offset-project data-showcase-index={index} onPointerEnter={() => router.prefetch(`/my-projects/${project.id}`)} onFocus={() => router.prefetch(`/my-projects/${project.id}`)}>
       <div className="showcase-head"><span>0{index + 1} / {project.category}</span><span>{project.year}</span></div>
       <div className="showcase-main">
         <div className="showcase-copy"><ViewTransition name={`project-title-${project.id}`} share="project-morph" default="none"><h3>{project.title}</h3></ViewTransition><p>{project.shortDescription}</p><span className="showcase-tech">{project.technologies.slice(0, 4).join(" · ")}</span><Link href={`/my-projects/${project.id}`}>Explore case study <span aria-hidden="true">↗</span></Link></div>
@@ -57,5 +57,19 @@ function ShowcaseRow({ project, index }: { project: Project; index: number }) {
 }
 
 export default function ProjectShowcase({ projects }: { projects: Project[] }) {
-  return <section className="offset-work" id="work" data-build-file="ProjectShowcase.tsx" data-build-note="Three products, three kinds of interaction. Open a case study to see the constraints and decisions behind each one." aria-labelledby="work-title"><div className="offset-work-rail" aria-hidden="true"><span>01 / Selected work</span></div><div className="offset-work-inner"><header className="offset-work-header" data-offset-reveal><span className="offset-kicker">Work / 001—003</span><h2 id="work-title">Work that<br />holds up<span>.</span></h2><p>Real-time bidding, a paired-wallpaper product, and an end-to-end store. Explore the product, then the decisions behind it.</p></header>{projects.map((project, index) => <ShowcaseRow key={project.id} project={project} index={index} />)}<Link className="offset-more-work" href="/my-projects">Browse all projects <span aria-hidden="true">↗</span></Link></div></section>;
+  const sectionRef = useRef<HTMLElement>(null);
+  const [activeProject, setActiveProject] = useState(0);
+
+  useEffect(() => {
+    const rows = sectionRef.current?.querySelectorAll<HTMLElement>("[data-showcase-index]");
+    if (!rows) return;
+    const observer = new IntersectionObserver((entries) => {
+      const current = entries.filter((entry) => entry.isIntersecting).sort((a, b) => Math.abs(a.boundingClientRect.top - window.innerHeight * .35) - Math.abs(b.boundingClientRect.top - window.innerHeight * .35))[0];
+      if (current) setActiveProject(Number((current.target as HTMLElement).dataset.showcaseIndex));
+    }, { rootMargin: "-30% 0px -45% 0px" });
+    rows.forEach((row) => observer.observe(row));
+    return () => observer.disconnect();
+  }, []);
+
+  return <section ref={sectionRef} className="offset-work" id="work" data-build-file="ProjectShowcase.tsx" data-build-note="Three products, three kinds of interaction. Open a case study to see the constraints and decisions behind each one." aria-labelledby="work-title"><div className="offset-work-rail" aria-hidden="true"><span>{String(activeProject + 1).padStart(2, "0")} / {String(projects.length).padStart(2, "0")} · {projects[activeProject]?.title}</span></div><div className="offset-work-inner"><header className="offset-work-header" data-offset-reveal><span className="offset-kicker">Work / 001—003</span><h2 id="work-title">Work that<br />holds up<span>.</span></h2><p>Real-time bidding, a paired-wallpaper product, and an end-to-end store. Explore the product, then the decisions behind it.</p></header>{projects.map((project, index) => <ShowcaseRow key={project.id} project={project} index={index} />)}<Link className="offset-more-work" href="/my-projects">Browse all projects <span aria-hidden="true">↗</span></Link></div></section>;
 }
