@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ContactInteraction from "@/components/ContactSectionComponents/ContactInteraction";
 import InteractiveHero from "@/components/InteractiveHero";
 import ProjectShowcase from "@/components/ProjectShowcase";
@@ -60,9 +61,9 @@ export default function Home() {
           <a className="offset-resume-link" href={PROFILE.resumePath} download>
             Download résumé (PDF) <span aria-hidden="true">↓</span>
           </a>
-          <a className="offset-resume-link" href="/quick">
+          <Link className="offset-resume-link" href="/quick">
             View 1-page profile <span aria-hidden="true">↗</span>
-          </a>
+          </Link>
         </div>
       </section>
 

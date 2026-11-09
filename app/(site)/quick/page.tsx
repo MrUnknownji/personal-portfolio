@@ -5,8 +5,8 @@ import { PROFILE } from "@/data/profile";
 import { SITE_CONFIG } from "@/data/site";
 import { SOCIAL_PROFILES } from "@/data/social";
 import PrintProfile from "@/components/PrintProfile";
-import "../styles/quick-profile.css";
-import "../styles/print.css";
+import "@/app/styles/quick-profile.css";
+import "@/app/styles/print.css";
 
 export const metadata: Metadata = {
   title: "1-Page Profile",

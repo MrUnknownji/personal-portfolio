@@ -1,7 +1,7 @@
 import ProjectsPage from "@/components/ProjectsPage";
 import { selectedProjects, toProjectSummary } from "@/data/projects";
 import type { Metadata } from "next";
-import "../styles/projects-index.css";
+import "@/app/styles/projects-index.css";
 
 export const metadata: Metadata = {
   title: "Selected Work",

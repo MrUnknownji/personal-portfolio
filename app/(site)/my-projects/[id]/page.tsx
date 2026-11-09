@@ -7,7 +7,7 @@ import ProjectGallery from "@/components/ProjectGallery";
 import WireframeToggle from "@/components/WireframeToggle";
 import { getProject, selectedProjects } from "@/data/projects";
 import { projectStories } from "@/data/projectStories";
-import "../../styles/case-study.css";
+import "@/app/styles/case-study.css";
 
 type ProjectPageProps = { params: Promise<{ id: string }> };
 

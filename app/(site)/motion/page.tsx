@@ -1,31 +1,13 @@
 import type { Metadata } from "next";
 import MotionPiece from "@/components/MotionPiece";
-import "../styles/motion.css";
+import { motionVideos as videos } from "@/data/motion";
+import "@/app/styles/motion.css";
 
 export const metadata: Metadata = {
   title: "Motion & Visual Work",
   description: "Selected visual stories made for CruxLog by Sandeep Kumar.",
   alternates: { canonical: "/motion" },
 };
-
-const videos = [
-  { id: "6mHdUbd3fh8", title: "Kese Ek $0.46 Ki Chip Ne Karwaya Nuclear Attack", duration: "9:10" },
-  {
-    id: "uYVl5RxheyM",
-    title: "Ek Update Ne Duniya Bhar Ke Computers Crash Kar Diye",
-    duration: "5:15",
-  },
-  {
-    id: "05FY1I_uVnA",
-    title: "₹450 Crore Mein Mars Kaise Pahuncha India? | Mangalyaan ki Incredible Story",
-    duration: "6:08",
-  },
-  {
-    id: "1TyCxKgJMeU",
-    title: "45 Minute Mein $460 Million Kaise Doob Gaye? | Knight Capital",
-    duration: "5:26",
-  },
-] as const;
 
 export default function MotionPage() {
   return (

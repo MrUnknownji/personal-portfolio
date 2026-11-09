@@ -1,48 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import "./globals.css";
-import "./styles/chrome.css";
-import "./styles/hero.css";
-import "./styles/work.css";
-import "./styles/lab.css";
-import "./styles/about.css";
-import "./styles/toolkit.css";
-import "./styles/contact.css";
-import "./styles/assistant.css";
-import "./styles/build-file.css";
-import "./styles/preferences.css";
-import { Barlow_Condensed, DM_Sans, IBM_Plex_Mono } from "next/font/google";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import LazyBot from "@/components/LazyBot";
-import PortfolioPreferences from "@/components/PortfolioPreferences";
 import { SITE_CONFIG } from "@/data/site";
 import { PROFILE } from "@/data/profile";
 import { SOCIAL_PROFILES } from "@/data/social";
-import { selectedProjects, toProjectSummary } from "@/data/projects";
-
-const projectSummaries = selectedProjects.map(toProjectSummary);
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#f3f0eb",
 };
-
-const displayFont = Barlow_Condensed({
-  subsets: ["latin"],
-  weight: "800",
-  variable: "--font-display",
-  display: "swap",
-});
-const bodyFont = DM_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
-const labelFont = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: "500",
-  variable: "--font-label",
-  display: "swap",
-  // Labels are small and secondary; let the body and display fonts load first.
-  preload: false,
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -104,28 +69,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   };
 
   return (
-    <html lang="en">
-      <body
-        id="top"
-        className={`${displayFont.variable} ${bodyFont.variable} ${labelFont.variable}`}
-      >
-        <PortfolioPreferences />
+    <html lang="en" suppressHydrationWarning>
+      <body id="top">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(personStructuredData) }}
         />
-        <a className="skip-link" href="#main">
-          Skip to content
-        </a>
-        <Header
-          workPreviewImage={selectedProjects[0].image}
-          projectCount={selectedProjects.length}
-        />
-        <main id="main" className="relative min-h-screen" tabIndex={-1}>
-          {children}
-        </main>
-        <Footer />
-        <LazyBot projects={projectSummaries} />
+        {children}
       </body>
     </html>
   );

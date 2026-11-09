@@ -1,21 +1,22 @@
 import Link from "next/link";
 
-export default function NotFound() {
+// A last-resort 404 with no stylesheet imports. The root not-found is part of every route's
+// tree, so importing either design's styles here would load them on the other design's pages.
+// Unknown addresses normally reach app/(site)/not-found.tsx or app/review/not-found.tsx instead.
+export default function RootNotFound() {
   return (
-    <section className="portfolio-state offset-wrap" aria-labelledby="not-found-title">
-      <div>
-        <span className="offset-kicker">Build file / 404</span>
-        <h1 id="not-found-title">
-          This page
-          <br />
-          is missing<span>.</span>
-        </h1>
-        <p>The address may have changed. You can return to the work or start again.</p>
-        <div className="portfolio-state-actions">
-          <Link href="/my-projects">Explore projects ↗</Link>
-          <Link href="/">Return home ↗</Link>
-        </div>
-      </div>
-    </section>
+    <main
+      style={{
+        fontFamily: "system-ui, sans-serif",
+        padding: "64px 24px",
+        maxWidth: 640,
+        margin: "0 auto",
+      }}
+    >
+      <h1>This page is missing.</h1>
+      <p>
+        The address may have changed. <Link href="/">Return home</Link>.
+      </p>
+    </main>
   );
 }

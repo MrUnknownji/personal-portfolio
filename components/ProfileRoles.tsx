@@ -4,44 +4,18 @@ import { useState, type PointerEvent } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
-
-const roles = [
-  {
-    name: "Full-stack developer",
-    detail: "Interface ↔ API ↔ Data",
-    href: "#work",
-    preview: "full",
-  },
-  {
-    name: "Mobile developer",
-    detail: "React Native / Expo ↗",
-    href: "/my-projects/11",
-    preview: "mobile",
-  },
-  {
-    name: "Real-time systems",
-    detail: "Socket.io / server authority ↗",
-    href: "/my-projects/9",
-    preview: "systems",
-  },
-  {
-    name: "Creative coder & video",
-    detail: "Motion / frames / story ▣",
-    href: "/motion",
-    preview: "video",
-  },
-] as const;
+import { profileRoles } from "@/data/sections";
 
 export default function ProfileRoles() {
   const [active, setActive] = useState<{
-    preview: (typeof roles)[number]["preview"];
+    preview: (typeof profileRoles)[number]["preview"];
     x: number;
     y: number;
   } | null>(null);
 
   const move = (
     event: PointerEvent<HTMLAnchorElement>,
-    preview: (typeof roles)[number]["preview"],
+    preview: (typeof profileRoles)[number]["preview"],
   ) => {
     if (event.pointerType === "touch") return;
     setActive({
@@ -57,7 +31,7 @@ export default function ProfileRoles() {
       aria-label="What I bring to a project"
       onPointerLeave={() => setActive(null)}
     >
-      {roles.map((role) => (
+      {profileRoles.map((role) => (
         <Link
           href={role.href}
           key={role.name}
