@@ -8,7 +8,8 @@ import { PROFILE } from "@/data/profile";
 import { SITE_CONFIG } from "@/data/site";
 
 const buildingLetters = [..."Building"];
-const currentRole = PROFILE.experience[0];
+// The entry marked `current` is the main job; the list itself is in date order.
+const currentRole = PROFILE.experience.find((entry) => "current" in entry && entry.current);
 
 export default function InteractiveHero() {
   return (
@@ -78,7 +79,7 @@ export default function InteractiveHero() {
         <p>{PROFILE.headline}</p>
         <div>
           <span>Currently</span>
-          <strong>{currentRole.role} at TCS</strong>
+          <strong>{currentRole?.current?.label}</strong>
         </div>
         <div>
           <span>Open to</span>

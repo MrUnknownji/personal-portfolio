@@ -7,6 +7,8 @@ export type ExperienceEntry = {
   organization: string;
   summary: string;
   highlights: { text: string; href?: string }[];
+  /** The main employer, shown as "Currently" in the home hero. Exactly one entry. */
+  current?: { label: string };
 };
 
 export const PROFILE = {
@@ -35,10 +37,12 @@ export const PROFILE = {
     },
     {
       period: "2024 — Now",
-      role: "Quality management and review",
+      role: "Programmer / Developer",
       organization: "Tata Consultancy Services (TCS)",
-      summary: "Quality management and review work, alongside independent product work.",
+      summary:
+        "Development work that includes quality management and review, alongside independent product work.",
       highlights: [],
+      current: { label: "Programmer / Developer at TCS" },
     },
     {
       period: "2024 — Now",

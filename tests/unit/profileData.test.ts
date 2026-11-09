@@ -27,4 +27,10 @@ describe("profile data", () => {
       }
     }
   });
+
+  it("marks exactly one entry as the current job shown in the hero", () => {
+    const current = PROFILE.experience.filter((entry) => "current" in entry && entry.current);
+    expect(current).toHaveLength(1);
+    expect(current[0].organization).toContain("TCS");
+  });
 });

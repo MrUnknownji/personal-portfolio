@@ -5,6 +5,7 @@ test("home presents work and contact with accessible structure", async ({ page }
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1, name: /Sandeep.*Kumar/ })).toBeVisible();
+  await expect(page.locator(".offset-hero-canvas")).toContainText("Programmer / Developer at TCS");
   await expect(page.getByRole("heading", { name: /Work that.*holds up/ })).toBeVisible();
   await expect(page.locator(".showcase-row").first()).toHaveClass(/showcase-bid/);
   const shortcuts = page.getByRole("navigation", { name: "Profile shortcuts" });
@@ -373,7 +374,7 @@ test("1-page profile leads with experience and links the résumé", async ({ pag
   await expect(page.getByRole("heading", { level: 1, name: /Sandeep.*Kumar/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Experience & education" })).toBeVisible();
   await expect(
-    page.getByText("Quality management and review, Tata Consultancy Services (TCS)"),
+    page.getByText("Programmer / Developer, Tata Consultancy Services (TCS)"),
   ).toBeVisible();
   await expect(page.locator(".quick-view-projects article")).toHaveCount(4);
   await expect(page.locator(".quick-view-projects article").first()).toContainText("BidStrike");
