@@ -180,12 +180,7 @@ export default function Header({
   return (
     <header className="print-header" data-compact={compact}>
       <div className="print-topbar">
-        <Link
-          href="/"
-          className="print-brand"
-          onClick={() => setOpen(false)}
-          aria-label="Sandeep Kumar homepage"
-        >
+        <Link href="/" className="print-brand" onClick={() => setOpen(false)}>
           Sandeep Kumar <span>Full-stack developer</span>
         </Link>
         <span className="print-header-section" aria-live="off">

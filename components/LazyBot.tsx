@@ -23,7 +23,7 @@ export default function LazyBot({ projects }: { projects: ProjectSummary[] }) {
       onClick={() => setIsActivated(true)}
       onPointerEnter={() => void loadBot()}
       onFocus={() => void loadBot()}
-      aria-label="Ask about Sandeep's work"
+      aria-label="Ask about my work"
     >
       <KryptonMark />
       <span>Ask about my work</span>

@@ -1,2 +1,11 @@
 allowBuilds:
   unrs-resolver: true
+
+# Patched versions of nested dependencies flagged by `pnpm audit`. Remove an entry once
+# the parent package ships with the fix.
+overrides:
+  ip-address: ^10.7.4
+  brace-expansion@>=4.0.0 <5.0.12: ^5.0.12
+  source-map-js: ^1.2.2
+  vite@>=8.2.0 <8.2.4: ^8.2.4
+  minimatch@>=7.0.0 <11.0.1: ^11.0.1

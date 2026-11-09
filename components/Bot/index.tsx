@@ -239,7 +239,7 @@ export default function Bot({
         className="krypton-launcher"
         data-compact={compact && !chatOpen}
         onClick={() => (chatOpen ? void closeChat() : setChatOpen(true))}
-        aria-label={chatOpen ? "Close Krypton assistant" : "Ask about Sandeep's work"}
+        aria-label={chatOpen ? "Close Krypton assistant" : "Ask about my work"}
         aria-expanded={chatOpen}
       >
         <KryptonMark />

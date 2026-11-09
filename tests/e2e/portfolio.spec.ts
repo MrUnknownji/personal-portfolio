@@ -250,7 +250,7 @@ test("two-bids study shows a lost update and how server authority prevents it", 
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/#lab", { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "Open Two bids, one price experiment" }).click();
+  await page.getByRole("button", { name: /Two bids, one price/ }).click();
   const race = page.getByRole("dialog", { name: "Two bids, one price experiment" });
   await expect(race.getByRole("group", { name: "Server rule" })).toBeVisible();
   await race.getByRole("button", { name: /Send both bids/ }).click();
@@ -286,14 +286,14 @@ test("work previews and lab studies respond to visitors", async ({ page }) => {
     .locator("#lab")
     .evaluate((section) => section.scrollIntoView({ behavior: "instant", block: "start" }));
   await expect(page.locator("#lab")).toBeInViewport();
-  await page.getByRole("button", { name: "Open Motion type experiment" }).click();
+  await page.getByRole("button", { name: /Motion type/ }).click();
   const lab = page.getByRole("dialog", { name: "Motion type experiment" });
   await expect(lab).toBeVisible();
   await expect(lab.getByRole("slider", { name: "Letter spacing" })).toBeVisible();
   await lab.getByRole("slider", { name: "Letter spacing" }).fill("14");
   await page.keyboard.press("Escape");
   await expect(lab).toBeHidden();
-  await page.getByRole("button", { name: "Open Color study experiment" }).click();
+  await page.getByRole("button", { name: /Color study/ }).click();
   await page.getByRole("button", { name: "Use Sage accent" }).click();
   await page.keyboard.press("Escape");
   await page.goto("/my-projects");
@@ -318,7 +318,7 @@ test("work previews and lab studies respond to visitors", async ({ page }) => {
     .locator("#lab")
     .evaluate((section) => section.scrollIntoView({ behavior: "instant", block: "start" }));
   await expect(page.locator("#lab")).toBeInViewport();
-  await page.getByRole("button", { name: "Open Motion type experiment" }).click();
+  await page.getByRole("button", { name: /Motion type/ }).click();
   await page.getByRole("button", { name: "Reset site" }).click();
   await page.keyboard.press("Escape");
   await expect
@@ -475,7 +475,7 @@ test("the home link starts at the top and browser Back keeps reading position", 
     .evaluate((section) => section.scrollIntoView({ behavior: "instant", block: "start" }));
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(500);
   await openProjects();
-  await page.getByRole("link", { name: "Sandeep Kumar homepage" }).click();
+  await page.getByRole("link", { name: "Sandeep Kumar Full-stack developer" }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
   await page.locator("#about").scrollIntoViewIfNeeded();
@@ -493,7 +493,7 @@ test("color study preview and contact email respond on hover", async ({ page }, 
   await page.goto("/#lab");
   const preview = page.locator(".offset-lab-color-block");
   await expect(page.locator("#lab")).toBeInViewport();
-  await page.getByRole("button", { name: "Open Color study experiment" }).hover();
+  await page.getByRole("button", { name: /Color study/ }).hover();
   await expect
     .poll(() => preview.evaluate((element) => getComputedStyle(element).backgroundColor))
     .toBe("rgb(115, 152, 189)");
@@ -565,7 +565,7 @@ test("all main routes fit the viewport", async ({ page }) => {
 
 test("footer assistant opens on demand", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("button", { name: "Ask about Sandeep's work" }).click();
+  await page.getByRole("button", { name: "Ask about my work" }).click();
   await expect(page.getByRole("button", { name: "Close chat" })).toBeVisible();
   await page.getByRole("button", { name: /Summarize BidStrike/ }).click();
   await expect(page.getByRole("log", { name: "Krypton conversation" })).toContainText("BidStrike");

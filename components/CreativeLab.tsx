@@ -115,11 +115,12 @@ export default function CreativeLab() {
               key={study.number}
               type="button"
               onClick={() => setOpen(index)}
-              aria-label={`Open ${study.title} experiment`}
             >
               <span className="offset-lab-card-top">
                 <span>LAB / {study.number}</span>
-                <span>OPEN ↗</span>
+                <span>
+                  OPEN <span aria-hidden="true">↗</span>
+                </span>
               </span>
               <span className="offset-lab-preview" aria-hidden="true">
                 {index === 0 ? (
