@@ -67,9 +67,7 @@ export const Dialog: FC<PropsWithChildren<DialogProps>> = ({
     if (!open || !isMounted || !dialogRef.current) return;
 
     previouslyFocusedRef.current =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null;
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
     const inertedSiblings = Array.from(document.body.children)
       .filter((element) => element !== dialogRef.current && element.tagName !== "SCRIPT")
@@ -141,9 +139,7 @@ export const Dialog: FC<PropsWithChildren<DialogProps>> = ({
       }}
     >
       <div className="flex min-h-full items-center justify-center p-0 md:p-4">
-        <div className={`relative text-left align-middle ${className}`}>
-          {children}
-        </div>
+        <div className={`relative text-left align-middle ${className}`}>{children}</div>
       </div>
     </div>,
     document.body,
@@ -156,11 +152,7 @@ interface DialogTitleProps {
   id?: string;
 }
 
-export const DialogTitle: FC<DialogTitleProps> = ({
-  children,
-  className = "",
-  id,
-}) => (
+export const DialogTitle: FC<DialogTitleProps> = ({ children, className = "", id }) => (
   <h2 id={id} className={`pb-2 text-lg font-medium leading-6 ${className}`}>
     {children}
   </h2>

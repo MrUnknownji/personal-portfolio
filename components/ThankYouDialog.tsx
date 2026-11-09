@@ -11,11 +11,7 @@ interface ThankYouDialogProps {
   email?: string;
 }
 
-const ThankYouDialog = ({
-  isOpen,
-  onClose,
-  email = "your@email.com",
-}: ThankYouDialogProps) => {
+const ThankYouDialog = ({ isOpen, onClose, email = "your@email.com" }: ThankYouDialogProps) => {
   const titleId = useId();
   const descriptionId = useId();
   const copyResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -66,7 +62,10 @@ const ThankYouDialog = ({
           </div>
 
           <div className="space-y-3">
-            <h2 id={titleId} className="font-[family-name:var(--font-display)] text-5xl font-extrabold uppercase leading-none">
+            <h2
+              id={titleId}
+              className="font-[family-name:var(--font-display)] text-5xl font-extrabold uppercase leading-none"
+            >
               Message transmitted.
             </h2>
             <p id={descriptionId} className="text-lg leading-relaxed">
@@ -75,9 +74,7 @@ const ThankYouDialog = ({
           </div>
 
           <div className="flex items-center justify-between gap-4 border border-[#19191b] p-4">
-            <span className="truncate font-mono text-sm">
-              {email}
-            </span>
+            <span className="truncate font-mono text-sm">{email}</span>
             <button
               type="button"
               onClick={handleCopyEmail}

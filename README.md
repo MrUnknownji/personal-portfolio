@@ -1,75 +1,91 @@
-# Sandeep Kumar Portfolio
+# Sandeep Kumar — Portfolio
 
-A production-focused personal portfolio built with Next.js App Router,
-TypeScript, Tailwind CSS, and MongoDB-backed contact handling.
+Personal portfolio of Sandeep Kumar, a full-stack developer building web, mobile,
+and real-time products, and the founder of
+[FrameRelay Studio](https://framerelaystudio.com/). Built with Next.js (App Router), React 19, TypeScript,
+and plain CSS, with a MongoDB-backed contact form and a small portfolio assistant.
 
-The site presents six selected products through dedicated case studies. Each
-study connects the problem, a design or engineering decision, curated screens,
-and source or demo evidence. The project index is searchable, and the homepage
-includes an interactive build-file view, a small lab, and Krypton, a portfolio
-assistant that can answer local portfolio questions or use Gemini when
-configured.
-
-## Preview
+- **Case studies, not screenshots.** Each selected project has its own route with
+  the problem, the constraint, the decision, the trade-offs, and countable facts
+  taken from its repository (API routes, tests, migrations).
+- **Facts are checked.** Every stack and number on the site was verified against
+  the project's source, and each case study links the files to read first.
+  `data/profile.ts` is the single source for experience, skills, and availability;
+  the home page, the 1-page profile, the résumé PDF, and the assistant all read
+  from it.
+- **A lab with a real idea in it.** "Two bids, one price" simulates two bidders on
+  different network latencies, with timeouts and retries, a lossy network, and
+  three server rules. It shows a lost update under last-write-wins, a bidder
+  outbidding itself after a lost reply, and how request IDs make retries safe.
+  The simulation is a pure, unit-tested module (`components/lab/bidRace.ts`).
+- **Measured performance.** Lighthouse budgets run in CI; see
+  [docs/performance](docs/performance) for the audits and what changed.
 
 ![BidStrike project screenshot](https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855178/Bid-Strike-Light-Home.png)
-![AuraEdit project screenshot](https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116565/AuraEdit-ImageUpload-Web-Light.png)
 
-## Features
+## Selected projects
 
-- Curated selected-work page with search, category filters, full case-study
-  routes, inspectable screenshot galleries, source links, and live demos.
-- Real contact API route with shared validation, a spam honeypot, durable
-  IP/email rate limits, retention controls, and user-facing error states.
-- Lightweight image-based assistant bot with local navigation commands, project
-  actions, contextual right-click summaries, and optional Gemini fallback.
-- Server-rendered social profile links that do not depend on client JavaScript.
-- Responsive App Router layout with a direct path into the work, an explanatory
-  build-file view, interactive studies, contact, and a printable quick profile.
+| Project            | What it is                                                                | Stack                                   |
+| ------------------ | ------------------------------------------------------------------------- | --------------------------------------- |
+| BidStrike          | Real-time auctions with server-side bid validation and proxy auto-bidding | Next.js, Socket.io, MongoDB, Stripe     |
+| FrameRelay Studio  | My motion studio: WebGL2 site with quality tiers, films in Remotion       | Astro, Three.js, Remotion, Cloudflare   |
+| Mirror Wallpapers  | Paired wallpapers: Expo app, Next.js admin, FastAPI AI (private repo)     | React Native, Supabase, FastAPI, Gemini |
+| OmniMart           | Store with cart, checkout, support, and admin                             | Next.js, MongoDB, Gemini, Cloudinary    |
+| YouTube Content OS | Creator workspace with AI and storage fallbacks                           | React, Vite, Express, MongoDB           |
+| AuraEdit           | Browser-only image editor with batch export                               | Next.js, Canvas API, JSZip              |
+| AudioVibes         | Local music player                                                        | React Native, Expo, Reanimated          |
+| This portfolio     | Verified facts, measured performance, and a tested lab                    | Next.js, Playwright, Vitest, Lighthouse |
 
-## Selected Projects
-
-- **BidStrike**: real-time AI-powered auction platform using Next.js, Pusher,
-  Prisma, and PostgreSQL.
-- **YouTube Content OS**: AI workspace for creator scripts, metadata,
-  thumbnails, and exports.
-- **AuraEdit**: local-first browser image editor with batch processing and
-  Canvas-based transformations.
-- **AudioVibes**: React Native music player with local playback, Material You
-  styling, and Reanimated interactions.
-- **OmniMart**: AI-enhanced e-commerce product surface with storefront,
-  checkout, support, and admin flows.
-
-Older clone/layout projects remain in the data as archive material, but the main
-portfolio experience is intentionally limited to stronger selected work.
-
-## Architecture
+## Structure
 
 ```text
 app/
-  api/contact/route.ts       Validated, rate-limited contact submissions
-  actions/chat.ts            Krypton local/Gemini response action
-  my-projects/[id]/          Indexable project case-study pages
+  page.tsx, home.tsx          Home: hero, work, lab, about, contact
+  my-projects/[id]/           Statically generated case-study routes
+  quick/                      1-page profile (also the résumé PDF source)
+  api/contact/route.ts        Validated, rate-limited contact submissions
+  actions/chat.ts             Assistant: local answers first, optional Gemini
+  globals.css                 Tailwind entry, tokens, base styles, rendering hints
+  styles/                     One stylesheet per feature, imported in cascade order
 
 components/
-  Bot/                       Lightweight assistant visual, chat UI, commands
-  ProjectModal*              Gallery, tech stack, expandable case-study notes
-  ContactSectionComponents/  Contact form and contact information
+  InteractiveHero, ProjectShowcase, CreativeLab, Experience, HowIBuild, ...
+  lab/                        Two-bids simulation (pure logic + view)
+  Bot/                        Assistant launcher, chat, and commands
 
 data/
-  projects.ts               Selected projects and archive data
-  projectStories.ts          Decisions and curated media for case studies
-  site.ts                   Shared identity/contact configuration
+  profile.ts                  Experience, skills, availability, résumé path
+  projects.ts                 Selected projects, verified stacks and facts
+  projectStories.ts           Case-study narrative and curated screens
+  archive.ts                  Earlier practice projects (assistant only)
 
 lib/
-  mongodb.ts                 Recoverable cached MongoDB client
-  server/rateLimit.ts        Atomic MongoDB-backed request quotas
+  contactValidation.ts        Shared client/server validation
+  server/rateLimit.ts         Atomic MongoDB-backed request quotas
+
+scripts/
+  build-resume.mjs            Prints /quick to public/sandeep-kumar-resume.pdf
+  run-lighthouse.mjs          Lighthouse budgets (median of three runs)
 ```
+
+## Development
+
+Use Node.js 24.19.0 (`.nvmrc`) and pnpm 11.22.0.
+
+```bash
+pnpm dev            # local development
+pnpm test:all       # format check, lint, types, unit, build, e2e
+pnpm lighthouse     # performance and accessibility budgets
+pnpm resume         # regenerate the résumé PDF after editing data/profile.ts (run after pnpm build)
+```
+
+Set `PLAYWRIGHT_CHROME_PATH` or `CHROME_PATH` to use a system Chrome instead of
+Playwright's bundled browser.
 
 ## Environment
 
-Create `.env.local` for local development. The contact form needs MongoDB to
-store submissions.
+Create `.env.local`. The contact form needs MongoDB; the assistant works without
+an API key and uses Gemini only when one is configured.
 
 ```bash
 MONGO_DB_URI=
@@ -84,49 +100,24 @@ GEMINI_API_KEY=
 GEMINI_MODEL=gemini-3.1-flash-lite-preview
 ```
 
-## Commands
+## Contact flow
 
-Use Node.js 24.19.0 (the version in `.nvmrc`) and pnpm 11.22.0.
-
-```bash
-pnpm dev
-pnpm lint
-pnpm typecheck
-pnpm build
-pnpm start
-pnpm test
-pnpm test:e2e
-pnpm audit:all
-pnpm audit:prod
-pnpm lighthouse
-pnpm db:indexes
-```
-
-## Contact Flow
-
-1. The client form validates name, email, category, subject, and message.
-2. `/api/contact` repeats validation on the server.
-3. A hidden honeypot field silently drops obvious bot submissions.
-4. Independent atomic per-IP and per-email limits block repeated abuse across instances.
-5. Valid messages are stored in the `contact_messages` MongoDB collection with
-   status, user-agent, hashed IP, and timestamps.
-
-Email notifications are not bundled yet because no email provider credential is
-configured. The stored messages are ready for a later Resend, EmailJS, or
-admin-dashboard integration.
-
-## Deployment Notes
-
-- Deploy on Vercel or another Node-capable Next.js host.
-- Configure `MONGO_DB_URI` in the production environment.
-- Configure a strong, independent `RATE_LIMIT_HASH_SECRET` and run `pnpm db:indexes` during deployment.
-- Add `NEXT_PUBLIC_SITE_URL` so metadata resolves with the production origin.
-- Add `GEMINI_AI_STUDIO_API_KEY` for Krypton's preferred free Gemini fallback.
-- Add `GEMINI_API_KEY` as the paid fallback if the AI Studio key is unavailable
-  or over quota.
+1. The form validates name, email, category, subject, and message on the client.
+2. `/api/contact` repeats validation on the server and caps the body at 32 KB.
+3. A hidden honeypot field drops obvious bot submissions.
+4. Atomic per-IP and per-email limits in MongoDB block repeated abuse across instances.
+5. Messages are stored with a hashed IP and an automatic deletion date.
 
 ## Quality gates
 
-Pull requests run dependency auditing, lint, strict type checking, unit tests,
-production build, Playwright desktop/mobile flows, axe accessibility checks, and
-Lighthouse budgets. Project details also have server-rendered, shareable routes.
+Every pull request runs dependency audit, Prettier, ESLint, strict TypeScript,
+Vitest unit tests, a production build, Playwright flows on desktop and mobile
+(with axe accessibility checks), and Lighthouse budgets. Security headers,
+including a Content Security Policy, are set in `next.config.mjs`.
+
+## Deployment
+
+- Deploy on Vercel or any Node-capable Next.js host.
+- Configure `MONGO_DB_URI`, a strong `RATE_LIMIT_HASH_SECRET`, and
+  `NEXT_PUBLIC_SITE_URL`, then run `pnpm db:indexes` once.
+- Optionally add `GEMINI_AI_STUDIO_API_KEY` or `GEMINI_API_KEY` for the assistant.

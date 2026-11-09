@@ -1,0 +1,252 @@
+/* How I build: stage map and tool-to-project evidence. */
+
+/* The build map connects tools to the projects that use them. */
+.offset-toolkit {
+  position: relative;
+  margin-top: 85px;
+  border: 1px solid var(--offset-dark);
+  background: #e9e4dd;
+}
+.offset-toolkit-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 20px;
+  align-items: end;
+  padding: 38px clamp(25px, 3vw, 48px) 43px;
+  border-bottom: 1px solid var(--offset-dark);
+}
+.offset-toolkit-heading .offset-kicker {
+  grid-column: 1/-1;
+}
+.offset-toolkit h2 {
+  font:
+    800 clamp(75px, 8.5vw, 132px) / 0.76 var(--font-display),
+    Impact,
+    sans-serif;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+.offset-toolkit-heading p {
+  max-width: 190px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.build-map {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 48px 24px 45px;
+}
+.build-map::before {
+  content: "";
+  position: absolute;
+  top: 64px;
+  left: 8%;
+  right: 8%;
+  border-top: 2px solid var(--offset-dark);
+  display: none;
+}
+.build-map-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 255px;
+  padding: 0 clamp(12px, 1.7vw, 25px);
+}
+.build-map-stage:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: calc(clamp(12px, 1.7vw, 25px) + 16px);
+  width: 100%;
+  border-top: 2px solid var(--offset-dark);
+}
+.build-map-stage-index {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--offset-dark);
+  border-radius: 50%;
+  background: var(--offset-paper);
+  font:
+    700 10px var(--font-label),
+    monospace;
+}
+.build-map-stage h3 {
+  margin-top: 37px;
+  font:
+    800 clamp(34px, 3.3vw, 52px) / 0.86 var(--font-display),
+    Impact,
+    sans-serif;
+  text-transform: uppercase;
+}
+.build-map-stage p {
+  max-width: 170px;
+  margin-top: 11px;
+  color: #5c5753;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.build-map-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+  gap: 5px;
+  margin-top: 22px;
+}
+.build-map-tools button {
+  padding: 7px 8px;
+  border: 1px solid #827a72;
+  background: var(--offset-paper);
+  font:
+    600 10px var(--font-label),
+    monospace;
+  white-space: nowrap;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+.build-map-tools button:is(:hover, :focus-visible),
+.build-map-tools button[aria-pressed="true"] {
+  border-color: var(--offset-dark);
+  background: var(--offset-orange);
+  color: var(--offset-dark);
+}
+.build-evidence {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 25px;
+  padding: 25px clamp(25px, 3vw, 48px);
+  background: var(--offset-dark);
+  color: var(--offset-paper);
+}
+.build-evidence-heading {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  font:
+    600 10px var(--font-label),
+    monospace;
+  text-transform: uppercase;
+}
+.build-evidence-heading strong {
+  color: var(--offset-orange);
+  font:
+    800 24px/0.9 var(--font-display),
+    Impact,
+    sans-serif;
+}
+.build-evidence-links {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+.build-evidence-links a {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 75px;
+  padding: 10px;
+  border: 1px solid #756e67;
+  font:
+    800 22px/0.9 var(--font-display),
+    Impact,
+    sans-serif;
+  text-transform: uppercase;
+  transition:
+    opacity 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+.build-evidence-links a[data-related="false"] {
+  opacity: 0.3;
+}
+.build-evidence-links a[data-related="true"]:is(:hover, :focus-visible) {
+  border-color: var(--offset-orange);
+  background: #302822;
+}
+.build-evidence-links a span {
+  color: var(--offset-orange);
+  font:
+    700 17px var(--font-body),
+    Arial,
+    sans-serif;
+}
+
+@media (max-width: 899px) {
+  .build-map {
+    grid-template-columns: 1fr;
+    padding: 26px 25px;
+  }
+  .build-map::before {
+    display: block;
+    top: 43px;
+    bottom: 50px;
+    left: 40px;
+    right: auto;
+    border-top: 0;
+    border-left: 2px solid var(--offset-dark);
+  }
+  .build-map-stage:not(:last-child)::before {
+    display: none;
+  }
+  .build-map-stage {
+    min-height: 0;
+    padding: 0 0 28px 48px;
+  }
+  .build-map-stage-index {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  .build-map-stage h3 {
+    margin-top: 0;
+    font-size: 46px;
+  }
+  .build-map-stage p {
+    max-width: none;
+  }
+  .build-map-tools {
+    margin-top: 15px;
+  }
+  .build-evidence {
+    grid-template-columns: 1fr;
+  }
+  .build-evidence-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .offset-toolkit {
+    margin-top: 85px;
+  }
+  .offset-toolkit-heading {
+    display: block;
+    padding: 28px 25px;
+  }
+  .offset-toolkit h2 {
+    margin-top: 25px;
+    font-size: clamp(70px, 14vw, 100px);
+  }
+  .offset-toolkit-heading p {
+    max-width: 250px;
+    margin-top: 24px;
+  }
+}
+
+/* How I build sits between About and Contact as its own section. */
+.offset-toolkit-section {
+  padding-bottom: 100px;
+}
+.offset-toolkit-section .offset-toolkit {
+  margin-top: 0;
+}
+@media (max-width: 760px) {
+  .offset-toolkit-section {
+    padding-bottom: 70px;
+  }
+}

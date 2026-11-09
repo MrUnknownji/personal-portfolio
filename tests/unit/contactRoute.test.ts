@@ -53,9 +53,7 @@ describe("contact route", () => {
     const malformed = await POST(createRequest("{"));
     expect(malformed.status).toBe(400);
 
-    const oversized = await POST(
-      createRequest("{}", { "content-length": String(33 * 1024) }),
-    );
+    const oversized = await POST(createRequest("{}", { "content-length": String(33 * 1024) }));
     expect(oversized.status).toBe(413);
     expect(mocks.getPortfolioDb).not.toHaveBeenCalled();
   });
@@ -85,9 +83,7 @@ describe("contact route", () => {
         retryAfterSeconds: 30,
       });
 
-    const response = await POST(
-      createRequest(JSON.stringify(validSubmission)),
-    );
+    const response = await POST(createRequest(JSON.stringify(validSubmission)));
 
     expect(response.status).toBe(429);
     expect(response.headers.get("retry-after")).toBe("75");

@@ -19,7 +19,12 @@ export function readPortfolioSettings(): PortfolioSettings {
     const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
     return {
       spacing: Number.isFinite(saved?.spacing) ? Math.max(-7, Math.min(22, saved.spacing)) : 0,
-      palette: Number.isInteger(saved?.palette) && saved.palette >= 0 && saved.palette < portfolioPalettes.length ? saved.palette : 0,
+      palette:
+        Number.isInteger(saved?.palette) &&
+        saved.palette >= 0 &&
+        saved.palette < portfolioPalettes.length
+          ? saved.palette
+          : 0,
     };
   } catch {
     return defaultPortfolioSettings;
@@ -38,10 +43,16 @@ export function applyPortfolioSettings(settings: PortfolioSettings) {
   root.style.setProperty("--portfolio-tracking", `${siteSpacing / 7}px`);
   root.style.setProperty("--portfolio-label-tracking", `${siteSpacing / 22}px`);
   root.dataset.portfolioPalette = color.name.toLowerCase();
-  try { localStorage.setItem(storageKey, JSON.stringify(settings)); } catch { /* Storage can be disabled. */ }
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(settings));
+  } catch {
+    /* Storage can be disabled. */
+  }
 }
 
 export default function PortfolioPreferences() {
-  useEffect(() => { applyPortfolioSettings(readPortfolioSettings()); }, []);
+  useEffect(() => {
+    applyPortfolioSettings(readPortfolioSettings());
+  }, []);
   return null;
 }

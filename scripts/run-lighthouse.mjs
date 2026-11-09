@@ -52,7 +52,9 @@ function getMetric(report, key) {
   if (key === "categories:performance") return report.categories.performance.score;
   if (key === "categories:accessibility") return report.categories.accessibility.score;
   if (key === "resource-summary:script:size") {
-    return report.audits["resource-summary"].details.items.find((item) => item.resourceType === "script").transferSize;
+    return report.audits["resource-summary"].details.items.find(
+      (item) => item.resourceType === "script",
+    ).transferSize;
   }
 
   return report.audits[key].numericValue;
@@ -101,9 +103,10 @@ try {
     console.log(`\n${url}`);
     for (const [key, [, threshold]] of Object.entries(assert.assertions)) {
       const value = median(reports.map((report) => getMetric(report, key)));
-      const passed = threshold.minScore === undefined
-        ? value <= threshold.maxNumericValue
-        : value >= threshold.minScore;
+      const passed =
+        threshold.minScore === undefined
+          ? value <= threshold.maxNumericValue
+          : value >= threshold.minScore;
       console.log(`  ${passed ? "PASS" : "FAIL"} ${key}: ${formatMetric(key, value)}`);
       if (!passed) failures.push(`${url}: ${key}`);
     }

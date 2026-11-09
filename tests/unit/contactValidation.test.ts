@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  CONTACT_FIELD_LIMITS,
-  validateContactRequest,
-} from "@/lib/contactValidation";
+import { CONTACT_FIELD_LIMITS, validateContactRequest } from "@/lib/contactValidation";
 
 const validRequest = {
   name: "Sandeep Visitor",
@@ -35,12 +32,7 @@ describe("validateContactRequest", () => {
       message: "short",
     });
 
-    expect(Object.keys(result.errors)).toEqual([
-      "name",
-      "email",
-      "subject",
-      "message",
-    ]);
+    expect(Object.keys(result.errors)).toEqual(["name", "email", "subject", "message"]);
   });
 
   it("accepts the short contact form and supplies useful routing labels", () => {
@@ -61,8 +53,6 @@ describe("validateContactRequest", () => {
       message: "x".repeat(CONTACT_FIELD_LIMITS.message + 1),
     });
 
-    expect(result.errors.message).toContain(
-      String(CONTACT_FIELD_LIMITS.message),
-    );
+    expect(result.errors.message).toContain(String(CONTACT_FIELD_LIMITS.message));
   });
 });

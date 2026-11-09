@@ -1,7 +1,7 @@
 import ProjectsPage from "@/components/ProjectsPage";
-import { selectedProjects } from "@/data/projects";
-import type { ProjectSummary } from "@/types/Project";
+import { selectedProjects, toProjectSummary } from "@/data/projects";
 import type { Metadata } from "next";
+import "../styles/projects-index.css";
 
 export const metadata: Metadata = {
   title: "Selected Work",
@@ -10,21 +10,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/my-projects" },
   openGraph: {
     title: "Selected Work | Sandeep Kumar",
-    description:
-      "Full stack, mobile, and AI product case studies with demos and source code.",
+    description: "Full stack, mobile, and AI product case studies with demos and source code.",
     url: "/my-projects",
   },
 };
 
-const projectSummaries: ProjectSummary[] = selectedProjects.map((project) => ({
-  id: project.id,
-  title: project.title,
-  shortDescription: project.shortDescription,
-  image: project.image,
-  technologies: project.technologies,
-  category: project.category,
-  featured: project.featured,
-}));
+const projectSummaries = selectedProjects.map(toProjectSummary);
 
 export default function Page() {
   return <ProjectsPage projects={projectSummaries} />;

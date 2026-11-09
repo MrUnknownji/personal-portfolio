@@ -1,514 +1,24 @@
-import type { Project, ProjectCaseStudy } from "@/types/Project";
+import type { Project, ProjectSummary } from "@/types/Project";
 
-export const projects: Project[] = [
-  //AudioVibes
-  {
-    id: 1,
-    title: "AudioVibes",
-    shortDescription:
-      "A minimalist React Native music player for Android & iOS with animations and Material You theming.",
-    longDescription:
-      "AudioVibes is an elegantly designed music player application for Android and iOS. Boasting a minimalist interface with captivating animations, it supports Material You theming, notifications, and background playback.",
-    image:
-      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062498/DescHome_gijzvt.png",
-    technologies: ["React Native", "Expo", "Reanimated"],
-    features: [
-      "Minimalist UI/UX",
-      "Captivating animations via Reanimated",
-      "Material You theming support",
-      "Background audio playback",
-      "Playback notifications",
-      "Cross-platform (Android/iOS)",
-      "Local audio file scanning and playback",
-    ],
-    demoLink: "https://github.com/MrUnknownji/AudioVibes2",
-    githubLink: "https://github.com/MrUnknownji/AudioVibes_music_player.git",
-    category: "Mobile",
-    gallery: [
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062498/DescHome_gijzvt.png",
-        alt: "AudioVibes Home Screen",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062499/ScreenShot7_vf2x9x.jpg",
-        alt: "AudioVibes Now Playing Screen",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062498/ScreenShot2_cxfvdm.jpg",
-        alt: "AudioVibes Playlist View",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062498/ScreenShot3_gcqdxd.jpg",
-        alt: "AudioVibes Search Functionality",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062498/ScreenShot6_wnr0j7.jpg",
-        alt: "AudioVibes Settings Screen",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062497/ScreenShot4_kra2yo.jpg",
-        alt: "AudioVibes Album View",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062497/ScreenShot5_wt8tnl.jpg",
-        alt: "AudioVibes Artist View",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062497/ScreenShot1_qmsvam.jpg",
-        alt: "AudioVibes Notification Player",
-      },
-    ],
-  },
-  //Cryptopedia
-  {
-    id: 2,
-    title: "CryptoPedia",
-    shortDescription:
-      "Real-time cryptocurrency data web app with interactive graphs and light/dark modes.",
-    longDescription:
-      "CryptoPedia is a sophisticated web app delivering real-time cryptocurrency data through interactive graphs. With features such as coin rankings, price ranges, and dark/light modes, it provides a comprehensive and visually appealing user experience.",
-    image:
-      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062500/DescHome_iyws8m.png",
-    technologies: ["React", "Redux", "Tailwind CSS", "axios", "Chart.js"],
-    features: [
-      "Real-time cryptocurrency data fetching",
-      "Interactive historical price charts",
-      "Coin ranking and essential data display",
-      "Data visualization using graphs",
-      "Light and Dark mode toggle",
-      "Responsive design for desktop and mobile",
-      "Integration with external crypto API",
-    ],
-    demoLink: "https://crypto-pedia-three.vercel.app/",
-    githubLink: "https://github.com/MrUnknownji/CryptoPedia.git",
-    category: "Frontend",
-    gallery: [
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062500/DescHome_iyws8m.png",
-        alt: "CryptoPedia Desktop Home Page",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062499/DescChart_ov7uud.png",
-        alt: "CryptoPedia Desktop Chart View",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062500/DescCoins_htulz8.png",
-        alt: "CryptoPedia Desktop Coins List",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062499/MobHome_jfuqov.png",
-        alt: "CryptoPedia Mobile Home Page",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062500/MobChart_xiji7o.png",
-        alt: "CryptoPedia Mobile Chart View",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062500/MobCoins_lenb9j.png",
-        alt: "CryptoPedia Mobile Coins List",
-      },
-    ],
-  },
-  //ShopNest
-  {
-    id: 3,
-    title: "ShopNest",
-    shortDescription:
-      "Elegant e-commerce website layout demo with search functionality and core shopping features.",
-    longDescription:
-      "ShopNest offers an exquisite and user-friendly shopping website layout with seamless search functionality. Its elegant design incorporates essential e-commerce components, showcasing a fully functional and interactive shopping experience.",
-    image:
-      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062491/DescHome_cq07dv.png",
-    technologies: ["React", "Redux", "Tailwind CSS"],
-    features: [
-      "Elegant UI/UX design for e-commerce",
-      "Product listing and search functionality",
-      "Shopping cart state management (Redux)",
-      "User profile page layout",
-      "Simulated checkout process flow",
-      "Responsive design for various screen sizes",
-      "Focus on frontend components and layout",
-    ],
-    demoLink: "https://shop-nest-rosy.vercel.app/",
-    githubLink: "https://github.com/MrUnknownji/ShopNest.git",
-    category: "Frontend",
-    gallery: [
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062491/DescHome_cq07dv.png",
-        alt: "ShopNest Desktop Homepage",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062481/DescProfile_xenrcb.png",
-        alt: "ShopNest Desktop Profile Page",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062481/DescCart_cotfhb.png",
-        alt: "ShopNest Desktop Shopping Cart",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062483/DescCheckout_rzmvpv.png",
-        alt: "ShopNest Desktop Checkout Page",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062487/MobHome_svss73.png",
-        alt: "ShopNest Mobile Homepage",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062487/MobCart_l3qeln.png",
-        alt: "ShopNest Mobile Shopping Cart",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062488/MobProfile_gqoobk.png",
-        alt: "ShopNest Mobile Profile Page",
-      },
-    ],
-  },
-  //SynthTech
-  {
-    id: 4,
-    title: "SynthTech",
-    shortDescription:
-      "Visually captivating website design for a tech solutions provider, featuring animations.",
-    longDescription:
-      "SynthTech presents a visually captivating design for a tech solution provider company. With its sleek design, engaging animations, and sophisticated layout, it stands as an impressive showcase of design and development capabilities.",
-    image:
-      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062491/DescHome_khhemb.png",
-    technologies: ["React", "Tailwind CSS", "Framer Motion"],
-    features: [
-      "Sleek and modern landing page design",
-      "Engaging animations and transitions",
-      "Sophisticated multi-section layout",
-      "Showcase for company services and portfolio",
-      "Contact form section",
-      "Client/Brand logo display",
-      "Responsive across devices",
-    ],
-    demoLink: "https://synth-tech.vercel.app/",
-    githubLink: "https://github.com/MrUnknownji/SynthTech.git",
-    category: "Frontend",
-    gallery: [
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062491/DescHome_khhemb.png",
-        alt: "SynthTech Desktop Homepage",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062492/DescBrands_yfxraa.png",
-        alt: "SynthTech Desktop Brands/Clients Section",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062491/DescContact_wdeyo9.png",
-        alt: "SynthTech Desktop Contact Section",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062496/DescServices_s5r7tk.png",
-        alt: "SynthTech Desktop Services Section",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062491/MobHome_lqxbwr.png",
-        alt: "SynthTech Mobile Homepage",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062489/MobAbout_lazliq.png",
-        alt: "SynthTech Mobile About Section",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062491/MobBrands_utva4p.png",
-        alt: "SynthTech Mobile Brands Section",
-      },
-    ],
-  },
-  //VideoHub
-  {
-    id: 5,
-    title: "VideoHub",
-    shortDescription:
-      "Visually stunning video streaming website demo with Chakra UI theming (light/dark).",
-    longDescription:
-      "VideoHub is a visually stunning video streaming website demo. Utilizing Chakra UI for theming and components, it promises a seamless experience in both light and dark modes. Its high responsiveness and sleek design ensure an engaging viewing experience for users.",
-    image:
-      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062495/DescHome_ps0drw.png",
-    technologies: ["React", "Tailwind CSS", "Redux", "Chakra UI"],
-    features: [
-      "Video streaming platform UI demo",
-      "Component styling with Chakra UI",
-      "Seamless Light/Dark mode switching",
-      "Highly responsive design",
-      "User Login and Signup page examples",
-      "Video listing and simulated playback page",
-      "State management with Redux",
-    ],
-    demoLink: "https://video-hub-gamma-two.vercel.app/",
-    githubLink: "https://github.com/MrUnknownji/VideoHub.git",
-    category: "Frontend",
-    gallery: [
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062495/DescHome_ps0drw.png",
-        alt: "VideoHub Desktop Homepage",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062494/DescContact_z6eu34.png",
-        alt: "VideoHub Desktop Contact Page",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062496/DescLoginDark_aw4rlt.png",
-        alt: "VideoHub Desktop Login (Dark Mode)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062494/DescNavDark_wr2pyb.png",
-        alt: "VideoHub Desktop Navigation (Dark Mode)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062496/DescNavLight_a5kjs3.png",
-        alt: "VideoHub Desktop Navigation (Light Mode)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062494/DescServices_cg3xdu.png",
-        alt: "VideoHub Desktop Services/Features Page",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062493/DescSignupDark_evyydd.png",
-        alt: "VideoHub Desktop Signup (Dark Mode)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062494/DescSignupLight_u8jvw6.png",
-        alt: "VideoHub Desktop Signup (Light Mode)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062496/DescVideo_dpykz5.png",
-        alt: "VideoHub Desktop Video Listing/Playback Page",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062495/MobHomeDark_hoxjnj.png",
-        alt: "VideoHub Mobile Homepage (Dark Mode)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062493/MobContact_g8morv.png",
-        alt: "VideoHub Mobile Contact Page",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062492/MobNavDark_ejjn7v.png",
-        alt: "VideoHub Mobile Navigation (Dark Mode)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062495/MobNavLight_cw7kho.png",
-        alt: "VideoHub Mobile Navigation (Light Mode)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062492/MobVideo_j42u0d.png",
-        alt: "VideoHub Mobile Video Page",
-      },
-    ],
-  },
-  //SpaceX Website Clone
-  {
-    id: 6,
-    title: "SpaceX Website Clone",
-    shortDescription:
-      "A meticulous clone of the SpaceX homepage showcasing HTML, CSS, and JavaScript skills.",
-    longDescription:
-      "The SpaceX(Clone) project meticulously reproduces the SpaceX homepage, showcasing impeccable attention to detail and advanced web development skills. It serves as a prime example of exemplary web design and development capabilities.",
-    image:
-      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062489/DescHome_o8q5wo.png",
-    technologies: ["HTML", "CSS", "JavaScript"],
-    features: [
-      "Homepage replication of SpaceX website",
-      "Implementation using core web technologies",
-      "Focus on layout, styling, and basic interactivity",
-      "Responsive design for different screen sizes",
-      "Navigation menu reproduction",
-      "Demonstrates foundational frontend skills",
-      "Attention to design details",
-    ],
-    demoLink: "https://mrunknownji.github.io/SpaceX/",
-    githubLink: "https://github.com/MrUnknownji/SpaceX.git",
-    category: "Frontend",
-    gallery: [
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062489/DescHome_o8q5wo.png",
-        alt: "SpaceX Clone Desktop Main Section",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062484/DescHome1_havv0w.png",
-        alt: "SpaceX Clone Desktop Section 2",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062486/DescHome3_qwrzuc.png",
-        alt: "SpaceX Clone Desktop Section 3",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062489/DescHome4_wqr1nu.png",
-        alt: "SpaceX Clone Desktop Section 4",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062486/DescNav_t89znc.png",
-        alt: "SpaceX Clone Desktop Navigation Menu",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062484/MobHome_xoutxh.png",
-        alt: "SpaceX Clone Mobile View",
-      },
-    ],
-  },
-  //AuraEdit(Open Source local image modifier)
-  {
-    id: 7,
-    title: "Aura Edit",
-    shortDescription: "An open-source browser-based image editor with batch processing capabilities.",
-    longDescription: "Aura Edit is a high-performance image editing tool that runs entirely in your browser. It allows users to perform complex modifications, apply filters, and process images in batches without ever uploading files to a server, ensuring maximum privacy and speed.",
-    image: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116565/AuraEdit-ImageUpload-Web-Light.png",
-    technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Canvas API", "Framer Motion"],
-    features: [
-      "Local-first image processing",
-      "Batch image editing and resizing",
-      "Real-time filters and adjustments",
-      "High-quality image exports",
-      "Privacy-focused (no server uploads)",
-      "Modern UI with Dark/Light mode support",
-    ],
-    demoLink: "https://image-modifier-jet.vercel.app/",
-    githubLink: "https://github.com/MrUnknownji/image-modifier",
-    category: "Web App",
-    gallery: [
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116715/AuraEdit-HomePage-Bottom-Mobile-Dark.png",
-        alt: "Aura Edit Mobile Home Page (Dark)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116714/AuraEdit-ImageSettings-Mobile-Dark-2.png",
-        alt: "Aura Edit Mobile Image Settings (Dark)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116711/AuraEdit-ImagePreview-Mobile-Dark.png",
-        alt: "Aura Edit Mobile Image Preview (Dark)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116710/AuraEdit-ImageUpload-Mobile-Dark.png",
-        alt: "Aura Edit Mobile Image Upload (Dark)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116709/AuraEdit-ImageSettings-Mobile-Light.png",
-        alt: "Aura Edit Mobile Image Settings (Light)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116687/AuraEdit-ImageUpload-Mobile-Light.png",
-        alt: "Aura Edit Mobile Image Upload (Light)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116686/AuraEdit-ImageUpload-Mobile-Light-2.png",
-        alt: "Aura Edit Mobile Upload Screen",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116664/AuraEdit-ImageSettings-Web-Light-2.png",
-        alt: "Aura Edit Web Settings (Light)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116647/AuraEdit-ImageSettings-Web-Dark.png",
-        alt: "Aura Edit Web Settings (Dark)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116645/AuraEdit-ImageSettings-Web-Dark-2.png",
-        alt: "Aura Edit Web Editor View (Dark)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116612/AuraEdit-BatchImage-Web-Dark.png",
-        alt: "Aura Edit Batch Image Processing (Dark)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116609/AuraEdit-ImageUpload-Web-Dark.png",
-        alt: "Aura Edit Web Image Upload (Dark)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116571/AuraEdit-ImageSettings-Web-Light-2.png",
-        alt: "Aura Edit Web Image Settings",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116568/AuraEdit-ImageSettings-Web-Light.png",
-        alt: "Aura Edit Web Image Editor (Light)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116565/AuraEdit-ImageUpload-Web-Light.png",
-        alt: "Aura Edit Web Image Upload (Light)",
-      },
-    ],
-  },
-  //BidStrike (AI Powered Auction Platform)
+// Selected work, in display order. Facts and stacks are checked against each project's repository.
+export const selectedProjects: Project[] = [
   {
     id: 9,
     title: "BidStrike",
-    shortDescription: "Bidding needs a current price. I built live bid updates, auction dashboards, and AI price suggestions around the same flow.",
-    longDescription: "BidStrike is a sophisticated auction platform designed for speed and reliability. It features real-time bidding updates, AI-driven price suggestions, and a comprehensive dashboard for tracking active auctions and notifications.",
-    image: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855178/Bid-Strike-Light-Home.png",
-    technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Pusher", "Prisma", "PostgreSQL"],
+    shortDescription:
+      "Bidding only works when everyone sees the same price. I built live auction rooms, proxy auto-bidding, and dashboards for bidders and sellers.",
+    longDescription:
+      "BidStrike is a real-time auction platform. Bids are validated on the server, broadcast to everyone watching an auction through Socket.io rooms, and backed by proxy auto-bidding, notifications, reviews, and an admin dashboard.",
+    image:
+      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1769855178/Bid-Strike-Light-Home.png",
+    technologies: ["Next.js", "TypeScript", "Socket.io", "MongoDB", "Stripe", "Tailwind CSS"],
     features: [
-      "Real-time bid updates via WebSockets",
-      "AI-powered auction insights and suggestions",
-      "Secure payment and escrow system",
-      "User-friendly bidder and auctioneer dashboards",
-      "Mobile-responsive interface",
-      "Detailed auction management and tracking",
+      "Live bid updates broadcast to per-auction Socket.io rooms",
+      "Proxy auto-bidding: set a maximum and the server bids for you",
+      "Server-side bid validation for auction status, end time, and minimum increment",
+      "Auction creation, editing, and scheduling with Cloudinary image uploads",
+      "Outbid notifications, reviews, and seller ratings",
+      "Admin dashboard for users, auctions, and service settings",
     ],
     demoLink: "https://bid-strike.vercel.app/",
     githubLink: "https://github.com/MrUnknownji/bid-strike",
@@ -587,114 +97,266 @@ export const projects: Project[] = [
         alt: "BidStrike Create Auction Page",
       },
     ],
-  },
-  //Youtube Content OS(AI Powered Youtube Content Generation Platform)
-  {
-    id: 8,
-    title: "Youtube Content OS",
-    shortDescription: "An all-in-one AI workspace for YouTube creators to manage scripts, thumbnails, and metadata.",
-    longDescription: "Youtube Content OS streamlines the content creation workflow by integrating AI into every step. From generating scripts and meta titles to creating thumbnails and managing export tasks, it's the ultimate tool for modern creators to scale their channels.",
-    image: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123509/Content-OS-Web-Light-Home.png",
-    technologies: ["Next.js", "TypeScript", "Tailwind CSS", "OpenAI/Gemini API", "Drizzle ORM", "Supabase"],
-    features: [
-      "AI-powered scriptwriting and hooks",
-      "Automated thumbnail generation and ideation",
-      "Metadata optimization for YouTube SEO",
-      "Creator-focused project management dashboard",
-      "Content export to various platforms",
-      "Mobile-friendly design for on-the-go creation",
+    caseStudy: {
+      problem:
+        "In an auction, a stale price is a wrong price. Bidders need to see each new bid immediately, and the server has to reject bids that arrive after the price has moved.",
+      solution:
+        "BidStrike validates every bid on the server, then broadcasts the accepted price to everyone in that auction's room. Proxy auto-bids run in the same request, so the shared price is always the result of one authoritative decision.",
+      architecture: [
+        "Next.js App Router serves 24 pages and 26 API route handlers for auctions, bids, auth, payments, and admin.",
+        "A dedicated Socket.io server joins each viewer to an auction room and broadcasts new-bid and bid-update events.",
+        "The bid route checks auction status, end time, ownership, and the minimum increment before saving, then resolves competing auto-bids.",
+        "MongoDB (Mongoose) stores auctions, bids, users, transactions, and notifications; Stripe handles payments and Resend sends email.",
+      ],
+      tradeoffs: [
+        "A separate socket server gives low-latency updates but is one more process to deploy and keep healthy.",
+        "Resolving auto-bids inside the bid request keeps the price consistent, at the cost of a slightly slower response for the bidder.",
+      ],
+    },
+    facts: [
+      {
+        value: "26",
+        label: "API route handlers",
+      },
+      {
+        value: "14",
+        label: "automated test cases",
+      },
+      {
+        value: "4",
+        label: "real-time socket events",
+      },
+      { value: "94", label: "Lighthouse mobile performance, live demo" },
     ],
-    demoLink: "https://youtube-content-os-one.vercel.app/",
-    githubLink: "https://github.com/MrUnknownji/youtube-content-os",
-    category: "Web App",
+  },
+  {
+    id: 13,
+    title: "FrameRelay Studio",
+    shortDescription:
+      "The motion studio I founded and run. Its site is a hand-painted WebGL world that lowers its own quality on slower phones, and every product film is written as code.",
+    longDescription:
+      "FrameRelay Studio makes launch films, product walkthroughs, and landing pages for software teams. I founded it in October 2026 and built everything it runs on: an Astro site on Cloudflare Workers with a scroll-driven WebGL2 scene, a Remotion pipeline that renders each film in three formats, a free MIT-licensed motion component, and the pricing, intake, and delivery workflow. The films on the site are original concept studies with fictional products, and the site says so.",
+    image: "/images/framerelay/reel.webp",
+    technologies: ["Astro", "TypeScript", "Three.js", "WebGL2", "Remotion", "Cloudflare Workers"],
+    features: [
+      "Scroll-driven WebGL2 world: a painted meadow, a butterfly rig, and brush-stroke panels behind the copy",
+      "Four quality tiers chosen from motion preference, data saver, memory, CPU cores, and pointer type",
+      "A frame-time governor that steps the scene down after sustained slow frames",
+      "A static tier, a plain simple view, and a pause button, so no content depends on the 3D scene",
+      "Product films written as Remotion compositions and retimed to measured downbeats of their scores",
+      "A free, MIT-licensed focus-highlight component with a standalone example",
+    ],
+    demoLink: "https://framerelaystudio.com/",
+    sourceNote: "Private studio repository · code walkthrough on request",
+    category: "Studio",
+    year: 2026,
+    showcaseVariant: "film",
+    showcaseLoop: {
+      src: "/images/framerelay/reel-loop.mp4",
+      poster: "/images/framerelay/reel-loop.webp",
+    },
+    facts: [
+      { value: "23", label: "Remotion compositions" },
+      { value: "4", label: "quality tiers, chosen per device" },
+      { value: "7", label: "concept films on the live site" },
+      { value: "27", label: "automated tests" },
+    ],
+    films: [
+      {
+        src: "/images/framerelay/reel.mp4",
+        poster: "/images/framerelay/reel.webp",
+        title: "Studio reel",
+        caption:
+          "25 seconds. Every cut and interface action lands on a measured beat of the score. All products shown are fictional.",
+      },
+    ],
     gallery: [
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123605/Content-OS-Mobile-Dark-Sidebar.png",
-        alt: "Youtube Content OS Mobile Sidebar (Dark)",
+        src: "/images/framerelay/hero.webp",
+        alt: "FrameRelay home: the painted butterfly-wing opening",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123603/Content-OS-Mobile-ImageGen.png",
-        alt: "Youtube Content OS Mobile Image Generation",
+        src: "/images/framerelay/meadow.webp",
+        alt: "WebGL meadow scene behind the selected work",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123601/Content-OS-Mobile-Dark-Settings.png",
-        alt: "Youtube Content OS Mobile Settings (Dark)",
+        src: "/images/framerelay/halden.webp",
+        alt: "Halden concept film: one-tap expense approval",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123600/Content-OS-Web-Dark-Pinned.png",
-        alt: "Youtube Content OS Web Pinned Projects (Dark)",
+        src: "/images/framerelay/pulseboard.webp",
+        alt: "Pulseboard concept film: a shared insight on a dashboard",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123597/Content-OS-Web-Dark-ImageGen.png",
-        alt: "Youtube Content OS Web Image Generation (Dark)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123595/Content-OS-Web-Dark-Profile.png",
-        alt: "Youtube Content OS Web User Profile (Dark)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123592/Content-OS-Web-Light-ImageGen.png",
-        alt: "Youtube Content OS Web Image Generation (Light)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123590/Content-OS-Web-Light-Export.png",
-        alt: "Youtube Content OS Web Export Section (Light)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123588/Content-OS-Web-Light-Shorts.png",
-        alt: "Youtube Content OS Web Shorts Generator (Light)",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123586/Content-OS-Web-Light-Meta-Thumbnail.png",
-        alt: "Youtube Content OS Web Thumbnail Meta",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123583/Content-OS-Web-Light-Meta-Title.png",
-        alt: "Youtube Content OS Web Title Meta",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123581/Content-OS-Web-Light-Visuals.png",
-        alt: "Youtube Content OS Web Visuals Management",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123578/Content-OS-Web-Light-Scripts.png",
-        alt: "Youtube Content OS Web Script Editor",
-      },
-      {
-        type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123509/Content-OS-Web-Light-Home.png",
-        alt: "Youtube Content OS Web Home (Light)",
+        src: "/images/framerelay/mobile.webp",
+        alt: "FrameRelay home on a phone",
       },
     ],
+    caseStudy: {
+      problem:
+        "Software teams want short films that look like their real product. A new studio has to prove it can make them before anyone has hired it, and its own site is the first proof.",
+      solution:
+        "I built the site as the studio's demo: a hand-painted WebGL2 world that plays on capable devices and steps aside everywhere else. Films are React code in Remotion, so timing, formats, and revisions are exact and repeatable.",
+      architecture: [
+        "Static Astro site served by a Cloudflare Worker. The 3D world is a separate chunk, imported only when motion is on, and loads mobile or desktop texture sizes.",
+        "selectTier() returns static, low, medium, or high from reduced motion, data saver, device memory, CPU cores, and pointer type. A Governor averages 90 frames and steps down after two slow windows (over 22 ms a frame).",
+        "Each film is a Remotion composition in 16:9, 1:1, and 9:16. A source-to-output frame map retimes the animation onto measured downbeats without reordering any interaction.",
+        "node:test covers pricing arithmetic, kit packaging, the music timing map, the brief builder, and both motion kits.",
+      ],
+      tradeoffs: [
+        "The painted world is the studio's signature but costs texture weight, so the static tier, the simple view, and the pause button keep it optional.",
+        "The films use fictional products so they can be shown publicly; they demonstrate craft, not client results.",
+      ],
+    },
   },
-  //OmniMart(AI Powered E-Commerce Platform)
+  {
+    id: 11,
+    title: "Mirror Wallpapers",
+    shortDescription:
+      "AI wallpapers need curation as well as creation. I built paired mobile previews and an admin console for approval, credits, and generation costs.",
+    longDescription:
+      "Mirror Wallpapers is an end-to-end wallpaper platform for discovering coordinated lock and home screen pairs, browsing standalone designs, previewing wallpapers in context, and accessing credit-based AI creation. Its Next.js admin console manages generation, catalog approval, style presets, subscription settings, and cost and reliability analytics across the same Supabase-backed product.",
+    image:
+      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828909/portfolio/projects/mirror-wallpapers/mirror-admin-pairs.png",
+    technologies: [
+      "React Native",
+      "Expo",
+      "TypeScript",
+      "Next.js",
+      "FastAPI",
+      "Supabase",
+      "Gemini API",
+      "Cloudinary",
+      "Razorpay",
+      "Tailwind CSS",
+    ],
+    features: [
+      "Curated lock and home wallpaper pairs alongside a standalone wallpaper catalog",
+      "Full-screen lock and home previews with native Android wallpaper application",
+      "Search, filters, favorites, generation history, and cross-device account sync",
+      "Credit-based AI generation with style presets, quality tiers, and resolution controls",
+      "Subscription tiers and one-time credit packs with server-verified Razorpay payments",
+      "Admin workflows for generation, approval, catalog management, and remote configuration",
+      "Operational analytics for generation success, failure rates, spend, and cost guardrails",
+    ],
+    sourceNote: "Private repository · code walkthrough on request",
+    category: "Full Stack",
+    year: 2026,
+    facts: [
+      { value: "3", label: "apps: mobile, admin, AI service" },
+      { value: "39", label: "Python tests" },
+      { value: "14", label: "SQL migrations" },
+    ],
+    showcaseVariant: "mirror",
+    showcaseFrames: [
+      {
+        label: "Discovery",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828972/portfolio/projects/mirror-wallpapers/mirror-mobile-explore.png",
+        alt: "Mirror mobile discovery screen with featured wallpaper pairs",
+      },
+      {
+        label: "Lock screen",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828978/portfolio/projects/mirror-wallpapers/mirror-mobile-pair-lock.png",
+        alt: "Red Crescent Ronin wallpaper shown as a full-screen lock screen preview",
+      },
+      {
+        label: "Home screen",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828983/portfolio/projects/mirror-wallpapers/mirror-mobile-pair-home.png",
+        alt: "Matching Red Crescent Ronin home screen wallpaper preview",
+      },
+    ],
+    gallery: [
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828909/portfolio/projects/mirror-wallpapers/mirror-admin-pairs.png",
+        alt: "Mirror admin catalog showing approved lock and home wallpaper pairs",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828972/portfolio/projects/mirror-wallpapers/mirror-mobile-explore.png",
+        alt: "Mirror mobile discovery screen with featured wallpaper pairs",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828978/portfolio/projects/mirror-wallpapers/mirror-mobile-pair-lock.png",
+        alt: "Red Crescent Ronin wallpaper shown as a full-screen lock screen preview",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828983/portfolio/projects/mirror-wallpapers/mirror-mobile-pair-home.png",
+        alt: "Matching Red Crescent Ronin home screen wallpaper preview",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828987/portfolio/projects/mirror-wallpapers/mirror-mobile-singles.png",
+        alt: "Mirror mobile catalog of standalone wallpapers",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828989/portfolio/projects/mirror-wallpapers/mirror-mobile-upgrade.png",
+        alt: "Mirror Pro subscription tiers and AI generation benefits",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828991/portfolio/projects/mirror-wallpapers/mirror-admin-generate.png",
+        alt: "Mirror admin AI generation workspace for wallpaper pairs and singles",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828993/portfolio/projects/mirror-wallpapers/mirror-admin-styles.png",
+        alt: "Mirror admin style preset management grid",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828997/portfolio/projects/mirror-wallpapers/mirror-admin-singles.png",
+        alt: "Mirror admin catalog for approving and managing standalone wallpapers",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828999/portfolio/projects/mirror-wallpapers/mirror-admin-analytics.png",
+        alt: "Mirror admin analytics for generation reliability, spend, and cost risk",
+      },
+    ],
+    caseStudy: {
+      problem:
+        "Most wallpaper apps treat lock and home screens as unrelated downloads, while AI generation, catalog curation, subscriptions, and operational visibility live in disconnected tools.",
+      solution:
+        "Mirror combines coordinated wallpaper pairs and standalone designs in one mobile experience, backed by an admin console that manages generation, approval, styles, pricing, and reliability from the same product data.",
+      architecture: [
+        "Expo and React Native deliver the mobile catalog, previews, account flows, purchases, and Android wallpaper integration.",
+        "A Next.js admin console uses authenticated server routes for catalog curation, remote settings, payment operations, and analytics.",
+        "FastAPI orchestrates Gemini image generation, deduplication, storage, and generation logging.",
+        "Supabase provides authentication and relational product data, while Cloudinary serves the approved image catalog.",
+      ],
+      tradeoffs: [
+        "Native wallpaper application and payment SDKs provide a better Android experience but cannot be fully represented by the Expo web build.",
+        "AI generation quality and cost require explicit model tiers, credit controls, deduplication, and operational monitoring.",
+        "Supporting Cloudinary, R2, and legacy Supabase Storage improves deployment flexibility but adds configuration and deletion-path complexity.",
+      ],
+    },
+  },
   {
     id: 10,
     title: "OmniMart",
-    shortDescription: "Shopping needs discovery and checkout to work together. I built product browsing, cart and checkout flows, and admin screens for catalog and orders.",
-    longDescription: "OmniMart redefines the online shopping experience with a focus on high-end aesthetics and AI-driven personalization. It features a robust admin panel, seamless checkout flow, and a dynamic search system designed for luxury retail.",
-    image: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124896/OmniMart-Light-Web-Home.png",
-    technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Redux", "Stripe", "AI Personalization"],
+    shortDescription:
+      "Shopping needs discovery and checkout to work together. I built product browsing, cart and checkout flows, and admin screens for catalog and orders.",
+    longDescription:
+      "OmniMart is a full-stack store built with Next.js and MongoDB. It covers browsing, cart, checkout, shipping, and support, with an admin side for products, orders, and customers.",
+    image:
+      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124896/OmniMart-Light-Web-Home.png",
+    technologies: ["Next.js", "TypeScript", "MongoDB", "Gemini API", "Cloudinary", "Tailwind CSS"],
     features: [
-      "Boutique editorial UI/UX design",
-      "AI-powered product discovery and recommendations",
-      "Comprehensive admin management dashboard",
-      "Secure cart and multi-step checkout flow",
-      "Responsive and fluid motion animations",
-      "Advanced inventory and customer management",
+      "Editorial storefront with category browsing and product detail pages",
+      "Account-gated cart, checkout, shipping, and order history",
+      "Gemini embeddings for product search, AI product drafts from a photo, and review summaries",
+      "Admin screens for products, orders, and customers with Recharts analytics",
+      "Cloudinary-hosted product media",
+      "Responsive layouts with Radix UI primitives",
     ],
     demoLink: "https://omni-mart-orpin.vercel.app/",
     githubLink: "https://github.com/MrUnknownji/omni-mart",
@@ -702,10 +364,26 @@ export const projects: Project[] = [
     year: 2026,
     showcaseVariant: "omni",
     showcaseFrames: [
-      { label: "Home", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124896/OmniMart-Light-Web-Home.png", alt: "OmniMart Web Home (Light)" },
-      { label: "Product", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124876/OmniMart-Dark-Web-Product2.png", alt: "OmniMart Product Detail View" },
-      { label: "Cart", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124869/OmniMart-Dark-Web-Cart.png", alt: "OmniMart Shopping Cart (Dark)" },
-      { label: "Checkout", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124871/OmniMart-Dark-Web-Checkout.png", alt: "OmniMart Web Checkout (Dark)" },
+      {
+        label: "Home",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124896/OmniMart-Light-Web-Home.png",
+        alt: "OmniMart Web Home (Light)",
+      },
+      {
+        label: "Product",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124876/OmniMart-Dark-Web-Product2.png",
+        alt: "OmniMart Product Detail View",
+      },
+      {
+        label: "Cart",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124869/OmniMart-Dark-Web-Cart.png",
+        alt: "OmniMart Shopping Cart (Dark)",
+      },
+      {
+        label: "Checkout",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777124871/OmniMart-Dark-Web-Checkout.png",
+        alt: "OmniMart Web Checkout (Dark)",
+      },
     ],
     gallery: [
       {
@@ -814,221 +492,447 @@ export const projects: Project[] = [
         alt: "OmniMart Sign Up Page (Dark)",
       },
     ],
+    caseStudy: {
+      problem:
+        "E-commerce demos often stop at a product grid and skip the parts that make a store work: accounts, checkout, support, and administration.",
+      solution:
+        "OmniMart carries a product from browsing into cart, checkout, and order history, and gives the store owner the admin screens to manage the catalog behind it.",
+      architecture: [
+        "Next.js App Router with TypeScript organizes 25 pages across storefront, account, and admin.",
+        "MongoDB (Mongoose) models products, carts, orders, and customers.",
+        "Cloudinary serves product media; Gemini generates embeddings, drafts product listings from a photo, and summarizes reviews.",
+        "Radix UI primitives and Tailwind CSS keep dense admin screens accessible and consistent.",
+      ],
+      tradeoffs: [
+        "Covering the whole store shows end-to-end thinking but leaves less depth for any single flow, such as real payments.",
+        "Editorial visuals strengthen the brand, while admin screens stay deliberately utilitarian.",
+      ],
+    },
+    facts: [
+      {
+        value: "25",
+        label: "app pages",
+      },
+      {
+        value: "3",
+        label: "surfaces: store, account, admin",
+      },
+    ],
   },
-  // Mirror Wallpapers
   {
-    id: 11,
-    title: "Mirror Wallpapers",
+    id: 8,
+    title: "YouTube Content OS",
     shortDescription:
-      "AI wallpapers need curation as well as creation. I built paired mobile previews and an admin console for approval, credits, and generation costs.",
+      "Creators juggle scripts, titles, and thumbnails across many tools. I built one AI workspace that keeps working even when a provider is down.",
     longDescription:
-      "Mirror Wallpapers is an end-to-end wallpaper platform for discovering coordinated lock and home screen pairs, browsing standalone designs, previewing wallpapers in context, and accessing credit-based AI creation. Its Next.js admin console manages generation, catalog approval, style presets, subscription settings, and cost and reliability analytics across the same Supabase-backed product.",
+      "YouTube Content OS is an AI workspace for planning, scripting, and packaging YouTube videos. Every external service has a fallback, so the workflow stays usable when an AI provider, the database, or image storage is unavailable.",
     image:
-      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828909/portfolio/projects/mirror-wallpapers/mirror-admin-pairs.png",
-    technologies: [
-      "React Native",
-      "Expo",
-      "TypeScript",
-      "Next.js",
-      "FastAPI",
-      "Supabase",
-      "Gemini API",
-      "Cloudinary",
-      "Razorpay",
-      "Tailwind CSS",
-    ],
+      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123509/Content-OS-Web-Light-Home.png",
+    technologies: ["React", "Vite", "TypeScript", "Express", "MongoDB", "Gemini API", "OpenAI API"],
     features: [
-      "Curated lock and home wallpaper pairs alongside a standalone wallpaper catalog",
-      "Full-screen lock and home previews with native Android wallpaper application",
-      "Search, filters, favorites, generation history, and cross-device account sync",
-      "Credit-based AI generation with style presets, quality tiers, and resolution controls",
-      "Subscription tiers and one-time credit packs with server-verified Razorpay payments",
-      "Admin workflows for generation, approval, catalog management, and remote configuration",
-      "Operational analytics for generation success, failure rates, spend, and cost guardrails",
+      "Topic suggestions from uploaded dashboard screenshots, CSV files, or manual metrics",
+      "Script studio for facecam and faceless videos",
+      "Scene-by-scene storyboard with image prompts",
+      "Titles, SEO descriptions, and thumbnail concepts",
+      "Choice of Gemini or OpenAI models from one central catalog",
+      "Fallbacks for AI, database, and image storage",
     ],
-    githubLink: "https://github.com/MrUnknownji/mirror-app",
-    category: "Full Stack",
-    year: 2026,
-    showcaseVariant: "mirror",
-    showcaseFrames: [
-      { label: "Discovery", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828972/portfolio/projects/mirror-wallpapers/mirror-mobile-explore.png", alt: "Mirror mobile discovery screen with featured wallpaper pairs" },
-      { label: "Lock screen", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828978/portfolio/projects/mirror-wallpapers/mirror-mobile-pair-lock.png", alt: "Red Crescent Ronin wallpaper shown as a full-screen lock screen preview" },
-      { label: "Home screen", src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828983/portfolio/projects/mirror-wallpapers/mirror-mobile-pair-home.png", alt: "Matching Red Crescent Ronin home screen wallpaper preview" },
-    ],
+    demoLink: "https://youtube-content-os-one.vercel.app/",
+    githubLink: "https://github.com/MrUnknownji/youtube-content-os",
+    category: "Web App",
     gallery: [
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828909/portfolio/projects/mirror-wallpapers/mirror-admin-pairs.png",
-        alt: "Mirror admin catalog showing approved lock and home wallpaper pairs",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123605/Content-OS-Mobile-Dark-Sidebar.png",
+        alt: "Youtube Content OS Mobile Sidebar (Dark)",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828972/portfolio/projects/mirror-wallpapers/mirror-mobile-explore.png",
-        alt: "Mirror mobile discovery screen with featured wallpaper pairs",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123603/Content-OS-Mobile-ImageGen.png",
+        alt: "Youtube Content OS Mobile Image Generation",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828978/portfolio/projects/mirror-wallpapers/mirror-mobile-pair-lock.png",
-        alt: "Red Crescent Ronin wallpaper shown as a full-screen lock screen preview",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123601/Content-OS-Mobile-Dark-Settings.png",
+        alt: "Youtube Content OS Mobile Settings (Dark)",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828983/portfolio/projects/mirror-wallpapers/mirror-mobile-pair-home.png",
-        alt: "Matching Red Crescent Ronin home screen wallpaper preview",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123600/Content-OS-Web-Dark-Pinned.png",
+        alt: "Youtube Content OS Web Pinned Projects (Dark)",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828987/portfolio/projects/mirror-wallpapers/mirror-mobile-singles.png",
-        alt: "Mirror mobile catalog of standalone wallpapers",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123597/Content-OS-Web-Dark-ImageGen.png",
+        alt: "Youtube Content OS Web Image Generation (Dark)",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828989/portfolio/projects/mirror-wallpapers/mirror-mobile-upgrade.png",
-        alt: "Mirror Pro subscription tiers and AI generation benefits",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123595/Content-OS-Web-Dark-Profile.png",
+        alt: "Youtube Content OS Web User Profile (Dark)",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828991/portfolio/projects/mirror-wallpapers/mirror-admin-generate.png",
-        alt: "Mirror admin AI generation workspace for wallpaper pairs and singles",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123592/Content-OS-Web-Light-ImageGen.png",
+        alt: "Youtube Content OS Web Image Generation (Light)",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828993/portfolio/projects/mirror-wallpapers/mirror-admin-styles.png",
-        alt: "Mirror admin style preset management grid",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123590/Content-OS-Web-Light-Export.png",
+        alt: "Youtube Content OS Web Export Section (Light)",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828997/portfolio/projects/mirror-wallpapers/mirror-admin-singles.png",
-        alt: "Mirror admin catalog for approving and managing standalone wallpapers",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123588/Content-OS-Web-Light-Shorts.png",
+        alt: "Youtube Content OS Web Shorts Generator (Light)",
       },
       {
         type: "image",
-        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1782828999/portfolio/projects/mirror-wallpapers/mirror-admin-analytics.png",
-        alt: "Mirror admin analytics for generation reliability, spend, and cost risk",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123586/Content-OS-Web-Light-Meta-Thumbnail.png",
+        alt: "Youtube Content OS Web Thumbnail Meta",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123583/Content-OS-Web-Light-Meta-Title.png",
+        alt: "Youtube Content OS Web Title Meta",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123581/Content-OS-Web-Light-Visuals.png",
+        alt: "Youtube Content OS Web Visuals Management",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123578/Content-OS-Web-Light-Scripts.png",
+        alt: "Youtube Content OS Web Script Editor",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777123509/Content-OS-Web-Light-Home.png",
+        alt: "Youtube Content OS Web Home (Light)",
       },
     ],
-    featured: true,
     caseStudy: {
       problem:
-        "Most wallpaper apps treat lock and home screens as unrelated downloads, while AI generation, catalog curation, subscriptions, and operational visibility live in disconnected tools.",
+        "YouTube creators move between scripts, hooks, metadata, and thumbnails in disconnected tools, and an AI outage can stop the whole workflow.",
       solution:
-        "Mirror combines coordinated wallpaper pairs and standalone designs in one mobile experience, backed by an admin console that manages generation, approval, styles, pricing, and reliability from the same product data.",
+        "Content OS keeps each step of a video in one workspace and degrades gracefully: AI falls back to templates, MongoDB to local storage with export, and Cloudinary to in-browser images.",
       architecture: [
-        "Expo and React Native deliver the mobile catalog, previews, account flows, purchases, and Android wallpaper integration.",
-        "A Next.js admin console uses authenticated server routes for catalog curation, remote settings, payment operations, and analytics.",
-        "FastAPI orchestrates Gemini image generation, deduplication, storage, and generation logging.",
-        "Supabase provides authentication and relational product data, while Cloudinary serves the approved image catalog.",
+        "A React and Vite single-page app holds the creator workflow, with an Express API deployed as a Vercel function.",
+        "A central model catalog maps each model to its provider and migrates saved, deprecated model IDs automatically.",
+        "MongoDB stores projects and Cloudinary stores generated images when they are configured.",
       ],
       tradeoffs: [
-        "Native wallpaper application and payment SDKs provide a better Android experience but cannot be fully represented by the Expo web build.",
-        "AI generation quality and cost require explicit model tiers, credit controls, deduplication, and operational monitoring.",
-        "Supporting Cloudinary, R2, and legacy Supabase Storage improves deployment flexibility but adds configuration and deletion-path complexity.",
+        "Fallbacks keep the tool usable offline-first, but every feature has two code paths to test.",
+        "AI output speeds up drafting but is always presented for review, never published automatically.",
+      ],
+    },
+    facts: [
+      {
+        value: "2",
+        label: "AI providers behind one interface",
+      },
+      {
+        value: "4",
+        label: "services with graceful fallbacks",
+      },
+      { value: "100", label: "Lighthouse accessibility, live demo" },
+    ],
+  },
+  {
+    id: 7,
+    title: "AuraEdit",
+    shortDescription:
+      "Most image tools upload your photos first. AuraEdit resizes, converts, and batch-exports images entirely in the browser.",
+    longDescription:
+      "Aura Edit is a high-performance image editing tool that runs entirely in your browser. It allows users to perform complex modifications, apply filters, and process images in batches without ever uploading files to a server, ensuring maximum privacy and speed.",
+    image:
+      "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116565/AuraEdit-ImageUpload-Web-Light.png",
+    technologies: ["Next.js", "TypeScript", "Canvas API", "JSZip", "Framer Motion"],
+    features: [
+      "Resize, convert, filter, rotate, and flip JPG, PNG, WebP, GIF, and BMP",
+      "Batch processing with bounded concurrency and ZIP export",
+      "EXIF-aware orientation",
+      "No server uploads: files never leave the device",
+      "Light and dark themes",
+    ],
+    demoLink: "https://image-modifier-jet.vercel.app/",
+    githubLink: "https://github.com/MrUnknownji/image-modifier",
+    category: "Web App",
+    gallery: [
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116715/AuraEdit-HomePage-Bottom-Mobile-Dark.png",
+        alt: "Aura Edit Mobile Home Page (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116714/AuraEdit-ImageSettings-Mobile-Dark-2.png",
+        alt: "Aura Edit Mobile Image Settings (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116711/AuraEdit-ImagePreview-Mobile-Dark.png",
+        alt: "Aura Edit Mobile Image Preview (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116710/AuraEdit-ImageUpload-Mobile-Dark.png",
+        alt: "Aura Edit Mobile Image Upload (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116709/AuraEdit-ImageSettings-Mobile-Light.png",
+        alt: "Aura Edit Mobile Image Settings (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116687/AuraEdit-ImageUpload-Mobile-Light.png",
+        alt: "Aura Edit Mobile Image Upload (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116686/AuraEdit-ImageUpload-Mobile-Light-2.png",
+        alt: "Aura Edit Mobile Upload Screen",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116664/AuraEdit-ImageSettings-Web-Light-2.png",
+        alt: "Aura Edit Web Settings (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116647/AuraEdit-ImageSettings-Web-Dark.png",
+        alt: "Aura Edit Web Settings (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116645/AuraEdit-ImageSettings-Web-Dark-2.png",
+        alt: "Aura Edit Web Editor View (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116612/AuraEdit-BatchImage-Web-Dark.png",
+        alt: "Aura Edit Batch Image Processing (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116609/AuraEdit-ImageUpload-Web-Dark.png",
+        alt: "Aura Edit Web Image Upload (Dark)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116571/AuraEdit-ImageSettings-Web-Light-2.png",
+        alt: "Aura Edit Web Image Settings",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116568/AuraEdit-ImageSettings-Web-Light.png",
+        alt: "Aura Edit Web Image Editor (Light)",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1777116565/AuraEdit-ImageUpload-Web-Light.png",
+        alt: "Aura Edit Web Image Upload (Light)",
+      },
+    ],
+    caseStudy: {
+      problem:
+        "Most browser image tools upload user files before editing, which adds latency and creates unnecessary privacy concerns.",
+      solution:
+        "AuraEdit keeps the editing pipeline inside the browser so users can resize, adjust, batch-process, and export images without server uploads.",
+      architecture: [
+        "Next.js and TypeScript provide the app shell, routing, and strong UI contracts.",
+        "Canvas APIs run the image transformation pipeline locally in the browser.",
+        "Batch operations reuse one processing path so single-image and multi-image exports stay consistent.",
+      ],
+      tradeoffs: [
+        "Local processing protects privacy but depends on the user's device memory and CPU.",
+        "Canvas-based transforms are portable, while very advanced editing features would need heavier rendering infrastructure.",
+      ],
+    },
+    facts: [
+      {
+        value: "0",
+        label: "server uploads",
+      },
+      {
+        value: "5",
+        label: "image formats",
+      },
+      {
+        value: "40",
+        label: "unit tests",
+      },
+      { value: "96", label: "Lighthouse accessibility, live demo" },
+    ],
+  },
+  {
+    id: 1,
+    title: "AudioVibes",
+    shortDescription:
+      "A minimalist React Native music player for Android & iOS with animations and Material You theming.",
+    longDescription:
+      "AudioVibes is an elegantly designed music player application for Android and iOS. Boasting a minimalist interface with captivating animations, it supports Material You theming, notifications, and background playback.",
+    image: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062498/DescHome_gijzvt.png",
+    technologies: ["React Native", "Expo", "Reanimated"],
+    features: [
+      "Minimalist UI/UX",
+      "Captivating animations via Reanimated",
+      "Material You theming support",
+      "Background audio playback",
+      "Playback notifications",
+      "Cross-platform (Android/iOS)",
+      "Local audio file scanning and playback",
+    ],
+    githubLink: "https://github.com/MrUnknownji/AudioVibes_music_player",
+    category: "Mobile",
+    gallery: [
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062498/DescHome_gijzvt.png",
+        alt: "AudioVibes Home Screen",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062499/ScreenShot7_vf2x9x.jpg",
+        alt: "AudioVibes Now Playing Screen",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062498/ScreenShot2_cxfvdm.jpg",
+        alt: "AudioVibes Playlist View",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062498/ScreenShot3_gcqdxd.jpg",
+        alt: "AudioVibes Search Functionality",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062498/ScreenShot6_wnr0j7.jpg",
+        alt: "AudioVibes Settings Screen",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062497/ScreenShot4_kra2yo.jpg",
+        alt: "AudioVibes Album View",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062497/ScreenShot5_wt8tnl.jpg",
+        alt: "AudioVibes Artist View",
+      },
+      {
+        type: "image",
+        src: "https://res.cloudinary.com/dfwgprzxo/image/upload/v1745062497/ScreenShot1_qmsvam.jpg",
+        alt: "AudioVibes Notification Player",
+      },
+    ],
+    caseStudy: {
+      problem:
+        "Mobile music players often feel generic or depend on cloud-first flows even when users mainly want polished local playback.",
+      solution:
+        "AudioVibes focuses on a local-first listening experience with a minimal interface, animated transitions, Material You styling, and background playback support.",
+      architecture: [
+        "Expo and React Native handle cross-platform screens and navigation.",
+        "Reanimated powers high-frequency UI transitions without blocking the JavaScript thread.",
+        "Playback state is separated from presentation so notification controls and app screens stay in sync.",
+      ],
+      tradeoffs: [
+        "Local file handling keeps privacy high but requires more platform-specific testing.",
+        "Animation richness is balanced against battery use and older Android device performance.",
+      ],
+    },
+  },
+  {
+    id: 12,
+    title: "This portfolio",
+    shortDescription:
+      "A portfolio is a product too. I rebuilt this one around verified facts, measured performance, and tests, and cut mobile LCP by about 30%.",
+    longDescription:
+      "This site is built with the same discipline as the products it shows: every claim is checked against a repository, the first screen is measured on a throttled phone, and every pull request runs formatting, types, unit and browser tests, accessibility checks, and Lighthouse budgets.",
+    image: "/images/portfolio/home.webp",
+    technologies: ["Next.js", "React", "TypeScript", "Playwright", "Vitest", "Lighthouse CI"],
+    features: [
+      "One typed source for experience, skills, and projects, shared by the site, the résumé PDF, and the assistant",
+      "Repository-counted facts on every case study",
+      "A unit-tested simulation of races, retries, and idempotency in the lab",
+      "Lighthouse, Playwright, and axe checks on every pull request",
+    ],
+    githubLink: "https://github.com/MrUnknownji/personal-portfolio",
+    category: "Engineering",
+    year: 2026,
+    facts: [
+      { value: "94", label: "mobile Lighthouse score, up from 87" },
+      { value: "29%", label: "faster LCP on a throttled phone (worst median)" },
+      { value: "45%", label: "less CSS on the home page" },
+    ],
+    gallery: [
+      { type: "image", src: "/images/portfolio/home.webp", alt: "Portfolio home page hero" },
+      {
+        type: "image",
+        src: "/images/portfolio/filmstrip-before.webp",
+        alt: "Filmstrip before: the loading screen covers the hero",
+      },
+      {
+        type: "image",
+        src: "/images/portfolio/filmstrip-after.webp",
+        alt: "Filmstrip after: the hero paints first",
+      },
+      {
+        type: "image",
+        src: "/images/portfolio/lab-race.webp",
+        alt: "Lab simulation of two bids and a lost reply",
+      },
+    ],
+    caseStudy: {
+      problem:
+        "A portfolio is judged in seconds, usually on a phone. Mine had grown layers of unused code, stacks that did not match the real repositories, and a first screen that waited behind a loading animation.",
+      solution:
+        "I checked every claim against its repository, moved career facts into one typed source, removed about 2,500 lines of dead components and 220 dead CSS rules, and fixed the load path after a Lighthouse filmstrip showed the real cause of the slow first paint.",
+      architecture: [
+        "Statically generated Next.js routes; client components receive small project summaries as props instead of importing the full data module.",
+        "Styles are split into one stylesheet per feature, with route-only styles imported by their pages.",
+        "The lab simulation is a pure, deterministic module with its own unit tests; the view only animates its output.",
+        "CI runs Prettier, ESLint, TypeScript, Vitest, a production build, Playwright with axe on desktop and mobile, and Lighthouse budgets.",
+      ],
+      tradeoffs: [
+        "Removing the route loading screen made first visits faster, at the cost of a branded transition between pages.",
+        "Repository counts are verifiable but modest; they show how the work is built rather than how many people use it.",
       ],
     },
   },
 ];
 
-export const selectedProjectIds = [9, 11, 10, 8, 7, 1] as const;
+export function getProject(id: number | string) {
+  return selectedProjects.find((project) => project.id === Number(id));
+}
 
-const selectedProjectIdSet = new Set<number>(selectedProjectIds);
-
-const projectTitleOverrides: Record<number, string> = {
-  7: "AuraEdit",
-  8: "YouTube Content OS",
-};
-
-const projectCaseStudies: Record<number, ProjectCaseStudy> = {
-  1: {
-    problem:
-      "Mobile music players often feel generic or depend on cloud-first flows even when users mainly want polished local playback.",
-    solution:
-      "AudioVibes focuses on a local-first listening experience with a minimal interface, animated transitions, Material You styling, and background playback support.",
-    architecture: [
-      "Expo and React Native handle cross-platform screens and navigation.",
-      "Reanimated powers high-frequency UI transitions without blocking the JavaScript thread.",
-      "Playback state is separated from presentation so notification controls and app screens stay in sync.",
-    ],
-    tradeoffs: [
-      "Local file handling keeps privacy high but requires more platform-specific testing.",
-      "Animation richness is balanced against battery use and older Android device performance.",
-    ],
-  },
-  7: {
-    problem:
-      "Most browser image tools upload user files before editing, which adds latency and creates unnecessary privacy concerns.",
-    solution:
-      "AuraEdit keeps the editing pipeline inside the browser so users can resize, adjust, batch-process, and export images without server uploads.",
-    architecture: [
-      "Next.js and TypeScript provide the app shell, routing, and strong UI contracts.",
-      "Canvas APIs run the image transformation pipeline locally in the browser.",
-      "Batch operations reuse one processing path so single-image and multi-image exports stay consistent.",
-    ],
-    tradeoffs: [
-      "Local processing protects privacy but depends on the user's device memory and CPU.",
-      "Canvas-based transforms are portable, while very advanced editing features would need heavier rendering infrastructure.",
-    ],
-  },
-  8: {
-    problem:
-      "YouTube creators juggle scripts, hooks, metadata, thumbnails, and exports across disconnected tools.",
-    solution:
-      "YouTube Content OS centralizes ideation, AI drafting, metadata generation, visual workflows, and export tasks in one creator workspace.",
-    architecture: [
-      "Next.js and TypeScript structure the product dashboard and creator workflows.",
-      "AI provider calls are isolated behind workflow actions so prompts and outputs can evolve without rewriting the UI.",
-      "Supabase and Drizzle model creator projects, saved content, settings, and generated assets.",
-    ],
-    tradeoffs: [
-      "AI-assisted output speeds up drafting but still needs user review before publishing.",
-      "A richer workspace creates more state to manage, so flows are split by content task instead of one oversized editor.",
-    ],
-  },
-  9: {
-    problem:
-      "Auction products need fast bid updates, clear bidder feedback, and reliable dashboard state under time pressure.",
-    solution:
-      "BidStrike combines real-time bidding, auction management, AI suggestions, and responsive dashboards for bidders and auctioneers.",
-    architecture: [
-      "Next.js and TypeScript power the product surface and route-level workflows.",
-      "Pusher handles real-time bid events so open auction views update immediately.",
-      "Prisma and PostgreSQL model auctions, bids, users, notifications, and dashboard data.",
-    ],
-    tradeoffs: [
-      "Real-time UX improves trust but requires careful event ordering and stale-state handling.",
-      "AI price suggestions are positioned as decision support, not automatic bidding.",
-    ],
-  },
-  10: {
-    problem:
-      "E-commerce demos often stop at product grids and miss admin, support, checkout, and personalization flows.",
-    solution:
-      "OmniMart presents a fuller retail product with editorial shopping, cart and checkout flows, AI discovery ideas, and admin management screens.",
-    architecture: [
-      "Next.js, TypeScript, Tailwind CSS, and Redux organize storefront, cart, checkout, and admin UI state.",
-      "Stripe-oriented checkout flows separate purchase intent from catalog browsing.",
-      "Admin dashboards cover product, order, and customer management surfaces.",
-    ],
-    tradeoffs: [
-      "A broad product surface demonstrates end-to-end thinking but needs clear boundaries between demo and production payment behavior.",
-      "Editorial visuals strengthen brand feel while dense admin screens stay more utilitarian.",
-    ],
-  },
-};
-
-export const selectedProjects: Project[] = selectedProjectIds.flatMap((id) => {
-  const project = projects.find((item) => item.id === id);
-  if (!project) return [];
-
-  return [
-    {
-      ...project,
-      title: projectTitleOverrides[id] || project.title,
-      featured: true,
-      caseStudy: projectCaseStudies[id] || project.caseStudy,
-    },
-  ];
-});
-
-export const archivedProjects = projects.filter((project) => {
-  return !selectedProjectIdSet.has(project.id);
-});
+/** Small, serializable project fields for client components. */
+export function toProjectSummary(project: Pick<Project, keyof ProjectSummary>): ProjectSummary {
+  const {
+    id,
+    title,
+    shortDescription,
+    image,
+    technologies,
+    category,
+    year,
+    demoLink,
+    githubLink,
+    sourceNote,
+  } = project;
+  return {
+    id,
+    title,
+    shortDescription,
+    image,
+    technologies,
+    category,
+    year,
+    demoLink,
+    githubLink,
+    sourceNote,
+  };
+}

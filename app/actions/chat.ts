@@ -1,24 +1,33 @@
 "use server";
 
 import { headers } from "next/headers";
-import { projects, selectedProjects } from "@/data/projects";
-import { SkillsData } from "@/data/skills";
+import { archivedProjects } from "@/data/archive";
+import { selectedProjects } from "@/data/projects";
+import { PROFILE } from "@/data/profile";
 import { SITE_CONFIG } from "@/data/site";
-import {
-  consumeRateLimit,
-  getTrustedClientIp,
-} from "@/lib/server/rateLimit";
+import { consumeRateLimit, getTrustedClientIp } from "@/lib/server/rateLimit";
 
 const GEMINI_AI_STUDIO_API_KEY = process.env.GEMINI_AI_STUDIO_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL =
-  process.env.GEMINI_MODEL || "gemini-3.1-flash-lite-preview";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite-preview";
 const MAX_PROMPT_LENGTH = 500;
 const GEMINI_TIMEOUT_MS = 8_000;
 const MAX_CONCURRENT_GEMINI_REQUESTS = 4;
 const CHAT_RATE_LIMIT = 12;
 const CHAT_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 
+const describeExperience = () =>
+  PROFILE.experience
+    .map((entry) => `${entry.role}, ${entry.organization} (${entry.period})`)
+    .join("; ");
+
+const describeEducation = () =>
+  PROFILE.education
+    .map((entry) => `${entry.title}, ${entry.institution} (${entry.period})`)
+    .join("; ");
+
+// A per-instance guard against bursts on one server. Cross-instance abuse is handled by the
+// MongoDB-backed rate limit below, which every instance shares.
 let activeGeminiRequests = 0;
 
 type GeminiResponse = {
@@ -42,12 +51,10 @@ function getLocalPortfolioAnswer(prompt: string) {
   const contextSummary = prompt.match(/portfolio item:\s*(.+)$/i)?.[1];
 
   if (contextSummary) {
-    return contextSummary.length > 220
-      ? `${contextSummary.slice(0, 217)}...`
-      : contextSummary;
+    return contextSummary.length > 220 ? `${contextSummary.slice(0, 217)}...` : contextSummary;
   }
 
-  const searchableProjects = [...selectedProjects, ...projects];
+  const searchableProjects = [...selectedProjects, ...archivedProjects];
   const requestedProject = searchableProjects.find((project) => {
     return normalizedPrompt.includes(project.title.toLowerCase());
   });
@@ -61,7 +68,7 @@ function getLocalPortfolioAnswer(prompt: string) {
   }
 
   if (/\b(summarize sandeep|who is sandeep|tell me about sandeep)\b/.test(normalizedPrompt)) {
-    return "Sandeep is a full-stack developer in Punjab, India. He builds web and mobile products, explores motion and creative code, and works as a developer at TCS.";
+    return `Sandeep is a full-stack developer in ${PROFILE.location}. Experience: ${describeExperience()}. The site shows ${selectedProjects.length} of his projects. Download his résumé at ${PROFILE.resumePath}.`;
   }
 
   if (/\b(who am i|my name)\b/.test(normalizedPrompt)) {
@@ -69,13 +76,14 @@ function getLocalPortfolioAnswer(prompt: string) {
   }
 
   if (/\b(contact|email|reach|hire|available)\b/.test(normalizedPrompt)) {
-    return `Sandeep is available for full stack work. Use the contact form or email him at ${SITE_CONFIG.email}.`;
+    return `Sandeep is open to ${PROFILE.openTo.toLowerCase()}. Use the contact form or email him at ${SITE_CONFIG.email}.`;
   }
 
-  if (
-    /\b(skill|stack|technology|tech|frontend|backend)\b/.test(normalizedPrompt)
-  ) {
-    return "Sandeep works with React, Next.js, TypeScript, Tailwind CSS, GSAP, Node.js, Express, MongoDB, REST APIs, and deployment tools like Vercel.";
+  if (/\b(skill|stack|technology|tech|frontend|backend)\b/.test(normalizedPrompt)) {
+    return PROFILE.skills
+      .slice(0, 4)
+      .map((skill) => `${skill.group}: ${skill.items.join(", ")}.`)
+      .join(" ");
   }
 
   if (/\b(project|work|portfolio|built|apps?)\b/.test(normalizedPrompt)) {
@@ -87,8 +95,12 @@ function getLocalPortfolioAnswer(prompt: string) {
     return `Featured projects include ${featuredProjects}. Open the Projects page for demos, source links, galleries, and tech stacks.`;
   }
 
-  if (/\b(experience|job|tcs|journey|background)\b/.test(normalizedPrompt)) {
-    return "Sandeep started web development in 2020, graduated in Computer Science, and works as a developer at TCS while building full stack products.";
+  if (
+    /\b(experience|job|tcs|journey|background|education|degree|university|framerelay|studio)\b/.test(
+      normalizedPrompt,
+    )
+  ) {
+    return `Experience: ${describeExperience()}. Education: ${describeEducation()}.`;
   }
 
   return null;
@@ -113,9 +125,7 @@ export async function chatWithBot(prompt: string) {
 
   const geminiApiKeys = Array.from(
     new Set(
-      [GEMINI_AI_STUDIO_API_KEY, GEMINI_API_KEY].filter(
-        (key): key is string => Boolean(key),
-      ),
+      [GEMINI_AI_STUDIO_API_KEY, GEMINI_API_KEY].filter((key): key is string => Boolean(key)),
     ),
   );
 
@@ -126,16 +136,15 @@ export async function chatWithBot(prompt: string) {
   const portfolioData = {
     owner: SITE_CONFIG.firstName,
     role: SITE_CONFIG.role,
-    skills: [
-      ...SkillsData.frontend,
-      ...SkillsData.backend,
-      ...SkillsData.tools,
-    ],
-    exp: "3 years building immersive web experiences",
+    skills: PROFILE.skills.flatMap((skill) => skill.items),
+    experience: PROFILE.experience.map(
+      (entry) => `${entry.period}: ${entry.role}, ${entry.organization}`,
+    ),
+    education: describeEducation(),
+    openTo: PROFILE.openTo,
     projects: selectedProjects.map((project) => {
       return `${project.title}: ${project.shortDescription}`;
     }),
-    funFact: "Once debugged a single line of CSS for 6 hours.",
   };
 
   const systemInstructionText = `
@@ -152,7 +161,7 @@ export async function chatWithBot(prompt: string) {
 
     MISSION:
     - Entertain the visitor.
-    - Answer questions about Sandeep's portfolio.
+    - Answer questions about Sandeep's portfolio using only the CONTEXT. Never invent employers, dates, or numbers.
     - If the user asks "Who am I?", tell them they are a welcome guest/visitor.
     - If the visitor asks about hiring or contact, mention ${SITE_CONFIG.email}.
     - If unsure, guide the visitor to the Projects page or Contact section.

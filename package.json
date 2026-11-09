@@ -13,16 +13,18 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "test:all": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:e2e",
+    "test:all": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:e2e",
     "audit:all": "pnpm audit",
     "audit:prod": "pnpm audit --prod",
     "lighthouse": "node scripts/run-lighthouse.mjs",
-    "db:indexes": "node --env-file-if-exists=.env scripts/setup-database-indexes.mjs"
+    "db:indexes": "node --env-file-if-exists=.env scripts/setup-database-indexes.mjs",
+    "resume": "node scripts/build-resume.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "animejs": "^4.5.0",
-    "gsap": "^3.15.0",
     "mongodb": "^7.5.0",
     "next": "16.3.1",
     "postcss": "^8.5.26",
@@ -35,12 +37,16 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.62.1",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^24.13.3",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.3.1",
+    "jsdom": "^26.1.0",
     "lighthouse": "13.4.1",
+    "prettier": "3.6.2",
     "typescript": "^5.9.3",
     "vitest": "^4.1.10"
   },

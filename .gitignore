@@ -39,3 +39,6 @@ yarn-error.log*
 next-env.d.ts
 .env
 i-did.md
+
+# local notes and prompts
+PROJECT_SHOWCASE_CAPTURE_PROMPT.md

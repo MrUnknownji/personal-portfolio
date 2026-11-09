@@ -40,5 +40,9 @@ export const setActiveProject = (project: ActiveProject) => {
 };
 
 export function useModalState() {
-  return useSyncExternalStore(subscribe, () => snapshot, () => snapshot);
+  return useSyncExternalStore(
+    subscribe,
+    () => snapshot,
+    () => snapshot,
+  );
 }

@@ -19,9 +19,7 @@ try {
   await Promise.all([
     database.collection("contact_messages").createIndex({ createdAt: -1 }),
     database.collection("contact_messages").createIndex({ email: 1 }),
-    database
-      .collection("contact_messages")
-      .createIndex({ deleteAt: 1 }, { expireAfterSeconds: 0 }),
+    database.collection("contact_messages").createIndex({ deleteAt: 1 }, { expireAfterSeconds: 0 }),
     database
       .collection("request_rate_limits")
       .createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),

@@ -3,10 +3,7 @@
     "collect": {
       "startServerCommand": "pnpm start -p 3101",
       "startServerReadyPattern": "Ready",
-      "url": [
-        "http://127.0.0.1:3101/",
-        "http://127.0.0.1:3101/my-projects"
-      ],
+      "url": ["http://127.0.0.1:3101/", "http://127.0.0.1:3101/my-projects"],
       "numberOfRuns": 3
     },
     "assert": {

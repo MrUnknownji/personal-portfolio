@@ -18,9 +18,18 @@ export default function ErrorPage({
     <section className="portfolio-state offset-wrap" aria-labelledby="error-title">
       <div>
         <span className="offset-kicker">Build file / Error</span>
-        <h1 id="error-title">This page<br />didn&apos;t load<span>.</span></h1>
+        <h1 id="error-title">
+          This page
+          <br />
+          didn&apos;t load<span>.</span>
+        </h1>
         <p>Try loading it again. If the problem continues, the project index is still available.</p>
-        <div className="portfolio-state-actions"><button type="button" onClick={reset}>Try again ↗</button><Link href="/my-projects">Explore projects ↗</Link></div>
+        <div className="portfolio-state-actions">
+          <button type="button" onClick={reset}>
+            Try again ↗
+          </button>
+          <Link href="/my-projects">Explore projects ↗</Link>
+        </div>
       </div>
     </section>
   );

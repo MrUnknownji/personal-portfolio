@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { botProjects as projects } from "@/data/bot-projects";
+import type { ProjectSummary } from "@/types/Project";
 import { SOCIAL_PROFILES } from "@/data/social";
 
 type ActiveProject = {
@@ -14,52 +14,45 @@ type BotRouter = {
 };
 
 type UseBotCommandsParams = {
+  projects: ProjectSummary[];
   activeProject: ActiveProject;
   pathname: string;
   router: BotRouter;
 };
 
 export function useBotCommands({
+  projects,
   activeProject,
   pathname,
   router,
 }: UseBotCommandsParams) {
-  const findProject = useCallback((prompt: string) => {
-    const normalizedPrompt = prompt.toLowerCase();
+  const findProject = useCallback(
+    (prompt: string) => {
+      const normalizedPrompt = prompt.toLowerCase();
 
-    return projects.find((project) => {
-      return (
-        normalizedPrompt.includes(project.title.toLowerCase()) ||
-        project.technologies.some((tech) =>
-          normalizedPrompt.includes(tech.toLowerCase()),
-        )
-      );
-    });
-  }, []);
-
-  const scrollElementPrecisely = useCallback(
-    (target: Element, hash?: string) => {
-      const headerHeight =
-        document.querySelector("header")?.getBoundingClientRect().height ?? 64;
-      const topOffset = Math.round(headerHeight + 20);
-
-      window.scrollTo({
-        top: Math.max(
-          0,
-          window.scrollY + target.getBoundingClientRect().top - topOffset,
-        ),
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "auto"
-          : "smooth",
+      return projects.find((project) => {
+        return (
+          normalizedPrompt.includes(project.title.toLowerCase()) ||
+          project.technologies.some((tech) => normalizedPrompt.includes(tech.toLowerCase()))
+        );
       });
-
-      if (hash) {
-        window.history.replaceState(null, "", hash);
-      }
-
     },
-    [],
+    [projects],
   );
+
+  const scrollElementPrecisely = useCallback((target: Element, hash?: string) => {
+    const headerHeight = document.querySelector("header")?.getBoundingClientRect().height ?? 64;
+    const topOffset = Math.round(headerHeight + 20);
+
+    window.scrollTo({
+      top: Math.max(0, window.scrollY + target.getBoundingClientRect().top - topOffset),
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    });
+
+    if (hash) {
+      window.history.replaceState(null, "", hash);
+    }
+  }, []);
 
   const scrollToTarget = useCallback(
     (selector: string, hash: string) => {
@@ -100,9 +93,7 @@ export function useBotCommands({
       if (!requestedLabel) return null;
 
       const candidates = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), a[href], [role="button"]',
-        ),
+        document.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [role="button"]'),
       )
         .map((element) => {
           const label = (
@@ -116,10 +107,7 @@ export function useBotCommands({
           const normalizedLabel = label.toLowerCase();
           const rect = element.getBoundingClientRect();
           const inViewport =
-            rect.width > 0 &&
-            rect.height > 0 &&
-            rect.bottom > 0 &&
-            rect.top < window.innerHeight;
+            rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < window.innerHeight;
 
           return {
             element,
@@ -137,10 +125,7 @@ export function useBotCommands({
         })
         .filter((candidate) => candidate.score > 0)
         .sort((left, right) => {
-          return (
-            right.score - left.score ||
-            Number(right.inViewport) - Number(left.inViewport)
-          );
+          return right.score - left.score || Number(right.inViewport) - Number(left.inViewport);
         });
 
       const match = candidates[0];
@@ -166,25 +151,16 @@ export function useBotCommands({
         : null;
       const requestedProject = findProject(prompt) || activeProjectMatch;
 
-      if (
-        /\b(summary|summarize|explain|tell me about|what is|give me)\b/.test(
-          normalizedPrompt,
-        )
-      ) {
+      if (/\b(summary|summarize|explain|tell me about|what is|give me)\b/.test(normalizedPrompt)) {
         return null;
       }
 
       if (
         /\b(open|show|view)\b/.test(normalizedPrompt) &&
         requestedProject &&
-        !/\bgithub|source|repo|code|live|demo|website|preview\b/.test(
-          normalizedPrompt,
-        )
+        !/\bgithub|source|repo|code|live|demo|website|preview\b/.test(normalizedPrompt)
       ) {
-        const project =
-          requestedProject ||
-          projects.find((item) => item.featured) ||
-          projects[0];
+        const project = requestedProject || projects[0];
 
         if (project) {
           openProjectDetails(project.id);
@@ -233,21 +209,13 @@ export function useBotCommands({
 
       if (/\b(source|repo|code)\b/.test(normalizedPrompt)) {
         if (requestedProject?.githubLink) {
-          window.open(
-            requestedProject.githubLink,
-            "_blank",
-            "noopener,noreferrer",
-          );
+          window.open(requestedProject.githubLink, "_blank", "noopener,noreferrer");
           return `Opening ${requestedProject.title} source code.`;
         }
       }
 
       if (/\bgithub\b/.test(normalizedPrompt)) {
-        window.open(
-          SOCIAL_PROFILES.github.href,
-          "_blank",
-          "noopener,noreferrer",
-        );
+        window.open(SOCIAL_PROFILES.github.href, "_blank", "noopener,noreferrer");
         return "Opening Sandeep's GitHub profile.";
       }
 
@@ -267,6 +235,7 @@ export function useBotCommands({
       findProject,
       openProjectDetails,
       pathname,
+      projects,
       router,
       scrollElementPrecisely,
       scrollToTarget,

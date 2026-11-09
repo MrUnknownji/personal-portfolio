@@ -16,6 +16,9 @@ export type ContactFormValues = {
   company: string;
 };
 
+/** Fields the portfolio form collects; the API fills a default category and subject. */
+export type ContactFormFields = Pick<ContactFormValues, "name" | "email" | "message" | "company">;
+
 export const CONTACT_FIELD_LIMITS = {
   name: 80,
   email: 120,
@@ -42,15 +45,20 @@ export function validateContactRequest(body: ContactRequestBody) {
   const errors: Partial<Record<keyof ContactFormValues, string>> = {};
 
   if (values.name.length < 2) errors.name = "Name must be at least 2 characters.";
-  if (values.name.length > CONTACT_FIELD_LIMITS.name) errors.name = `Name must be ${CONTACT_FIELD_LIMITS.name} characters or less.`;
+  if (values.name.length > CONTACT_FIELD_LIMITS.name)
+    errors.name = `Name must be ${CONTACT_FIELD_LIMITS.name} characters or less.`;
   if (!EMAIL_PATTERN.test(values.email)) errors.email = "Enter a valid email address.";
-  if (values.email.length > CONTACT_FIELD_LIMITS.email) errors.email = `Email must be ${CONTACT_FIELD_LIMITS.email} characters or less.`;
+  if (values.email.length > CONTACT_FIELD_LIMITS.email)
+    errors.email = `Email must be ${CONTACT_FIELD_LIMITS.email} characters or less.`;
   if (values.category.length < 2) errors.category = "Category is required.";
-  if (values.category.length > CONTACT_FIELD_LIMITS.category) errors.category = `Category must be ${CONTACT_FIELD_LIMITS.category} characters or less.`;
+  if (values.category.length > CONTACT_FIELD_LIMITS.category)
+    errors.category = `Category must be ${CONTACT_FIELD_LIMITS.category} characters or less.`;
   if (values.subject.length < 3) errors.subject = "Subject is required.";
-  if (values.subject.length > CONTACT_FIELD_LIMITS.subject) errors.subject = `Subject must be ${CONTACT_FIELD_LIMITS.subject} characters or less.`;
+  if (values.subject.length > CONTACT_FIELD_LIMITS.subject)
+    errors.subject = `Subject must be ${CONTACT_FIELD_LIMITS.subject} characters or less.`;
   if (values.message.length < 10) errors.message = "Message must be at least 10 characters.";
-  if (values.message.length > CONTACT_FIELD_LIMITS.message) errors.message = `Message must be ${CONTACT_FIELD_LIMITS.message} characters or less.`;
+  if (values.message.length > CONTACT_FIELD_LIMITS.message)
+    errors.message = `Message must be ${CONTACT_FIELD_LIMITS.message} characters or less.`;
 
   return { values, errors };
 }

@@ -14,17 +14,13 @@ import { chatWithBot } from "@/app/actions/chat";
 describe("portfolio chat", () => {
   it("rejects empty and oversized prompts before external work", async () => {
     await expect(chatWithBot("   ")).resolves.toMatch(/enter a question/i);
-    await expect(chatWithBot("x".repeat(501))).resolves.toMatch(
-      /under 500 characters/i,
-    );
+    await expect(chatWithBot("x".repeat(501))).resolves.toMatch(/under 500 characters/i);
   });
 
   it("answers common portfolio intents locally", async () => {
-    await expect(chatWithBot("How can I contact Sandeep?")).resolves.toMatch(
-      /contact form|email/i,
-    );
+    await expect(chatWithBot("How can I contact Sandeep?")).resolves.toMatch(/contact form|email/i);
     await expect(chatWithBot("What is his tech stack?")).resolves.toMatch(
-      /React.*Next\.js.*TypeScript/i,
+      /TypeScript.*Frontend: React, Next\.js.*Backend: Node\.js/i,
     );
     await expect(chatWithBot("Tell me about Mirror Wallpapers")).resolves.toMatch(
       /Mirror Wallpapers/i,

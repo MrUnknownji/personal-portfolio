@@ -9,11 +9,21 @@ describe("selected project stories", () => {
       expect(story, `${project.title} has an editorial story`).toBeDefined();
       if (!story) continue;
 
-      const matches = story.gallery.map(({ match }) => project.gallery?.filter((item) =>
-        item.type === "image" && item.alt?.toLowerCase().includes(match.toLowerCase()),
-      ) ?? []);
-      expect(matches.every((items) => items.length === 1), `${project.title} media selectors are unambiguous`).toBe(true);
-      expect(new Set(matches.map(([item]) => item.src)).size, `${project.title} media are distinct`).toBe(matches.length);
+      const matches = story.gallery.map(
+        ({ match }) =>
+          project.gallery?.filter(
+            (item) =>
+              item.type === "image" && item.alt?.toLowerCase().includes(match.toLowerCase()),
+          ) ?? [],
+      );
+      expect(
+        matches.every((items) => items.length === 1),
+        `${project.title} media selectors are unambiguous`,
+      ).toBe(true);
+      expect(
+        new Set(matches.map(([item]) => item.src)).size,
+        `${project.title} media are distinct`,
+      ).toBe(matches.length);
     }
   });
 });

@@ -1,0 +1,25 @@
+/*
+ * Visitor preferences from the lab (letter spacing, accent colour) travel through
+ * every route. The :root prefix keeps these above route stylesheets, which load
+ * after the layout's.
+ */
+:root .offset-hero-display,
+:root .offset-work-header h2,
+:root .showcase-copy h3,
+:root .offset-lab-heading h2,
+:root .offset-about h2,
+:root .offset-toolkit h2,
+:root .offset-contact h2,
+:root .print-index-header h1,
+:root .print-index-card-title,
+:root .study-header h1,
+:root .print-footer-main p {
+  letter-spacing: calc(-0.035em + var(--portfolio-tracking, 0px));
+}
+:root .offset-kicker,
+:root .print-eyebrow,
+:root .print-index-card-meta,
+:root .showcase-head,
+:root .showcase-tech {
+  letter-spacing: calc(0.12em + var(--portfolio-label-tracking, 0px));
+}

@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  FiMail,
-  FiPhone,
-  FiMapPin,
-  FiGithub,
-  FiLinkedin,
-} from "react-icons/fi";
+import { FiMail, FiPhone, FiMapPin, FiGithub, FiLinkedin } from "react-icons/fi";
 import { FaXTwitter } from "react-icons/fa6";
 import { SITE_CONFIG } from "@/data/site";
 import { SOCIAL_PROFILES } from "@/data/social";

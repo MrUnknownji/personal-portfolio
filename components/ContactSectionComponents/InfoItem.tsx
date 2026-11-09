@@ -33,9 +33,7 @@ const InfoItem: React.FC<InfoItemProps> = ({ icon, label, value, link }) => {
         <div className="text-xs uppercase tracking-wider text-neutral-400 font-medium mb-1 transition-colors duration-150 group-hover/infoitem:text-primary/80">
           {label}
         </div>
-        <div className="text-white font-medium text-lg tracking-tight">
-          {value}
-        </div>
+        <div className="text-white font-medium text-lg tracking-tight">{value}</div>
       </div>
     </a>
   );
