@@ -4,7 +4,7 @@ export type Body = "putty" | "clay" | "sage" | "peach" | "sheet" | "signal" | "p
 
 /**
  * The layers every Lumen Draft surface is made of. Place inside an element with `ld-soft`:
- * a cast shadow (moved by the light), the skin (body colour and rim), and a sheen on the skin.
+ * a soft ambient shadow, the skin (body colour and rim), and a sheen that follows the light.
  * Content beside these layers must be wrapped in elements so it paints above the skin.
  */
 export function SoftLayers({ z = 6, sheen = true }: { z?: 6 | 12 | 20; sheen?: boolean }) {

@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { castKeyframes, ORBIT_SECONDS, sheenKeyframes } from "@/lib/lumen/light";
+import { ORBIT_SECONDS, sheenKeyframes } from "@/lib/lumen/light";
 import { lightStore } from "./lightStore";
 
-const SELECTOR = ".ld-cast, .ld-sheen";
+const SELECTOR = ".ld-sheen";
 
 /**
- * Moves every shadow and sheen with the light. Each surface gets one transform animation that
+ * Moves every sheen with the light. Each surface gets one transform animation that
  * the compositor runs, so the orbit never touches style, layout, or paint on the main thread.
  * All animations share one start time, so every surface agrees on where the light is.
  */
@@ -16,7 +16,6 @@ export default function LightEngine() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     const duration = ORBIT_SECONDS * 1000;
     const animations = new Map<Element, Animation>();
-    const castCache = new Map<number, Keyframe[]>();
     const sheen = sheenKeyframes();
 
     const sync = (animation: Animation) => {
@@ -33,13 +32,7 @@ export default function LightEngine() {
 
     const attach = (element: Element) => {
       if (animations.has(element)) return;
-      let keyframes = sheen;
-      if (element.classList.contains("ld-cast")) {
-        const z = Number((element as HTMLElement).dataset.z || 6);
-        keyframes = castCache.get(z) ?? castKeyframes(z);
-        castCache.set(z, keyframes);
-      }
-      const animation = element.animate(keyframes, { duration, iterations: Infinity });
+      const animation = element.animate(sheen, { duration, iterations: Infinity });
       animations.set(element, animation);
       sync(animation);
     };

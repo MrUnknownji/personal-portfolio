@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { animate, Spring } from "@/lib/lumen/springs";
 import { SoftLayers, softStyle, type Body } from "./Soft";
 import { haptic, tone } from "./feedback";
@@ -26,6 +26,19 @@ const SLOP = 6;
 const zone = (col: number, row: number) => `${String.fromCharCode(65 + col)}${row + 1}`;
 
 type Tile = { col: number; row: number; x: Spring; y: Spring; rot: Spring };
+type Drag = {
+  id: number;
+  sx: number;
+  sy: number;
+  ox: number;
+  oy: number;
+  lx: number;
+  ly: number;
+  lt: number;
+  vx: number;
+  vy: number;
+  active: boolean;
+};
 
 /** Snap with give: beats move freely, then land on the nearest free cell and wobble once. */
 export default function SnapField() {
@@ -46,6 +59,9 @@ export default function SnapField() {
     })),
   );
   const gridRef = useRef(grid);
+  // Drags live in a ref: the readout re-renders the field on every move, and a drag kept in
+  // render scope would be dropped mid-gesture, leaving the beat stuck where it was.
+  const drags = useRef<(Drag | null)[]>([]);
 
   const render = (index: number) => {
     const t = tiles.current[index];
@@ -108,8 +124,9 @@ export default function SnapField() {
     });
   };
 
-  // Fit the grid to the plate; tiles that fall off the edge move to the nearest free cell.
-  useEffect(() => {
+  // Fit the grid to the plate before paint; tiles that fall off the edge move to the nearest
+  // free cell.
+  useLayoutEffect(() => {
     const el = wrap.current;
     if (!el) return;
     let lastWidth = 0;
@@ -139,91 +156,84 @@ export default function SnapField() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- layout reads refs only
   }, []);
 
-  const bindDrag = (index: number) => {
-    let drag: {
-      id: number;
-      sx: number;
-      sy: number;
-      ox: number;
-      oy: number;
-      lx: number;
-      ly: number;
-      lt: number;
-      vx: number;
-      vy: number;
-      active: boolean;
-    } | null = null;
-    return {
-      onPointerDown: (event: React.PointerEvent<HTMLDivElement>) => {
-        if (event.button !== 0) return;
-        const t = tiles.current[index];
-        event.currentTarget.setPointerCapture(event.pointerId);
-        drag = {
-          id: event.pointerId,
-          sx: event.clientX,
-          sy: event.clientY,
-          ox: t.x.x,
-          oy: t.y.x,
-          lx: t.x.x,
-          ly: t.y.x,
-          lt: performance.now(),
-          vx: 0,
-          vy: 0,
-          active: false,
-        };
-      },
-      onPointerMove: (event: React.PointerEvent<HTMLDivElement>) => {
-        const el = event.currentTarget;
-        if (!drag || event.pointerId !== drag.id || el.classList.contains("is-exploded")) return;
-        const dx = event.clientX - drag.sx;
-        const dy = event.clientY - drag.sy;
-        if (!drag.active) {
-          if (Math.hypot(dx, dy) <= SLOP) return;
-          drag.active = true;
-          el.classList.add("is-dragging");
-          el.classList.remove("is-pressed");
-        }
-        const { cell, cols } = gridRef.current;
-        const t = tiles.current[index];
-        const now = performance.now();
-        const dt = Math.max(1, now - drag.lt) / 1000;
-        const nx = Math.max(-cell * 0.3, Math.min((cols - 0.7) * cell, drag.ox + dx));
-        const ny = Math.max(-cell * 0.3, Math.min((ROWS - 0.7) * cell, drag.oy + dy));
-        drag.vx = drag.vx * 0.6 + ((nx - drag.lx) / dt) * 0.4;
-        drag.vy = drag.vy * 0.6 + ((ny - drag.ly) / dt) * 0.4;
-        drag.lx = nx;
-        drag.ly = ny;
-        drag.lt = now;
-        t.x.x = t.x.target = nx;
-        t.y.x = t.y.target = ny;
-        t.x.v = drag.vx;
-        t.y.v = drag.vy;
-        t.rot.target = Math.max(-10, Math.min(10, drag.vx / 90));
-        t.rot.step(dt);
-        render(index);
-        const target = nearestFree(nx + drag.vx * 0.15, ny + drag.vy * 0.15, index);
-        if (target && ghost.current) {
-          ghost.current.style.translate = `${target[0] * cell}px ${target[1] * cell}px`;
-          ghost.current.classList.add("is-on");
-          setReadout(
-            `${BEATS[index].name} → ${zone(target[0], target[1])} · ${Math.round(Math.hypot(target[0] * cell - nx, target[1] * cell - ny))} px to go`,
-          );
-        }
-      },
-      onPointerUp: (event: React.PointerEvent<HTMLDivElement>) => {
-        if (!drag || event.pointerId !== drag.id) return;
-        const current = drag;
-        drag = null;
-        if (!current.active) return;
-        event.currentTarget.classList.remove("is-dragging");
-        ghost.current?.classList.remove("is-on");
-        const t = tiles.current[index];
-        const target = nearestFree(t.x.x + current.vx * 0.15, t.y.x + current.vy * 0.15, index);
-        if (target) [t.col, t.row] = target;
-        settle(index);
-      },
-    };
+  const endDrag = (index: number, el: HTMLElement, pointerId: number) => {
+    const current = drags.current[index];
+    if (!current || pointerId !== current.id) return;
+    drags.current[index] = null;
+    if (!current.active) return;
+    el.classList.remove("is-dragging");
+    ghost.current?.classList.remove("is-on");
+    const t = tiles.current[index];
+    const target = nearestFree(t.x.x + current.vx * 0.15, t.y.x + current.vy * 0.15, index);
+    if (target) [t.col, t.row] = target;
+    settle(index);
   };
+
+  const bindDrag = (index: number) => ({
+    onPointerDown: (event: React.PointerEvent<HTMLDivElement>) => {
+      if (event.button !== 0) return;
+      const t = tiles.current[index];
+      event.currentTarget.setPointerCapture(event.pointerId);
+      drags.current[index] = {
+        id: event.pointerId,
+        sx: event.clientX,
+        sy: event.clientY,
+        ox: t.x.x,
+        oy: t.y.x,
+        lx: t.x.x,
+        ly: t.y.x,
+        lt: performance.now(),
+        vx: 0,
+        vy: 0,
+        active: false,
+      };
+    },
+    onPointerMove: (event: React.PointerEvent<HTMLDivElement>) => {
+      const el = event.currentTarget;
+      const drag = drags.current[index];
+      if (!drag || event.pointerId !== drag.id || el.classList.contains("is-exploded")) return;
+      const dx = event.clientX - drag.sx;
+      const dy = event.clientY - drag.sy;
+      if (!drag.active) {
+        if (Math.hypot(dx, dy) <= SLOP) return;
+        drag.active = true;
+        el.classList.add("is-dragging");
+        el.classList.remove("is-pressed");
+      }
+      const { cell, cols } = gridRef.current;
+      const t = tiles.current[index];
+      const now = performance.now();
+      const dt = Math.max(1, now - drag.lt) / 1000;
+      const nx = Math.max(-cell * 0.3, Math.min((cols - 0.7) * cell, drag.ox + dx));
+      const ny = Math.max(-cell * 0.3, Math.min((ROWS - 0.7) * cell, drag.oy + dy));
+      drag.vx = drag.vx * 0.6 + ((nx - drag.lx) / dt) * 0.4;
+      drag.vy = drag.vy * 0.6 + ((ny - drag.ly) / dt) * 0.4;
+      drag.lx = nx;
+      drag.ly = ny;
+      drag.lt = now;
+      t.x.x = t.x.target = nx;
+      t.y.x = t.y.target = ny;
+      t.x.v = drag.vx;
+      t.y.v = drag.vy;
+      t.rot.target = Math.max(-10, Math.min(10, drag.vx / 90));
+      t.rot.step(dt);
+      render(index);
+      const target = nearestFree(nx + drag.vx * 0.15, ny + drag.vy * 0.15, index);
+      if (target && ghost.current) {
+        ghost.current.style.translate = `${target[0] * cell}px ${target[1] * cell}px`;
+        ghost.current.classList.add("is-on");
+        setReadout(
+          `${BEATS[index].name} → ${zone(target[0], target[1])} · ${Math.round(Math.hypot(target[0] * cell - nx, target[1] * cell - ny))} px to go`,
+        );
+      }
+    },
+    onPointerUp: (event: React.PointerEvent<HTMLDivElement>) =>
+      endDrag(index, event.currentTarget, event.pointerId),
+    onPointerCancel: (event: React.PointerEvent<HTMLDivElement>) =>
+      endDrag(index, event.currentTarget, event.pointerId),
+    onLostPointerCapture: (event: React.PointerEvent<HTMLDivElement>) =>
+      endDrag(index, event.currentTarget, event.pointerId),
+  });
 
   return (
     <div className="ld-field-wrap" ref={wrap}>
@@ -267,7 +277,6 @@ export default function SnapField() {
               data-ld-name={`${beat.name} beat`}
               data-ld-base={`Body · ${beat.body} · r 18 · z 6`}
               {...handlers}
-              onPointerCancel={handlers.onPointerUp}
               onKeyDown={(event) => {
                 const step = {
                   ArrowLeft: [-1, 0],

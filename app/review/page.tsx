@@ -2,10 +2,9 @@ import Link from "next/link";
 import BuildMap from "@/components/lumen/BuildMap";
 import ContactForm from "@/components/lumen/ContactForm";
 import CopyEmail from "@/components/lumen/CopyEmail";
-import LabRace from "@/components/lumen/LabRace";
+import LabStudies from "@/components/lumen/LabStudies";
 import MeasuredWord from "@/components/lumen/MeasuredWord";
 import ProjectSheet from "@/components/lumen/ProjectSheet";
-import SnapField from "@/components/lumen/SnapField";
 import { SoftLayers, softStyle, type Body } from "@/components/lumen/Soft";
 import { profileRoles } from "@/data/sections";
 import { PROFILE } from "@/data/profile";
@@ -92,9 +91,9 @@ export default function ReviewHome() {
             />
           </picture>
           <figcaption className="ld-portrait-notes" aria-hidden="true">
-            <span>01 · Developer</span>
-            <span>02 · Motion</span>
-            <span>03 · Systems</span>
+            <span data-note="developer">01 · Developer</span>
+            <span data-note="motion">02 · Motion</span>
+            <span data-note="systems">03 · Systems</span>
           </figcaption>
         </figure>
         <div className="ld-hero-body">
@@ -177,34 +176,9 @@ export default function ReviewHome() {
 
       <section id="lab" className="ld-section ld-wrap ld-deferred" aria-labelledby="ld-lab-title">
         <SectionHead sheet="Sheet 03 · Lab" id="ld-lab-title" title="The lab.">
-          Small working studies. One is about how things should feel, the other about what keeps a
-          real-time product honest.
+          Small working studies. Open one to try it.
         </SectionHead>
-        <div className="ld-plates">
-          <div className="ld-plate">
-            <div className="ld-plate-head">
-              <span className="ld-anno">Study 001 · Snap with give</span>
-              <h3>A storyboard grid</h3>
-              <p>
-                Drag or fling a beat. It moves freely, lands on the nearest free cell, and wobbles
-                once. Arrow keys move a focused beat.
-              </p>
-            </div>
-            <SnapField />
-          </div>
-          <div className="ld-plate">
-            <div className="ld-plate-head">
-              <span className="ld-anno">Study 002 · Real-time / Systems</span>
-              <h3>Two bids, one price</h3>
-              <p>
-                Two people bid at the same moment over different networks. Change the latency, the
-                server rule, and what the network drops, then watch lost updates and duplicate bids
-                happen, or not.
-              </p>
-            </div>
-            <LabRace />
-          </div>
-        </div>
+        <LabStudies />
       </section>
 
       <section

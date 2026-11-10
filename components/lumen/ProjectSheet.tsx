@@ -4,11 +4,13 @@ import type { ShowcaseProject } from "@/types/Project";
 import LoopVideo from "./LoopVideo";
 import { SoftLayers, softStyle, type Body } from "./Soft";
 
-const bodies: Body[] = ["clay", "sage", "peach", "putty"];
+const mats: Body[] = ["clay", "sage", "peach", "putty"];
+const pad = (value: number) => String(value).padStart(2, "0");
 
 /**
- * A featured project drawn as one soft sheet. Holding it splits the sheet into the layers a
- * reviewer cares about: the screen, the story, the evidence, and the stack.
+ * A featured project drawn as one sheet of a drawing set: the screen sits in a pastel mat, the
+ * copy carries a large index number, the evidence reads like dimensions, and a title block runs
+ * along the foot. Holding the sheet splits it into the screen, story, evidence, and stack.
  */
 export default function ProjectSheet({
   project,
@@ -19,40 +21,48 @@ export default function ProjectSheet({
   index: number;
   total: number;
 }) {
-  const body = bodies[index % bodies.length];
+  const mat = mats[index % mats.length];
   const stack = project.technologies.slice(0, 3).join(" / ");
   const caseStudy = `/review/my-projects/${project.id}`;
   return (
     <article
       className="ld-sheet ld-soft"
-      style={softStyle(body, 12)}
+      style={softStyle("sheet", 6, { "--ld-mat": `var(--ld-${mat})` } as React.CSSProperties)}
       data-flip={index % 2 === 1}
       aria-labelledby={`ld-work-${project.id}`}
       data-ld-inspect=""
       data-ld-name={`${project.title} sheet`}
-      data-ld-base={`Sheet · ${body} · z 12`}
+      data-ld-base={`Sheet · mat ${mat} · z 6`}
     >
-      <SoftLayers z={12} sheen={false} />
-      <div className="ld-sheet-screen" data-ld-layer={`Screen · ${project.category}`}>
-        {project.showcaseLoop ? (
-          <LoopVideo
-            src={project.showcaseLoop.src}
-            poster={project.showcaseLoop.poster}
-            alt={`${project.title} reel`}
-          />
-        ) : (
-          <Image
-            src={project.image}
-            alt={`${project.title} interface`}
-            fill
-            sizes="(max-width: 900px) 92vw, 640px"
-            priority={index === 0}
-          />
-        )}
-      </div>
+      <SoftLayers sheen={false} />
+      <figure className="ld-sheet-mat" data-ld-layer={`Screen · ${project.category}`}>
+        <div className="ld-sheet-screen">
+          {project.showcaseLoop ? (
+            <LoopVideo
+              src={project.showcaseLoop.src}
+              poster={project.showcaseLoop.poster}
+              alt={`${project.title} reel`}
+            />
+          ) : (
+            <Image
+              src={project.image}
+              alt={`${project.title} interface`}
+              fill
+              sizes="(max-width: 900px) 92vw, 640px"
+              priority={index === 0}
+            />
+          )}
+        </div>
+        <figcaption className="ld-anno">
+          Fig. {pad(index + 1)} · {project.title}
+          {project.showcaseLoop ? " · screen recording" : " · screenshot"}
+        </figcaption>
+      </figure>
       <div className="ld-sheet-copy" data-ld-layer="Story · the problem in one line">
+        <span className="ld-sheet-num" aria-hidden="true">
+          {pad(index + 1)}
+        </span>
         <span className="ld-anno">
-          {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")} ·{" "}
           {project.category}
           {project.year ? ` · ${project.year}` : ""}
         </span>
@@ -78,12 +88,19 @@ export default function ProjectSheet({
           ))}
         </ul>
         <div className="ld-links">
-          <Link href={caseStudy} className="ld-link-strong">
-            Case study <span aria-hidden="true">→</span>
+          <Link
+            href={caseStudy}
+            className="ld-key ld-soft ld-key-signal ld-key-sm"
+            style={softStyle("signal")}
+          >
+            <SoftLayers />
+            <span>
+              Case study <span aria-hidden="true">→</span>
+            </span>
           </Link>
           {project.demoLink && (
             <a href={project.demoLink} target="_blank" rel="noopener noreferrer">
-              Live <span aria-hidden="true">↗</span>
+              Live site <span aria-hidden="true">↗</span>
             </a>
           )}
           {project.githubLink ? (
@@ -95,6 +112,28 @@ export default function ProjectSheet({
           )}
         </div>
       </div>
+      <dl className="ld-sheet-block">
+        <div>
+          <dt className="ld-anno">Drawing</dt>
+          <dd>{project.title}</dd>
+        </div>
+        <div>
+          <dt className="ld-anno">Type</dt>
+          <dd>{project.category}</dd>
+        </div>
+        {project.year && (
+          <div>
+            <dt className="ld-anno">Year</dt>
+            <dd>{project.year}</dd>
+          </div>
+        )}
+        <div>
+          <dt className="ld-anno">Sheet</dt>
+          <dd>
+            {pad(index + 1)} of {pad(total)}
+          </dd>
+        </div>
+      </dl>
     </article>
   );
 }

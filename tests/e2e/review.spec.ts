@@ -48,8 +48,46 @@ test("holding a project sheet explodes it into layers without opening it", async
   await expect(page).toHaveURL(/\/review$/);
 });
 
+test("lab cards open in place and close again", async ({ page }) => {
+  await page.goto("/review");
+  const grid = page.getByRole("button", { name: "A storyboard grid" });
+  const race = page.getByRole("button", { name: "Two bids, one price" });
+  await grid.scrollIntoViewIfNeeded();
+  await expect(page.locator(".ld-tile")).toHaveCount(0);
+  await grid.click();
+  await expect(grid).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator(".ld-tile")).toHaveCount(6);
+  await race.click();
+  await expect(grid).toHaveAttribute("aria-expanded", "false");
+  await expect(page.locator(".ld-tile")).toHaveCount(0);
+  await expect(page.locator(".bid-race-latency input").first()).toHaveCSS("appearance", "none");
+  await race.click();
+  await expect(race).toHaveAttribute("aria-expanded", "false");
+});
+
+test("a dragged beat lands on a free cell even while the readout updates", async ({ page }) => {
+  await page.goto("/review");
+  await page.getByRole("button", { name: "A storyboard grid" }).click();
+  // Pointer input goes to the view transition's overlay until the morph finishes.
+  await expect(page.locator("html")).not.toHaveClass(/ld-vt-lab/);
+  const beat = page.locator(".ld-tile").nth(5);
+  await beat.scrollIntoViewIfNeeded();
+  await expect(beat).toHaveAccessibleName(/Outro.*cell D2/);
+  const box = (await beat.boundingBox())!;
+  await page.mouse.move(box.x + 30, box.y + 30);
+  await page.mouse.down();
+  for (let step = 1; step <= 12; step++) {
+    await page.mouse.move(box.x + 30 - step * 12, box.y + 30);
+  }
+  await page.mouse.up();
+  await expect(page.locator(".ld-readout")).toContainText(/Outro landed on [A-Z]\d/);
+  await expect(beat).not.toHaveClass(/is-dragging/);
+  await expect(beat).not.toHaveAccessibleName(/cell D2/);
+});
+
 test("keyboard: hold Space to inspect, arrows move a storyboard beat", async ({ page }) => {
   await page.goto("/review");
+  await page.getByRole("button", { name: "A storyboard grid" }).click();
   const beat = page.locator(".ld-tile").first();
   await expect(beat).toHaveAccessibleName(/Hook.*cell A1/);
   await beat.scrollIntoViewIfNeeded();

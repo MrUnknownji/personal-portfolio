@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { castKeyframes, describeLight, lightVector, START_ANGLE } from "@/lib/lumen/light";
+import { describeLight, lightVector, sheenKeyframes, START_ANGLE } from "@/lib/lumen/light";
 import {
   simulateSpring,
   Spring,
@@ -62,16 +62,9 @@ describe("Lumen Draft light", () => {
     expect(describeLight(START_ANGLE).direction).toBe("upper left");
   });
 
-  it("casts a closed orbit that grows with elevation", () => {
-    const low = castKeyframes(6);
-    const high = castKeyframes(20);
-    expect(low[0].transform).toBe(low.at(-1)!.transform);
-    const distance = (frame: Keyframe) =>
-      Math.hypot(
-        ...String(frame.transform)
-          .match(/-?\d+(\.\d+)?/g)!
-          .map(Number),
-      );
-    expect(distance(high[3])).toBeGreaterThan(distance(low[3]));
+  it("moves the sheen around a closed orbit", () => {
+    const frames = sheenKeyframes();
+    expect(frames[0].transform).toBe(frames.at(-1)!.transform);
+    expect(new Set(frames.map((frame) => frame.transform)).size).toBeGreaterThan(12);
   });
 });
