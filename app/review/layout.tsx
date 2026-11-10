@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Fredoka, Instrument_Sans } from "next/font/google";
 import Dock from "@/components/lumen/Dock";
-import Inspector from "@/components/lumen/Inspector";
 import LightEngine from "@/components/lumen/LightEngine";
 import ReviewFooter from "@/components/lumen/ReviewFooter";
 import ReviewHeader from "@/components/lumen/ReviewHeader";
@@ -60,13 +59,7 @@ export default function ReviewLayout({ children }: { children: React.ReactNode }
       </main>
       <ReviewFooter />
       <Dock />
-      <svg id="ld-holdring" className="ld-holdring" viewBox="0 0 56 56" aria-hidden="true">
-        <circle className="ld-holdring-halo" cx="28" cy="28" r="27" />
-        <circle className="ld-holdring-arc" cx="28" cy="28" r="23" />
-      </svg>
-      <div id="ld-live" className="ld-sr-only" aria-live="polite" />
       <LightEngine />
-      <Inspector />
     </div>
   );
 }

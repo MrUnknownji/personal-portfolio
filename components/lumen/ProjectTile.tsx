@@ -19,15 +19,12 @@ export default function ProjectTile({
       href={`/review/my-projects/${project.id}`}
       className="ld-tile-card ld-soft"
       style={softStyle(body)}
-      data-ld-inspect=""
-      data-ld-name={`${project.title} tile`}
-      data-ld-base={`Tile · ${body} · z 6`}
     >
       <SoftLayers />
-      <span className="ld-tile-media" data-ld-layer="Screen · cover image">
+      <span className="ld-tile-media">
         <Image src={project.image} alt="" fill sizes="(max-width: 700px) 92vw, 380px" />
       </span>
-      <span className="ld-tile-copy" data-ld-layer={`Story · ${project.category}`}>
+      <span className="ld-tile-copy">
         <span className="ld-anno">
           Dwg {String(index + 1).padStart(2, "0")} · {project.category}
           {project.year ? ` · ${project.year}` : ""}

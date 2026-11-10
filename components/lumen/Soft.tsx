@@ -21,8 +21,3 @@ export function SoftLayers({ z = 6, sheen = true }: { z?: 6 | 12 | 20; sheen?: b
 export function softStyle(body: Body, z: 6 | 12 | 20 = 6, extra?: CSSProperties) {
   return { "--ld-body": `var(--ld-${body})`, "--z": z, ...extra } as CSSProperties;
 }
-
-/** Attributes that make a surface inspectable with press and hold. */
-export function inspectable(name: string, base: string) {
-  return { "data-ld-inspect": "", "data-ld-name": name, "data-ld-base": base };
-}

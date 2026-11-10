@@ -156,8 +156,7 @@ export default function ReviewHome() {
           title="Work that holds up."
         >
           Real-time bidding, the motion studio I run, a paired-wallpaper product, and an end-to-end
-          store. Every number is counted from the project&apos;s repository or its live site. Hold
-          any sheet to see what it&apos;s made of.
+          store. Every number is counted from the project&apos;s repository or its live site.
         </SectionHead>
         <div className="ld-sheets">
           {featured.map((project, index) => (
@@ -253,15 +252,10 @@ export default function ReviewHome() {
                   href={reviewHref(role.href)}
                   className="ld-role ld-soft"
                   style={softStyle(roleBodies[index])}
-                  data-ld-inspect=""
-                  data-ld-name={`${role.name} key`}
-                  data-ld-base={`Key · ${roleBodies[index]} · r 18`}
                 >
                   <SoftLayers />
-                  <strong data-ld-layer="Role · Fredoka 600">{role.name}</strong>
-                  <span className="ld-anno" data-ld-layer="Proof · where it shows">
-                    {role.detail.replace(/\s*[↗▣]$/, "")}
-                  </span>
+                  <strong>{role.name}</strong>
+                  <span className="ld-anno">{role.detail.replace(/\s*[↗▣]$/, "")}</span>
                 </Link>
               ))}
             </div>

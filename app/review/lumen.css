@@ -72,7 +72,6 @@
     --ld-rim-light: #ffffffb8;
     --ld-rim-dark: #3c3a2833;
     --ld-sheen: #fffdf2a6;
-    --ld-dent: #3c3a2840;
     --ld-r-sm: 10px;
     --ld-r-md: 18px;
     --ld-r-lg: 26px;
@@ -98,7 +97,6 @@
       --ld-rim-light: #ffd9a02e;
       --ld-rim-dark: #00000066;
       --ld-sheen: #ffd49a2e;
-      --ld-dent: #00000070;
       color-scheme: dark;
     }
   }
@@ -120,7 +118,6 @@
     --ld-rim-light: #ffd9a02e;
     --ld-rim-dark: #00000066;
     --ld-sheen: #ffd49a2e;
-    --ld-dent: #00000070;
     color-scheme: dark;
   }
 
@@ -192,6 +189,68 @@
   }
   #ld-main:focus {
     outline: none;
+  }
+
+  /* Scrollbars drawn as a ruler: a hairline rail with a tick every 24px and a pill handle that
+     lights up chartreuse when grabbed. Firefox has no scrollbar parts, so it gets matched colours. */
+  @supports selector(::-webkit-scrollbar) {
+    html::-webkit-scrollbar {
+      width: 14px;
+      height: 14px;
+    }
+    html::-webkit-scrollbar-track {
+      background:
+        repeating-linear-gradient(to bottom, var(--ld-line-strong) 0 1px, transparent 1px 24px)
+          right 0 top 0 / 5px 100% no-repeat,
+        linear-gradient(var(--ld-line-strong), var(--ld-line-strong)) 0 0 / 1px 100% no-repeat,
+        var(--ld-paper);
+    }
+    html::-webkit-scrollbar-thumb {
+      min-height: 56px;
+      border: 4px solid transparent;
+      border-radius: 999px;
+      background-color: var(--ld-graphite-2);
+      background-clip: padding-box;
+    }
+    html::-webkit-scrollbar-thumb:hover {
+      background-color: var(--ld-signal-ink);
+    }
+    html::-webkit-scrollbar-thumb:active {
+      border-width: 3px;
+      background-color: var(--ld-signal);
+      box-shadow: inset 0 0 0 1px var(--ld-signal-ink);
+    }
+    .ld ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .ld ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .ld ::-webkit-scrollbar-thumb {
+      border: 2px solid transparent;
+      border-radius: 999px;
+      background-color: var(--ld-line-strong);
+      background-clip: padding-box;
+    }
+    .ld ::-webkit-scrollbar-thumb:hover {
+      background-color: var(--ld-signal-ink);
+    }
+    html::-webkit-scrollbar-button,
+    .ld ::-webkit-scrollbar-button {
+      display: none;
+    }
+    html::-webkit-scrollbar-corner,
+    .ld ::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+  }
+  @supports not selector(::-webkit-scrollbar) {
+    html,
+    .ld * {
+      scrollbar-color: var(--ld-graphite-2) transparent;
+      scrollbar-width: thin;
+    }
   }
   .ld-wrap {
     width: 100%;
@@ -288,18 +347,6 @@
       background-color 0.4s,
       box-shadow var(--ld-dur-settle) var(--ld-ease-settle);
   }
-  .ld-skin::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(
-      circle at var(--px, 50%) var(--py, 50%),
-      var(--ld-dent),
-      transparent 62%
-    );
-    opacity: 0;
-    transition: opacity var(--ld-dur-settle) var(--ld-ease-settle);
-  }
   .ld-sheen {
     position: absolute;
     inset: -30%;
@@ -307,10 +354,10 @@
     will-change: transform;
   }
   @media (hover: hover) {
-    .ld-soft:is(a, button):hover:not(.is-pressed, .is-exploded, :disabled) {
+    .ld-soft:is(a, button):hover:not(:disabled) {
       translate: 0 -2px;
     }
-    .ld-soft:is(a, button, [data-ld-inspect]):hover:not(.is-pressed, .is-exploded) > .ld-cast {
+    .ld-soft:is(a, button):hover:not(:disabled) > .ld-cast {
       opacity: 1;
       translate: 0 2px;
     }
@@ -327,20 +374,10 @@
   .ld-soft:is(a, button):active:not(:disabled) > .ld-cast {
     opacity: 0.4;
   }
-  .ld-soft.is-pressed:not(.ld-tile) {
-    scale: 0.975;
-  }
-  .ld-soft.is-pressed > .ld-cast {
-    opacity: 0.35;
-    scale: 0.96;
-  }
-  .ld-soft.is-pressed > .ld-skin {
+  .ld-soft:is(a, button):active:not(:disabled) > .ld-skin {
     box-shadow:
       inset 0 3px 9px var(--ld-rim-dark),
       inset 0 -1px 0 var(--ld-rim-light);
-  }
-  .ld-soft.is-pressed > .ld-skin::after {
-    opacity: 1;
   }
   @supports (corner-shape: squircle) {
     .ld-soft,
@@ -362,131 +399,7 @@
     }
   }
 
-  /* ---------- Inspect: crop mark, exploded view, dimensions, callouts ---------- */
-  [data-ld-inspect] {
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-  }
-  [data-ld-inspect]::before {
-    content: "";
-    position: absolute;
-    left: -8px;
-    top: -8px;
-    width: 9px;
-    height: 9px;
-    border-left: 1.5px solid var(--ld-signal-ink);
-    border-top: 1.5px solid var(--ld-signal-ink);
-    opacity: 0.75;
-    pointer-events: none;
-  }
-  [data-ld-layer] {
-    transition:
-      transform var(--ld-dur-morph) var(--ld-ease-morph),
-      outline-color 0.2s;
-    outline: 1px dashed transparent;
-    outline-offset: 3px;
-  }
-  .ld-soft.is-exploded {
-    isolation: auto;
-    transform-style: preserve-3d;
-    transform: perspective(1200px) rotateX(48deg) rotateZ(-24deg) scale(0.86);
-    z-index: 40;
-  }
-  .is-exploded [data-ld-layer] {
-    transform-style: preserve-3d;
-    transform: translateZ(calc(var(--li, 1) * 40px));
-    outline-color: var(--ld-signal-ink);
-  }
-  .ld-soft > .ld-callout,
-  [data-ld-layer] > .ld-callout {
-    position: absolute;
-    left: 100%;
-    top: 50%;
-    display: flex;
-    align-items: center;
-    transform-style: preserve-3d;
-    transform: translateY(-50%);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.18s;
-  }
-  .ld-callouts-inside .ld-callout {
-    left: auto;
-    right: 8px;
-    top: 0;
-  }
-  .ld-callouts-inside .ld-callout i {
-    display: none;
-  }
-  .ld-callout i {
-    display: block;
-    width: var(--lead, 28px);
-    border-top: 1px solid var(--ld-signal-ink);
-  }
-  .ld-callout > span {
-    transform: rotateZ(24deg) rotateX(-48deg);
-    transform-origin: 0 50%;
-    white-space: nowrap;
-    padding: 3px 8px;
-    border-left: 2px solid var(--ld-signal-ink);
-    border-radius: 0 6px 6px 0;
-    background: var(--ld-paper);
-    color: var(--ld-graphite);
-    box-shadow: 0 2px 8px var(--ld-shadow);
-    font:
-      600 11px/1.3 var(--ld-font-text),
-      sans-serif;
-    font-variation-settings: "wdth" 75;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-  .is-exploded > .ld-callout,
-  .is-exploded [data-ld-layer] > .ld-callout,
-  .is-exploded > .ld-dims {
-    opacity: 1;
-    transition-delay: 0.16s;
-  }
-  .ld-soft > .ld-dims {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.18s;
-  }
-  .ld-dim-w {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -28px;
-    height: 11px;
-    border-inline: 1px solid var(--ld-signal-ink);
-  }
-  .ld-dim-h {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: -28px;
-    width: 11px;
-    border-block: 1px solid var(--ld-signal-ink);
-  }
-  .ld-dim-w::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 5px;
-    border-top: 1px solid var(--ld-signal-ink);
-  }
-  .ld-dim-h::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 5px;
-    border-left: 1px solid var(--ld-signal-ink);
-  }
-  .ld-dims b,
+  /* A live dimension label, as on a drawing (used by the measured word in the hero). */
   .ld-wdim b {
     position: absolute;
     left: 50%;
@@ -503,56 +416,6 @@
     letter-spacing: 0.06em;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
-  }
-  .ld-dim-h b {
-    rotate: -90deg;
-  }
-  .ld-dim-r {
-    position: absolute;
-    left: 6px;
-    top: -30px;
-    color: var(--ld-signal-ink);
-    font:
-      600 11px/1 var(--ld-font-text),
-      sans-serif;
-    font-variation-settings: "wdth" 75;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-  body.ld-inspecting [data-ld-inspect]:not(.is-exploded) {
-    opacity: 0.3;
-  }
-  .ld-holdring {
-    position: fixed;
-    left: -28px;
-    top: -28px;
-    width: 56px;
-    height: 56px;
-    pointer-events: none;
-    z-index: 60;
-    opacity: 0;
-    transition: opacity 0.12s;
-  }
-  .ld-holdring-halo {
-    fill: color-mix(in srgb, var(--ld-signal) 30%, transparent);
-  }
-  .ld-holdring-arc {
-    fill: none;
-    stroke: var(--ld-signal-ink);
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    stroke-dasharray: 144.5;
-    stroke-dashoffset: 144.5;
-    transform: rotate(-90deg);
-    transform-origin: 28px 28px;
-  }
-  .ld-holdring.is-on {
-    opacity: 1;
-  }
-  .ld-holdring.is-on .ld-holdring-arc {
-    stroke-dashoffset: 0;
-    transition: stroke-dashoffset 450ms linear;
   }
 
   /* ---------- Keys, chips, links ---------- */
@@ -1113,7 +976,7 @@
         "wght" 690;
     }
   }
-  .ld-ch.is-squashed {
+  .ld-ch:active {
     font-variation-settings:
       "wdth" 125,
       "wght" 700;
@@ -1365,7 +1228,7 @@
     transition: scale var(--ld-dur-morph) var(--ld-ease-morph);
   }
   @media (hover: hover) {
-    .ld-sheet:hover:not(.is-exploded) .ld-sheet-screen :is(img, video) {
+    .ld-sheet:hover .ld-sheet-screen :is(img, video) {
       scale: 1.025;
     }
   }
@@ -1727,8 +1590,9 @@
     }
   }
 
-  /* The morph: the card's box springs to its new size while its old face fades out over the new
-     one. Faces are drawn unscaled and clipped, so text never stretches mid-flight. */
+  /* The morph is a container transform: the card's shell springs to its new size while the old
+     content fades out quickly and the new content fades in near the end. Only one face is ever
+     visible, so the two layouts never overlap mid-flight. */
   html.ld-vt-lab {
     view-transition-name: none;
   }
@@ -1744,9 +1608,9 @@
   ::view-transition-image-pair(ld-study-0),
   ::view-transition-image-pair(ld-study-1) {
     overflow: clip;
-    border: 1px solid var(--ld-line);
     border-radius: 28px;
     background: var(--ld-sheet);
+    box-shadow: inset 0 0 0 1px var(--ld-line);
   }
   @supports (corner-shape: squircle) {
     ::view-transition-image-pair(ld-study-0),
@@ -1762,15 +1626,27 @@
     height: 100%;
     object-fit: none;
     object-position: left top;
-  }
-  ::view-transition-new(ld-study-0),
-  ::view-transition-new(ld-study-1) {
-    animation: none;
+    mix-blend-mode: normal;
   }
   ::view-transition-old(ld-study-0),
   ::view-transition-old(ld-study-1) {
-    animation-duration: 0.2s;
+    animation: ld-face-out 120ms ease-out both;
   }
+  ::view-transition-new(ld-study-0),
+  ::view-transition-new(ld-study-1) {
+    animation: ld-face-in 240ms ease-out calc(var(--ld-dur-morph) * 0.4) both;
+  }
+  @keyframes ld-face-out {
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes ld-face-in {
+    from {
+      opacity: 0;
+    }
+  }
+
   .ld-field-wrap {
     display: grid;
     gap: 10px;
@@ -3066,16 +2942,12 @@
   .ld *::after {
     scroll-behavior: auto;
   }
-  .ld-holdring.is-on .ld-holdring-arc {
-    transition-duration: 1ms;
-  }
 }
 
 @media print {
   .ld-top,
   .ld-dock,
   .ld-footer,
-  .ld-holdring,
   .ld-skip {
     display: none !important;
   }

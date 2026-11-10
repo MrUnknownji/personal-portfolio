@@ -10,7 +10,7 @@ const pad = (value: number) => String(value).padStart(2, "0");
 /**
  * A featured project drawn as one sheet of a drawing set: the screen sits in a pastel mat, the
  * copy carries a large index number, the evidence reads like dimensions, and a title block runs
- * along the foot. Holding the sheet splits it into the screen, story, evidence, and stack.
+ * along the foot.
  */
 export default function ProjectSheet({
   project,
@@ -30,12 +30,9 @@ export default function ProjectSheet({
       style={softStyle("sheet", 6, { "--ld-mat": `var(--ld-${mat})` } as React.CSSProperties)}
       data-flip={index % 2 === 1}
       aria-labelledby={`ld-work-${project.id}`}
-      data-ld-inspect=""
-      data-ld-name={`${project.title} sheet`}
-      data-ld-base={`Sheet · mat ${mat} · z 6`}
     >
       <SoftLayers sheen={false} />
-      <figure className="ld-sheet-mat" data-ld-layer={`Screen · ${project.category}`}>
+      <figure className="ld-sheet-mat">
         <div className="ld-sheet-screen">
           {project.showcaseLoop ? (
             <LoopVideo
@@ -58,7 +55,7 @@ export default function ProjectSheet({
           {project.showcaseLoop ? " · screen recording" : " · screenshot"}
         </figcaption>
       </figure>
-      <div className="ld-sheet-copy" data-ld-layer="Story · the problem in one line">
+      <div className="ld-sheet-copy">
         <span className="ld-sheet-num" aria-hidden="true">
           {pad(index + 1)}
         </span>
@@ -70,7 +67,7 @@ export default function ProjectSheet({
         <p>{project.shortDescription}</p>
       </div>
       {project.facts && (
-        <dl className="ld-facts" data-ld-layer="Evidence · counted from the repo">
+        <dl className="ld-facts">
           {project.facts.slice(0, 3).map((fact) => (
             <div key={fact.label}>
               <dt>{fact.label}</dt>
@@ -79,7 +76,7 @@ export default function ProjectSheet({
           ))}
         </dl>
       )}
-      <div className="ld-sheet-foot" data-ld-layer={`Stack · ${stack}`}>
+      <div className="ld-sheet-foot">
         <ul className="ld-chips" aria-label="Stack">
           {project.technologies.map((tech) => (
             <li className="ld-chip" key={tech}>

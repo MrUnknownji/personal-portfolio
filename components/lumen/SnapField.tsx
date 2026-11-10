@@ -191,14 +191,13 @@ export default function SnapField() {
     onPointerMove: (event: React.PointerEvent<HTMLDivElement>) => {
       const el = event.currentTarget;
       const drag = drags.current[index];
-      if (!drag || event.pointerId !== drag.id || el.classList.contains("is-exploded")) return;
+      if (!drag || event.pointerId !== drag.id) return;
       const dx = event.clientX - drag.sx;
       const dy = event.clientY - drag.sy;
       if (!drag.active) {
         if (Math.hypot(dx, dy) <= SLOP) return;
         drag.active = true;
         el.classList.add("is-dragging");
-        el.classList.remove("is-pressed");
       }
       const { cell, cols } = gridRef.current;
       const t = tiles.current[index];
@@ -273,9 +272,6 @@ export default function SnapField() {
               role="button"
               tabIndex={0}
               aria-describedby="ld-beat-help"
-              data-ld-inspect=""
-              data-ld-name={`${beat.name} beat`}
-              data-ld-base={`Body · ${beat.body} · r 18 · z 6`}
               {...handlers}
               onKeyDown={(event) => {
                 const step = {
@@ -305,17 +301,15 @@ export default function SnapField() {
               }}
             >
               <SoftLayers />
-              <span className="ld-anno" data-ld-layer="Beat number · annotation">
-                Beat 0{index + 1}
-              </span>
-              <strong data-ld-layer="Name · Fredoka 600">{beat.name}</strong>
+              <span className="ld-anno">Beat 0{index + 1}</span>
+              <strong>{beat.name}</strong>
               <span className="ld-sr-only">, cell {labels[index]}</span>
             </div>
           );
         })}
       </div>
       <p id="ld-beat-help" className="ld-sr-only">
-        Arrow keys move a beat. Hold Space to inspect it.
+        Drag a beat, or use the arrow keys to move it one cell.
       </p>
       <p className="ld-readout ld-anno" aria-live="polite">
         {readout}

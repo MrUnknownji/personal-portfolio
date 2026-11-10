@@ -33,19 +33,9 @@ test("review pages render inside the review shell", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /isn.t in the set/ })).toBeVisible();
 });
 
-test("holding a project sheet explodes it into layers without opening it", async ({ page }) => {
+test("project sheets have no hold-to-inspect layer", async ({ page }) => {
   await page.goto("/review");
-  const sheet = page.locator(".ld-sheet").first();
-  await sheet.scrollIntoViewIfNeeded();
-  const box = (await sheet.locator(".ld-sheet-copy p").boundingBox())!;
-  await page.mouse.move(box.x + 20, box.y + 10);
-  await page.mouse.down();
-  await expect(sheet).toHaveClass(/is-exploded/, { timeout: 2000 });
-  await expect(sheet.locator(".ld-dim-w b")).toHaveText(/^\d+ px$/);
-  await expect(sheet.locator(".ld-callout")).toHaveCount(5);
-  await page.mouse.up();
-  await expect(sheet).not.toHaveClass(/is-exploded/);
-  await expect(page).toHaveURL(/\/review$/);
+  await expect(page.locator("[data-ld-inspect], [data-ld-layer], #ld-holdring")).toHaveCount(0);
 });
 
 test("lab cards open in place and close again", async ({ page }) => {
@@ -85,17 +75,13 @@ test("a dragged beat lands on a free cell even while the readout updates", async
   await expect(beat).not.toHaveAccessibleName(/cell D2/);
 });
 
-test("keyboard: hold Space to inspect, arrows move a storyboard beat", async ({ page }) => {
+test("keyboard: arrows move a storyboard beat", async ({ page }) => {
   await page.goto("/review");
   await page.getByRole("button", { name: "A storyboard grid" }).click();
   const beat = page.locator(".ld-tile").first();
   await expect(beat).toHaveAccessibleName(/Hook.*cell A1/);
   await beat.scrollIntoViewIfNeeded();
   await beat.focus();
-  await page.keyboard.down(" ");
-  await expect(beat).toHaveClass(/is-exploded/, { timeout: 2000 });
-  await page.keyboard.up(" ");
-  await expect(beat).not.toHaveClass(/is-exploded/);
   await page.keyboard.press("ArrowRight");
   await expect(beat).toHaveAccessibleName(/Hook.*cell B1/);
   await expect(page.locator(".ld-readout")).toContainText("Hook landed on B1");
