@@ -2,12 +2,11 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { SoftLayers, softStyle, type Body } from "@/components/lumen/Soft";
+import { SoftLayers, softStyle } from "@/components/lumen/Soft";
 import { getProject, selectedProjects } from "@/data/projects";
 import { projectStories } from "@/data/projectStories";
 
 type Props = { params: Promise<{ id: string }> };
-const bodies: Body[] = ["clay", "sage", "peach", "putty"];
 
 export function generateStaticParams() {
   return selectedProjects.map((project) => ({ id: String(project.id) }));
@@ -26,7 +25,6 @@ export default async function ReviewCaseStudy({ params }: Props) {
   const story = projectStories[project.id];
   const index = selectedProjects.findIndex((item) => item.id === project.id);
   const next = selectedProjects[(index + 1) % selectedProjects.length];
-  const body = bodies[index % bodies.length];
   const gallery = story
     ? story.gallery.flatMap(({ match, caption }) => {
         const item = project.gallery?.find(
@@ -73,7 +71,7 @@ export default async function ReviewCaseStudy({ params }: Props) {
             {project.githubLink && (
               <a
                 className="ld-key ld-soft"
-                style={softStyle("putty")}
+                style={softStyle("key")}
                 href={project.githubLink}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -115,7 +113,7 @@ export default async function ReviewCaseStudy({ params }: Props) {
       </div>
 
       <div className="ld-wrap">
-        <figure className="ld-cover ld-soft" style={softStyle(body, 12)}>
+        <figure className="ld-cover ld-soft" style={softStyle("sheet", 12)}>
           <SoftLayers z={12} sheen={false} />
           <span className="ld-cover-frame">
             <Image

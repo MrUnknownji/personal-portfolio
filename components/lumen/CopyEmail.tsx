@@ -29,7 +29,7 @@ export default function CopyEmail({
         type="button"
         className="ld-key ld-soft ld-copy"
         data-copied={copied}
-        style={softStyle(copied ? "signal" : "putty")}
+        style={softStyle(copied ? "signal" : "key")}
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(email);

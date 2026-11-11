@@ -106,7 +106,7 @@ export default function ContactForm({ email }: { email: string }) {
 
   return (
     <div className="ld-form-sheet ld-soft" style={softStyle("sheet")} ref={sheet} data-sent={sent}>
-      <SoftLayers />
+      <SoftLayers sheen={false} />
       {!sent ? (
         <form ref={form} onSubmit={submit} noValidate className="ld-form">
           <input

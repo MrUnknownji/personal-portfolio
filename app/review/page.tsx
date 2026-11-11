@@ -71,8 +71,8 @@ export default function ReviewHome() {
             <MeasuredWord word="Kumar" />
           </h1>
         </div>
-        <figure className="ld-portrait ld-soft" style={softStyle("clay", 12)}>
-          <SoftLayers z={12} />
+        <figure className="ld-portrait ld-soft" style={softStyle("signal", 12)}>
+          <SoftLayers z={12} sheen={false} />
           <picture>
             <source
               media="(max-width: 760px)"

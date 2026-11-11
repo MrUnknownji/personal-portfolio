@@ -59,10 +59,16 @@
     --ld-graphite-2: #565d50;
     --ld-line: #22251f1c;
     --ld-line-strong: #22251f3a;
-    --ld-putty: #d9d3c6;
-    --ld-clay: #cdc6da;
-    --ld-sage: #c6d3c1;
-    --ld-peach: #e8cebd;
+    /* Neutral key surface, and the clean hues used only on small objects. Hues keep their
+       value in both themes and always carry dark text. */
+    --ld-key: #fbfcf7;
+    --ld-sky: #8ecbff;
+    --ld-coral: #ff9a7d;
+    --ld-violet: #bba8ff;
+    --ld-mint: #7fe3b4;
+    --ld-amber: #ffcf5c;
+    --ld-pink: #ffa6cf;
+    --ld-on-hue: #15170f;
     --ld-signal: #cdf23c;
     --ld-signal-ink: #4c6200;
     --ld-on-signal: #1b2207;
@@ -70,7 +76,7 @@
     --ld-ambient: #2b2f2026;
     --ld-ambient-near: #2b2f201c;
     --ld-rim-light: #ffffffb8;
-    --ld-rim-dark: #3c3a2833;
+    --ld-rim-dark: #22251f24;
     --ld-sheen: #fffdf2a6;
     --ld-warn: #a1361c;
     --ld-r-sm: 10px;
@@ -87,17 +93,14 @@
       --ld-graphite-2: #a5aa9a;
       --ld-line: #e8eadf14;
       --ld-line-strong: #e8eadf33;
-      --ld-putty: #4b4841;
-      --ld-clay: #46425a;
-      --ld-sage: #3e4a3c;
-      --ld-peach: #5a4639;
+      --ld-key: #383b34;
       --ld-signal-ink: #cdf23c;
       --ld-shadow: #00000073;
       --ld-ambient: #0000004d;
       --ld-ambient-near: #00000038;
-      --ld-rim-light: #ffd9a02e;
+      --ld-rim-light: #ffffff1c;
       --ld-rim-dark: #00000066;
-      --ld-sheen: #ffd49a2e;
+      --ld-sheen: #ffffff12;
       --ld-warn: #ff9c7a;
       --ld-warn: #ff9c7a;
       color-scheme: dark;
@@ -110,17 +113,14 @@
     --ld-graphite-2: #a5aa9a;
     --ld-line: #e8eadf14;
     --ld-line-strong: #e8eadf33;
-    --ld-putty: #4b4841;
-    --ld-clay: #46425a;
-    --ld-sage: #3e4a3c;
-    --ld-peach: #5a4639;
+    --ld-key: #383b34;
     --ld-signal-ink: #cdf23c;
     --ld-shadow: #00000073;
     --ld-ambient: #0000004d;
     --ld-ambient-near: #00000038;
-    --ld-rim-light: #ffd9a02e;
+    --ld-rim-light: #ffffff1c;
     --ld-rim-dark: #00000066;
-    --ld-sheen: #ffd49a2e;
+    --ld-sheen: #ffffff12;
     color-scheme: dark;
   }
 
@@ -303,7 +303,7 @@
   .ld-soft {
     --z: 6;
     --r: var(--ld-r-md);
-    --ld-body: var(--ld-putty);
+    --ld-body: var(--ld-key);
     /* Secondary text on a pastel body is graphite at 80%, so it keeps 4.5:1 on every body. */
     --ld-graphite-2: color-mix(in srgb, var(--ld-graphite) 80%, transparent);
     position: relative;
@@ -1103,17 +1103,14 @@
     --ld-graphite-2: #a9ae9e;
     --ld-line: #e8eadf17;
     --ld-line-strong: #e8eadf36;
-    --ld-putty: #4b4841;
-    --ld-clay: #46425a;
-    --ld-sage: #3e4a3c;
-    --ld-peach: #5a4639;
+    --ld-key: #383b34;
     --ld-signal-ink: #cdf23c;
     --ld-shadow: #00000073;
     --ld-ambient: #00000059;
     --ld-ambient-near: #0000003d;
     --ld-rim-light: #ffffff14;
     --ld-rim-dark: #00000066;
-    --ld-sheen: #ffd49a24;
+    --ld-sheen: #ffffff10;
     --ld-warn: #ff9c7a;
     color-scheme: dark;
     margin: clamp(40px, 6vw, 72px) clamp(6px, 1.2vw, 18px) 0;
@@ -1565,17 +1562,17 @@
       translate var(--ld-dur-snap) var(--ld-ease-snap),
       rotate var(--ld-dur-snap) var(--ld-ease-snap);
   }
-  .ld-preview-putty {
-    fill: var(--ld-putty);
+  .ld-preview-amber {
+    fill: var(--ld-amber);
   }
-  .ld-preview-clay {
-    fill: var(--ld-clay);
+  .ld-preview-violet {
+    fill: var(--ld-violet);
   }
-  .ld-preview-sage {
-    fill: var(--ld-sage);
+  .ld-preview-mint {
+    fill: var(--ld-mint);
   }
-  .ld-preview-peach {
-    fill: var(--ld-peach);
+  .ld-preview-coral {
+    fill: var(--ld-coral);
   }
   .ld-preview .ld-preview-ghost {
     fill: none;
@@ -1593,7 +1590,7 @@
     stroke: var(--ld-graphite);
   }
   .ld-preview text {
-    fill: var(--ld-graphite);
+    fill: var(--ld-on-hue);
     font:
       600 12px var(--ld-font-text),
       sans-serif;
@@ -2936,16 +2933,17 @@
     margin-top: -55px;
     border: 1px solid var(--ld-line-strong);
     border-radius: 18px;
-    background: color-mix(in srgb, var(--ld-clay) 85%, transparent);
+    color: var(--ld-on-hue);
+    background: color-mix(in srgb, var(--ld-violet) 88%, transparent);
     box-shadow: 0 10px 22px var(--ld-shadow);
     transform: rotateX(56deg) rotateZ(-30deg)
       translateZ(calc((var(--i) - (var(--n) - 1) / 2) * -44px));
   }
   .ld-stack-plate:nth-child(2n) {
-    background: color-mix(in srgb, var(--ld-sage) 85%, transparent);
+    background: color-mix(in srgb, var(--ld-mint) 88%, transparent);
   }
   .ld-stack-plate:nth-child(3n) {
-    background: color-mix(in srgb, var(--ld-peach) 85%, transparent);
+    background: color-mix(in srgb, var(--ld-coral) 88%, transparent);
   }
   .ld-stack-plate b {
     position: absolute;

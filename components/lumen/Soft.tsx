@@ -1,6 +1,10 @@
 import type { CSSProperties } from "react";
 
-export type Body = "putty" | "clay" | "sage" | "peach" | "sheet" | "signal" | "paper";
+/** Clean hues, used only on small objects such as storyboard beats. They always carry dark text. */
+export type Hue = "sky" | "coral" | "violet" | "mint" | "amber" | "pink";
+const HUES = new Set<string>(["sky", "coral", "violet", "mint", "amber", "pink"]);
+/** Large surfaces are neutral (key, sheet, paper); colour comes from signal and the hues. */
+export type Body = "key" | "sheet" | "signal" | "paper" | Hue;
 
 /**
  * The layers every Lumen Draft surface is made of. Place inside an element with `ld-soft`:
@@ -19,5 +23,10 @@ export function SoftLayers({ z = 6, sheen = true }: { z?: 6 | 12 | 20; sheen?: b
 }
 
 export function softStyle(body: Body, z: 6 | 12 | 20 = 6, extra?: CSSProperties) {
-  return { "--ld-body": `var(--ld-${body})`, "--z": z, ...extra } as CSSProperties;
+  return {
+    "--ld-body": `var(--ld-${body})`,
+    "--z": z,
+    ...(HUES.has(body) ? { "--ld-graphite": "var(--ld-on-hue)" } : {}),
+    ...extra,
+  } as CSSProperties;
 }

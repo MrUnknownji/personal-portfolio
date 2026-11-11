@@ -122,11 +122,11 @@ export default function LabStudies() {
 
 function GridPreview() {
   const tiles: [number, number, string][] = [
-    [0, 0, "putty"],
-    [2, 1, "clay"],
-    [4, 0, "sage"],
-    [1, 2, "peach"],
-    [5, 2, "putty"],
+    [0, 0, "amber"],
+    [2, 1, "coral"],
+    [4, 0, "sky"],
+    [1, 2, "mint"],
+    [5, 2, "violet"],
   ];
   return (
     <svg className="ld-preview" viewBox="0 0 320 120" preserveAspectRatio="xMidYMid meet">
@@ -149,7 +149,7 @@ function GridPreview() {
       ))}
       <rect className="ld-preview-ghost" x="124" y="4" width="32" height="32" rx="9" />
       <rect
-        className="ld-preview-sage"
+        className="ld-preview-mint"
         x="136"
         y="22"
         width="32"
@@ -166,9 +166,9 @@ function RacePreview() {
     <svg className="ld-preview" viewBox="0 0 320 120" preserveAspectRatio="xMidYMid meet">
       <path className="ld-preview-wire" d="M70 30 C150 30 160 60 230 60" />
       <path className="ld-preview-wire" d="M70 90 C150 90 160 60 230 60" />
-      <rect className="ld-preview-putty" x="10" y="14" width="60" height="32" rx="10" />
-      <rect className="ld-preview-putty" x="10" y="74" width="60" height="32" rx="10" />
-      <rect className="ld-preview-clay" x="230" y="38" width="80" height="44" rx="12" />
+      <rect className="ld-preview-amber" x="10" y="14" width="60" height="32" rx="10" />
+      <rect className="ld-preview-coral" x="10" y="74" width="60" height="32" rx="10" />
+      <rect className="ld-preview-violet" x="230" y="38" width="80" height="44" rx="12" />
       <text x="40" y="34">
         A
       </text>

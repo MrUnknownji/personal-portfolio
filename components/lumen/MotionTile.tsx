@@ -18,7 +18,7 @@ export default function MotionTile({
 }) {
   const [playing, setPlaying] = useState(false);
   return (
-    <article className="ld-film ld-soft" style={softStyle(index % 2 ? "clay" : "putty")}>
+    <article className="ld-film ld-soft" style={softStyle("sheet")}>
       <SoftLayers sheen={false} />
       <div className="ld-film-screen">
         {playing ? (

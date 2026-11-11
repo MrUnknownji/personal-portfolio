@@ -6,12 +6,12 @@ import { SoftLayers, softStyle, type Body } from "./Soft";
 import { haptic, tone } from "./feedback";
 
 const BEATS: { name: string; body: Body }[] = [
-  { name: "Hook", body: "putty" },
-  { name: "Problem", body: "clay" },
-  { name: "Reveal", body: "sage" },
-  { name: "Proof", body: "peach" },
-  { name: "Price", body: "putty" },
-  { name: "Outro", body: "sage" },
+  { name: "Hook", body: "amber" },
+  { name: "Problem", body: "coral" },
+  { name: "Reveal", body: "sky" },
+  { name: "Proof", body: "mint" },
+  { name: "Price", body: "violet" },
+  { name: "Outro", body: "pink" },
 ];
 const START: [number, number][] = [
   [0, 0],
