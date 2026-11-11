@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { describeLight, lightVector, sheenKeyframes, START_ANGLE } from "@/lib/lumen/light";
 import {
   simulateSpring,
   Spring,
@@ -47,24 +46,5 @@ describe("Lumen Draft springs", () => {
     for (let i = 0; i < 240 && !spring.resting; i++) spring.step(1 / 60);
     expect(spring.resting).toBe(true);
     expect(spring.x).toBeCloseTo(100, 0);
-  });
-});
-
-describe("Lumen Draft light", () => {
-  it("always sits above the sheet, so shadows fall mostly downward", () => {
-    for (let angle = 0; angle < 360; angle += 15) {
-      const [, y] = lightVector(angle);
-      expect(y).toBeLessThan(0);
-    }
-  });
-
-  it("starts at the upper left", () => {
-    expect(describeLight(START_ANGLE).direction).toBe("upper left");
-  });
-
-  it("moves the sheen around a closed orbit", () => {
-    const frames = sheenKeyframes();
-    expect(frames[0].transform).toBe(frames.at(-1)!.transform);
-    expect(new Set(frames.map((frame) => frame.transform)).size).toBeGreaterThan(12);
   });
 });

@@ -87,27 +87,27 @@ test("keyboard: arrows move a storyboard beat", async ({ page }) => {
   await expect(page.locator(".ld-readout")).toContainText("Hook landed on B1");
 });
 
-test("the light orbits on the compositor and pauses from the dock", async ({ page }) => {
+test("nothing moves on its own: the only time-based animations are ones the visitor started", async ({
+  page,
+}) => {
   await page.goto("/review");
-  const running = () =>
-    page.evaluate(() =>
+  await page.waitForTimeout(1500);
+  const timeBased = await page.evaluate(
+    () =>
       document
         .getAnimations()
-        .filter((animation) => (animation as CSSAnimation).animationName === undefined)
-        .map((animation) => animation.playState),
-    );
-  await expect
-    .poll(async () => (await running()).filter((s) => s === "running").length)
-    .toBeGreaterThan(10);
-  await page.getByRole("button", { name: "Pause the light" }).click();
-  await expect.poll(async () => (await running()).filter((s) => s === "running").length).toBe(0);
-  await expect(page.getByRole("button", { name: "Resume the light" })).toBeVisible();
+        .filter((animation) => animation.timeline === document.timeline)
+        .filter((animation) => animation.playState === "running").length,
+  );
+  expect(timeBased).toBe(0);
 });
 
-test("reduced motion keeps the light still", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
+test("the header keeps the résumé and the display switches", async ({ page }) => {
   await page.goto("/review");
-  await expect(page.getByRole("button", { name: "Resume the light" })).toBeVisible();
+  const header = page.locator(".ld-top");
+  await expect(header.getByRole("link", { name: /Résumé/ })).toBeVisible();
+  await expect(header.getByRole("switch", { name: "Night" })).toBeVisible();
+  await expect(header.getByRole("switch", { name: "Sound" })).toBeVisible();
 });
 
 test("night draft persists across pages", async ({ page }) => {

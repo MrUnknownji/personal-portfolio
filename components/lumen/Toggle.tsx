@@ -1,18 +1,23 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { animate, Spring } from "@/lib/lumen/springs";
 import { haptic, tone } from "./feedback";
 
-/** The droplet switch: its knob travels on the snap spring and stretches with speed. */
+/**
+ * The droplet switch: its knob travels on the snap spring and stretches with speed. With an
+ * icon, the icon rides in the knob and the label is read by assistive tech only.
+ */
 export default function Toggle({
   label,
   checked,
   onChange,
+  icon,
 }: {
   label: string;
   checked: boolean;
   onChange: (next: boolean) => void;
+  icon?: ReactNode;
 }) {
   const knob = useRef<HTMLSpanElement>(null);
   const track = useRef<HTMLSpanElement>(null);
@@ -48,7 +53,8 @@ export default function Toggle({
       type="button"
       role="switch"
       aria-checked={checked}
-      className="ld-drop"
+      className={icon ? "ld-drop ld-drop-icon" : "ld-drop"}
+      title={icon ? label : undefined}
       onClick={() => {
         onChange(!checked);
         tone("snap", 0.6);
@@ -56,9 +62,11 @@ export default function Toggle({
       }}
     >
       <span className="ld-drop-track" ref={track} aria-hidden="true">
-        <span className="ld-drop-knob" ref={knob} />
+        <span className="ld-drop-knob" ref={knob}>
+          {icon}
+        </span>
       </span>
-      <span className="ld-drop-label">{label}</span>
+      <span className={icon ? "ld-sr-only" : "ld-drop-label"}>{label}</span>
     </button>
   );
 }

@@ -12,14 +12,16 @@ const pages = [
   { href: "/review/quick", label: "1-page profile" },
 ];
 
-/** The last sheet of the set: a closing call, the index, the title block, and the signature. */
+/**
+ * The close of the page: a call to talk, the index, and the name again as a signature. The
+ * signature's letters press and stretch like the name in the hero, so the page ends where it began.
+ */
 export default function ReviewFooter() {
   const year = new Date().getFullYear();
   return (
-    <footer className="ld-footer">
+    <footer className="ld-footer ld-band">
       <div className="ld-wrap">
         <div className="ld-footer-cta">
-          <span className="ld-anno">End of the drawing set</span>
           <p className="ld-footer-line">
             Let&apos;s make something <span>worth using.</span>
           </p>
@@ -41,7 +43,7 @@ export default function ReviewFooter() {
         <div className="ld-footer-grid">
           <nav className="ld-footer-col" aria-labelledby="ld-footer-pages">
             <h2 id="ld-footer-pages" className="ld-anno">
-              Sheets
+              Pages
             </h2>
             <ul>
               {pages.map((page) => (
@@ -71,28 +73,18 @@ export default function ReviewFooter() {
               </li>
             </ul>
           </div>
-          <dl className="ld-tblock ld-footer-block">
-            <div className="ld-tblock-wide">
-              <dt className="ld-anno">Drawing</dt>
-              <dd>Portfolio of {SITE_CONFIG.name}</dd>
-            </div>
-            <div>
-              <dt className="ld-anno">Revision</dt>
-              <dd>A · under review</dd>
-            </div>
-            <div>
-              <dt className="ld-anno">Language</dt>
-              <dd>Lumen Draft</dd>
-            </div>
-            <div>
-              <dt className="ld-anno">Based in</dt>
-              <dd>{PROFILE.location}</dd>
-            </div>
-          </dl>
         </div>
 
         <p className="ld-footer-mark" aria-hidden="true">
-          <span>{SITE_CONFIG.name}</span>
+          {SITE_CONFIG.name.split(" ").map((word) => (
+            <span className="ld-word" key={word}>
+              {[...word].map((letter, index) => (
+                <span className="ld-ch" key={index}>
+                  {letter}
+                </span>
+              ))}
+            </span>
+          ))}
         </p>
 
         <div className="ld-footer-base">

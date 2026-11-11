@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Fredoka, Instrument_Sans } from "next/font/google";
-import Dock from "@/components/lumen/Dock";
-import LightEngine from "@/components/lumen/LightEngine";
 import ReviewFooter from "@/components/lumen/ReviewFooter";
 import ReviewHeader from "@/components/lumen/ReviewHeader";
 import { springCssVariables } from "@/lib/lumen/springs";
@@ -58,8 +56,6 @@ export default function ReviewLayout({ children }: { children: React.ReactNode }
         {children}
       </main>
       <ReviewFooter />
-      <Dock />
-      <LightEngine />
     </div>
   );
 }

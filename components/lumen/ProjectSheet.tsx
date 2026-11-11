@@ -6,35 +6,56 @@ import { SoftLayers, softStyle, type Body } from "./Soft";
 
 const mats: Body[] = ["clay", "sage", "peach", "putty"];
 const pad = (value: number) => String(value).padStart(2, "0");
+/** The sheet's own timeline name; the sheet before it recedes as this one arrives. */
+export const sheetTimeline = (index: number) => `--ld-sheet-${index}`;
+
+/**
+ * Stills chosen for the work sheets. FrameRelay's sheet is about the studio's own painted site,
+ * so it shows that site rather than a client-style product film.
+ */
+const stills: Partial<Record<number, string>> = { 13: "/images/framerelay/hero.webp" };
 
 /**
  * A featured project drawn as one sheet of a drawing set: the screen sits in a pastel mat, the
- * copy carries a large index number, the evidence reads like dimensions, and a title block runs
- * along the foot.
+ * copy carries a large index number, and the evidence reads like dimensions. On wide screens the
+ * sheets stack as you scroll, each one settling over the last.
  */
 export default function ProjectSheet({
   project,
   index,
-  total,
+  last,
 }: {
   project: ShowcaseProject;
   index: number;
-  total: number;
+  last: boolean;
 }) {
   const mat = mats[index % mats.length];
-  const stack = project.technologies.slice(0, 3).join(" / ");
   const caseStudy = `/review/my-projects/${project.id}`;
+  const still = stills[project.id];
   return (
     <article
       className="ld-sheet ld-soft"
-      style={softStyle("sheet", 6, { "--ld-mat": `var(--ld-${mat})` } as React.CSSProperties)}
+      style={softStyle("sheet", 6, {
+        "--ld-mat": `var(--ld-${mat})`,
+        "--i": index,
+        viewTimelineName: sheetTimeline(index),
+        ...(last ? {} : { "--ld-next": sheetTimeline(index + 1) }),
+      } as React.CSSProperties)}
       data-flip={index % 2 === 1}
       aria-labelledby={`ld-work-${project.id}`}
     >
       <SoftLayers sheen={false} />
       <figure className="ld-sheet-mat">
         <div className="ld-sheet-screen">
-          {project.showcaseLoop ? (
+          {still ? (
+            <Image
+              src={still}
+              alt={`${project.title} website`}
+              fill
+              sizes="(max-width: 900px) 92vw, 680px"
+              priority={index === 0}
+            />
+          ) : project.showcaseLoop ? (
             <LoopVideo
               src={project.showcaseLoop.src}
               poster={project.showcaseLoop.poster}
@@ -45,15 +66,11 @@ export default function ProjectSheet({
               src={project.image}
               alt={`${project.title} interface`}
               fill
-              sizes="(max-width: 900px) 92vw, 640px"
+              sizes="(max-width: 900px) 92vw, 680px"
               priority={index === 0}
             />
           )}
         </div>
-        <figcaption className="ld-anno">
-          Fig. {pad(index + 1)} · {project.title}
-          {project.showcaseLoop ? " · screen recording" : " · screenshot"}
-        </figcaption>
       </figure>
       <div className="ld-sheet-copy">
         <span className="ld-sheet-num" aria-hidden="true">
@@ -109,28 +126,6 @@ export default function ProjectSheet({
           )}
         </div>
       </div>
-      <dl className="ld-sheet-block">
-        <div>
-          <dt className="ld-anno">Drawing</dt>
-          <dd>{project.title}</dd>
-        </div>
-        <div>
-          <dt className="ld-anno">Type</dt>
-          <dd>{project.category}</dd>
-        </div>
-        {project.year && (
-          <div>
-            <dt className="ld-anno">Year</dt>
-            <dd>{project.year}</dd>
-          </div>
-        )}
-        <div>
-          <dt className="ld-anno">Sheet</dt>
-          <dd>
-            {pad(index + 1)} of {pad(total)}
-          </dd>
-        </div>
-      </dl>
     </article>
   );
 }

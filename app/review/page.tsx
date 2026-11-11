@@ -4,7 +4,7 @@ import ContactForm from "@/components/lumen/ContactForm";
 import CopyEmail from "@/components/lumen/CopyEmail";
 import LabStudies from "@/components/lumen/LabStudies";
 import MeasuredWord from "@/components/lumen/MeasuredWord";
-import ProjectSheet from "@/components/lumen/ProjectSheet";
+import ProjectSheet, { sheetTimeline } from "@/components/lumen/ProjectSheet";
 import { SoftLayers, softStyle, type Body } from "@/components/lumen/Soft";
 import { profileRoles } from "@/data/sections";
 import { PROFILE } from "@/data/profile";
@@ -33,7 +33,6 @@ const current = PROFILE.experience.find((entry) => "current" in entry && entry.c
 const studio = PROFILE.experience.find((entry) => entry.organization === "FrameRelay Studio");
 const roleBodies: Body[] = ["putty", "clay", "sage", "peach"];
 const reviewHref = (href: string) => `/review${href}`;
-const revisions = "CBA";
 
 function SectionHead({
   sheet,
@@ -60,7 +59,7 @@ export default function ReviewHome() {
     <>
       <section className="ld-hero ld-wrap" aria-labelledby="ld-home-title">
         <div className="ld-hero-head">
-          <span className="ld-anno">Sheet 01 · Profile · Full-stack developer</span>
+          <span className="ld-anno">01 · Full-stack developer</span>
           <h1 id="ld-home-title" className="ld-display">
             <span className="ld-sr-only">{SITE_CONFIG.name}</span>
             <span className="ld-word" aria-hidden="true">
@@ -149,32 +148,39 @@ export default function ReviewHome() {
         </div>
       </section>
 
-      <section id="work" className="ld-section ld-wrap ld-deferred" aria-labelledby="ld-work-title">
-        <SectionHead
-          sheet={`Sheet 02 · Work · ${String(featured.length).padStart(2, "0")} drawings`}
-          id="ld-work-title"
-          title="Work that holds up."
-        >
-          Real-time bidding, the motion studio I run, a paired-wallpaper product, and an end-to-end
-          store. Every number is counted from the project&apos;s repository or its live site.
-        </SectionHead>
-        <div className="ld-sheets">
-          {featured.map((project, index) => (
-            <ProjectSheet
-              key={project.id}
-              project={project}
-              index={index}
-              total={featured.length}
-            />
-          ))}
+      {/* Work sits on the light table: the one dark band, so the screens carry the page. */}
+      <section id="work" className="ld-section ld-band ld-deferred" aria-labelledby="ld-work-title">
+        <div className="ld-wrap">
+          <SectionHead sheet="02 · Work" id="ld-work-title" title="Work that holds up.">
+            Real-time bidding, the motion studio I run, a paired-wallpaper product, and an
+            end-to-end store. Every number is counted from the project&apos;s repository or its live
+            site.
+          </SectionHead>
+          <div
+            className="ld-sheets"
+            style={
+              {
+                timelineScope: featured.map((_, index) => sheetTimeline(index)).join(", "),
+              } as React.CSSProperties
+            }
+          >
+            {featured.map((project, index) => (
+              <ProjectSheet
+                key={project.id}
+                project={project}
+                index={index}
+                last={index === featured.length - 1}
+              />
+            ))}
+          </div>
+          <Link className="ld-link-strong ld-more" href="/review/my-projects">
+            Browse all {selectedProjects.length} projects <span aria-hidden="true">→</span>
+          </Link>
         </div>
-        <Link className="ld-link-strong ld-more" href="/review/my-projects">
-          Browse all {selectedProjects.length} projects <span aria-hidden="true">→</span>
-        </Link>
       </section>
 
       <section id="lab" className="ld-section ld-wrap ld-deferred" aria-labelledby="ld-lab-title">
-        <SectionHead sheet="Sheet 03 · Lab" id="ld-lab-title" title="The lab.">
+        <SectionHead sheet="03 · Lab" id="ld-lab-title" title="The lab.">
           Small working studies. Open one to try it.
         </SectionHead>
         <LabStudies />
@@ -186,17 +192,16 @@ export default function ReviewHome() {
         aria-labelledby="ld-about-title"
       >
         <SectionHead
-          sheet="Sheet 04 · About"
+          sheet="04 · About"
           id="ld-about-title"
           title="I like building things that explain themselves."
         />
         <div className="ld-about">
           <div>
-            <h3 className="ld-subhead">Revision history</h3>
+            <h3 className="ld-subhead">Experience</h3>
             <ol className="ld-revisions">
-              {PROFILE.experience.map((entry, index) => (
+              {PROFILE.experience.map((entry) => (
                 <li key={`${entry.role}-${entry.organization}`}>
-                  <span className="ld-rev">{revisions[index] ?? "·"}</span>
                   <span className="ld-anno">{entry.period}</span>
                   <div>
                     <h4>
@@ -232,7 +237,6 @@ export default function ReviewHome() {
               ))}
               {PROFILE.education.map((entry) => (
                 <li key={entry.title}>
-                  <span className="ld-rev">Ed</span>
                   <span className="ld-anno">{entry.period}</span>
                   <div>
                     <h4>
@@ -259,7 +263,7 @@ export default function ReviewHome() {
                 </Link>
               ))}
             </div>
-            <h3 className="ld-subhead">Parts list</h3>
+            <h3 className="ld-subhead">Skills</h3>
             <div className="ld-tablewrap">
               <table className="ld-parts">
                 <thead>
@@ -297,11 +301,7 @@ export default function ReviewHome() {
         className="ld-section ld-wrap ld-deferred"
         aria-labelledby="ld-build-title"
       >
-        <SectionHead
-          sheet="Sheet 05 · How I build"
-          id="ld-build-title"
-          title="From idea to shipped."
-        >
+        <SectionHead sheet="05 · Process" id="ld-build-title" title="From idea to shipped.">
           Follow a tool to the work that uses it.
         </SectionHead>
         <BuildMap projects={evidence} />
@@ -313,7 +313,7 @@ export default function ReviewHome() {
         aria-labelledby="ld-contact-title"
       >
         <SectionHead
-          sheet="Sheet 06 · Contact"
+          sheet="06 · Contact"
           id="ld-contact-title"
           title="Have an idea? Let's build it."
         >

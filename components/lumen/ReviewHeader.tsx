@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PROFILE } from "@/data/profile";
+import DisplaySwitches from "./DisplaySwitches";
 
 const links = [
   { label: "Work", href: "/review#work" },
@@ -26,10 +27,13 @@ export default function ReviewHeader() {
           ))}
         </nav>
         <div className="ld-top-actions">
-          <Link href="/review/quick">1-page profile</Link>
+          <Link className="ld-top-quick" href="/review/quick">
+            1-page profile
+          </Link>
           <a href={PROFILE.resumePath} download>
             Résumé <span aria-hidden="true">↓</span>
           </a>
+          <DisplaySwitches />
           {/* A full page load on purpose, so the live site's styles start clean. */}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a
