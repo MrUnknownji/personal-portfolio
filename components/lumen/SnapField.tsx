@@ -173,6 +173,8 @@ export default function SnapField() {
     onPointerDown: (event: React.PointerEvent<HTMLDivElement>) => {
       if (event.button !== 0) return;
       const t = tiles.current[index];
+      // A drag must never turn into a text selection: drop any selection already on the page.
+      window.getSelection()?.removeAllRanges();
       event.currentTarget.setPointerCapture(event.pointerId);
       drags.current[index] = {
         id: event.pointerId,

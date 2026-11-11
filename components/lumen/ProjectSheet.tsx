@@ -2,9 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ShowcaseProject } from "@/types/Project";
 import LoopVideo from "./LoopVideo";
-import { SoftLayers, softStyle, type Body } from "./Soft";
+import { SoftLayers, softStyle } from "./Soft";
 
-const mats: Body[] = ["clay", "sage", "peach", "putty"];
 const pad = (value: number) => String(value).padStart(2, "0");
 /** The sheet's own timeline name; the sheet before it recedes as this one arrives. */
 export const sheetTimeline = (index: number) => `--ld-sheet-${index}`;
@@ -16,7 +15,7 @@ export const sheetTimeline = (index: number) => `--ld-sheet-${index}`;
 const stills: Partial<Record<number, string>> = { 13: "/images/framerelay/hero.webp" };
 
 /**
- * A featured project drawn as one sheet of a drawing set: the screen sits in a pastel mat, the
+ * A featured project drawn as one sheet of a drawing set: the screen sits in a neutral bezel, the
  * copy carries a large index number, and the evidence reads like dimensions. On wide screens the
  * sheets stack as you scroll, each one settling over the last.
  */
@@ -29,14 +28,12 @@ export default function ProjectSheet({
   index: number;
   last: boolean;
 }) {
-  const mat = mats[index % mats.length];
   const caseStudy = `/review/my-projects/${project.id}`;
   const still = stills[project.id];
   return (
     <article
       className="ld-sheet ld-soft"
       style={softStyle("sheet", 6, {
-        "--ld-mat": `var(--ld-${mat})`,
         "--i": index,
         viewTimelineName: sheetTimeline(index),
         ...(last ? {} : { "--ld-next": sheetTimeline(index + 1) }),

@@ -50,7 +50,7 @@ test("lab cards open in place and close again", async ({ page }) => {
   await race.click();
   await expect(grid).toHaveAttribute("aria-expanded", "false");
   await expect(page.locator(".ld-tile")).toHaveCount(0);
-  await expect(page.locator(".bid-race-latency input").first()).toHaveCSS("appearance", "none");
+  await expect(page.getByRole("radiogroup", { name: "Bidder A's network" })).toBeVisible();
   await race.click();
   await expect(race).toHaveAttribute("aria-expanded", "false");
 });
@@ -73,6 +73,35 @@ test("a dragged beat lands on a free cell even while the readout updates", async
   await expect(page.locator(".ld-readout")).toContainText(/Outro landed on [A-Z]\d/);
   await expect(beat).not.toHaveClass(/is-dragging/);
   await expect(beat).not.toHaveAccessibleName(/cell D2/);
+});
+
+test("dragging a beat never selects its text", async ({ page }) => {
+  await page.goto("/review");
+  await page.getByRole("button", { name: "A storyboard grid" }).click();
+  await expect(page.locator("html")).not.toHaveClass(/ld-vt-lab/);
+  const beat = page.locator(".ld-tile").nth(5);
+  await beat.scrollIntoViewIfNeeded();
+  await expect(beat).toHaveCSS("user-select", "none");
+  await beat.dblclick();
+  expect(await page.evaluate(() => window.getSelection()?.toString() ?? "")).toBe("");
+});
+
+test("two bids: signal bars set the network and a run ends with a verdict", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/review");
+  await page.getByRole("button", { name: "Two bids, one price" }).click();
+  const bars = page.getByRole("radiogroup", { name: "Bidder B's network" });
+  await expect(bars.getByRole("radio", { checked: true })).toHaveAccessibleName(/3G, 300 ms/);
+  await bars.getByRole("radio", { checked: true }).focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(bars.getByRole("radio", { checked: true })).toHaveAccessibleName(/4G, 120 ms/);
+  await page.getByRole("button", { name: /Both bid/ }).click();
+  await expect(page.locator(".ld-rl-verdict")).toContainText("lost update");
+  await page.getByRole("radio", { name: "Authority + IDs" }).click();
+  await page.getByRole("button", { name: /Both bid/ }).click();
+  await expect(page.locator(".ld-rl-verdict")).toContainText("exactly once");
+  const results = await new AxeBuilder({ page }).include(".ld-rl").analyze();
+  expect(results.violations.map((violation) => violation.id)).toEqual([]);
 });
 
 test("keyboard: arrows move a storyboard beat", async ({ page }) => {

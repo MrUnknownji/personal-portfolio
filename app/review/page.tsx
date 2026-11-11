@@ -5,7 +5,7 @@ import CopyEmail from "@/components/lumen/CopyEmail";
 import LabStudies from "@/components/lumen/LabStudies";
 import MeasuredWord from "@/components/lumen/MeasuredWord";
 import ProjectSheet, { sheetTimeline } from "@/components/lumen/ProjectSheet";
-import { SoftLayers, softStyle, type Body } from "@/components/lumen/Soft";
+import { SoftLayers, softStyle } from "@/components/lumen/Soft";
 import { profileRoles } from "@/data/sections";
 import { PROFILE } from "@/data/profile";
 import { selectedProjects, toProjectSummary } from "@/data/projects";
@@ -31,7 +31,6 @@ const evidence = selectedProjects
   .map(toProjectSummary);
 const current = PROFILE.experience.find((entry) => "current" in entry && entry.current);
 const studio = PROFILE.experience.find((entry) => entry.organization === "FrameRelay Studio");
-const roleBodies: Body[] = ["putty", "clay", "sage", "peach"];
 const reviewHref = (href: string) => `/review${href}`;
 
 function SectionHead({
@@ -250,14 +249,8 @@ export default function ReviewHome() {
           <div>
             <h3 className="ld-subhead">What I bring</h3>
             <div className="ld-roles">
-              {profileRoles.map((role, index) => (
-                <Link
-                  key={role.name}
-                  href={reviewHref(role.href)}
-                  className="ld-role ld-soft"
-                  style={softStyle(roleBodies[index])}
-                >
-                  <SoftLayers />
+              {profileRoles.map((role) => (
+                <Link key={role.name} href={reviewHref(role.href)} className="ld-role">
                   <strong>{role.name}</strong>
                   <span className="ld-anno">{role.detail.replace(/\s*[↗▣]$/, "")}</span>
                 </Link>

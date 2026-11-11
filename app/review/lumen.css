@@ -72,6 +72,7 @@
     --ld-rim-light: #ffffffb8;
     --ld-rim-dark: #3c3a2833;
     --ld-sheen: #fffdf2a6;
+    --ld-warn: #a1361c;
     --ld-r-sm: 10px;
     --ld-r-md: 18px;
     --ld-r-lg: 26px;
@@ -97,6 +98,8 @@
       --ld-rim-light: #ffd9a02e;
       --ld-rim-dark: #00000066;
       --ld-sheen: #ffd49a2e;
+      --ld-warn: #ff9c7a;
+      --ld-warn: #ff9c7a;
       color-scheme: dark;
     }
   }
@@ -1111,6 +1114,7 @@
     --ld-rim-light: #ffffff14;
     --ld-rim-dark: #00000066;
     --ld-sheen: #ffd49a24;
+    --ld-warn: #ff9c7a;
     color-scheme: dark;
     margin: clamp(40px, 6vw, 72px) clamp(6px, 1.2vw, 18px) 0;
     padding-bottom: clamp(72px, 10vw, 128px);
@@ -1213,8 +1217,8 @@
     align-self: center;
     padding: var(--mat-pad);
     border-radius: var(--r-mat);
-    background: var(--ld-mat);
-    box-shadow: inset 0 1.5px 0 var(--ld-rim-light);
+    background: color-mix(in srgb, var(--ld-graphite) 6%, transparent);
+    box-shadow: inset 0 0 0 1px var(--ld-line);
   }
   /* Screens keep their own shape, so a wide screenshot is never cropped into a tall frame. */
   .ld-sheet-screen {
@@ -1669,11 +1673,15 @@
     }
   }
 
+  /* The grid is a set of objects to pick up, not text: nothing in it can be selected. */
   .ld-field-wrap {
     display: grid;
     gap: 10px;
     padding: 22px 0 0 24px;
     min-width: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
   .ld-field {
     --cell: 96px;
@@ -1779,295 +1787,482 @@
     color: var(--ld-signal-ink);
   }
 
-  /* The two-bids simulation, redrawn in Lumen Draft. */
-  .ld-race .bid-race {
+  /* ---------- Two bids, one price ---------- */
+  .ld-rl {
     display: grid;
-    gap: 18px;
-  }
-  .ld-race .bid-race-controls {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 22px;
-  }
-  .ld-race .bid-race-choice {
-    display: grid;
-    gap: 6px;
-  }
-  .ld-race .bid-race-choice-label,
-  .ld-race .bid-race-latency > span {
-    font-variation-settings: "wdth" 75;
-    font-weight: 600;
-    font-size: 11px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ld-graphite-2);
-  }
-  .ld-race .bid-race-modes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  .ld-race .bid-race-modes button {
-    display: grid;
-    gap: 2px;
-    padding: 8px 12px;
-    border: 1px solid var(--ld-line-strong);
-    border-radius: 14px;
-    background: transparent;
-    text-align: left;
-    font-size: 13px;
-    transition:
-      background-color 0.25s,
-      border-color 0.25s,
-      color 0.25s,
-      scale var(--ld-dur-snap) var(--ld-ease-snap);
-  }
-  .ld-race .bid-race-modes button:hover {
-    border-color: var(--ld-graphite-2);
-  }
-  .ld-race .bid-race-modes button:active,
-  .ld-race .bid-race-run:active:not(:disabled) {
-    scale: 0.96;
-  }
-  .ld-race .bid-race-modes button[aria-pressed="true"] {
-    background: var(--ld-signal);
-    border-color: transparent;
-    color: var(--ld-on-signal);
-  }
-  .ld-race .bid-race-modes span {
-    font-size: 12px;
-    opacity: 0.8;
-  }
-  .ld-race .bid-race-latency {
-    display: grid;
-    gap: 6px;
-  }
-  /* Latency sliders drawn as rulers: one tick per 20 ms step, a chartreuse measured span up to
-     a reticle handle. The handle squashes on the snap spring while held. */
-  .ld-race .bid-race-latency input[type="range"] {
-    --fill: 0;
-    --steps: 28;
-    --thumb: 18px;
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 36px;
-    margin: 0;
-    background:
-      linear-gradient(var(--ld-signal), var(--ld-signal)) 0 12px /
-        calc(var(--thumb) / 2 + (100% - var(--thumb)) * var(--fill)) 7px no-repeat,
-      linear-gradient(var(--ld-line-strong), var(--ld-line-strong)) 0 15px / 100% 1px no-repeat,
-      repeating-linear-gradient(
-          to right,
-          var(--ld-graphite-2) 0 1px,
-          transparent 1px calc(100% / var(--steps))
-        )
-        calc(var(--thumb) / 2) 100% / calc(100% - var(--thumb) + 1px) 6px no-repeat,
-      linear-gradient(var(--ld-graphite-2), var(--ld-graphite-2)) calc(var(--thumb) / 2) 100% / 1px
-        11px no-repeat,
-      linear-gradient(var(--ld-graphite-2), var(--ld-graphite-2)) calc(100% - var(--thumb) / 2)
-        100% / 1px 11px no-repeat;
-    cursor: pointer;
-    touch-action: pan-y;
-  }
-  .ld-race .bid-race-latency input[type="range"]::-webkit-slider-runnable-track {
-    height: 36px;
-    background: transparent;
-  }
-  .ld-race .bid-race-latency input[type="range"]::-moz-range-track {
-    height: 36px;
-    background: transparent;
-  }
-  .ld-race .bid-race-latency input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    box-sizing: border-box;
-    width: var(--thumb);
-    height: 30px;
-    border: 1.5px solid var(--ld-graphite);
-    border-radius: 7px;
-    background:
-      linear-gradient(var(--ld-graphite), var(--ld-graphite)) 50% 50% / 1.5px 12px no-repeat,
-      var(--ld-paper);
-    box-shadow: 0 2px 6px var(--ld-ambient);
-    transform-origin: 50% 100%;
-    transition:
-      scale var(--ld-dur-snap) var(--ld-ease-snap),
-      background-color 0.2s;
-  }
-  .ld-race .bid-race-latency input[type="range"]::-moz-range-thumb {
-    box-sizing: border-box;
-    width: var(--thumb);
-    height: 30px;
-    border: 1.5px solid var(--ld-graphite);
-    border-radius: 7px;
-    background:
-      linear-gradient(var(--ld-graphite), var(--ld-graphite)) 50% 50% / 1.5px 12px no-repeat,
-      var(--ld-paper);
-    box-shadow: 0 2px 6px var(--ld-ambient);
-    transition: scale var(--ld-dur-snap) var(--ld-ease-snap);
-  }
-  .ld-race .bid-race-latency input[type="range"]:hover::-webkit-slider-thumb {
-    background-color: var(--ld-signal);
-  }
-  .ld-race .bid-race-latency input[type="range"]:active::-webkit-slider-thumb {
-    scale: 1.18 0.9;
-    background-color: var(--ld-signal);
-  }
-  .ld-race .bid-race-latency input[type="range"]:active::-moz-range-thumb {
-    scale: 1.18 0.9;
-  }
-  .ld-race .bid-race-latency input[type="range"]:focus-visible {
-    outline-offset: 2px;
-  }
-  .ld-race .bid-race-latency b {
-    display: inline-block;
-    margin-left: 4px;
-    padding: 0 6px;
-    border-radius: 5px;
-    background: var(--ld-signal);
-    color: var(--ld-on-signal);
-    font-variant-numeric: tabular-nums;
-  }
-  .ld-race .bid-race-diagram {
-    display: block;
-    width: 100%;
-    height: auto;
-    border: 1px solid var(--ld-line);
-    border-radius: 18px;
-    background: var(--ld-paper);
-  }
-  .ld-race .bid-race-wire {
-    stroke: var(--ld-line-strong);
-    stroke-width: 2;
-    stroke-dasharray: 4 5;
-    fill: none;
-  }
-  .ld-race .bid-race-node rect {
-    fill: var(--ld-putty);
-    stroke: var(--ld-line-strong);
-    rx: 14px;
-  }
-  .ld-race .bid-race-server rect {
-    fill: var(--ld-clay);
-  }
-  .ld-race .bid-race-node text {
-    text-anchor: middle;
-    fill: var(--ld-graphite);
-  }
-  .ld-race .bid-race-node-label {
-    font:
-      600 12px var(--ld-font-text),
-      sans-serif;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-  .ld-race .bid-race-node-price {
-    font:
-      600 16px var(--ld-font-display),
-      sans-serif;
-  }
-  .ld-race .bid-race-packet circle {
-    fill: var(--ld-peach);
-    stroke: var(--ld-graphite);
-  }
-  .ld-race .bid-race-packet-broadcast circle,
-  .ld-race .bid-race-packet-ack circle {
-    fill: var(--ld-signal);
-  }
-  .ld-race .bid-race-packet-reject circle {
-    fill: var(--ld-graphite-2);
-  }
-  .ld-race .bid-race-packet-dropping {
-    opacity: 0.35;
-  }
-  .ld-race .bid-race-packet text {
-    text-anchor: middle;
-    fill: var(--ld-graphite);
-    font:
-      600 11px var(--ld-font-text),
-      sans-serif;
-  }
-  .ld-race .bid-race-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px 16px;
-  }
-  .ld-race .bid-race-actions span {
-    font-size: 13px;
-    color: var(--ld-graphite-2);
-  }
-  .ld-race .bid-race-run {
-    min-height: 44px;
-    padding: 0 20px;
-    border: 0;
-    border-radius: 999px;
-    background: var(--ld-signal);
-    color: var(--ld-on-signal);
-    font:
-      600 16px var(--ld-font-display),
-      sans-serif;
-    box-shadow:
-      0 3px 10px var(--ld-ambient),
-      inset 0 1.5px 0 var(--ld-rim-light);
-    transition:
-      scale var(--ld-dur-snap) var(--ld-ease-snap),
-      translate var(--ld-dur-snap) var(--ld-ease-snap),
-      opacity 0.2s;
-  }
-  @media (hover: hover) {
-    .ld-race .bid-race-run:hover:not(:disabled) {
-      translate: 0 -2px;
-    }
-  }
-  .ld-race .bid-race-diagram {
+    gap: 22px;
     user-select: none;
     -webkit-user-select: none;
   }
-  .ld-race .bid-race-run:disabled {
-    opacity: 0.6;
-  }
-  .ld-race .bid-race-log {
+  .ld-rl-controls {
     display: grid;
-    gap: 4px;
-    max-height: 180px;
-    overflow: auto;
-    list-style: none;
-    font-size: 13px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 28px;
   }
-  .ld-race .bid-race-log li {
+  /* A row of choices with one marker that slides on the snap spring. */
+  .ld-seg-field {
     display: grid;
-    grid-template-columns: 62px minmax(0, 1fr);
-    gap: 10px;
-    padding: 4px 0;
-    border-bottom: 1px solid var(--ld-line);
+    gap: 8px;
+    min-width: 0;
   }
-  .ld-race .bid-race-log span {
+  .ld-seg {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    padding: 4px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--ld-graphite) 8%, transparent);
+    box-shadow: inset 0 1px 3px var(--ld-rim-dark);
+  }
+  .ld-seg-marker {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc((100% - 8px) / var(--n));
+    translate: calc(var(--i) * 100%) 0;
+    border-radius: 999px;
+    background: var(--ld-graphite);
+    box-shadow:
+      0 1px 2px var(--ld-ambient-near),
+      0 6px 14px -6px var(--ld-ambient);
+    transition: translate var(--ld-dur-snap) var(--ld-ease-snap);
+  }
+  .ld-seg button {
+    position: relative;
+    min-width: 0;
+    min-height: 40px;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
     color: var(--ld-graphite-2);
-    font-variant-numeric: tabular-nums;
+    font:
+      600 14px/1.15 var(--ld-font-display),
+      ui-rounded,
+      sans-serif;
+    transition:
+      color 0.25s,
+      scale var(--ld-dur-snap) var(--ld-ease-snap);
   }
-  .ld-race .bid-race-log li[data-tone="warn"] {
-    color: #a1361c;
+  .ld-seg button:hover {
+    color: var(--ld-graphite);
   }
-  :root[data-ld-theme="dark"] .ld-race .bid-race-log li[data-tone="warn"] {
-    color: #ff9c7a;
+  .ld-seg button[aria-checked="true"] {
+    color: var(--ld-paper);
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-ld-theme="light"]) .ld-race .bid-race-log li[data-tone="warn"] {
-      color: #ff9c7a;
-    }
+  .ld-seg button:active {
+    scale: 0.94;
+    transition-duration: 90ms;
   }
-  .ld-race .bid-race-log li[data-tone="good"] {
+  .ld-seg-note {
+    min-height: 2.8em;
+    color: var(--ld-graphite-2);
+    font-size: 13.5px;
+  }
+
+  /* The bench: phones on the left, the server on the right, the network drawn between. */
+  .ld-bench {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(176px, 220px) minmax(64px, 1fr) minmax(172px, 212px);
+    grid-template-areas:
+      "a net server"
+      "b net server";
+    row-gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--ld-line);
+    border-radius: 24px;
+    background:
+      radial-gradient(circle, var(--ld-line-strong) 1px, transparent 1.4px) 0 0 / 16px 16px,
+      color-mix(in srgb, var(--ld-graphite) 3%, transparent);
+  }
+  .ld-bench[data-orient="v"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto 112px auto;
+    grid-template-areas:
+      "a b"
+      "net net"
+      "server server";
+    column-gap: 10px;
+    row-gap: 0;
+    padding: 12px;
+  }
+  .ld-phone,
+  .ld-server {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid var(--ld-line-strong);
+    border-radius: 18px;
+    background: var(--ld-paper);
+    box-shadow:
+      0 1px 2px var(--ld-ambient-near),
+      0 10px 24px -14px var(--ld-ambient);
+  }
+  .ld-phone[data-node="A"] {
+    grid-area: a;
+  }
+  .ld-phone[data-node="B"] {
+    grid-area: b;
+  }
+  .ld-phone header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 28px;
+  }
+  .ld-phone-id {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 9px;
+    background: var(--ld-graphite);
+    color: var(--ld-paper);
+    font:
+      600 14px/1 var(--ld-font-display),
+      ui-rounded,
+      sans-serif;
+  }
+  .ld-phone-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    color: var(--ld-graphite-2);
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  .ld-phone-status[data-tone="good"] {
     color: var(--ld-signal-ink);
   }
-  .ld-race .bid-race-summary {
-    min-height: 1.5em;
+  .ld-phone-status[data-tone="bad"] {
+    color: var(--ld-warn);
+  }
+  .ld-phone-status[data-tone="wait"]::before {
+    content: "";
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .ld-bench[data-running="true"] .ld-phone-status[data-tone="wait"]::before {
+      animation: ld-wait 0.9s ease-in-out infinite alternate;
+    }
+  }
+  @keyframes ld-wait {
+    to {
+      opacity: 0.2;
+    }
+  }
+  .ld-phone-price {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .ld-phone-price b,
+  .ld-server-price {
+    font:
+      600 26px/1 var(--ld-font-display),
+      ui-rounded,
+      sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  /* Signal bars that are also the control. Each bar is a 24px target; the bar inside is drawn. */
+  .ld-signal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 6px 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--ld-line);
+  }
+  .ld-signal-bars {
+    display: flex;
+    align-items: stretch;
+    height: 32px;
+  }
+  .ld-signal-bars button {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+  }
+  .ld-signal-bars button span {
+    width: 12px;
+    height: calc(var(--h) * 100%);
+    border-radius: 3px;
+    background: var(--ld-line-strong);
+    transform-origin: 50% 100%;
+    transition:
+      background-color 0.2s,
+      scale var(--ld-dur-snap) var(--ld-ease-snap);
+  }
+  .ld-signal-bars button[data-lit="true"] span {
+    background: var(--ld-signal-ink);
+  }
+  @media (hover: hover) {
+    .ld-signal-bars button:hover span {
+      scale: 1.12 1.1;
+    }
+  }
+  .ld-signal-bars button:active span {
+    scale: 1.2 0.8;
+    transition-duration: 90ms;
+  }
+  .ld-signal-bars button:focus-visible {
+    outline: 2px solid var(--ld-signal-ink);
+    outline-offset: 1px;
+  }
+  .ld-signal-read {
+    color: var(--ld-graphite-2);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .ld-signal-read b {
+    color: var(--ld-graphite);
+  }
+  .ld-server {
+    grid-area: server;
+    align-self: center;
+    gap: 8px;
+    border: 1.5px solid var(--ld-graphite);
+  }
+  .ld-bench[data-orient="v"] .ld-server {
+    justify-self: center;
+    width: min(100%, 260px);
+  }
+  .ld-server-price {
+    font-size: 34px;
+    animation: ld-pop var(--ld-dur-snap) var(--ld-ease-snap);
+  }
+  .ld-tally {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    min-height: 22px;
+  }
+  .ld-tally i {
+    width: 7px;
+    height: 22px;
+    border-radius: 3px;
+    background: var(--ld-graphite);
+    transform-origin: 50% 100%;
+    animation: ld-tally var(--ld-dur-snap) var(--ld-ease-snap);
+  }
+  .ld-tally i[data-lost="true"] {
+    background: var(--ld-warn);
+  }
+  @keyframes ld-tally {
+    from {
+      scale: 1 0;
+    }
+  }
+
+  /* The network: wires and the messages travelling on them. */
+  .ld-net {
+    grid-area: net;
+    position: relative;
+    min-width: 0;
+  }
+  .ld-net svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .ld-net-wire {
+    fill: none;
+    stroke: var(--ld-line-strong);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+  }
+  .ld-bench[data-running="true"] .ld-net-wire {
+    stroke: color-mix(in srgb, var(--ld-graphite) 40%, transparent);
+  }
+  .ld-pkt,
+  .ld-net-loss {
+    position: absolute;
+    left: calc(var(--x) * 1%);
+    top: calc(var(--y) * 1%);
+    translate: -50% -50%;
+    pointer-events: none;
+  }
+  .ld-pkt {
+    z-index: 1;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: var(--ld-graphite);
+    color: var(--ld-paper);
+    box-shadow: 0 3px 10px -2px var(--ld-ambient);
+    font:
+      600 11.5px/1.2 var(--ld-font-text),
+      sans-serif;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    transition:
+      opacity 0.2s,
+      scale 0.2s;
+  }
+  .ld-pkt[data-kind="ack"] {
+    background: var(--ld-signal);
+    color: var(--ld-on-signal);
+  }
+  .ld-pkt[data-kind="reject"] {
+    background: var(--ld-warn);
+    color: var(--ld-paper);
+  }
+  .ld-pkt[data-kind="broadcast"] {
+    background: var(--ld-paper);
+    color: var(--ld-graphite);
+    box-shadow: inset 0 0 0 1px var(--ld-line-strong);
+  }
+  .ld-pkt[data-dropping="true"] {
+    opacity: 0.35;
+    scale: 0.7;
+  }
+  .ld-net-loss {
+    display: grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid var(--ld-warn);
+    border-radius: 50%;
+    background: var(--ld-paper);
+    color: var(--ld-warn);
+    font-size: 12px;
+    font-weight: 700;
+    animation: ld-pop var(--ld-dur-snap) var(--ld-ease-snap);
+  }
+
+  /* The run: one key, and a clock that marks every event as it happens. */
+  .ld-rl-run {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 14px 24px;
+  }
+  .ld-rl-clock {
+    display: grid;
+    gap: 8px;
+  }
+  .ld-rl-track {
+    position: relative;
+    height: 12px;
+    border-bottom: 1px solid var(--ld-line-strong);
+  }
+  .ld-rl-track i {
+    position: absolute;
+    bottom: -4px;
+    left: calc(var(--at) * 100%);
+    width: 7px;
+    height: 7px;
+    translate: -50% 0;
+    border-radius: 50%;
+    background: var(--ld-line-strong);
+    transition:
+      background-color 0.2s,
+      scale var(--ld-dur-snap) var(--ld-ease-snap);
+  }
+  .ld-rl-track i[data-seen="true"] {
+    background: var(--ld-graphite);
+    scale: 1.3;
+  }
+  .ld-rl-track i[data-seen="true"][data-tone="warn"] {
+    background: var(--ld-warn);
+  }
+  .ld-rl-track i[data-seen="true"][data-tone="good"] {
+    background: var(--ld-signal-ink);
+  }
+  .ld-rl-head {
+    position: absolute;
+    top: -4px;
+    bottom: -6px;
+    left: calc(var(--at) * 100%);
+    width: 2px;
+    translate: -1px 0;
+    border-radius: 2px;
+    background: var(--ld-signal-ink);
+  }
+  .ld-rl-out {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: 16px 28px;
+    align-items: start;
+  }
+  .ld-rl-verdict {
+    padding: 14px 16px;
+    border: 1px solid var(--ld-line-strong);
+    border-radius: 16px;
+    color: var(--ld-graphite-2);
+    font-size: 15px;
+    line-height: 1.45;
+    transition:
+      background-color 0.3s,
+      border-color 0.3s;
+  }
+  .ld-rl-verdict[data-verdict] {
+    color: var(--ld-graphite);
     font-weight: 600;
   }
-  @media (max-width: 640px) {
-    .ld-race .bid-race-controls {
+  .ld-rl-verdict[data-verdict="good"] {
+    border-color: var(--ld-signal-ink);
+    background: color-mix(in srgb, var(--ld-signal) 16%, transparent);
+  }
+  .ld-rl-verdict[data-verdict="bad"] {
+    border-color: var(--ld-warn);
+    background: color-mix(in srgb, var(--ld-warn) 12%, transparent);
+  }
+  .ld-rl-log {
+    display: grid;
+    max-height: 232px;
+    overflow-y: auto;
+    list-style: none;
+    font-size: 13px;
+    user-select: text;
+    -webkit-user-select: text;
+  }
+  .ld-rl-log:empty {
+    display: none;
+  }
+  .ld-rl-log li {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--ld-line);
+  }
+  .ld-rl-log li .ld-anno {
+    padding-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .ld-rl-log li[data-tone="warn"] {
+    color: var(--ld-warn);
+  }
+  .ld-rl-log li[data-tone="good"] {
+    color: var(--ld-signal-ink);
+  }
+  @media (max-width: 760px) {
+    .ld-rl-controls,
+    .ld-rl-out,
+    .ld-rl-run {
       grid-template-columns: minmax(0, 1fr);
+    }
+    .ld-rl-go {
+      justify-self: start;
     }
   }
 
@@ -2123,13 +2318,58 @@
     gap: 14px;
     margin-bottom: 36px;
   }
+  /* Role cards are drawn, not moulded: a hairline card that inks in and nudges its arrow. */
   .ld-role {
+    position: relative;
     display: grid;
     gap: 6px;
     align-content: space-between;
     min-height: 104px;
-    padding: 14px 16px;
+    padding: 14px 40px 14px 16px;
+    border: 1px solid var(--ld-line-strong);
+    border-radius: 18px;
+    background: var(--ld-sheet);
+    color: var(--ld-graphite);
     text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+      border-color 0.25s,
+      background-color 0.25s,
+      scale var(--ld-dur-snap) var(--ld-ease-snap);
+  }
+  .ld-role::after {
+    content: "→";
+    position: absolute;
+    top: 13px;
+    right: 15px;
+    color: var(--ld-graphite-2);
+    font-weight: 600;
+    transition:
+      translate var(--ld-dur-snap) var(--ld-ease-snap),
+      color 0.25s;
+  }
+  @media (hover: hover) {
+    .ld-role:hover {
+      border-color: var(--ld-signal-ink);
+      background: color-mix(in srgb, var(--ld-signal) 7%, var(--ld-sheet));
+    }
+    .ld-role:hover::after {
+      translate: 4px 0;
+      color: var(--ld-signal-ink);
+    }
+  }
+  .ld-role:active {
+    scale: 0.97;
+    transition-duration: 90ms;
+  }
+  .ld-role .ld-anno {
+    color: var(--ld-graphite-2);
+  }
+  @supports (corner-shape: squircle) {
+    .ld-role {
+      corner-shape: squircle;
+      border-radius: 30px;
+    }
   }
   .ld-role strong {
     font:

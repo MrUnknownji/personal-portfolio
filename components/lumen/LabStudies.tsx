@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ComponentType } from "react";
+import { useRef, useState, type ComponentType } from "react";
 import { flushSync } from "react-dom";
 import SnapField from "./SnapField";
 import { tone } from "./feedback";
@@ -26,14 +26,13 @@ const STUDIES: Study[] = [
     anno: "Study 002 · Real-time / Systems",
     title: "Two bids, one price",
     text: "What keeps a real-time product honest: two people bid at the same moment over different networks.",
-    hint: "Change the latency, the server rule, and what the network drops, then watch lost updates and duplicate bids happen, or not.",
+    hint: "Set each phone's signal, the server's rule, and what the network loses. Then send both bids and watch what the server stores.",
   },
 ];
 
 // The simulation is only fetched when someone shows interest in its card.
 let racePromise: Promise<ComponentType> | null = null;
-const loadRace = () =>
-  (racePromise ??= import("@/components/lab/BidRace").then((module) => module.default));
+const loadRace = () => (racePromise ??= import("./RaceLab").then((module) => module.default));
 
 /**
  * Two lab cards. Opening one morphs it to full width with a view transition: the browser
@@ -112,43 +111,11 @@ export default function LabStudies() {
               </div>
             )}
             <div id={bodyId} className="ld-lab-body" hidden={state !== "open"}>
-              {state === "open" &&
-                (index === 0 ? <SnapField /> : Race ? <RaceStudy Race={Race} /> : null)}
+              {state === "open" && (index === 0 ? <SnapField /> : Race ? <Race /> : null)}
             </div>
           </article>
         );
       })}
-    </div>
-  );
-}
-
-/** The simulation, with its latency sliders drawn as measured rulers. */
-function RaceStudy({ Race }: { Race: ComponentType }) {
-  const wrap = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = wrap.current;
-    if (!el) return;
-    const paint = (input: HTMLInputElement) => {
-      const min = Number(input.min) || 0;
-      const max = Number(input.max) || 100;
-      const fill = (Number(input.value) - min) / (max - min);
-      input.style.setProperty("--fill", fill.toFixed(4));
-      input.style.setProperty(
-        "--steps",
-        String(Math.round((max - min) / (Number(input.step) || 1))),
-      );
-    };
-    el.querySelectorAll<HTMLInputElement>('input[type="range"]').forEach(paint);
-    const onInput = (event: Event) => {
-      const input = event.target as HTMLInputElement;
-      if (input.type === "range") paint(input);
-    };
-    el.addEventListener("input", onInput);
-    return () => el.removeEventListener("input", onInput);
-  }, []);
-  return (
-    <div className="ld-race" ref={wrap}>
-      <Race />
     </div>
   );
 }
