@@ -39,16 +39,16 @@
     "@playwright/test": "^1.65.0",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",
-    "@types/node": "^24.19.2",
-    "@types/react": "19.2.18",
-    "@types/react-dom": "19.2.4",
-    "eslint": "^9.39.5",
+    "@types/node": "^26.6.6",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "^10.14.0",
     "eslint-config-next": "16.4.5",
-    "jsdom": "^26.1.0",
-    "lighthouse": "13.4.1",
-    "prettier": "3.6.2",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.12"
+    "jsdom": "^31.0.0",
+    "lighthouse": "13.6.0",
+    "prettier": "3.9.10",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.0"
   },
   "packageManager": "pnpm@11.22.0+sha512.1ff870c4c6133dfd88fb2afc46dd13d47f09c9794b438c6fdb47ca98caf3bc16381ee0be93a091b8e3824cf01f889f46d7d9e20910fb0be1ab0fb5baa80dd621"
 }
