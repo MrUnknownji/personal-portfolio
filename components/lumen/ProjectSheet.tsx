@@ -30,8 +30,10 @@ export default function ProjectSheet({
 }) {
   const caseStudy = `/review/my-projects/${project.id}`;
   const still = stills[project.id];
+  const host = project.demoLink ? new URL(project.demoLink).host.replace(/^www\./, "") : null;
   return (
     <article
+      id={`ld-sheet-${project.id}`}
       className="ld-sheet ld-soft"
       style={softStyle("sheet", 6, {
         "--i": index,
@@ -49,7 +51,7 @@ export default function ProjectSheet({
               src={still}
               alt={`${project.title} website`}
               fill
-              sizes="(max-width: 900px) 92vw, 680px"
+              sizes="(max-width: 900px) 92vw, 760px"
               priority={index === 0}
             />
           ) : project.showcaseLoop ? (
@@ -63,11 +65,15 @@ export default function ProjectSheet({
               src={project.image}
               alt={`${project.title} interface`}
               fill
-              sizes="(max-width: 900px) 92vw, 680px"
+              sizes="(max-width: 900px) 92vw, 760px"
               priority={index === 0}
             />
           )}
         </div>
+        <figcaption className="ld-sheet-cap ld-anno">
+          <span>{host ? "Live site" : "Product screen"}</span>
+          <span>{host ?? project.title}</span>
+        </figcaption>
       </figure>
       <div className="ld-sheet-copy">
         <span className="ld-sheet-num" aria-hidden="true">

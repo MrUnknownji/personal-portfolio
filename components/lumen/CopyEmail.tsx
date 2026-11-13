@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { SoftLayers, softStyle } from "./Soft";
-import { haptic, tone } from "./feedback";
+import { haptic } from "./feedback";
 
 /**
  * Copies the address; mailto links do nothing on machines without a mail client. Both labels
@@ -34,7 +34,6 @@ export default function CopyEmail({
           try {
             await navigator.clipboard.writeText(email);
             setCopied(true);
-            tone("snap", 0.6);
             haptic(8);
           } catch {
             window.location.href = `mailto:${email}`;

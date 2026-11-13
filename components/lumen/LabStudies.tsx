@@ -3,7 +3,6 @@
 import { useRef, useState, type ComponentType } from "react";
 import { flushSync } from "react-dom";
 import SnapField from "./SnapField";
-import { tone } from "./feedback";
 
 type Study = {
   id: string;
@@ -50,7 +49,6 @@ export default function LabStudies() {
       if (RaceComponent) setRace(() => RaceComponent);
       setOpen(next);
     };
-    tone(next === null ? "settle" : "morph", 0.7);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!document.startViewTransition || reduced) {
       apply();

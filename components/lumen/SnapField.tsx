@@ -3,7 +3,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { animate, Spring } from "@/lib/lumen/springs";
 import { SoftLayers, softStyle, type Body } from "./Soft";
-import { haptic, tone } from "./feedback";
+import { haptic } from "./feedback";
 
 const BEATS: { name: string; body: Body }[] = [
   { name: "Hook", body: "amber" },
@@ -110,7 +110,6 @@ export default function SnapField() {
       render(index);
       if (!landed && Math.hypot(t.x.x - t.x.target, t.y.x - t.y.target) < 3) {
         landed = true;
-        tone("snap");
         haptic(10);
         setReadout(`${BEATS[index].name} landed on ${zone(t.col, t.row)}`);
       }

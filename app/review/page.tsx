@@ -3,8 +3,10 @@ import BuildMap from "@/components/lumen/BuildMap";
 import ContactForm from "@/components/lumen/ContactForm";
 import CopyEmail from "@/components/lumen/CopyEmail";
 import LabStudies from "@/components/lumen/LabStudies";
+import Letter from "@/components/lumen/Letter";
 import MeasuredWord from "@/components/lumen/MeasuredWord";
 import ProjectSheet, { sheetTimeline } from "@/components/lumen/ProjectSheet";
+import ReplySlip from "@/components/lumen/ReplySlip";
 import { SoftLayers, softStyle } from "@/components/lumen/Soft";
 import { profileRoles } from "@/data/sections";
 import { PROFILE } from "@/data/profile";
@@ -32,6 +34,14 @@ const evidence = selectedProjects
 const current = PROFILE.experience.find((entry) => "current" in entry && entry.current);
 const studio = PROFILE.experience.find((entry) => entry.organization === "FrameRelay Studio");
 const reviewHref = (href: string) => `/review${href}`;
+const pad = (value: number) => String(value).padStart(2, "0");
+
+/** Counted from the projects' own facts, so the summary never claims more than the sheets show. */
+const testCount = selectedProjects
+  .flatMap((project) => project.facts ?? [])
+  .filter((fact) => /\btests?\b|test cases/i.test(fact.label) && /^\d+$/.test(fact.value))
+  .reduce((sum, fact) => sum + Number(fact.value), 0);
+const liveCount = selectedProjects.filter((project) => project.demoLink).length;
 
 function SectionHead({
   sheet,
@@ -147,30 +157,78 @@ export default function ReviewHome() {
         </div>
       </section>
 
+      <Letter slot="intro" />
+
       {/* Work sits on the light table: the one dark band, so the screens carry the page. */}
       <section id="work" className="ld-section ld-band ld-deferred" aria-labelledby="ld-work-title">
         <div className="ld-wrap">
-          <SectionHead sheet="02 · Work" id="ld-work-title" title="Work that holds up.">
-            Real-time bidding, the motion studio I run, a paired-wallpaper product, and an
-            end-to-end store. Every number is counted from the project&apos;s repository or its live
-            site.
-          </SectionHead>
+          <div className="ld-work-top">
+            <SectionHead sheet="02 · Work" id="ld-work-title" title="Work that holds up.">
+              Real-time bidding, the motion studio I run, a paired-wallpaper product, and an
+              end-to-end store. Every number is counted from the project&apos;s repository or its
+              live site.
+            </SectionHead>
+            <dl className="ld-facts ld-work-sum">
+              <div>
+                <dt>products built end to end</dt>
+                <dd>{selectedProjects.length}</dd>
+              </div>
+              <div>
+                <dt>automated tests across the repos</dt>
+                <dd>{testCount}</dd>
+              </div>
+              <div>
+                <dt>running live sites</dt>
+                <dd>{liveCount}</dd>
+              </div>
+            </dl>
+          </div>
           <div
-            className="ld-sheets"
+            className="ld-work"
             style={
               {
                 timelineScope: featured.map((_, index) => sheetTimeline(index)).join(", "),
               } as React.CSSProperties
             }
           >
-            {featured.map((project, index) => (
-              <ProjectSheet
-                key={project.id}
-                project={project}
-                index={index}
-                last={index === featured.length - 1}
-              />
-            ))}
+            <nav className="ld-work-rail" aria-label="Featured projects">
+              <span className="ld-anno">Featured · {pad(featured.length)}</span>
+              <ol>
+                {featured.map((project, index) => (
+                  <li
+                    key={project.id}
+                    className={index === featured.length - 1 ? "ld-rail-last" : undefined}
+                    style={
+                      {
+                        animationTimeline:
+                          index === featured.length - 1
+                            ? sheetTimeline(index)
+                            : `${sheetTimeline(index)}, ${sheetTimeline(index + 1)}`,
+                      } as React.CSSProperties
+                    }
+                  >
+                    <a href={`#ld-sheet-${project.id}`}>
+                      <span className="ld-rail-num">{pad(index + 1)}</span>
+                      <span className="ld-rail-name">{project.title}</span>
+                      <span className="ld-anno">{project.category}</span>
+                    </a>
+                  </li>
+                ))}
+              </ol>
+              <Link className="ld-link-strong" href="/review/my-projects">
+                All {selectedProjects.length} projects <span aria-hidden="true">→</span>
+              </Link>
+            </nav>
+            <div className="ld-sheets">
+              {featured.map((project, index) => (
+                <ProjectSheet
+                  key={project.id}
+                  project={project}
+                  index={index}
+                  last={index === featured.length - 1}
+                />
+              ))}
+            </div>
           </div>
           <Link className="ld-link-strong ld-more" href="/review/my-projects">
             Browse all {selectedProjects.length} projects <span aria-hidden="true">→</span>
@@ -310,25 +368,18 @@ export default function ReviewHome() {
           id="ld-contact-title"
           title="Have an idea? Let's build it."
         >
-          Hiring for a full-stack or frontend role, or building something interesting? Tell me about
-          it, even if it&apos;s still rough.
+          Hiring for a full-stack or frontend role, or building something interesting? Email is the
+          fastest way to reach me, or leave a note and I&apos;ll write back.
         </SectionHead>
-        <div className="ld-contact">
-          <div className="ld-contact-direct">
-            <span className="ld-anno">Send an email</span>
-            <a className="ld-email" href={`mailto:${SITE_CONFIG.email}`}>
-              {SITE_CONFIG.email}
-            </a>
-            <div className="ld-actions">
-              <CopyEmail email={SITE_CONFIG.email} />
-            </div>
-            <p>Based in {PROFILE.location}. Working with people everywhere.</p>
-            <span className="ld-status">
-              <i aria-hidden="true" />
-              Open to new roles
-            </span>
-          </div>
-          <div>
+        <Letter slot="contact" />
+        <div className="ld-reply">
+          <ReplySlip
+            email={SITE_CONFIG.email}
+            openTo={PROFILE.openTo}
+            location={PROFILE.location}
+            role={current?.current?.label ? `Currently ${current.current.label}` : undefined}
+          />
+          <div className="ld-reply-note">
             <span className="ld-anno ld-form-label">Or leave a note here</span>
             <ContactForm email={SITE_CONFIG.email} />
           </div>

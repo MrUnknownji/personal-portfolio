@@ -14,7 +14,7 @@ import {
   type RacePacket,
   type RaceResult,
 } from "@/components/lab/bidRace";
-import { haptic, tone } from "./feedback";
+import { haptic } from "./feedback";
 import { SoftLayers, softStyle } from "./Soft";
 
 /*
@@ -288,7 +288,6 @@ export default function RaceLab() {
 
   const run = () => {
     cancelAnimationFrame(frame.current);
-    tone("morph", 0.6);
     haptic(10);
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setElapsed(result.duration);
@@ -299,7 +298,6 @@ export default function RaceLab() {
       const next = Math.min(result.duration, (now - startedAt) / SLOW_MOTION);
       setElapsed(next);
       if (next < result.duration) frame.current = requestAnimationFrame(tick);
-      else tone("settle", 0.5);
     };
     setElapsed(0);
     frame.current = requestAnimationFrame(tick);
@@ -308,7 +306,6 @@ export default function RaceLab() {
   const choose = (apply: () => void) => {
     reset();
     apply();
-    tone("snap", 0.4);
   };
 
   const inFlight = started

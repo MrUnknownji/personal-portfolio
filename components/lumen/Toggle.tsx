@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { animate, Spring } from "@/lib/lumen/springs";
-import { haptic, tone } from "./feedback";
+import { haptic } from "./feedback";
 
 /**
  * The droplet switch: its knob travels on the snap spring and stretches with speed. With an
@@ -57,7 +57,6 @@ export default function Toggle({
       title={icon ? label : undefined}
       onClick={() => {
         onChange(!checked);
-        tone("snap", 0.6);
         haptic(8);
       }}
     >

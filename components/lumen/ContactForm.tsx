@@ -8,7 +8,7 @@ import {
 } from "@/lib/contactValidation";
 import { animate, Spring } from "@/lib/lumen/springs";
 import { SoftLayers, softStyle } from "./Soft";
-import { haptic, tone } from "./feedback";
+import { haptic } from "./feedback";
 
 type FieldName = "name" | "email" | "message";
 type Errors = Partial<Record<FieldName | "form", string>>;
@@ -74,7 +74,6 @@ export default function ContactForm({ email }: { email: string }) {
     const first = fields.find((field) => found[field.name]);
     if (first) {
       form.current?.querySelector<HTMLElement>(`[name="${first.name}"]`)?.focus();
-      tone("drift", 0.6);
       return;
     }
     setSending(true);
@@ -95,7 +94,6 @@ export default function ContactForm({ email }: { email: string }) {
       setSent(true);
       setValues(empty);
       setErrors({});
-      tone("snap");
       haptic(10);
     } catch {
       setErrors({ form: "Unable to send your message right now. Please try again." });
@@ -119,6 +117,9 @@ export default function ContactForm({ email }: { email: string }) {
             className="ld-sr-only"
             aria-hidden="true"
           />
+          <p className="ld-form-dear" aria-hidden="true">
+            Dear Sandeep,
+          </p>
           {fields.map((field) => {
             const id = `ld-contact-${field.name}`;
             const shared = {

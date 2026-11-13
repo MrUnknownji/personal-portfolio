@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { PROFILE } from "@/data/profile";
-import VersionSwitch from "@/components/review/VersionSwitch";
 import DisplaySwitches from "./DisplaySwitches";
 
 const links = [
@@ -22,7 +21,7 @@ export default function ReviewHeader() {
         </Link>
         <nav className="ld-nav" aria-label="Primary navigation">
           {links.map((link) => (
-            <Link key={link.href} href={link.href}>
+            <Link key={link.href} href={link.href} data-nav={link.label.toLowerCase()}>
               {link.label}
             </Link>
           ))}
@@ -35,7 +34,6 @@ export default function ReviewHeader() {
             Résumé <span aria-hidden="true">↓</span>
           </a>
           <DisplaySwitches />
-          <VersionSwitch current={1} className="ld-versions" />
           {/* A full page load on purpose, so the live site's styles start clean. */}
           {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
           <a

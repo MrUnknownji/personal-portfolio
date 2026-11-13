@@ -2,7 +2,6 @@ import Link from "next/link";
 import { PROFILE } from "@/data/profile";
 import { SITE_CONFIG } from "@/data/site";
 import { SOCIAL_PROFILES } from "@/data/social";
-import VersionSwitch from "@/components/review/VersionSwitch";
 import CopyEmail from "./CopyEmail";
 import { SoftLayers, softStyle } from "./Soft";
 
@@ -92,7 +91,6 @@ export default function ReviewFooter() {
           <span className="ld-anno">
             © {year} {SITE_CONFIG.name}
           </span>
-          <VersionSwitch current={1} className="ld-versions ld-footer-versions" />
           <a className="ld-footer-top" href="#top">
             Back to top <span aria-hidden="true">↑</span>
           </a>
