@@ -1,0 +1,1224 @@
+/* Review 3 · Ticker — the portfolio as a market terminal. Near-black board, one phosphor lime for
+   what is live, one hot red for "now". No blur, no 3D: rules, type, and numbers do the work. */
+
+.tk {
+  --tk-bg: #0a0b09;
+  --tk-panel: #11130f;
+  --tk-raise: #181b15;
+  --tk-line: #2a2e25;
+  --tk-ink: #eceee4;
+  --tk-mute: #8e9384;
+  --tk-lime: #d2ff3a;
+  --tk-on-lime: #0a0b09;
+  --tk-red: #ff5533;
+  --tk-gutter: clamp(16px, 3vw, 40px);
+  color-scheme: dark;
+  min-height: 100dvh;
+  background: var(--tk-bg);
+  color: var(--tk-ink);
+  font-family: var(--tk-display), ui-sans-serif, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+body:has(.tk) {
+  margin: 0;
+  background: #0a0b09;
+}
+html:has(.tk) {
+  scroll-behavior: smooth;
+  scroll-padding-top: 72px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:has(.tk) {
+    scroll-behavior: auto;
+  }
+}
+.tk *,
+.tk *::before,
+.tk *::after {
+  box-sizing: border-box;
+}
+.tk :where(h1, h2, h3, p, ul, ol, dl, dd, figure, table) {
+  margin: 0;
+}
+.tk :where(ul, ol) {
+  padding: 0;
+  list-style: none;
+}
+.tk a {
+  color: inherit;
+}
+.tk button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.tk :focus-visible {
+  outline: 2px solid var(--tk-lime);
+  outline-offset: 2px;
+}
+.tk ::selection {
+  background: var(--tk-lime);
+  color: var(--tk-on-lime);
+}
+.tk-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.tk-skip:not(:focus) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.tk-skip:focus {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  z-index: 50;
+  padding: 10px 14px;
+  background: var(--tk-lime);
+  color: var(--tk-on-lime) !important;
+  font:
+    600 13px/1 var(--tk-mono),
+    monospace;
+}
+.tk-dim {
+  color: var(--tk-mute);
+}
+.tk-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  font:
+    500 13px/1.4 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.tk-links a {
+  text-decoration: none;
+  border-bottom: 1px solid var(--tk-lime);
+  padding-bottom: 2px;
+}
+.tk-links a:hover {
+  background: var(--tk-lime);
+  color: var(--tk-on-lime);
+}
+
+/* ---------- Top bar ---------- */
+.tk-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 56px;
+  padding: 0 var(--tk-gutter);
+  background: var(--tk-bg);
+  border-bottom: 1px solid var(--tk-line);
+  font:
+    500 12px/1 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+}
+.tk-mark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-weight: 600;
+}
+.tk-mark-sym {
+  padding: 6px 7px;
+  background: var(--tk-lime);
+  color: var(--tk-on-lime);
+}
+.tk-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--tk-lime);
+}
+.tk-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tk-lime);
+  animation: tk-blink 1.6s steps(2, jump-none) infinite;
+}
+@keyframes tk-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+.tk-nav {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+.tk-nav a {
+  padding: 8px 10px;
+  text-decoration: none;
+  color: var(--tk-mute);
+}
+.tk-nav a:hover {
+  color: var(--tk-ink);
+  background: var(--tk-raise);
+}
+.tk-clock time {
+  font-variant-numeric: tabular-nums;
+}
+.tk-versions {
+  display: flex;
+  border: 1px solid var(--tk-line);
+}
+.tk-versions a {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  text-decoration: none;
+  color: var(--tk-mute);
+}
+.tk-versions a + a {
+  border-left: 1px solid var(--tk-line);
+}
+.tk-versions a:hover {
+  color: var(--tk-ink);
+}
+.tk-versions a[aria-current="page"] {
+  background: var(--tk-ink);
+  color: var(--tk-bg);
+}
+
+/* ---------- Tape ---------- */
+.tk-tape {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--tk-line);
+  background: var(--tk-panel);
+  font:
+    500 12px/1 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+}
+.tk-tape-toggle {
+  flex: none;
+  padding: 0 14px;
+  border: 0;
+  border-right: 1px solid var(--tk-line);
+  background: var(--tk-bg);
+  color: var(--tk-mute) !important;
+  font-size: 11px !important;
+}
+.tk-tape-toggle:hover {
+  color: var(--tk-ink) !important;
+}
+.tk-tape-window {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.tk-tape-run {
+  display: flex;
+  width: max-content;
+  animation: tk-tape 90s linear infinite;
+}
+.tk-tape:hover .tk-tape-run,
+.tk-tape[data-paused] .tk-tape-run {
+  animation-play-state: paused;
+}
+.tk-tape-run li {
+  padding: 12px 22px;
+  white-space: nowrap;
+  border-right: 1px solid var(--tk-line);
+}
+.tk-up {
+  color: var(--tk-lime);
+}
+@keyframes tk-tape {
+  to {
+    translate: -50% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tk-tape-run {
+    animation: none;
+  }
+  .tk-tape-window {
+    overflow-x: auto;
+  }
+  .tk-tape-toggle {
+    display: none;
+  }
+}
+
+/* ---------- Hero ---------- */
+.tk-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.tk-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-hero-name {
+  display: grid;
+  align-content: end;
+  gap: 26px;
+  padding: clamp(40px, 6vw, 88px) var(--tk-gutter) 40px;
+  border-right: 1px solid var(--tk-line);
+  background-image:
+    linear-gradient(var(--tk-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tk-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: -1px -1px;
+}
+.tk-kicker,
+.tk-section-n {
+  font:
+    500 12px/1.4 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tk-lime);
+}
+.tk-hero h1 {
+  display: grid;
+  font-weight: 900;
+  font-stretch: 62%;
+  font-size: clamp(96px, 15.5vw, 270px);
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.tk-hero h1 span:last-child {
+  color: var(--tk-lime);
+}
+.tk-lede {
+  max-width: 36ch;
+  font-size: clamp(18px, 1.6vw, 23px);
+  line-height: 1.4;
+  font-stretch: 92%;
+}
+
+.tk-quote {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+}
+.tk-quote-face {
+  position: relative;
+  min-height: 300px;
+  overflow: hidden;
+  background: var(--tk-lime);
+  border-right: 1px solid var(--tk-line);
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-quote-face img {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: auto;
+  max-width: none;
+  height: 100%;
+  translate: -50% 0;
+  filter: grayscale(1) contrast(1.25);
+  mix-blend-mode: multiply;
+}
+/* Static scan lines over the portrait: a painted gradient, nothing animates. */
+.tk-quote-face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, #0a0b0926 0 1px, transparent 1px 4px);
+}
+.tk-quote-meta {
+  display: grid;
+  align-content: end;
+  gap: 16px;
+  padding: 22px;
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-quote-meta dt,
+.tk-board dt {
+  font:
+    500 11px/1.4 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  color: var(--tk-mute);
+}
+.tk-quote-meta dd {
+  font-size: 17px;
+  line-height: 1.3;
+}
+.tk-board {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.tk-board div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px;
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-board div:nth-child(odd) {
+  border-right: 1px solid var(--tk-line);
+}
+.tk-board dd {
+  order: -1;
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: clamp(48px, 5vw, 76px);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.tk-odo {
+  display: inline-flex;
+}
+.tk-odo-col {
+  display: inline-flex;
+  flex-direction: column;
+  height: 1em;
+  overflow: hidden;
+}
+.tk-odo-col > span {
+  display: block;
+  height: 1em;
+  line-height: 1;
+  translate: 0 calc(var(--d) * -1em);
+  animation: tk-roll 1.3s cubic-bezier(0.2, 0.8, 0.1, 1) backwards;
+  animation-delay: inherit;
+}
+@keyframes tk-roll {
+  from {
+    translate: 0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tk-odo-col > span {
+    animation: none;
+  }
+}
+
+/* ---------- Sections ---------- */
+.tk-section {
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-section-head {
+  display: grid;
+  grid-template-columns: 90px minmax(0, auto) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 24px;
+  padding: 44px var(--tk-gutter) 26px;
+}
+.tk-section-head h2 {
+  font-weight: 800;
+  font-stretch: 70%;
+  font-size: clamp(48px, 7vw, 104px);
+  line-height: 0.9;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+.tk-section-head p {
+  justify-self: end;
+  max-width: 38ch;
+  color: var(--tk-mute);
+  font-size: 15px;
+}
+
+/* ---------- Positions (order book) ---------- */
+.tk-book {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  border-top: 1px solid var(--tk-line);
+}
+.tk-book-list {
+  border-right: 1px solid var(--tk-line);
+}
+.tk-book-head,
+.tk-row {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1.3fr) minmax(0, 0.8fr) minmax(0, 2fr) 54px;
+  gap: 16px;
+  align-items: center;
+  padding: 0 var(--tk-gutter);
+}
+.tk-book-head {
+  height: 38px;
+  border-bottom: 1px solid var(--tk-line);
+  font:
+    500 11px/1 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  color: var(--tk-mute);
+}
+.tk-book-head span:last-child,
+.tk-row-yr {
+  text-align: right;
+}
+.tk-book li {
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-row {
+  position: relative;
+  width: 100%;
+  min-height: 74px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.tk-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--tk-lime);
+  scale: 1 0;
+  transition: scale 0.18s ease-out;
+}
+.tk-book li[data-sel] .tk-row {
+  background: var(--tk-panel);
+}
+.tk-book li[data-sel] .tk-row::before {
+  scale: 1 1;
+}
+.tk-row:hover {
+  background: var(--tk-raise) !important;
+}
+.tk-row-sym {
+  font:
+    600 13px/1 var(--tk-mono),
+    monospace;
+  color: var(--tk-lime);
+}
+.tk-row-name {
+  font-weight: 700;
+  font-stretch: 85%;
+  font-size: 22px;
+  line-height: 1.1;
+}
+.tk-book li[data-featured="false"] .tk-row-name {
+  font-weight: 500;
+}
+.tk-row-type,
+.tk-row-yr {
+  font:
+    500 12px/1.3 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  color: var(--tk-mute);
+}
+.tk-row-fact {
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--tk-mute);
+}
+.tk-row-fact b {
+  font-weight: 800;
+  font-stretch: 115%;
+  font-size: 20px;
+  color: var(--tk-ink);
+  font-variant-numeric: tabular-nums;
+}
+.tk-row-detail {
+  display: none;
+}
+
+.tk-pane {
+  position: sticky;
+  top: 56px;
+  align-self: start;
+  display: block;
+  padding: 22px var(--tk-gutter) 30px 26px;
+  max-height: calc(100dvh - 56px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+/* Block flow, not grid: under max-height a grid would squeeze the empty aspect-ratio shot. */
+.tk-pane > * + *,
+.tk-row-detail > * + * {
+  margin-top: 18px;
+}
+.tk-pane-head {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 2px 12px;
+  font:
+    500 12px/1.3 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  color: var(--tk-mute);
+}
+.tk-pane-head span:first-child {
+  color: var(--tk-lime);
+}
+.tk-pane-head h3 {
+  font:
+    800 40px/1 var(--tk-display),
+    sans-serif;
+  font-stretch: 75%;
+  text-transform: uppercase;
+  color: var(--tk-ink);
+}
+.tk-pane-head span:last-child {
+  grid-column: 2;
+}
+.tk-pane-shot {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--tk-line);
+  background: var(--tk-raise);
+}
+.tk-pane-shot img {
+  object-fit: cover;
+  object-position: top center;
+}
+.tk-pane-sym {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 6px 8px;
+  background: var(--tk-lime);
+  color: var(--tk-on-lime);
+  font:
+    600 11px/1 var(--tk-mono),
+    monospace;
+}
+.tk-pane-short {
+  font-size: 19px;
+  line-height: 1.35;
+}
+.tk-pane-case {
+  display: grid;
+  gap: 12px;
+}
+.tk-pane-case dt {
+  font:
+    600 11px/1.4 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  color: var(--tk-red);
+}
+.tk-pane-case dd {
+  color: #c9ccbf;
+  font-size: 15px;
+}
+.tk-pane-facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--tk-line);
+}
+.tk-pane-facts div {
+  display: grid;
+  gap: 4px;
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-pane-facts dd {
+  font-weight: 800;
+  font-stretch: 125%;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--tk-lime);
+}
+.tk-pane-facts dt {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--tk-mute);
+}
+.tk-pane-stack {
+  font:
+    500 12px/1.6 var(--tk-mono),
+    monospace;
+  color: var(--tk-mute);
+}
+
+/* ---------- Crosshair ---------- */
+.tk-cross {
+  position: relative;
+  cursor: crosshair;
+}
+.tk-cross-v,
+.tk-cross-h,
+.tk-cross-tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+.tk-cross-v {
+  bottom: 0;
+  width: 1px;
+  margin-left: -0.5px;
+  background: var(--tk-lime);
+}
+.tk-cross-h {
+  right: 0;
+  height: 1px;
+  margin-top: -0.5px;
+  background: var(--tk-lime);
+}
+.tk-cross[data-live="lines"] :is(.tk-cross-v, .tk-cross-h),
+.tk-cross[data-live="true"] :is(.tk-cross-v, .tk-cross-h, .tk-cross-tag) {
+  visibility: visible;
+}
+.tk-cross-tag {
+  z-index: 2;
+  padding: 6px 8px;
+  white-space: nowrap;
+  background: var(--tk-lime);
+  color: var(--tk-on-lime);
+  font:
+    600 11px/1 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+}
+
+/* ---------- Exposure (heat map) ---------- */
+.tk-heat {
+  margin: 0 var(--tk-gutter);
+  border: 1px solid var(--tk-line);
+  overflow-x: auto;
+}
+.tk-heat-table {
+  width: 100%;
+  border-collapse: collapse;
+  font:
+    500 12px/1 var(--tk-mono),
+    monospace;
+}
+.tk-heat-table th {
+  font-weight: 500;
+  color: var(--tk-mute);
+}
+.tk-heat-table thead th {
+  height: 44px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-heat-table thead th[data-on],
+.tk-heat-table tr[data-on] th {
+  color: var(--tk-lime);
+}
+.tk-heat-corner,
+.tk-heat-table tbody th {
+  width: 210px;
+  padding: 0 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+.tk-heat-table tbody th {
+  color: var(--tk-ink);
+}
+.tk-heat-table td {
+  height: 32px;
+  border-left: 1px solid var(--tk-line);
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-heat-table tr:last-child td {
+  border-bottom: 0;
+}
+.tk-heat-table td[data-cross] {
+  background: var(--tk-raise);
+}
+.tk-heat-table td[data-used] {
+  background-image: linear-gradient(var(--tk-lime), var(--tk-lime));
+  background-size: calc(100% - 8px) calc(100% - 8px);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.tk-heat-count {
+  width: 52px;
+  text-align: center;
+  color: var(--tk-mute);
+}
+.tk-skills {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  margin-top: 40px;
+  border-top: 1px solid var(--tk-line);
+}
+.tk-skills li {
+  padding: 22px var(--tk-gutter) 26px;
+  border-right: 1px solid var(--tk-line);
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-skills h3 {
+  margin-bottom: 8px;
+  font:
+    600 12px/1.4 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  color: var(--tk-lime);
+}
+.tk-skills p {
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+/* ---------- Ledger ---------- */
+.tk-career {
+  margin: 0 var(--tk-gutter);
+  border: 1px solid var(--tk-line);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+.tk-career-grid {
+  --name: 280px;
+}
+.tk-career-axis {
+  height: 38px;
+  padding-left: var(--name);
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-career-ticks {
+  position: relative;
+  height: 100%;
+  margin-right: 24px;
+  font:
+    500 11px/1 var(--tk-mono),
+    monospace;
+  color: var(--tk-mute);
+}
+.tk-career-ticks span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 6px;
+  border-left: 1px solid var(--tk-line);
+}
+.tk-career-ticks .tk-now {
+  color: var(--tk-red);
+  border-color: var(--tk-red);
+}
+.tk-career-rows li {
+  display: grid;
+  grid-template-columns: var(--name) 1fr;
+  align-items: center;
+  min-height: 64px;
+  border-bottom: 1px solid var(--tk-line);
+}
+.tk-career-rows li:last-child {
+  border-bottom: 0;
+}
+.tk-career-name {
+  display: grid;
+  padding: 10px 18px;
+  font-size: 15px;
+  line-height: 1.25;
+}
+.tk-career-name span {
+  font-size: 13px;
+  color: var(--tk-mute);
+}
+.tk-career-rows li[data-lit] .tk-career-name strong {
+  color: var(--tk-lime);
+}
+.tk-career-track {
+  position: relative;
+  height: 100%;
+  min-height: 64px;
+  margin-right: 24px;
+}
+.tk-career-bar {
+  position: absolute;
+  top: 50%;
+  height: 26px;
+  min-width: 10px;
+  translate: 0 -50%;
+  background: var(--tk-raise);
+  border: 1px solid var(--tk-mute);
+  font:
+    500 11px/24px var(--tk-mono),
+    monospace;
+  white-space: nowrap;
+}
+.tk-career-bar span {
+  padding-left: 8px;
+}
+/* A bar that starts late carries its label on its left, so it never runs off the axis. */
+.tk-career-bar[data-flip] span {
+  position: absolute;
+  right: calc(100% + 8px);
+  padding: 0;
+  color: var(--tk-ink);
+}
+.tk-career {
+  overflow: hidden;
+}
+.tk-career-bar[data-open] {
+  background: repeating-linear-gradient(-45deg, #d2ff3a26 0 6px, transparent 6px 12px);
+  border-color: var(--tk-lime);
+}
+.tk-career-rows li[data-lit] .tk-career-bar {
+  background: var(--tk-lime);
+  color: var(--tk-on-lime);
+}
+.tk-career-now {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed var(--tk-red);
+}
+.tk-ledger {
+  width: calc(100% - var(--tk-gutter) * 2);
+  margin: 30px var(--tk-gutter) 48px;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.tk-ledger thead th {
+  padding: 10px 14px 10px 0;
+  border-bottom: 1px solid var(--tk-ink);
+  text-align: left;
+  font:
+    500 11px/1 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  color: var(--tk-mute);
+}
+.tk-ledger td,
+.tk-ledger tbody th {
+  padding: 16px 18px 16px 0;
+  border-bottom: 1px solid var(--tk-line);
+  vertical-align: top;
+  text-align: left;
+}
+.tk-ledger td:first-child {
+  font:
+    500 12px/1.6 var(--tk-mono),
+    monospace;
+  white-space: nowrap;
+  color: var(--tk-mute);
+}
+.tk-ledger tbody th {
+  font-weight: 700;
+  min-width: 220px;
+}
+.tk-ledger tbody th span {
+  display: block;
+  font-weight: 400;
+  color: var(--tk-mute);
+}
+.tk-ledger td:last-child {
+  color: #c9ccbf;
+}
+.tk-pill {
+  display: inline-block;
+  padding: 4px 7px;
+  border: 1px solid var(--tk-mute);
+  font:
+    600 11px/1 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  color: var(--tk-mute);
+}
+.tk-pill[data-open="true"] {
+  border-color: var(--tk-lime);
+  background: var(--tk-lime);
+  color: var(--tk-on-lime);
+}
+
+/* ---------- Wire ---------- */
+.tk-wire {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--tk-line);
+}
+.tk-wire li + li {
+  border-left: 1px solid var(--tk-line);
+}
+.tk-wire a {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 12px;
+  height: 100%;
+  padding: 20px var(--tk-gutter) 26px;
+  text-decoration: none;
+}
+.tk-wire a:hover {
+  background: var(--tk-panel);
+}
+.tk-wire-shot {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--tk-line);
+}
+.tk-wire-shot img {
+  object-fit: cover;
+  filter: grayscale(1);
+}
+.tk-wire a:hover .tk-wire-shot img {
+  filter: none;
+}
+.tk-wire-meta {
+  font:
+    500 11px/1 var(--tk-mono),
+    monospace;
+  color: var(--tk-lime);
+}
+.tk-wire-title {
+  font-size: 17px;
+  line-height: 1.3;
+}
+.tk-wire-go {
+  align-self: end;
+  font:
+    500 12px/1 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  color: var(--tk-mute);
+}
+.tk-section > .tk-links {
+  padding: 22px var(--tk-gutter) 40px;
+  border-top: 1px solid var(--tk-line);
+}
+
+/* ---------- Order ---------- */
+.tk-order {
+  display: grid;
+  gap: 26px;
+  padding: clamp(56px, 8vw, 120px) var(--tk-gutter);
+}
+.tk-order h2 {
+  font-weight: 900;
+  font-stretch: 62%;
+  font-size: clamp(88px, 16vw, 280px);
+  line-height: 0.8;
+  text-transform: uppercase;
+}
+.tk-order h2 span {
+  color: var(--tk-lime);
+}
+.tk-order-note {
+  max-width: 44ch;
+  font-size: 19px;
+  color: var(--tk-mute);
+}
+.tk-cmd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 18px;
+  max-width: 960px;
+  padding: 20px 22px;
+  border: 1px solid var(--tk-lime);
+  font:
+    500 clamp(17px, 2.2vw, 28px) / 1.2 var(--tk-mono),
+    monospace;
+}
+.tk-cmd-prompt {
+  color: var(--tk-lime);
+}
+.tk-cmd a {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+.tk-cmd a:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--tk-lime);
+}
+.tk-cmd-copy {
+  margin-left: auto;
+  padding: 12px 16px;
+  border: 0;
+  background: var(--tk-lime);
+  color: var(--tk-on-lime) !important;
+  font:
+    600 12px/1 var(--tk-mono),
+    monospace !important;
+  text-transform: uppercase;
+}
+.tk-cmd-copy[data-copied="true"] {
+  background: var(--tk-ink);
+}
+.tk-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 18px var(--tk-gutter);
+  border-top: 1px solid var(--tk-line);
+  font:
+    500 11px/1.4 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  color: var(--tk-mute);
+}
+
+/* ---------- Narrow screens ---------- */
+@media (max-width: 1100px) {
+  .tk-nav,
+  .tk-clock {
+    display: none;
+  }
+  .tk-versions {
+    margin-left: auto;
+  }
+  .tk-hero {
+    grid-template-columns: 1fr;
+  }
+  .tk-hero-name {
+    border-right: 0;
+    border-bottom: 1px solid var(--tk-line);
+  }
+  .tk-wire {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tk-wire li:nth-child(3) {
+    border-left: 0;
+  }
+  .tk-wire li:nth-child(n + 3) {
+    border-top: 1px solid var(--tk-line);
+  }
+}
+@media (max-width: 900px) {
+  .tk-book {
+    grid-template-columns: 1fr;
+  }
+  .tk-book-list {
+    border-right: 0;
+  }
+  .tk-pane {
+    display: none;
+  }
+  .tk-book-head {
+    display: none;
+  }
+  .tk-row {
+    grid-template-columns: 58px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "sym name yr"
+      "sym fact fact";
+    gap: 6px 12px;
+    padding-block: 16px;
+  }
+  .tk-row-sym {
+    grid-area: sym;
+    align-self: start;
+    padding-top: 6px;
+  }
+  .tk-row-name {
+    grid-area: name;
+  }
+  .tk-row-type {
+    display: none;
+  }
+  .tk-row-fact {
+    grid-area: fact;
+  }
+  .tk-row-yr {
+    grid-area: yr;
+  }
+  .tk-row-detail {
+    display: block;
+    padding: 4px var(--tk-gutter) 26px;
+    background: var(--tk-panel);
+  }
+  .tk-section-head {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding-top: 36px;
+  }
+  .tk-section-head p {
+    justify-self: start;
+  }
+  .tk-career-grid {
+    --name: 0px;
+  }
+  .tk-career-rows li {
+    grid-template-columns: 1fr;
+  }
+  .tk-career-name {
+    padding: 12px 14px 0;
+  }
+  .tk-career-track {
+    margin-left: 0;
+  }
+  .tk-ledger thead {
+    display: none;
+  }
+  .tk-ledger tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 6px 12px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--tk-line);
+  }
+  .tk-ledger td,
+  .tk-ledger tbody th {
+    padding: 0;
+    border: 0;
+  }
+  .tk-ledger tbody th {
+    grid-row: 2;
+    min-width: 0;
+  }
+  .tk-ledger td:last-child {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 640px) {
+  .tk-status {
+    display: none;
+  }
+  .tk-mark > span:last-child {
+    display: none;
+  }
+  .tk-quote {
+    grid-template-columns: 1fr;
+  }
+  .tk-quote-face {
+    min-height: 0;
+    height: 320px;
+    border-right: 0;
+  }
+  .tk-wire {
+    grid-template-columns: 1fr;
+  }
+  .tk-wire li + li {
+    border-left: 0;
+    border-top: 1px solid var(--tk-line);
+  }
+  .tk-heat-corner,
+  .tk-heat-table tbody th {
+    width: 120px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+  .tk-heat-table thead th span {
+    display: inline-block;
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    padding-block: 6px;
+  }
+  .tk-heat-table thead th {
+    height: auto;
+  }
+  .tk-cmd-copy {
+    margin-left: 0;
+  }
+}

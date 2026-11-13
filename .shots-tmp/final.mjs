@@ -1,0 +1,11 @@
+import { chromium } from "@playwright/test";
+const b = await chromium.launch({ executablePath: "/usr/bin/google-chrome" });
+const p = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+await p.goto("http://localhost:3100/review", { waitUntil: "networkidle" });
+await p.screenshot({ path: "/tmp/claude-1000/-home-unknown-web-personal-portfolio/c6c5e3aa-bfa2-4a4c-acc6-c85396710292/scratchpad/prod/f-r1-top.png", clip: { x: 0, y: 0, width: 1440, height: 80 } });
+const f = p.locator(".ld-footer-base"); await f.scrollIntoViewIfNeeded();
+await f.screenshot({ path: "/tmp/claude-1000/-home-unknown-web-personal-portfolio/c6c5e3aa-bfa2-4a4c-acc6-c85396710292/scratchpad/prod/f-r1-foot.png" });
+const m = await (await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true })).newPage();
+await m.goto("http://localhost:3100/review-4", { waitUntil: "networkidle" });
+await m.screenshot({ path: "/tmp/claude-1000/-home-unknown-web-personal-portfolio/c6c5e3aa-bfa2-4a4c-acc6-c85396710292/scratchpad/prod/f-r4-m.png" });
+await b.close();

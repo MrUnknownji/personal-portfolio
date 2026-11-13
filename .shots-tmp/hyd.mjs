@@ -1,0 +1,12 @@
+import { chromium } from "@playwright/test";
+const b = await chromium.launch({ executablePath: "/usr/bin/google-chrome" });
+const p = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
+const logs = [];
+p.on("console", (m) => logs.push(m.type() + ": " + m.text().slice(0, 200)));
+await p.goto("http://localhost:" + (process.env.PORT ?? 3200) + "/review-3", { waitUntil: "networkidle" });
+await p.waitForTimeout(2500);
+console.log("clock:", await p.textContent(".tk-clock"));
+await p.click(".tk-tape-toggle");
+console.log("toggle:", await p.textContent(".tk-tape-toggle"));
+console.log(logs.filter((l) => !l.includes("hmr")).slice(0, 10).join("\n"));
+await b.close();

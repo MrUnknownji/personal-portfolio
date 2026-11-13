@@ -711,6 +711,35 @@
     }
   }
 
+  /* ---------- Review version switch (header) ---------- */
+  .ld-top-actions .ld-versions {
+    display: flex;
+    gap: 1px;
+    margin-left: 6px;
+    padding: 2px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--ld-graphite) 18%, transparent);
+  }
+  .ld-top-actions .ld-versions a {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .ld-top-actions .ld-versions a[aria-current="page"] {
+    background: var(--ld-graphite);
+    color: var(--ld-paper, #fff);
+  }
+  /* The header only has room for the switch on wide screens; the footer always carries it. */
+  @media (max-width: 1599px) {
+    .ld-top-actions .ld-versions {
+      display: none;
+    }
+  }
+
   /* ---------- Display switches (header) ---------- */
   .ld-switches {
     display: flex;
@@ -863,6 +892,27 @@
     gap: 12px;
     padding-top: 16px;
     border-top: 1px solid var(--ld-line-strong);
+  }
+  .ld-footer-versions {
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    border-radius: 999px;
+    border: 1px solid var(--ld-line-strong);
+  }
+  .ld-footer-versions a {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .ld-footer-versions a[aria-current="page"] {
+    background: var(--ld-graphite);
+    color: var(--ld-paper);
   }
   .ld-footer-top {
     font-weight: 600;
@@ -1738,6 +1788,10 @@
     touch-action: none;
   }
   .ld-tile strong {
+    display: block;
+    min-width: 0;
+    white-space: nowrap;
+    overflow-x: clip;
     font:
       600 clamp(15px, calc(var(--cell) * 0.2), 19px) / 1.05 var(--ld-font-display),
       ui-rounded,
@@ -1751,8 +1805,7 @@
     display: none;
   }
   .ld-field[data-compact="true"] .ld-tile strong {
-    font-size: 13px;
-    overflow-wrap: anywhere;
+    font-size: 15px;
   }
   .ld-tile.is-dragging {
     z-index: 5;

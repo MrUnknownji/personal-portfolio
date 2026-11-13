@@ -46,6 +46,7 @@ export default function SnapField() {
   const field = useRef<HTMLDivElement>(null);
   const ghost = useRef<HTMLDivElement>(null);
   const tileEls = useRef<(HTMLDivElement | null)[]>([]);
+  const wordEls = useRef<(HTMLElement | null)[]>([]);
   const [grid, setGrid] = useState({ cell: 96, cols: 8 });
   const [readout, setReadout] = useState("Six beats on a three-row grid");
   const [labels, setLabels] = useState(() => START.map(([c, r]) => zone(c, r)));
@@ -155,6 +156,28 @@ export default function SnapField() {
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- layout reads refs only
   }, []);
+
+  // Each beat name is set as large as its tile allows, so long words like "Problem" shrink to
+  // fit instead of spilling past the rounded edge.
+  useLayoutEffect(() => {
+    const fit = () =>
+      wordEls.current.forEach((el) => {
+        if (!el) return;
+        el.style.fontSize = "";
+        const room = el.clientWidth;
+        const natural = el.scrollWidth;
+        if (natural > room) {
+          const size = parseFloat(getComputedStyle(el).fontSize);
+          el.style.fontSize = `${Math.floor(((size * room * 0.98) / natural) * 10) / 10}px`;
+        }
+      });
+    fit();
+    let live = true;
+    document.fonts?.ready.then(() => live && fit());
+    return () => {
+      live = false;
+    };
+  }, [grid.cell]);
 
   const endDrag = (index: number, el: HTMLElement, pointerId: number) => {
     const current = drags.current[index];
@@ -304,7 +327,13 @@ export default function SnapField() {
             >
               <SoftLayers />
               <span className="ld-anno">Beat 0{index + 1}</span>
-              <strong>{beat.name}</strong>
+              <strong
+                ref={(el) => {
+                  wordEls.current[index] = el;
+                }}
+              >
+                {beat.name}
+              </strong>
               <span className="ld-sr-only">, cell {labels[index]}</span>
             </div>
           );
