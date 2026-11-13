@@ -15,7 +15,7 @@ import {
 import VersionSwitch from "@/components/review/VersionSwitch";
 import CareerChart from "@/components/ticker/CareerChart";
 import Heatmap from "@/components/ticker/Heatmap";
-import { Clock, Tape } from "@/components/ticker/Live";
+import { Tape } from "@/components/ticker/Live";
 import Positions, { type Position } from "@/components/ticker/Positions";
 import { motionChannel, motionVideos } from "@/data/motion";
 import { PROFILE } from "@/data/profile";
@@ -79,17 +79,15 @@ function Section({
 }
 
 const live = ALL.filter((project) => project.demoLink).length;
-const open = ALL.filter((project) => project.githubLink).length;
 const tape = ALL.flatMap((project) =>
   (project.facts ?? []).map((fact) => ({
-    sym: SYMBOLS[project.id],
+    sym: project.title,
     value: fact.value,
     label: fact.label,
   })),
 );
 const positions: Position[] = ALL.map((project) => ({
   id: project.id,
-  sym: SYMBOLS[project.id],
   title: project.title,
   category: project.category,
   year: project.year,
@@ -102,7 +100,7 @@ const positions: Position[] = ALL.map((project) => ({
   links: projectLinks(project),
   featured: FEATURED.includes(project),
 }));
-const techRows = TECH_INDEX.slice(0, 16).map(([tech, count]) => ({ tech, count }));
+const techRows = TECH_INDEX.slice(0, 10).map(([tech, count]) => ({ tech, count }));
 const heatCols = ALL.map((project) => ({
   id: project.id,
   sym: SYMBOLS[project.id],
@@ -121,20 +119,19 @@ export default function TickerHome() {
       </a>
       <header className="tk-top">
         <a className="tk-mark" href="#top">
-          <span className="tk-mark-sym">SKMR</span>
+          <span className="tk-mark-sym">SK</span>
           <span>Sandeep Kumar</span>
         </a>
         <p className="tk-status">
           <span className="tk-dot" aria-hidden="true" /> Open to roles
         </p>
         <nav className="tk-nav" aria-label="Sections">
-          <a href="#positions">Positions</a>
-          <a href="#exposure">Exposure</a>
-          <a href="#ledger">Ledger</a>
-          <a href="#wire">Wire</a>
+          <a href="#positions">Work</a>
+          <a href="#exposure">Stack</a>
+          <a href="#ledger">Experience</a>
+          <a href="#wire">Films</a>
           <a href="#order">Contact</a>
         </nav>
-        <Clock />
         <VersionSwitch current={3} className="tk-versions" />
       </header>
 
@@ -143,7 +140,7 @@ export default function TickerHome() {
       <main id="main" className="tk-main">
         <section className="tk-hero" aria-labelledby="tk-name">
           <div className="tk-hero-name">
-            <p className="tk-kicker">SKMR · Full-stack developer · {PROFILE.location}</p>
+            <p className="tk-kicker">Full-stack developer · {PROFILE.location}</p>
             <h1 id="tk-name">
               <span>Sandeep</span>
               <span>Kumar</span>
@@ -205,12 +202,6 @@ export default function TickerHome() {
                 </dd>
                 <dt>live demos you can open</dt>
               </div>
-              <div>
-                <dd>
-                  <Odo value={String(open)} delay={360} />
-                </dd>
-                <dt>public repositories</dt>
-              </div>
             </dl>
           </div>
         </section>
@@ -218,8 +209,8 @@ export default function TickerHome() {
         <Section
           n="01"
           id="positions"
-          title="Positions"
-          note="Eight products. Point at a row for its quote: the problem, the fix, and the numbers."
+          title="Work"
+          note="Point at a project to read the problem it solved, the fix, and the numbers."
         >
           <Positions rows={positions} />
         </Section>
@@ -227,74 +218,47 @@ export default function TickerHome() {
         <Section
           n="02"
           id="exposure"
-          title="Exposure"
-          note="Every technology against every project. Move across the grid to read a cell."
+          title="Stack"
+          note="The ten technologies I use most, across every project."
         >
           <Heatmap rows={techRows} cols={heatCols} used={used} />
-          <ul className="tk-skills">
+          <dl className="tk-skills">
             {PROFILE.skills.map((group) => (
-              <li key={group.group}>
-                <h3>{group.group}</h3>
-                <p>{group.items.join(" · ")}</p>
-              </li>
+              <div key={group.group}>
+                <dt>{group.group}</dt>
+                <dd>{group.items.join(", ")}</dd>
+              </div>
             ))}
-          </ul>
+          </dl>
         </Section>
 
         <Section
           n="03"
           id="ledger"
-          title="Ledger"
-          note="Roles on one time axis. Drag the crosshair along it to see what was open when."
+          title="Experience"
+          note="Move along the timeline to see which roles overlapped."
         >
           <CareerChart
-            entries={CAREER.map(({ title, place, start, end, period }) => ({
+            entries={CAREER.map(({ title, place, start, end, period, note }) => ({
               title,
               place,
               start,
-              end: end === null ? null : end,
+              end,
               period,
+              note,
             }))}
             now={now}
           />
-          <table className="tk-ledger">
-            <caption className="tk-sr">Career entries, oldest first</caption>
-            <thead>
-              <tr>
-                <th scope="col">Period</th>
-                <th scope="col">Entry</th>
-                <th scope="col">Status</th>
-                <th scope="col">Memo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {CAREER.map((entry) => (
-                <tr key={entry.title + entry.place}>
-                  <td>{entry.period}</td>
-                  <th scope="row">
-                    {entry.title}
-                    <span>{entry.place}</span>
-                  </th>
-                  <td>
-                    <span className="tk-pill" data-open={entry.open}>
-                      {entry.open ? "Open" : "Closed"}
-                    </span>
-                  </td>
-                  <td>{entry.note}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </Section>
 
         <Section
           n="04"
           id="wire"
-          title="Wire"
+          title="Films"
           note="Technology stories I made for CruxLog, told through research, pacing, and visuals."
         >
           <ul className="tk-wire">
-            {motionVideos.map((video, i) => (
+            {motionVideos.map((video) => (
               <li key={video.id}>
                 <a
                   href={`https://www.youtube.com/watch?v=${video.id}`}
@@ -309,9 +273,7 @@ export default function TickerHome() {
                       sizes="(max-width: 900px) 92vw, 320px"
                     />
                   </span>
-                  <span className="tk-wire-meta">
-                    CRUX-{String(i + 1).padStart(2, "0")} · {video.duration}
-                  </span>
+                  <span className="tk-wire-meta">CruxLog · {video.duration}</span>
                   <span className="tk-wire-title">{video.title}</span>
                   <span className="tk-wire-go">
                     Watch <span aria-hidden="true">↗</span>

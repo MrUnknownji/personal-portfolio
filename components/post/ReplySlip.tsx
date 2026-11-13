@@ -7,7 +7,15 @@ import CopyEmail from "@/components/review/CopyEmail";
  * A reply coupon with a pair of scissors on its dotted line. Drag the scissors along the line (they
  * stay exactly under the pointer) or press them to cut. The email is readable whether or not you cut.
  */
-export default function ReplySlip({ email, openTo }: { email: string; openTo: string }) {
+export default function ReplySlip({
+  email,
+  openTo,
+  location,
+}: {
+  email: string;
+  openTo: string;
+  location: string;
+}) {
   const line = useRef<HTMLDivElement>(null);
   const scissors = useRef<HTMLButtonElement>(null);
   const cutRef = useRef<HTMLSpanElement>(null);
@@ -34,8 +42,9 @@ export default function ReplySlip({ email, openTo }: { email: string; openTo: st
   return (
     <div className="ps-slip" data-cut={cut || undefined}>
       <div className="ps-slip-keep">
-        <p className="ps-kicker">Keep this part</p>
-        <p>{`Open to ${openTo.toLowerCase()}. Email is the fastest way to reach me.`}</p>
+        <p className="ps-kicker">Open to</p>
+        <p className="ps-slip-role">{openTo}</p>
+        <p>{`Based in ${location}. Email is the fastest way to reach me.`}</p>
       </div>
       <div className="ps-slip-line" ref={line}>
         <span className="ps-slip-cut" ref={cutRef} aria-hidden="true" />

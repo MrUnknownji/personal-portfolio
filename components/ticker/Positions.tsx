@@ -6,7 +6,6 @@ import type { ReviewLink } from "@/components/review/portfolio";
 
 export type Position = {
   id: number;
-  sym: string;
   title: string;
   category: string;
   year?: number;
@@ -30,7 +29,6 @@ function Detail({ p }: { p: Position }) {
           fill
           sizes="(max-width: 900px) 92vw, 560px"
         />
-        <span className="tk-pane-sym">{p.sym}</span>
       </div>
       <p className="tk-pane-short">{p.short}</p>
       {p.problem && (
@@ -92,11 +90,9 @@ export default function Positions({ rows }: { rows: Position[] }) {
     <div className="tk-book">
       <div className="tk-book-list">
         <div className="tk-book-head" aria-hidden="true">
-          <span>Sym</span>
-          <span>Position</span>
-          <span>Type</span>
+          <span>Project</span>
           <span>Key fact</span>
-          <span>Yr</span>
+          <span>Year</span>
         </div>
         <ol>
           {rows.map((row, i) => {
@@ -114,9 +110,10 @@ export default function Positions({ rows }: { rows: Position[] }) {
                   onClick={() => setSel(i)}
                   onKeyDown={(e) => onKey(e, i)}
                 >
-                  <span className="tk-row-sym">{row.sym}</span>
-                  <span className="tk-row-name">{row.title}</span>
-                  <span className="tk-row-type">{row.category}</span>
+                  <span className="tk-row-name">
+                    {row.title}
+                    <span className="tk-row-type">{row.category}</span>
+                  </span>
                   <span className="tk-row-fact">
                     {lead ? (
                       <>
@@ -140,7 +137,6 @@ export default function Positions({ rows }: { rows: Position[] }) {
       </div>
       <aside id="tk-pane" className="tk-pane" aria-live="polite" aria-label={`${p.title} quote`}>
         <header className="tk-pane-head">
-          <span>{p.sym}</span>
           <h3>{p.title}</h3>
           <span>
             {p.category}

@@ -41,15 +41,18 @@ export default function Heatmap({
         <thead>
           <tr>
             <th scope="col" className="tk-heat-corner">
-              Tech / Sym
+              Technology
             </th>
             {cols.map((col, c) => (
               <th key={col.id} scope="col" data-on={hot?.c === c || undefined} title={col.title}>
-                <span>{col.sym}</span>
+                <span className="tk-heat-name">{col.title}</span>
+                <span className="tk-heat-sym" aria-hidden="true">
+                  {col.sym}
+                </span>
               </th>
             ))}
             <th scope="col" className="tk-heat-count">
-              Σ
+              Uses
             </th>
           </tr>
         </thead>

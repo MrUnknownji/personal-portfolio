@@ -1,7 +1,7 @@
 import { chromium } from "@playwright/test";
 const b = await chromium.launch({ executablePath: "/usr/bin/google-chrome" });
 const p = await (await b.newContext({ viewport: { width: 1440, height: 900 } })).newPage();
-await p.goto("http://localhost:3200/review-3", { waitUntil: "networkidle" });
+await p.goto("http://localhost:3100/review-3", { waitUntil: "networkidle" });
 await p.locator("#tk-row-11").hover();
 await p.waitForTimeout(500);
 await p.locator(".tk-book").screenshot({ path: "/tmp/claude-1000/-home-unknown-web-personal-portfolio/c6c5e3aa-bfa2-4a4c-acc6-c85396710292/scratchpad/shots/v3/i-book.png" });

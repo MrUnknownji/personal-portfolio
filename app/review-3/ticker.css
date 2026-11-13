@@ -238,9 +238,9 @@ html:has(.tk) {
   animation-play-state: paused;
 }
 .tk-tape-run li {
-  padding: 12px 22px;
+  padding: 11px 26px 11px 0;
   white-space: nowrap;
-  border-right: 1px solid var(--tk-line);
+  color: var(--tk-mute);
 }
 .tk-up {
   color: var(--tk-lime);
@@ -270,19 +270,19 @@ html:has(.tk) {
 .tk-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 64px);
+  align-items: end;
+  padding-right: var(--tk-gutter);
   border-bottom: 1px solid var(--tk-line);
 }
 .tk-hero-name {
   display: grid;
   align-content: end;
   gap: 26px;
-  padding: clamp(40px, 6vw, 88px) var(--tk-gutter) 40px;
-  border-right: 1px solid var(--tk-line);
-  background-image:
-    linear-gradient(var(--tk-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--tk-line) 1px, transparent 1px);
-  background-size: 48px 48px;
-  background-position: -1px -1px;
+  padding: clamp(48px, 7vw, 104px) var(--tk-gutter) 48px;
+}
+.tk-section-n {
+  grid-column: 1 / -1;
 }
 .tk-kicker,
 .tk-section-n {
@@ -314,16 +314,14 @@ html:has(.tk) {
 
 .tk-quote {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
-  grid-template-rows: auto 1fr;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  padding-bottom: 40px;
 }
 .tk-quote-face {
   position: relative;
   min-height: 300px;
   overflow: hidden;
   background: var(--tk-lime);
-  border-right: 1px solid var(--tk-line);
-  border-bottom: 1px solid var(--tk-line);
 }
 .tk-quote-face img {
   position: absolute;
@@ -337,18 +335,11 @@ html:has(.tk) {
   mix-blend-mode: multiply;
 }
 /* Static scan lines over the portrait: a painted gradient, nothing animates. */
-.tk-quote-face::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(0deg, #0a0b0926 0 1px, transparent 1px 4px);
-}
 .tk-quote-meta {
   display: grid;
   align-content: end;
-  gap: 16px;
-  padding: 22px;
-  border-bottom: 1px solid var(--tk-line);
+  gap: 18px;
+  padding: 24px 0 24px 24px;
 }
 .tk-quote-meta dt,
 .tk-board dt {
@@ -365,23 +356,21 @@ html:has(.tk) {
 .tk-board {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  padding: 28px 0 8px;
+  border-top: 1px solid var(--tk-line);
 }
 .tk-board div {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 22px;
-  border-bottom: 1px solid var(--tk-line);
-}
-.tk-board div:nth-child(odd) {
-  border-right: 1px solid var(--tk-line);
 }
 .tk-board dd {
   order: -1;
   font-weight: 800;
   font-stretch: 125%;
-  font-size: clamp(48px, 5vw, 76px);
+  font-size: clamp(40px, 4vw, 60px);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -415,28 +404,28 @@ html:has(.tk) {
 
 /* ---------- Sections ---------- */
 .tk-section {
-  border-bottom: 1px solid var(--tk-line);
+  padding-bottom: clamp(32px, 4vw, 56px);
 }
 .tk-section-head {
   display: grid;
-  grid-template-columns: 90px minmax(0, auto) minmax(0, 1fr);
-  align-items: baseline;
-  gap: 24px;
-  padding: 44px var(--tk-gutter) 26px;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  align-items: end;
+  gap: 8px 40px;
+  padding: clamp(40px, 5vw, 72px) var(--tk-gutter) 24px;
 }
 .tk-section-head h2 {
+  grid-column: 1;
   font-weight: 800;
-  font-stretch: 70%;
-  font-size: clamp(48px, 7vw, 104px);
-  line-height: 0.9;
+  font-stretch: 75%;
+  font-size: clamp(40px, 5vw, 72px);
+  line-height: 0.95;
   text-transform: uppercase;
-  letter-spacing: -0.01em;
 }
 .tk-section-head p {
   justify-self: end;
-  max-width: 38ch;
+  max-width: 40ch;
   color: var(--tk-mute);
-  font-size: 15px;
+  font-size: 16px;
 }
 
 /* ---------- Positions (order book) ---------- */
@@ -451,7 +440,7 @@ html:has(.tk) {
 .tk-book-head,
 .tk-row {
   display: grid;
-  grid-template-columns: 74px minmax(0, 1.3fr) minmax(0, 0.8fr) minmax(0, 2fr) 54px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.5fr) 54px;
   gap: 16px;
   align-items: center;
   padding: 0 var(--tk-gutter);
@@ -501,13 +490,9 @@ html:has(.tk) {
 .tk-row:hover {
   background: var(--tk-raise) !important;
 }
-.tk-row-sym {
-  font:
-    600 13px/1 var(--tk-mono),
-    monospace;
-  color: var(--tk-lime);
-}
 .tk-row-name {
+  display: grid;
+  gap: 4px;
   font-weight: 700;
   font-stretch: 85%;
   font-size: 22px;
@@ -516,7 +501,13 @@ html:has(.tk) {
 .tk-book li[data-featured="false"] .tk-row-name {
   font-weight: 500;
 }
-.tk-row-type,
+.tk-row-type {
+  font:
+    500 11px/1.3 var(--tk-mono),
+    monospace;
+  text-transform: uppercase;
+  color: var(--tk-mute);
+}
 .tk-row-yr {
   font:
     500 12px/1.3 var(--tk-mono),
@@ -557,17 +548,12 @@ html:has(.tk) {
 }
 .tk-pane-head {
   display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: baseline;
-  gap: 2px 12px;
+  gap: 6px;
   font:
     500 12px/1.3 var(--tk-mono),
     monospace;
   text-transform: uppercase;
   color: var(--tk-mute);
-}
-.tk-pane-head span:first-child {
-  color: var(--tk-lime);
 }
 .tk-pane-head h3 {
   font:
@@ -576,9 +562,6 @@ html:has(.tk) {
   font-stretch: 75%;
   text-transform: uppercase;
   color: var(--tk-ink);
-}
-.tk-pane-head span:last-child {
-  grid-column: 2;
 }
 .tk-pane-shot {
   position: relative;
@@ -590,17 +573,6 @@ html:has(.tk) {
 .tk-pane-shot img {
   object-fit: cover;
   object-position: top center;
-}
-.tk-pane-sym {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  padding: 6px 8px;
-  background: var(--tk-lime);
-  color: var(--tk-on-lime);
-  font:
-    600 11px/1 var(--tk-mono),
-    monospace;
 }
 .tk-pane-short {
   font-size: 19px;
@@ -715,6 +687,14 @@ html:has(.tk) {
   padding: 0 4px;
   border-bottom: 1px solid var(--tk-line);
 }
+.tk-heat-table thead th {
+  white-space: normal;
+  line-height: 1.25;
+  font-size: 11px;
+}
+.tk-heat-sym {
+  display: none;
+}
 .tk-heat-table thead th[data-on],
 .tk-heat-table tr[data-on] th {
   color: var(--tk-lime);
@@ -753,26 +733,28 @@ html:has(.tk) {
 }
 .tk-skills {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  margin-top: 40px;
-  border-top: 1px solid var(--tk-line);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 48px;
+  margin: 36px var(--tk-gutter) 0;
 }
-.tk-skills li {
-  padding: 22px var(--tk-gutter) 26px;
-  border-right: 1px solid var(--tk-line);
+.tk-skills div {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 16px;
+  padding: 14px 0;
   border-bottom: 1px solid var(--tk-line);
 }
-.tk-skills h3 {
-  margin-bottom: 8px;
+.tk-skills dt {
   font:
-    600 12px/1.4 var(--tk-mono),
+    600 12px/1.6 var(--tk-mono),
     monospace;
   text-transform: uppercase;
   color: var(--tk-lime);
 }
-.tk-skills p {
+.tk-skills dd {
+  margin: 0;
   font-size: 16px;
-  line-height: 1.45;
+  line-height: 1.5;
 }
 
 /* ---------- Ledger ---------- */
@@ -817,7 +799,6 @@ html:has(.tk) {
   display: grid;
   grid-template-columns: var(--name) 1fr;
   align-items: center;
-  min-height: 64px;
   border-bottom: 1px solid var(--tk-line);
 }
 .tk-career-rows li:last-child {
@@ -832,6 +813,17 @@ html:has(.tk) {
 .tk-career-name span {
   font-size: 13px;
   color: var(--tk-mute);
+}
+.tk-career-note {
+  grid-column: 1 / -1;
+  max-width: 80ch;
+  padding: 0 18px 16px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--tk-mute);
+}
+.tk-career-rows li[data-lit] .tk-career-note {
+  color: var(--tk-ink);
 }
 .tk-career-rows li[data-lit] .tk-career-name strong {
   color: var(--tk-lime);
@@ -882,79 +874,20 @@ html:has(.tk) {
   bottom: 0;
   border-left: 1px dashed var(--tk-red);
 }
-.tk-ledger {
-  width: calc(100% - var(--tk-gutter) * 2);
-  margin: 30px var(--tk-gutter) 48px;
-  border-collapse: collapse;
-  font-size: 15px;
-}
-.tk-ledger thead th {
-  padding: 10px 14px 10px 0;
-  border-bottom: 1px solid var(--tk-ink);
-  text-align: left;
-  font:
-    500 11px/1 var(--tk-mono),
-    monospace;
-  text-transform: uppercase;
-  color: var(--tk-mute);
-}
-.tk-ledger td,
-.tk-ledger tbody th {
-  padding: 16px 18px 16px 0;
-  border-bottom: 1px solid var(--tk-line);
-  vertical-align: top;
-  text-align: left;
-}
-.tk-ledger td:first-child {
-  font:
-    500 12px/1.6 var(--tk-mono),
-    monospace;
-  white-space: nowrap;
-  color: var(--tk-mute);
-}
-.tk-ledger tbody th {
-  font-weight: 700;
-  min-width: 220px;
-}
-.tk-ledger tbody th span {
-  display: block;
-  font-weight: 400;
-  color: var(--tk-mute);
-}
-.tk-ledger td:last-child {
-  color: #c9ccbf;
-}
-.tk-pill {
-  display: inline-block;
-  padding: 4px 7px;
-  border: 1px solid var(--tk-mute);
-  font:
-    600 11px/1 var(--tk-mono),
-    monospace;
-  text-transform: uppercase;
-  color: var(--tk-mute);
-}
-.tk-pill[data-open="true"] {
-  border-color: var(--tk-lime);
-  background: var(--tk-lime);
-  color: var(--tk-on-lime);
-}
 
 /* ---------- Wire ---------- */
 .tk-wire {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid var(--tk-line);
-}
-.tk-wire li + li {
-  border-left: 1px solid var(--tk-line);
+  gap: 8px;
+  padding: 0 calc(var(--tk-gutter) - 16px);
 }
 .tk-wire a {
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   gap: 12px;
   height: 100%;
-  padding: 20px var(--tk-gutter) 26px;
+  padding: 16px;
   text-decoration: none;
 }
 .tk-wire a:hover {
@@ -968,10 +901,6 @@ html:has(.tk) {
 }
 .tk-wire-shot img {
   object-fit: cover;
-  filter: grayscale(1);
-}
-.tk-wire a:hover .tk-wire-shot img {
-  filter: none;
 }
 .tk-wire-meta {
   font:
@@ -992,8 +921,7 @@ html:has(.tk) {
   color: var(--tk-mute);
 }
 .tk-section > .tk-links {
-  padding: 22px var(--tk-gutter) 40px;
-  border-top: 1px solid var(--tk-line);
+  padding: 20px var(--tk-gutter) 0;
 }
 
 /* ---------- Order ---------- */
@@ -1081,18 +1009,14 @@ html:has(.tk) {
   .tk-hero {
     grid-template-columns: 1fr;
   }
+  .tk-hero {
+    padding-inline: var(--tk-gutter);
+  }
   .tk-hero-name {
-    border-right: 0;
-    border-bottom: 1px solid var(--tk-line);
+    padding-inline: 0;
   }
   .tk-wire {
     grid-template-columns: 1fr 1fr;
-  }
-  .tk-wire li:nth-child(3) {
-    border-left: 0;
-  }
-  .tk-wire li:nth-child(n + 3) {
-    border-top: 1px solid var(--tk-line);
   }
 }
 @media (max-width: 900px) {
@@ -1109,23 +1033,15 @@ html:has(.tk) {
     display: none;
   }
   .tk-row {
-    grid-template-columns: 58px minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
-      "sym name yr"
-      "sym fact fact";
-    gap: 6px 12px;
+      "name yr"
+      "fact fact";
+    gap: 8px 12px;
     padding-block: 16px;
-  }
-  .tk-row-sym {
-    grid-area: sym;
-    align-self: start;
-    padding-top: 6px;
   }
   .tk-row-name {
     grid-area: name;
-  }
-  .tk-row-type {
-    display: none;
   }
   .tk-row-fact {
     grid-area: fact;
@@ -1141,7 +1057,9 @@ html:has(.tk) {
   .tk-section-head {
     grid-template-columns: 1fr;
     gap: 10px;
-    padding-top: 36px;
+  }
+  .tk-skills {
+    grid-template-columns: 1fr;
   }
   .tk-section-head p {
     justify-self: start;
@@ -1158,27 +1076,8 @@ html:has(.tk) {
   .tk-career-track {
     margin-left: 0;
   }
-  .tk-ledger thead {
-    display: none;
-  }
-  .tk-ledger tr {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 6px 12px;
-    padding: 16px 0;
-    border-bottom: 1px solid var(--tk-line);
-  }
-  .tk-ledger td,
-  .tk-ledger tbody th {
-    padding: 0;
-    border: 0;
-  }
-  .tk-ledger tbody th {
-    grid-row: 2;
-    min-width: 0;
-  }
-  .tk-ledger td:last-child {
-    grid-column: 1 / -1;
+  .tk-career-note {
+    padding-inline: 14px;
   }
 }
 @media (max-width: 640px) {
@@ -1194,14 +1093,23 @@ html:has(.tk) {
   .tk-quote-face {
     min-height: 0;
     height: 320px;
-    border-right: 0;
+  }
+  .tk-quote-meta {
+    padding-left: 0;
+  }
+  .tk-board {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .tk-board dt {
+    font-size: 10px;
   }
   .tk-wire {
     grid-template-columns: 1fr;
   }
-  .tk-wire li + li {
-    border-left: 0;
-    border-top: 1px solid var(--tk-line);
+  .tk-skills div {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
   .tk-heat-corner,
   .tk-heat-table tbody th {
@@ -1209,7 +1117,10 @@ html:has(.tk) {
     padding: 0 8px;
     font-size: 11px;
   }
-  .tk-heat-table thead th span {
+  .tk-heat-name {
+    display: none;
+  }
+  .tk-heat-table thead th .tk-heat-sym {
     display: inline-block;
     writing-mode: vertical-rl;
     rotate: 180deg;

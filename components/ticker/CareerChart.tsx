@@ -3,7 +3,14 @@
 import { useRef, useState } from "react";
 import Crosshair from "./Crosshair";
 
-type Entry = { title: string; place: string; start: number; end: number | null; period: string };
+type Entry = {
+  title: string;
+  place: string;
+  start: number;
+  end: number | null;
+  period: string;
+  note: string;
+};
 
 const FROM = 2023;
 const TO = 2027.25;
@@ -71,6 +78,7 @@ export default function CareerChart({ entries, now }: { entries: Entry[]; now: n
                   </span>
                   <span className="tk-career-now" style={{ left: pct(now) }} aria-hidden="true" />
                 </div>
+                <p className="tk-career-note">{entry.note}</p>
               </li>
             );
           })}

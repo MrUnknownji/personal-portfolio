@@ -46,13 +46,26 @@ function Postmark({ className, year }: { className?: string; year: number }) {
   );
 }
 
-function Head({ n, id, title, note }: { n: string; id: string; title: string; note: string }) {
+function Head({
+  n,
+  id,
+  title,
+  kicker,
+  lede,
+}: {
+  n: string;
+  id: string;
+  title: string;
+  kicker: string;
+  lede?: string;
+}) {
   return (
     <header className="ps-head">
       <p className="ps-kicker">
-        No. {n} · {note}
+        No. {n} · {kicker}
       </p>
       <h2 id={id}>{title}</h2>
+      {lede && <p className="ps-lede">{lede}</p>}
     </header>
   );
 }
@@ -71,9 +84,16 @@ const cards: Card[] = ALL.map((project) => ({
   links: projectLinks(project),
 }));
 
-// Career as a parcel's journey, oldest scan at the bottom like a real tracking sheet.
-const SCANS = ["Posted", "Sorted", "In transit", "Out for delivery"];
-const tracking = CAREER.map((entry, i) => ({ ...entry, scan: SCANS[i] ?? "In transit" })).reverse();
+// Newest first, like a tracking sheet.
+const tracking = [...CAREER].reverse();
+// The route a reader can take in at a glance: where the degree was, then each organisation.
+const route = [...new Set(CAREER.map((entry) => entry.place))].filter(
+  (place) => place !== "Self-directed",
+);
+// The concrete proof behind the roles, with links, straight from the profile.
+const proof = PROFILE.experience.flatMap((entry) =>
+  entry.highlights.map((highlight) => ({ ...highlight, org: entry.organization })),
+);
 const HUES = ["red", "blue", "green", "ochre"];
 
 export default function PostHome() {
@@ -84,14 +104,14 @@ export default function PostHome() {
       </a>
       <header className="ps-top">
         <a className="ps-mark" href="#top">
-          Sandeep Kumar <span>Correspondence</span>
+          Sandeep Kumar <span>Full-stack developer</span>
         </a>
         <nav className="ps-nav" aria-label="Sections">
-          <a href="#letter">Letter</a>
-          <a href="#postcards">Postcards</a>
-          <a href="#tracking">Tracking</a>
-          <a href="#stamps">Stamps</a>
-          <a href="#reply">Reply</a>
+          <a href="#postcards">Work</a>
+          <a href="#tracking">Experience</a>
+          <a href="#stamps">Skills</a>
+          <a href="#films">Films</a>
+          <a href="#reply">Contact</a>
         </nav>
         <VersionSwitch current={4} className="ps-versions" />
       </header>
@@ -140,11 +160,10 @@ export default function PostHome() {
             <div className="ps-envelope" aria-hidden="true">
               <div className="ps-envelope-front">
                 <p className="ps-from">
-                  From
+                  <span>From</span>
+                  Sandeep Kumar, full-stack developer
                   <br />
-                  S. Kumar
-                  <br />
-                  {PROFILE.location}
+                  TypeScript · React · Next.js · Node.js
                 </p>
                 <div className="ps-stamp-wrap">
                   <figure className="ps-stamp">
@@ -166,7 +185,7 @@ export default function PostHome() {
                   <br />
                   full-stack &amp; frontend roles
                 </p>
-                <p className="ps-priority">Priority · Handle with care</p>
+                <p className="ps-priority">Enclosed · {ALL.length} case studies</p>
                 <span className="ps-barcode" />
               </div>
             </div>
@@ -177,53 +196,109 @@ export default function PostHome() {
           <Head
             n="01"
             id="ps-postcards"
+            kicker="Selected work"
             title="Postcards from the work"
-            note={`${ALL.length} products, one card each`}
+            lede={`${ALL.length} products I built end to end. Turn a card over for the problem it solved and the numbers counted from its repository.`}
           />
           <Deck cards={cards} />
         </section>
 
         <section className="ps-section ps-tracking" id="tracking" aria-labelledby="ps-track">
-          <Head n="02" id="ps-track" title="Tracking" note="Where this parcel has been" />
-          <div className="ps-track-card">
-            <p className="ps-track-no">
-              <span>Tracking no.</span> SK·2023·IN·{built.getFullYear()}
-            </p>
-            <ol className="ps-track">
-              <li className="ps-track-next">
-                <span className="ps-track-scan">Next scan</span>
-                <div>
-                  <h3>Delivered to your team</h3>
-                  <p>Awaiting a reply. See the slip at the end.</p>
-                </div>
-              </li>
-              {tracking.map((entry) => (
-                <li key={entry.title + entry.place} data-open={entry.open}>
-                  <span className="ps-track-scan">{entry.scan}</span>
+          <Head n="02" id="ps-track" kicker="Tracking, newest first" title="Experience" />
+          <div className="ps-track-grid">
+            <div className="ps-track-card">
+              <p className="ps-track-route">
+                <span>Route</span>
+                {route.join(" → ")}
+              </p>
+              <ol className="ps-track">
+                <li className="ps-track-next">
+                  <span className="ps-track-when">Next</span>
                   <div>
-                    <p className="ps-track-when">{entry.period}</p>
-                    <h3>
-                      {entry.title} <span>· {entry.place}</span>
-                    </h3>
-                    <p>{entry.note}</p>
+                    <h3>Your team</h3>
+                    <p>
+                      Open to {PROFILE.openTo.toLowerCase()}.{" "}
+                      <a href={`mailto:${SITE_CONFIG.email}`}>Email me</a>
+                    </p>
                   </div>
                 </li>
-              ))}
-            </ol>
+                {tracking.map((entry) => (
+                  <li key={entry.title + entry.place} data-open={entry.open}>
+                    <span className="ps-track-when">
+                      {entry.period}
+                      {entry.open && <b>Current</b>}
+                    </span>
+                    <div>
+                      <h3>{entry.title}</h3>
+                      <p className="ps-track-place">{entry.place}</p>
+                      <p>{entry.note}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <aside className="ps-proof" aria-labelledby="ps-proof">
+              <p className="ps-kicker">Proof of delivery</p>
+              <h3 id="ps-proof">What the work shows</h3>
+              <ol>
+                {proof.map((item) => (
+                  <li key={item.text}>
+                    <span className="ps-proof-org">{item.org}</span>
+                    {item.href ? (
+                      <a
+                        href={item.href}
+                        {...(item.href.startsWith("http")
+                          ? { target: "_blank", rel: "noopener noreferrer" }
+                          : {})}
+                      >
+                        {item.text}
+                      </a>
+                    ) : (
+                      item.text
+                    )}
+                  </li>
+                ))}
+              </ol>
+              <dl className="ps-proof-facts">
+                <div>
+                  <dt>Education</dt>
+                  <dd>
+                    {PROFILE.education[0].title}, {PROFILE.education[0].institution} ·{" "}
+                    {PROFILE.education[0].period}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Based in</dt>
+                  <dd>{PROFILE.location}</dd>
+                </div>
+                <div>
+                  <dt>Open to</dt>
+                  <dd>{PROFILE.openTo}</dd>
+                </div>
+              </dl>
+            </aside>
           </div>
         </section>
 
         <section className="ps-section" id="stamps" aria-labelledby="ps-stamps">
-          <Head n="03" id="ps-stamps" title="A sheet of stamps" note="Each one a skill set" />
+          <Head
+            n="03"
+            id="ps-stamps"
+            kicker="A sheet of stamps"
+            title="Skills"
+            lede="What I reach for, grouped the way a project uses them."
+          />
           <ul className="ps-sheet">
             {PROFILE.skills.map((group, i) => (
               <li key={group.group} className="ps-skill" data-hue={HUES[i % HUES.length]}>
                 <div className="ps-skill-face">
-                  <span className="ps-skill-value" aria-hidden="true">
-                    {group.items.length}
-                  </span>
                   <h3>{group.group}</h3>
-                  <p>{group.items.join(" · ")}</p>
+                  <ul>
+                    {group.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
                 </div>
               </li>
             ))}
@@ -231,10 +306,13 @@ export default function PostHome() {
         </section>
 
         <section className="ps-section" id="films" aria-labelledby="ps-films">
-          <Head n="04" id="ps-films" title="Enclosed: films" note="Made for CruxLog" />
-          <p className="ps-films-note">
-            Technology stories I made for CruxLog, told through research, pacing, and visuals.
-          </p>
+          <Head
+            n="04"
+            id="ps-films"
+            kicker="Also enclosed"
+            title="Films for CruxLog"
+            lede="Technology stories I made for CruxLog, told through research, pacing, and visuals."
+          />
           <ul className="ps-prints">
             {motionVideos.map((video, i) => (
               <li
@@ -270,8 +348,12 @@ export default function PostHome() {
         </section>
 
         <section className="ps-section" id="reply" aria-labelledby="ps-reply">
-          <Head n="05" id="ps-reply" title="Reply by return" note="Postage paid" />
-          <ReplySlip email={SITE_CONFIG.email} openTo={PROFILE.openTo} />
+          <Head n="05" id="ps-reply" kicker="Reply by return" title="Get in touch" />
+          <ReplySlip
+            email={SITE_CONFIG.email}
+            openTo={PROFILE.openTo}
+            location={PROFILE.location}
+          />
           <p className="ps-links ps-center">
             <a href={SOCIAL_PROFILES.linkedin.href} target="_blank" rel="noopener noreferrer">
               LinkedIn <span aria-hidden="true">↗</span>
@@ -286,7 +368,9 @@ export default function PostHome() {
         </section>
       </main>
       <footer className="ps-foot">
-        <span>Posted from {PROFILE.location}</span>
+        <span>
+          {SITE_CONFIG.name} · Full-stack developer · {PROFILE.location}
+        </span>
         <span>Review build 4 · Post</span>
       </footer>
     </>

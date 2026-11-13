@@ -3,10 +3,8 @@ import Link from "next/link";
 // The review builds link to each other with this one switcher. Each version styles it itself.
 export const REVIEW_VERSIONS = [
   { n: 1, href: "/review", name: "Lumen" },
-  { n: 2, href: "/review-2", name: "Atlas" },
   { n: 3, href: "/review-3", name: "Ticker" },
   { n: 4, href: "/review-4", name: "Post" },
-  { n: 5, href: "/review-5", name: "Mixer" },
 ] as const;
 
 export default function VersionSwitch({
