@@ -42,63 +42,76 @@ export const TRACKS: Track[] = [
       [74, "outro"],
     ],
   },
-  /* Three originals made for the party with Google's Lyria, steered bar by bar (intro, groove,
-     break, build, drop), then checked by ear by Gemini and against the waveform. Each loops from
-     its first groove through its drop. */
+  /* Three originals made for the party with Google's Lyria 3.5 in the same family as Calor (full
+     songs, two takes of each, the best picked by ear by Gemini against Calor). Sections come from
+     the measured sub-bass, which drops out in every break and comes back on every drop, with
+     Gemini's notes where the bass alone doesn't tell. Each loops from its first drop or groove to
+     its last bar, skipping the intro. */
   {
-    // Cyberpunk festival trap, half-time: 808 sub, hi-hat rolls, brass stabs. Silence on the
-    // last beats of the intro, then everything at bar 8.
-    id: "laser-grid",
-    title: "Laser Grid",
-    files: ["/audio/party-laser-grid-1.webm", "/audio/party-laser-grid-1.m4a"],
-    bpm: 140.46,
-    first: 0.094,
-    loop: [8, 40],
+    // Latin tech house, D minor: four-on-the-floor, congas and timbales, horn hook. The first
+    // drop lands straight out of the intro.
+    id: "noche",
+    title: "Noche Sin Fin",
+    files: ["/audio/party-noche-1.webm", "/audio/party-noche-1.m4a"],
+    bpm: 124.58,
+    first: 0.294,
+    loop: [8, 68],
     song: [
       [0, "intro"],
-      [8, "verse"],
-      [14, "lift"],
+      [8, "drop"],
+      [16, "lift"],
       [24, "break"],
       [28, "build"],
-      [32, "drop"],
-      [40, "outro"],
+      [32, "verse"],
+      [40, "lift"],
+      [48, "build"],
+      [52, "drop"],
+      [68, "outro"],
     ],
   },
   {
-    // Drift phonk: distorted 808 slides and a cowbell riff.
-    id: "drift-mode",
-    title: "Drift Mode",
-    files: ["/audio/party-drift-mode-1.webm", "/audio/party-drift-mode-1.m4a"],
-    bpm: 130.44,
-    first: 0.21,
-    loop: [8, 40],
+    // Dembow house, G minor: nylon guitar, 808 sub, brass stabs and crowd chants. Three drops.
+    id: "fuego",
+    title: "Fuego de Medianoche",
+    files: ["/audio/party-fuego-1.webm", "/audio/party-fuego-1.m4a"],
+    bpm: 103.62,
+    first: 0.426,
+    loop: [8, 66],
+    song: [
+      [0, "intro"],
+      [8, "drop"],
+      [16, "verse"],
+      [24, "break"],
+      [28, "lift"],
+      [36, "build"],
+      [40, "drop"],
+      [48, "break"],
+      [56, "build"],
+      [59, "drop"],
+      [66, "outro"],
+    ],
+  },
+  {
+    // Moombahton, C minor: dembow drums, heavy sub, brass and synth plucks. Two drops, each after
+    // a one-beat cut.
+    id: "tormenta",
+    title: "Tormenta Tropical",
+    files: ["/audio/party-tormenta-1.webm", "/audio/party-tormenta-1.m4a"],
+    bpm: 108,
+    first: 0.558,
+    loop: [8, 64],
     song: [
       [0, "intro"],
       [8, "verse"],
       [16, "lift"],
-      [24, "break"],
+      [20, "break"],
+      [23, "lift"],
       [28, "build"],
       [32, "drop"],
-      [40, "outro"],
-    ],
-  },
-  {
-    // Bass house: wobble bass, claps, vocal shouts. Its bars start a beat earlier than its first
-    // sound suggests (the kick and bass come in on what would otherwise be beat 4).
-    id: "chrome-bounce",
-    title: "Chrome Bounce",
-    files: ["/audio/party-chrome-bounce-1.webm", "/audio/party-chrome-bounce-1.m4a"],
-    bpm: 126.58,
-    first: 1.588,
-    loop: [7, 43],
-    song: [
-      [0, "intro"],
-      [7, "verse"],
-      [15, "lift"],
-      [23, "break"],
-      [27, "build"],
-      [31, "drop"],
-      [43, "outro"],
+      [48, "break"],
+      [52, "build"],
+      [56, "drop"],
+      [64, "outro"],
     ],
   },
 ];

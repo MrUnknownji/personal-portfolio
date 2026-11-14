@@ -914,9 +914,11 @@ export async function startParty() {
 
   /* Read the clock from the music a few times a second. Small wobbles are ignored; a real
      difference (a stall on a slow connection, the loop, a new track) moves the show. */
-  const lead = context
-    ? Math.min(0.5, Math.max(context.outputLatency || 0, context.baseLatency || 0)) * 1000
-    : 0;
+  // What the speakers are behind the music's clock. Read each time: it settles after start.
+  const lead = () =>
+    context
+      ? Math.min(0.5, Math.max(context.outputLatency || 0, context.baseLatency || 0)) * 1000
+      : 0;
   let strikes = 0;
   let loopTimer = 0;
   const listen = () => {
@@ -933,7 +935,7 @@ export async function startParty() {
         },
         Math.max(0, (end - audio.currentTime) * 1000),
       );
-    const heard = performance.now() - (audio.currentTime - track.first) * 1000 + lead;
+    const heard = performance.now() - (audio.currentTime - track.first) * 1000 + lead();
     const off = heard - origin;
     if (Math.abs(off) > 400) retime(heard);
     else if (Math.abs(off) > 30) {
