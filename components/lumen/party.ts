@@ -288,39 +288,76 @@ function crowd(width: number) {
 /* ---------- The city ---------- */
 
 /**
- * A skyline behind the crowd, drawn once as SVG: two rows of towers with lit windows and a few
- * neon strips on the roofs. It never repaints; in a drop it bumps on the kick, as a transform.
+ * The skyline behind the crowd. The far row is one SVG, drawn once. The near row is a set of
+ * towers, each its own element, so each can rise with its own slice of the music (a transform)
+ * and its windows can flash (opacity); their colours come from the party's palette.
  */
+function farRow(width: number, height: number) {
+  let out = "";
+  let lit = "";
+  let x = -10;
+  while (x < width) {
+    const w = rand(34, 80);
+    const h = height * rand(0.36, 0.8);
+    const top = height - h;
+    out += `<rect x="${x.toFixed(0)}" y="${top.toFixed(0)}" width="${w.toFixed(0)}" height="${h.toFixed(0)}"/>`;
+    for (let wx = x + 6; wx < x + w - 8; wx += 9)
+      for (let wy = top + 10; wy < height - 8; wy += 13)
+        if (Math.random() < 0.09)
+          lit += `<rect x="${wx.toFixed(0)}" y="${wy.toFixed(0)}" width="4" height="6" opacity="${rand(0.25, 0.5).toFixed(2)}"/>`;
+    x += w + rand(-4, 6);
+  }
+  return `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" width="100%" height="100%"><g fill="#1b1233">${out}</g><g fill="#c7a6ff">${lit}</g></svg>`;
+}
+
+type Tower = { el: HTMLElement; lit: HTMLElement; bin: number; scale: number; glow: number };
+
+/** One near tower: a dark body, and its windows, roof strip and antenna in the tower's colour. */
+function tower(x: number, w: number, h: number, hue: number, seek = false) {
+  const el = document.createElement("div");
+  el.className = seek ? "ldp-tower is-seek" : "ldp-tower";
+  el.style.cssText = `left:${x.toFixed(0)}px;width:${w.toFixed(0)}px;height:${h.toFixed(0)}px;color:var(--ldp-c${hue})`;
+  let windows = "";
+  for (let wx = 6; wx < w - 8; wx += 9)
+    for (let wy = 10; wy < h - 8; wy += 13)
+      if (Math.random() < 0.16)
+        windows += `<rect x="${wx}" y="${wy}" width="4" height="6" opacity="${rand(0.5, 1).toFixed(2)}"/>`;
+  // The seek tower's roof is the seek bar itself, drawn by the control on top of it.
+  const roof = seek
+    ? ""
+    : Math.random() < 0.5
+      ? `<rect x="4" y="0" width="${(w - 8).toFixed(0)}" height="2"/>`
+      : "";
+  const antenna =
+    !seek && Math.random() < 0.3
+      ? `<rect x="${(w / 2).toFixed(0)}" y="-26" width="2" height="26" fill="#3a2d58"/><rect x="${(w / 2 - 1).toFixed(0)}" y="-28" width="4" height="4" fill="#ff3d5a"/>`
+      : "";
+  el.innerHTML = `<svg class="ldp-tower-lit" viewBox="0 0 ${w.toFixed(0)} ${h.toFixed(0)}" width="100%" height="100%" fill="currentColor">${roof}${windows}</svg>${antenna ? `<svg class="ldp-tower-top" viewBox="0 -28 ${w.toFixed(0)} 28" width="100%" height="28">${antenna}</svg>` : ""}`;
+  return { el, lit: el.querySelector<HTMLElement>(".ldp-tower-lit")! };
+}
+
 function city(width: number, height: number) {
-  const windows = ["#7ff6ff", "#ff7de9", "#ffd27a", "#c7a6ff"];
-  const strips = ["#ff2bd6", "#1ff4ff", "#ffe23d", "#b46bff"];
-  let far = "";
-  let near = "";
-  let lights = "";
-  const row = (fill: number, min: number, max: number, near: boolean) => {
-    let x = -10;
-    let out = "";
-    while (x < width) {
-      const w = rand(near ? 46 : 34, near ? 110 : 80);
-      const h = height * rand(min, max);
-      const top = height - h;
-      out += `<rect x="${x.toFixed(0)}" y="${top.toFixed(0)}" width="${w.toFixed(0)}" height="${h.toFixed(0)}"/>`;
-      if (near && Math.random() < 0.45)
-        lights += `<rect x="${(x + 4).toFixed(0)}" y="${(top - 2).toFixed(0)}" width="${(w - 8).toFixed(0)}" height="2" fill="${strips[Math.floor(rand(0, strips.length))]}"/>`;
-      if (near && Math.random() < 0.3)
-        lights += `<rect x="${(x + w / 2).toFixed(0)}" y="${(top - 26).toFixed(0)}" width="2" height="26" fill="#3a2d58"/><rect x="${(x + w / 2 - 1).toFixed(0)}" y="${(top - 28).toFixed(0)}" width="4" height="4" fill="#ff3d5a"/>`;
-      // Windows: a sparse grid, lit at random.
-      for (let wx = x + 6; wx < x + w - 8; wx += 9)
-        for (let wy = top + 10; wy < height - 8; wy += 13)
-          if (Math.random() < (near ? 0.13 : 0.09))
-            lights += `<rect x="${wx.toFixed(0)}" y="${wy.toFixed(0)}" width="4" height="6" fill="${windows[Math.floor(rand(0, windows.length))]}" opacity="${(near ? rand(0.55, 0.95) : rand(0.25, 0.5)).toFixed(2)}"/>`;
-      x += w + rand(-4, 6) * fill;
-    }
-    return out;
-  };
-  far = row(1, 0.36, 0.8, false);
-  near = row(1, 0.2, 0.62, true);
-  return `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" width="100%" height="100%"><g fill="#1b1233">${far}</g><g fill="#0c0818">${near}</g>${lights}</svg>`;
+  const wrap = document.createElement("div");
+  wrap.className = "ldp-city";
+  wrap.innerHTML = farRow(width, height);
+  const towers: Tower[] = [];
+  let x = -10;
+  let i = 0;
+  while (x < width) {
+    const w = rand(46, 110);
+    const { el, lit } = tower(x, w, height * rand(0.2, 0.62), (i % 3) + 1);
+    wrap.append(el);
+    // Each tower listens to its own slice of the spectrum, low to high, in no order.
+    towers.push({ el, lit, bin: Math.round(1.5 * 28 ** Math.random()), scale: 1, glow: 1 });
+    x += w + rand(-4, 6);
+    i++;
+  }
+  // One tower stands still and tall enough to clear the crowd: its roof is the seek bar.
+  const seekWidth = Math.min(220, Math.max(110, width * 0.2));
+  const seek = tower(width * 0.17, seekWidth, height * 0.8, 2, true);
+  wrap.append(seek.el);
+  towers.push({ el: seek.el, lit: seek.lit, bin: 6, scale: 1, glow: 1 });
+  return { wrap, towers, seekTower: seek.el };
 }
 
 /* ---------- The party ---------- */
@@ -349,6 +386,7 @@ export async function startParty() {
   /* The sound: the first track comes in muffled, as if through the club's door, which opens in
      the intro. Without Web Audio the element plays straight out. */
   let out: GainNode | null = null;
+  let analyser: AnalyserNode | null = null;
   let door: BiquadFilterNode | null = null;
   if (context && prime?.source) {
     try {
@@ -374,6 +412,11 @@ export async function startParty() {
         .connect(limiter)
         .connect(out)
         .connect(context.destination);
+      // The towers listen here, before the volume, so they keep dancing with the sound off.
+      analyser = context.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.72;
+      limiter.connect(analyser);
     } catch {
       out = null;
     }
@@ -400,7 +443,6 @@ export async function startParty() {
   const skyline = Math.round(window.innerHeight * 0.36);
   club.innerHTML = `
     <div class="ldp-dim"></div>
-    <div class="ldp-city">${city(window.innerWidth, skyline)}</div>
     <div class="ldp-lights">
       <div class="ldp-beams">${BEAMS.map((colour, i) => `<div class="ldp-beam" style="left:${12.5 + i * 25}%">${cone(colour, i)}</div>`).join("")}</div>
       <div class="ldp-fan is-left"><div class="ldp-fan-lines">${'<i class="ldp-laser"></i>'.repeat(6)}</div></div>
@@ -417,6 +459,8 @@ export async function startParty() {
       <p class="ldp-sign-name"><span class="is-a">${neon("After")}</span> <span class="is-b">${neon("Hours")}</span></p>
       <p class="ldp-sign-track"></p>
     </div>`;
+  const town = city(window.innerWidth, skyline);
+  club.querySelector(".ldp-dim")!.after(town.wrap);
   const { wrap, people, lines } = crowd(window.innerWidth);
   club.append(wrap);
   host().append(club);
@@ -425,7 +469,6 @@ export async function startParty() {
   const letters = [...sign.querySelectorAll<HTMLElement>(".ldp-sign-name i")];
   const beams = club.querySelector<HTMLElement>(".ldp-beams")!;
   const dim = club.querySelector<HTMLElement>(".ldp-dim")!;
-  const skylineEl = club.querySelector<HTMLElement>(".ldp-city")!;
 
   /* One clock. Until the music plays it runs on its own; then it is read from the music. */
   let origin = performance.now() + 250;
@@ -644,12 +687,9 @@ export async function startParty() {
   let rain = 1;
   let rainTarget = 1;
   let frame = 0;
-  let previous = performance.now();
-  const draw = (now: number) => {
+  const paint = (now: number, dt: number) => {
     if (!sky || !spot || !ray) return;
     const { context: g, width, height, ratio: r } = sky;
-    const dt = Math.min(1 / 30, (now - previous) / 1000);
-    previous = now;
     level += (target - level) * Math.min(1, dt * 3);
     rain += (rainTarget - rain) * Math.min(1, dt * 1.5);
     g.setTransform(r, 0, 0, r, 0, 0);
@@ -730,9 +770,7 @@ export async function startParty() {
       g.fillStyle = bit.colour;
       g.fillRect(-bit.w / 2, -bit.h / 2, bit.w, bit.h);
     }
-    frame = requestAnimationFrame(draw);
   };
-  if (sky) frame = requestAnimationFrame(draw);
 
   /* The show follows the song: each part of it has its own lights. */
   const flash = (strength: number) => {
@@ -771,7 +809,7 @@ export async function startParty() {
     if (scene === "drop") {
       flash(0.32);
       confetti(first ? 170 : 120);
-      // The whole crowd jumps on the beat, and the city bumps with the bass.
+      // The whole crowd jumps on the beat.
       lines.forEach((line, i) =>
         groove(
           line,
@@ -784,17 +822,6 @@ export async function startParty() {
           { shift: i * 0.04 },
           sceneOnly,
         ),
-      );
-      groove(
-        skylineEl,
-        [
-          { transform: "scaleY(1.035)", easing: "ease-out" },
-          { transform: "scaleY(1)", offset: 0.5 },
-          { transform: "scaleY(1)" },
-        ],
-        1,
-        {},
-        sceneOnly,
       );
       // The sign goes wild for the first bar of the drop.
       if (!calm)
@@ -832,8 +859,14 @@ export async function startParty() {
      up once they're quick again. */
   let slow = 1;
   let shade = 0;
+  let chase = ["#ff3dd8", "#1ff4ff", "#ffcf3d"];
   const recolour = (hex: string) => {
     club.style.setProperty("--ldp-glow", hex);
+    // The towers' windows take the new colour in turn, so it runs across the skyline.
+    if (hex !== chase[0]) {
+      chase = [hex, chase[0], chase[1]];
+      chase.forEach((colour, i) => club.style.setProperty(`--ldp-c${i + 1}`, colour));
+    }
     if (root.style.getPropertyValue(names[0]) === hex) return;
     const before = performance.now();
     root.style.setProperty(names[0], hex);
@@ -925,7 +958,7 @@ export async function startParty() {
     if (!audio || audio.paused || audio.readyState < 3) return;
     openDoor();
     const end = track.first + (track.loop[1] * barMs) / 1000;
-    if (!loopTimer && audio.currentTime > end - 0.3)
+    if (!loopTimer && audio.currentTime > end - 0.3 && audio.currentTime < end + 0.25)
       loopTimer = window.setTimeout(
         () => {
           loopTimer = 0;
@@ -983,9 +1016,248 @@ export async function startParty() {
       audio.currentTime = track.first + (start * barMs) / 1000;
       void audio.play().catch(() => undefined);
     }
+    lineIndex = -2;
+    lastHeard = Number.NEGATIVE_INFINITY;
+    lastShout?.remove();
     // Until the new track is heard, keep time from now.
     retime(performance.now() + 300 - start * barMs);
   });
+
+  /* ---------- Every frame: the towers, the subtitles, the hook word and the seek dot ---------- */
+
+  /** Where in the file the listener is now: the music's clock minus what the speakers lag. */
+  const heard = () => (audio && audio.readyState >= 2 ? audio.currentTime - lead() / 1000 : null);
+
+  // Each tower rises with its own band of the spectrum, measured against that band's recent peak,
+  // so quiet highs move as much as loud bass. Without Web Audio they bounce on the beat instead.
+  const bins = analyser ? new Uint8Array(analyser.frequencyBinCount) : null;
+  const peaks = town.towers.map(() => 60);
+  const DRIVE: Record<Scene, number> = {
+    intro: 0.25,
+    verse: 0.65,
+    lift: 0.8,
+    break: 0.3,
+    build: 0.6,
+    drop: 1,
+    outro: 0.25,
+  };
+  let towerFrame = 0;
+  const moveTowers = (now: number) => {
+    // Thirty times a second is plenty for a skyline, and halves the work.
+    if (calm || ++towerFrame % 2) return;
+    if (analyser && bins) analyser.getByteFrequencyData(bins);
+    // Where we are in the beat (0 on the kick), and a bump that decays from it.
+    const phase = ((((now - origin) / beatMs) % 1) + 1) % 1;
+    const kick = Math.exp(-phase * 5) * DRIVE[scene ?? "intro"];
+    town.towers.forEach((t, i) => {
+      let v: number;
+      if (bins) {
+        const raw = bins[t.bin];
+        peaks[i] = Math.max(peaks[i] * 0.997, raw, 60);
+        v = Math.min(1, Math.max(0, (raw / peaks[i] - 0.55) / 0.45));
+      } else v = kick * (0.55 + 0.45 * Math.abs(Math.sin(t.bin * 1.7)));
+      const scale = t.el === town.seekTower ? 1 : 1 + v * v * 0.34;
+      const glow = 0.28 + 0.72 * v;
+      if (Math.abs(scale - t.scale) > 0.008) {
+        t.scale = scale;
+        t.el.style.transform = `scaleY(${scale.toFixed(3)})`;
+      }
+      if (Math.abs(glow - t.glow) > 0.05) {
+        t.glow = glow;
+        t.lit.style.opacity = glow.toFixed(2);
+      }
+    });
+  };
+
+  // Subtitles, for songs with words. Shown when the visitor turns them on in the panel (the
+  // stylesheet reads that from <html>), so they can come and go mid-song.
+  const subs = document.createElement("p");
+  subs.className = "ldp-subs";
+  subs.setAttribute("aria-live", "off");
+  host().append(subs);
+  let lineIndex = -2;
+  const caption = (t: number | null) => {
+    const lyrics = track.lyrics;
+    // The latest line that has begun, held a moment after it ends (a new line always wins).
+    let i = -1;
+    if (lyrics && t !== null) {
+      for (let k = 0; k < lyrics.length && lyrics[k][0] - 0.05 <= t; k++) i = k;
+      if (i >= 0 && t >= lyrics[i][1] + 0.35) i = -1;
+    }
+    if (i === lineIndex) return;
+    lineIndex = i;
+    subs.textContent = i < 0 ? "" : lyrics![i][2];
+    if (i >= 0 && !calm)
+      subs.animate(
+        [
+          { opacity: 0, transform: "translate(-50%, 6px)" },
+          { opacity: 1, transform: "translate(-50%, 0)" },
+        ],
+        { duration: 180, easing: "ease-out" },
+      );
+  };
+
+  // The hook: each time the song's word is sung, it slams onto the screen, scaled down from big,
+  // glitching in two colours, and burns out. It peaks on the stressed syllable.
+  const LEAD_IN = 0.19;
+  let hookNext = 0;
+  let lastHeard = Number.NEGATIVE_INFINITY;
+  let lastShout: HTMLElement | null = null;
+  const shout = (word: string) => {
+    lastShout?.remove();
+    const el = document.createElement("div");
+    el.className = "ldp-word";
+    el.dataset.word = word.toUpperCase();
+    el.textContent = word.toUpperCase();
+    el.setAttribute("aria-hidden", "true");
+    host().append(el);
+    lastShout = el;
+    const at = (scale: number, skew = 0) =>
+      `translate(-50%, -50%) scale(${scale}) skewX(${skew}deg)`;
+    el.animate(
+      calm
+        ? [
+            { opacity: 0 },
+            { opacity: 1, offset: 0.17 },
+            { opacity: 1, offset: 0.7 },
+            { opacity: 0 },
+          ]
+        : [
+            { opacity: 0, transform: at(2.6, -14) },
+            { opacity: 1, transform: at(0.94), offset: 0.17, easing: "ease-out" },
+            { opacity: 1, transform: at(1.08), offset: 0.24 },
+            { opacity: 1, transform: at(1), offset: 0.32 },
+            { opacity: 0.2, transform: at(1), offset: 0.4 },
+            { opacity: 1, transform: at(1.01), offset: 0.45 },
+            { opacity: 1, transform: at(1.03), offset: 0.72 },
+            { opacity: 0, transform: at(1.45, 8) },
+          ],
+      { duration: 950 },
+    ).finished.then(
+      () => el.remove(),
+      () => el.remove(),
+    );
+    if (calm) return;
+    // The room punches with it, and the colours jump.
+    dim.animate([{ opacity: 0.45 }, { opacity: 0.86 }], { duration: 380, easing: "ease-out" });
+    shade = (shade + 1) % DROP.length;
+    recolour(DROP[shade]);
+  };
+  const hook = (t: number | null) => {
+    const words = track.hook;
+    if (!words || t === null) return;
+    // A seek, a loop or a new track: find our place again.
+    if (t < lastHeard - 0.3 || t > lastHeard + 1.5) {
+      hookNext = words.at.findIndex((at) => at - LEAD_IN > t);
+      if (hookNext < 0) hookNext = words.at.length;
+    }
+    lastHeard = t;
+    while (hookNext < words.at.length && t >= words.at[hookNext] - LEAD_IN) {
+      if (t - words.at[hookNext] < 0.3) shout(words.word);
+      hookNext++;
+    }
+  };
+
+  /* The seek bar is hidden in plain sight: the roof line of one tower. Only a tiny dark dot on it
+     moves with the song. It is a real slider for keyboards and screen readers. */
+  const seek = document.createElement("div");
+  seek.className = "ldp-seek";
+  seek.setAttribute("role", "slider");
+  seek.setAttribute("aria-label", "Song position");
+  seek.setAttribute("aria-valuemin", "0");
+  seek.tabIndex = 0;
+  seek.innerHTML = '<i class="ldp-seek-line"></i><i class="ldp-seek-dot"></i>';
+  const dot = seek.querySelector<HTMLElement>(".ldp-seek-dot")!;
+  if (audio) host().append(seek);
+  let seekBox = { left: 0, width: 1 };
+  const placeSeek = () => {
+    const box = town.seekTower.getBoundingClientRect();
+    seekBox = { left: box.left, width: box.width };
+    seek.style.cssText = `left:${box.left}px;top:${box.top - 9}px;width:${box.width}px`;
+  };
+  placeSeek();
+  window.addEventListener("resize", placeSeek);
+  const clock = (seconds: number) =>
+    `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+  let shownAt = -1;
+  let dragging = false;
+  let dragAt = 0;
+  const showSeek = (time: number) => {
+    const duration = audio?.duration;
+    if (!duration || !Number.isFinite(duration)) return;
+    const fraction = Math.min(1, Math.max(0, time / duration));
+    dot.style.transform = `translateX(${(fraction * seekBox.width).toFixed(1)}px)`;
+    const second = Math.floor(time);
+    if (second !== shownAt) {
+      shownAt = second;
+      seek.setAttribute("aria-valuemax", String(Math.round(duration)));
+      seek.setAttribute("aria-valuenow", String(second));
+      seek.setAttribute("aria-valuetext", `${clock(time)} of ${clock(duration)}`);
+    }
+  };
+  const seekTo = (time: number) => {
+    if (!audio?.duration || !Number.isFinite(audio.duration)) return;
+    audio.currentTime = Math.min(audio.duration - 0.5, Math.max(0, time));
+    showSeek(audio.currentTime);
+  };
+  const timeAt = (x: number) =>
+    (Math.min(1, Math.max(0, (x - seekBox.left) / seekBox.width)) || 0) * (audio?.duration || 0);
+  let lastSeek = 0;
+  seek.addEventListener("pointerdown", (event) => {
+    if (!audio) return;
+    dragging = true;
+    seek.setPointerCapture(event.pointerId);
+    dragAt = timeAt(event.clientX);
+    seekTo(dragAt);
+    lastSeek = performance.now();
+  });
+  seek.addEventListener("pointermove", (event) => {
+    if (!dragging) return;
+    dragAt = timeAt(event.clientX);
+    showSeek(dragAt);
+    // Scrub, but not on every pixel: a seek every 150 ms is enough to hear where you are.
+    if (performance.now() - lastSeek > 150) {
+      lastSeek = performance.now();
+      seekTo(dragAt);
+    }
+  });
+  const release = () => {
+    if (!dragging) return;
+    dragging = false;
+    seekTo(dragAt);
+  };
+  seek.addEventListener("pointerup", release);
+  seek.addEventListener("pointercancel", release);
+  seek.addEventListener("keydown", (event) => {
+    if (!audio) return;
+    const step = {
+      ArrowRight: 5,
+      ArrowUp: 5,
+      ArrowLeft: -5,
+      ArrowDown: -5,
+      PageUp: 15,
+      PageDown: -15,
+    }[event.key];
+    if (step) seekTo(audio.currentTime + step);
+    else if (event.key === "Home") seekTo(0);
+    else if (event.key === "End") seekTo(audio.duration - 2);
+    else return;
+    event.preventDefault();
+  });
+
+  let previous = performance.now();
+  const step = (now: number) => {
+    const dt = Math.min(1 / 30, (now - previous) / 1000);
+    previous = now;
+    const t = heard();
+    moveTowers(now);
+    caption(t);
+    hook(t);
+    if (audio && !dragging && t !== null) showSeek(audio.currentTime);
+    paint(now, dt);
+    frame = requestAnimationFrame(step);
+  };
+  frame = requestAnimationFrame(step);
 
   let soundOn = true;
   const hidden = () => {
@@ -1011,6 +1283,10 @@ export async function startParty() {
       window.clearInterval(listener);
       window.clearTimeout(loopTimer);
       window.removeEventListener("resize", findBall);
+      window.removeEventListener("resize", placeSeek);
+      seek.remove();
+      subs.remove();
+      lastShout?.remove();
       document.removeEventListener("visibilitychange", hidden);
       audio?.removeEventListener("playing", listen);
       club.classList.add("is-leaving");

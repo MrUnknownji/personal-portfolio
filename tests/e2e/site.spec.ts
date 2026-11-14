@@ -244,6 +244,8 @@ test("toys reach the whole site and put it back exactly", async ({ page }, testI
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
     if (toy === "party") {
       await expect(page.getByRole("button", { name: "Sound" })).toBeVisible();
+      // The hidden seek bar is a real slider.
+      await expect(page.getByRole("slider", { name: "Song position" })).toBeAttached();
       // The track switcher moves on to the next track, and the sign says so.
       const next = page.getByRole("button", { name: /^Now playing .+\. Play the next track/ });
       const label = await next.getAttribute("aria-label");
@@ -253,7 +255,9 @@ test("toys reach the whole site and put it back exactly", async ({ page }, testI
       await expect(next).toHaveAttribute("aria-label", new RegExp(`^Now playing ${upcoming}\\.`));
     }
     await back.click();
-    await expect(page.locator(".ldp-club, .ldp-canvas, .ldp-caption, .ldp-dusting")).toHaveCount(0);
+    await expect(
+      page.locator(".ldp-club, .ldp-canvas, .ldp-caption, .ldp-dusting, .ldp-seek, .ldp-subs"),
+    ).toHaveCount(0);
     await expect.poll(touched).toBe(before);
     await expect(page.locator("html")).toHaveAttribute("style", /--ldt-accent:\s*#7fe3b4/);
   }

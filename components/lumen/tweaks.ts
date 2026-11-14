@@ -466,6 +466,19 @@ export const GROUPS: Group[] = [
       },
     ],
   },
+  {
+    id: "party",
+    title: "Party mode",
+    controls: [
+      {
+        type: "toggle",
+        key: "lyrics",
+        label: "Song subtitles",
+        hint: "Shows the words of songs that have them, during the Party.",
+        def: false,
+      },
+    ],
+  },
 ];
 
 export const CONTROLS = GROUPS.flatMap((group) => group.controls);
