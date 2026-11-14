@@ -48,6 +48,11 @@ const nextConfig = {
       { source: "/:path*", headers: securityHeaders },
       { source: "/images/:path*", headers: [{ key: "Cache-Control", value: assetCache }] },
       { source: "/favicon.:ext", headers: [{ key: "Cache-Control", value: assetCache }] },
+      // The party's track (about 2 MB). A new mix gets a new file name, so it can be kept for good.
+      {
+        source: "/audio/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
       {
         source: "/sandeep-kumar-resume.pdf",
         headers: [

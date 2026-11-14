@@ -6,6 +6,7 @@
  * Nothing here uses blur, and a block held in Gravity is written straight to its transform on every
  * pointer event, so it never trails the cursor.
  */
+import { dropAudio } from "./audioPrime";
 import { haptic } from "./feedback";
 import "./play.css";
 
@@ -1062,8 +1063,15 @@ async function quake() {
 }
 
 async function party() {
-  const { startParty } = await import("./party");
-  const club = await startParty();
+  let club: Awaited<ReturnType<typeof import("./party").startParty>>;
+  try {
+    const { startParty } = await import("./party");
+    club = await startParty();
+  } catch (error) {
+    // The track was started in the click; don't leave it streaming with no party around it.
+    dropAudio();
+    throw error;
+  }
   active = { stop: club.stop };
   showPill("Stop the party", { label: "Sound", pressed: club.sound, onToggle: club.setSound });
 }

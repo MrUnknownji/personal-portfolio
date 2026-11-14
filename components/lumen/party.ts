@@ -1,386 +1,70 @@
 /**
- * Party: the site becomes a club at closing time. The lights go down, beams sweep, a mirror ball
- * turns, a crowd bounces along the bottom, and an original late-night groove plays, synthesized
- * live with Web Audio (no audio files).
+ * Party: the site becomes a club at closing time. The lights go down, a mirror ball throws spots
+ * around the room, beams sweep, lasers fan out in the chorus and a crowd dances along the bottom,
+ * all to a real track ("Calor de Madrugada", 105 BPM) that streams in when the party starts.
  *
  * Built to stay smooth: every moving light is a compositor animation (transform and opacity only),
- * all of them locked to one beat clock, and the music follows the same clock. The page underneath
- * changes once a bar (the accent colour), never every frame.
+ * all of them locked to one beat clock, and that clock is read from the music itself. The page
+ * underneath changes at most once every two bars (the accent colour), never every frame.
  */
 import { takeAudio } from "./audioPrime";
 import { host, overlayCanvas, rand, reducedMotion } from "./play";
 import { accentInk, onAccent } from "./tweaks";
 import "./party.css";
 
-const BPM = 102;
-const BEAT = 60 / BPM;
-const STEP = BEAT / 4;
-const BAR = BEAT * 4;
-const BEAT_MS = BEAT * 1000;
-/** Bars heard through the door, muffled, before it opens. */
-const INTRO = 1;
+/* ---------- The track ---------- */
 
-const hz = (midi: number) => 440 * 2 ** ((midi - 69) / 12);
+const BPM = 105;
+const BEAT_MS = 60_000 / BPM;
+const BAR_MS = BEAT_MS * 4;
+/** Where bar 0, beat 1 falls in the file, in seconds (measured from the waveform). */
+const FIRST = 0.184;
+/**
+ * The song stops dead at bar 74. Rather than play its tail and the quiet intro again, the party
+ * jumps from there straight back into the groove at bar 4, on the beat.
+ */
+const LOOP_START = 4;
+const LOOP_END = 74;
+const songBar = (count: number) =>
+  count < LOOP_END ? count : LOOP_START + ((count - LOOP_START) % (LOOP_END - LOOP_START));
 
-/* ---------- The music: F minor, one chord a bar, a dembow-style bounce ---------- */
+type Scene = "intro" | "verse" | "lift" | "break" | "build" | "drop" | "outro";
 
-const CHORDS = [
-  [65, 68, 72], // F minor
-  [65, 68, 73], // D-flat
-  [63, 68, 72], // A-flat
-  [63, 67, 70], // E-flat
+/**
+ * The song, bar by bar, from listening to it (Gemini's notes) and from its measured energy, which
+ * changes on these bars. Intro: guitar and keys, no drums. Verse: the four-on-the-floor kick and
+ * dembow snare come in; halfway, open hats and plucks lift it. Break: drums filtered out. Build:
+ * a snare roll and a riser, with a one-beat cut before each drop. Drop: the hook, full bass.
+ */
+const SONG: [bar: number, scene: Scene][] = [
+  [0, "intro"],
+  [4, "verse"],
+  [12, "lift"],
+  [20, "break"],
+  [24, "build"],
+  [28, "drop"],
+  [44, "verse"],
+  [52, "break"],
+  [55, "build"],
+  [58, "drop"],
+  [74, "outro"],
 ];
-const ROOTS = [41, 37, 44, 39];
-/** 808 notes in a bar: [step, length in steps, jumps an octave on odd bars]. */
-const BASS: [number, number, boolean][] = [
-  [0, 5, false],
-  [7, 2, false],
-  [10, 3, false],
-  [14, 2, true],
-];
-/** The hook, two bars of sixteenths (0 is a rest). */
-const HOOK = [
-  [77, 0, 80, 0, 82, 0, 80, 77, 0, 75, 0, 77, 0, 0, 72, 0],
-  [77, 0, 80, 0, 84, 0, 82, 80, 0, 77, 0, 80, 82, 0, 80, 0],
-];
-const ARP = [0, 1, 2, 1, 0, 2, 1, 2];
-const SNARES = new Set([3, 6, 11, 14]);
+const sceneAt = (bar: number) => {
+  let scene = SONG[0][1];
+  for (const [start, part] of SONG) if (start <= bar) scene = part;
+  return scene;
+};
 
-class Groove {
-  private ctx: AudioContext;
-  private sum: GainNode;
-  private door: BiquadFilterNode;
-  private out: GainNode;
-  private drums: GainNode;
-  private pump: GainNode;
-  private verb: GainNode;
-  private echo: GainNode;
-  private noise: AudioBuffer;
-  private shape: Float32Array<ArrayBuffer>;
-  private timer = 0;
-  private step = 0;
-  private offset = Number.NaN;
-  private open = false;
-  private lastBass = 0;
-  on = true;
-
-  constructor(
-    ctx: AudioContext,
-    private origin: number,
-    private onBar: (bar: number) => void,
-  ) {
-    this.ctx = ctx;
-    this.sum = ctx.createGain();
-    this.door = ctx.createBiquadFilter();
-    this.door.type = "lowpass";
-    this.door.frequency.value = 280;
-    this.door.Q.value = 0.8;
-    const squash = ctx.createDynamicsCompressor();
-    squash.threshold.value = -16;
-    squash.ratio.value = 4;
-    squash.attack.value = 0.004;
-    squash.release.value = 0.18;
-    this.out = ctx.createGain();
-    this.out.gain.value = 0;
-    this.sum.connect(this.door).connect(squash).connect(this.out).connect(ctx.destination);
-
-    this.drums = ctx.createGain();
-    this.drums.gain.value = 0.8;
-    this.drums.connect(this.sum);
-    this.pump = ctx.createGain();
-    this.pump.connect(this.sum);
-
-    // A room: two seconds of decaying noise as a reverb.
-    const length = Math.floor(ctx.sampleRate * 2);
-    const room = ctx.createBuffer(2, length, ctx.sampleRate);
-    for (let channel = 0; channel < 2; channel++) {
-      const data = room.getChannelData(channel);
-      for (let i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / length) ** 3;
-    }
-    const convolver = ctx.createConvolver();
-    convolver.buffer = room;
-    const wet = ctx.createGain();
-    wet.gain.value = 0.22;
-    this.verb = ctx.createGain();
-    this.verb.connect(convolver).connect(wet).connect(this.sum);
-
-    // A dotted-eighth echo on the lead.
-    const delay = ctx.createDelay(1);
-    delay.delayTime.value = STEP * 3;
-    const feedback = ctx.createGain();
-    feedback.gain.value = 0.32;
-    const tone = ctx.createBiquadFilter();
-    tone.type = "lowpass";
-    tone.frequency.value = 2800;
-    this.echo = ctx.createGain();
-    const echoOut = ctx.createGain();
-    echoOut.gain.value = 0.45;
-    this.echo.connect(delay);
-    delay.connect(tone).connect(feedback).connect(delay);
-    tone.connect(echoOut).connect(this.sum);
-
-    this.noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-    const data = this.noise.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-    this.shape = new Float32Array(1024);
-    for (let i = 0; i < 1024; i++) {
-      const x = (i / 1023) * 2 - 1;
-      this.shape[i] = Math.tanh(x * 2.6) / Math.tanh(2.6);
-    }
-  }
-
-  start() {
-    const now = this.ctx.currentTime;
-    this.out.gain.setValueAtTime(0, now);
-    this.out.gain.linearRampToValueAtTime(this.on ? 0.7 : 0, now + 0.8);
-    this.tick();
-    this.timer = window.setInterval(() => this.tick(), 25);
-  }
-
-  setOn(on: boolean) {
-    this.on = on;
-    if (on) void this.ctx.resume().catch(() => undefined);
-    this.out.gain.setTargetAtTime(on ? 0.7 : 0, this.ctx.currentTime, 0.06);
-  }
-
-  async stop() {
-    window.clearInterval(this.timer);
-    const now = this.ctx.currentTime;
-    this.out.gain.cancelScheduledValues(now);
-    this.out.gain.setTargetAtTime(0, now, 0.08);
-    await new Promise((resolve) => window.setTimeout(resolve, 380));
-    await this.ctx.close().catch(() => undefined);
-  }
-
-  /** Audio clock minus page clock (seconds), for sound heard at a page time, smoothed. */
-  private measure() {
-    const stamp = this.ctx.getOutputTimestamp?.();
-    const measured =
-      stamp?.performanceTime && stamp.contextTime
-        ? stamp.contextTime - stamp.performanceTime / 1000
-        : this.ctx.currentTime -
-          performance.now() / 1000 -
-          Math.max(this.ctx.outputLatency || 0, this.ctx.baseLatency || 0);
-    if (Number.isNaN(this.offset) || Math.abs(measured - this.offset) > 0.05)
-      this.offset = measured;
-    else this.offset += (measured - this.offset) * 0.05;
-  }
-
-  /**
-   * Looks ahead and books every sixteenth that falls inside it. "Ahead" includes the output
-   * latency (often 0.1-0.3 s): a note is booked that long before it is heard, so it lands on
-   * the beat the lights are showing.
-   */
-  private tick() {
-    const running = this.on && this.ctx.state === "running";
-    let lead = 0;
-    if (running) {
-      this.measure();
-      lead = Math.max(0, this.ctx.currentTime - (performance.now() / 1000 + this.offset));
-    }
-    const horizon = performance.now() + 140 + lead * 1000;
-    for (;;) {
-      const at = this.origin + this.step * STEP * 1000;
-      if (at >= horizon) break;
-      const step = this.step++;
-      if (step % 16 === 0) {
-        const bar = step / 16 - INTRO;
-        window.setTimeout(() => this.onBar(bar), Math.max(0, at - performance.now()));
-      }
-      if (!running) continue;
-      const time = at / 1000 + this.offset;
-      if (time < this.ctx.currentTime - 0.02) continue;
-      this.play(step, Math.max(time, this.ctx.currentTime));
-    }
-  }
-
-  private play(step: number, t: number) {
-    const bar = Math.floor(step / 16) - INTRO;
-    const k = step % 16;
-    const chord = ((bar % 4) + 4) % 4;
-    if (k === 0) this.pad(t, CHORDS[chord]);
-    for (const [at, length, jump] of BASS)
-      if (k === at) this.bass(t, ROOTS[chord] + (jump && bar % 2 ? 12 : 0), length * STEP);
-
-    if (bar < 0) {
-      // Outside: the kick through the wall, then a riser and a roll as the door opens.
-      if (k % 4 === 0) this.kick(t, 0.9);
-      if (k === 8) this.riser(t, BEAT * 2);
-      if (k >= 12) this.snare(t, 0.3 + (k - 12) * 0.14);
-      return;
-    }
-    if (!this.open) {
-      this.open = true;
-      this.door.frequency.setValueAtTime(18000, t);
-      this.crash(t, 1);
-    }
-    const phrase = bar % 8;
-    const hook = phrase >= 4;
-    const drop = phrase === 7 && Math.floor(bar / 8) % 2 === 1 && k >= 8;
-    if (bar > 0 && phrase === 0 && k === 0) this.crash(t, 0.55);
-
-    if (k % 4 === 0 && !drop) this.kick(t, 1);
-    if (SNARES.has(k) && !drop) this.snare(t, k === 6 || k === 14 ? 0.9 : 0.7);
-    if (drop) this.snare(t, 0.3 + (k - 8) * 0.08);
-    if (k % 2 === 0) this.hat(t, k % 4 === 2 ? 0.9 : 0.5, k === 14 && phrase % 2 === 1);
-    else if ((phrase === 3 || phrase === 7) && k >= 9) this.hat(t, 0.4, false);
-
-    if (hook) {
-      const note = HOOK[bar % 2][k];
-      if (note) this.pluck(t, note, 0.9);
-    } else if (k % 2 === 0) this.pluck(t, CHORDS[chord][ARP[k / 2]] + 12, 0.35);
-  }
-
-  /* Instruments. Every one is a few nodes that start, decay and stop on their own. */
-
-  private envelope(t: number, peak: number, decay: number, attack = 0.003) {
-    const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.linearRampToValueAtTime(peak, t + attack);
-    gain.gain.exponentialRampToValueAtTime(0.0008, t + attack + decay);
-    return gain;
-  }
-
-  private burst(t: number, length: number) {
-    const source = this.ctx.createBufferSource();
-    source.buffer = this.noise;
-    source.start(t, Math.random() * 0.5);
-    source.stop(t + length);
-    return source;
-  }
-
-  private filter(type: BiquadFilterType, frequency: number, q = 0.7) {
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = type;
-    filter.frequency.value = frequency;
-    filter.Q.value = q;
-    return filter;
-  }
-
-  private kick(t: number, velocity: number) {
-    const body = this.ctx.createOscillator();
-    body.frequency.setValueAtTime(155, t);
-    body.frequency.exponentialRampToValueAtTime(48, t + 0.12);
-    body.connect(this.envelope(t, velocity, 0.42)).connect(this.drums);
-    body.start(t);
-    body.stop(t + 0.5);
-    this.burst(t, 0.02)
-      .connect(this.filter("highpass", 3000))
-      .connect(this.envelope(t, 0.18 * velocity, 0.012))
-      .connect(this.drums);
-    // Everything melodic ducks under the kick: the pump.
-    this.pump.gain.cancelScheduledValues(t);
-    this.pump.gain.setValueAtTime(0.35, t);
-    this.pump.gain.linearRampToValueAtTime(1, t + BEAT * 0.55);
-  }
-
-  private snare(t: number, velocity: number) {
-    const crack = this.envelope(t, 0.5 * velocity, 0.17);
-    this.burst(t, 0.22)
-      .connect(this.filter("bandpass", 1900, 0.9))
-      .connect(crack);
-    crack.connect(this.drums);
-    crack.connect(this.verb);
-    const body = this.ctx.createOscillator();
-    body.type = "triangle";
-    body.frequency.setValueAtTime(190, t);
-    body.frequency.exponentialRampToValueAtTime(150, t + 0.08);
-    body.connect(this.envelope(t, 0.28 * velocity, 0.08)).connect(this.drums);
-    body.start(t);
-    body.stop(t + 0.12);
-  }
-
-  private hat(t: number, velocity: number, open: boolean) {
-    const decay = open ? 0.22 : 0.04;
-    this.burst(t, decay + 0.02)
-      .connect(this.filter("highpass", 7500))
-      .connect(this.envelope(t, 0.16 * velocity, decay))
-      .connect(this.drums);
-  }
-
-  private crash(t: number, velocity: number) {
-    const tail = this.envelope(t, 0.2 * velocity, 1.6);
-    const source = this.ctx.createBufferSource();
-    source.buffer = this.noise;
-    source.loop = true;
-    source.connect(this.filter("highpass", 4200)).connect(tail);
-    tail.connect(this.drums);
-    tail.connect(this.verb);
-    source.start(t);
-    source.stop(t + 1.7);
-  }
-
-  private riser(t: number, length: number) {
-    const source = this.ctx.createBufferSource();
-    source.buffer = this.noise;
-    source.loop = true;
-    const sweep = this.filter("bandpass", 400, 4);
-    sweep.frequency.setValueAtTime(400, t);
-    sweep.frequency.exponentialRampToValueAtTime(7000, t + length);
-    const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.linearRampToValueAtTime(0.22, t + length);
-    gain.gain.linearRampToValueAtTime(0.0001, t + length + 0.05);
-    // Not behind the door: the build is what you hear as it opens.
-    source.connect(sweep).connect(gain).connect(this.out);
-    source.start(t);
-    source.stop(t + length + 0.06);
-  }
-
-  private bass(t: number, midi: number, length: number) {
-    const tone = this.ctx.createOscillator();
-    const frequency = hz(midi);
-    tone.frequency.setValueAtTime(this.lastBass || frequency, t);
-    tone.frequency.exponentialRampToValueAtTime(frequency, t + 0.05);
-    this.lastBass = frequency;
-    const drive = this.ctx.createWaveShaper();
-    drive.curve = this.shape;
-    tone
-      .connect(drive)
-      .connect(this.filter("lowpass", 900))
-      .connect(this.envelope(t, 0.5, length + 0.12, 0.006))
-      .connect(this.sum);
-    tone.start(t);
-    tone.stop(t + length + 0.2);
-  }
-
-  private pad(t: number, chord: number[]) {
-    const tone = this.filter("lowpass", 1300, 0.5);
-    const gain = this.ctx.createGain();
-    gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.linearRampToValueAtTime(0.05, t + 0.12);
-    gain.gain.setValueAtTime(0.05, t + BAR - 0.1);
-    gain.gain.linearRampToValueAtTime(0.0001, t + BAR + 0.15);
-    tone.connect(gain);
-    gain.connect(this.pump);
-    gain.connect(this.verb);
-    for (const note of chord)
-      for (const cents of [-8, 8]) {
-        const voice = this.ctx.createOscillator();
-        voice.type = "sawtooth";
-        voice.frequency.value = hz(note);
-        voice.detune.value = cents;
-        voice.connect(tone);
-        voice.start(t);
-        voice.stop(t + BAR + 0.2);
-      }
-  }
-
-  private pluck(t: number, midi: number, velocity: number) {
-    const tone = this.ctx.createOscillator();
-    tone.type = "square";
-    tone.frequency.value = hz(midi);
-    const filter = this.filter("lowpass", 4200, 2);
-    filter.frequency.setValueAtTime(4200, t);
-    filter.frequency.exponentialRampToValueAtTime(700, t + 0.2);
-    const gain = this.envelope(t, 0.085 * velocity, 0.28);
-    tone.connect(filter).connect(gain);
-    gain.connect(this.pump);
-    gain.connect(this.echo);
-    tone.start(t);
-    tone.stop(t + 0.32);
-  }
-}
+/** How bright the mirror ball's spots are in each part: they carry the quiet parts. */
+const BALL_LEVEL: Record<Scene, number> = {
+  intro: 1,
+  verse: 0.55,
+  lift: 0.5,
+  break: 1,
+  build: 0.75,
+  drop: 0.7,
+  outro: 0.9,
+};
 
 /* ---------- The room ---------- */
 
@@ -396,77 +80,291 @@ function cone(colour: string, index: number) {
   return `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><defs><linearGradient id="${id}" x2="0" y2="1"><stop offset="0" stop-color="${colour}" stop-opacity=".7"/><stop offset=".45" stop-color="${colour}" stop-opacity=".22"/><stop offset=".9" stop-color="${colour}" stop-opacity="0"/></linearGradient></defs><polygon points="47,0 53,0 100,100 0,100" fill="url(#${id})"/></svg>`;
 }
 
-/** A dancer, drawn in a 60 x 130 box. Arms: none, left up, right up, both, or a fist pump. */
-function dancer(arms: number) {
-  const lines = [
-    "",
-    "M15 52 L6 6",
-    "M45 52 L54 6",
-    "M15 52 L5 8 M45 52 L55 8",
-    "M45 52 L58 32 L51 4",
-  ][arms];
-  return `<svg viewBox="0 0 60 130" preserveAspectRatio="xMidYMax meet"><circle cx="30" cy="21" r="12.5"/><rect x="25" y="28" width="10" height="16"/><path d="M4 130C4 74 12 42 30 42s26 32 26 88z"/>${
-    lines
-      ? `<path d="${lines}" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>`
-      : ""
-  }</svg>`;
+const BALL = 72;
+const BALL_FRAMES = 16;
+
+/**
+ * The mirror ball, painted once at startup as a strip of frames of a faceted sphere turning.
+ * A stepped compositor animation slides the strip, so it costs nothing per frame. Each facet's
+ * shade depends on where it faces, so after a cycle (four facet columns) the strip matches its
+ * first frame and the turn loops without a seam.
+ */
+function paintBall(ratio: number) {
+  const size = Math.round(BALL * ratio);
+  const canvas = document.createElement("canvas");
+  canvas.width = size * BALL_FRAMES;
+  canvas.height = size;
+  const g = canvas.getContext("2d");
+  if (!g) return "";
+  const rows = 16;
+  const cols = 34;
+  const loop = 4;
+  const radius = size / 2 - ratio;
+  const dLat = Math.PI / rows;
+  const dLon = (Math.PI * 2) / cols;
+  const unit = (x: number, y: number, z: number) => {
+    const l = Math.hypot(x, y, z);
+    return [x / l, y / l, z / l];
+  };
+  // A white pin spot from the upper left, and the room's colours from the sides.
+  const lights = [
+    { dir: unit(-0.45, -0.6, 0.66), colour: [255, 255, 255], power: 34 },
+    { dir: unit(0.75, -0.1, 0.65), colour: [255, 79, 216], power: 18 },
+    { dir: unit(-0.65, 0.55, 0.55), colour: [62, 232, 255], power: 18 },
+  ];
+  const shade = (row: number, col: number) => {
+    const n = Math.sin(row * 12.9898 + (col % loop) * 78.233) * 43758.5453;
+    return n - Math.floor(n);
+  };
+  for (let frame = 0; frame < BALL_FRAMES; frame++) {
+    const cx = frame * size + size / 2;
+    const cy = size / 2;
+    g.save();
+    g.beginPath();
+    g.arc(cx, cy, radius, 0, Math.PI * 2);
+    g.clip();
+    g.fillStyle = "#16161d";
+    g.fillRect(cx - size / 2, 0, size, size);
+    const turn = (frame / BALL_FRAMES) * loop * dLon;
+    for (let row = 0; row < rows; row++) {
+      const lat = -Math.PI / 2 + (row + 0.5) * dLat;
+      for (let col = 0; col < cols; col++) {
+        const lon = (col + 0.5) * dLon + turn;
+        const nx = Math.cos(lat) * Math.sin(lon);
+        const ny = Math.sin(lat);
+        const nz = Math.cos(lat) * Math.cos(lon);
+        if (nz < 0.04) continue;
+        // A facet mirrors the room: reflect the eye's ray off it and see which light it meets.
+        const rx = 2 * nz * nx;
+        const ry = 2 * nz * ny;
+        const rz = 2 * nz * nz - 1;
+        let [r, gr, b] = [30 + 70 * nz, 30 + 70 * nz, 38 + 74 * nz].map(
+          (v) => v + shade(row, col) * 46,
+        );
+        for (const { dir, colour, power } of lights) {
+          const hit = Math.max(0, rx * dir[0] + ry * dir[1] + rz * dir[2]) ** power;
+          r += colour[0] * hit;
+          gr += colour[1] * hit;
+          b += colour[2] * hit;
+        }
+        g.fillStyle = `rgb(${Math.min(255, r) | 0},${Math.min(255, gr) | 0},${Math.min(255, b) | 0})`;
+        g.beginPath();
+        for (const [a, o] of [
+          [-0.42, -0.42],
+          [0.42, -0.42],
+          [0.42, 0.42],
+          [-0.42, 0.42],
+        ]) {
+          const la = lat + a * dLat;
+          const lo = lon + o * dLon;
+          g.lineTo(cx + radius * Math.cos(la) * Math.sin(lo), cy + radius * Math.sin(la));
+        }
+        g.fill();
+      }
+    }
+    // Round it off: darker towards the rim.
+    const rim = g.createRadialGradient(
+      cx - radius * 0.2,
+      cy - radius * 0.25,
+      radius * 0.3,
+      cx,
+      cy,
+      radius,
+    );
+    rim.addColorStop(0, "#0000");
+    rim.addColorStop(1, "#000a");
+    g.fillStyle = rim;
+    g.fillRect(cx - size / 2, 0, size, size);
+    g.restore();
+  }
+  return canvas.toDataURL();
 }
+
+/** A soft round spot of light, drawn once and stamped many times. */
+function spotSprite() {
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = 32;
+  const g = canvas.getContext("2d")!;
+  const glow = g.createRadialGradient(16, 16, 0, 16, 16, 16);
+  glow.addColorStop(0, "#fff");
+  glow.addColorStop(0.3, "#ffffffc0");
+  glow.addColorStop(0.55, "#ffffff30");
+  glow.addColorStop(1, "#fff0");
+  g.fillStyle = glow;
+  g.fillRect(0, 0, 32, 32);
+  return canvas;
+}
+
+/** A shaft of light through haze, from the ball outwards, fading along its length. */
+function raySprite() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 8;
+  const g = canvas.getContext("2d")!;
+  const fade = g.createLinearGradient(0, 0, 256, 0);
+  fade.addColorStop(0, "#fff0");
+  fade.addColorStop(0.08, "#ffffffb0");
+  fade.addColorStop(1, "#fff0");
+  g.fillStyle = fade;
+  g.beginPath();
+  g.moveTo(0, 4);
+  g.lineTo(256, 0);
+  g.lineTo(256, 8);
+  g.fill();
+  return canvas;
+}
+
+/* ---------- The crowd ---------- */
+
+const HAIR = [
+  "",
+  '<circle cx="30" cy="27" r="6.5"/>',
+  '<path d="M37 34C50 38 52 56 45 67C45 54 42 46 35 42Z"/>',
+  '<path d="M19.5 40C19 50 18.5 57 18 63C22 65 26 63 27 59H33C34 63 38 65 42 63C41.5 57 41 50 40.5 40C40.5 26 19.5 26 19.5 40Z"/>',
+  '<path d="M19 40C19 27 41 27 41 40H52V43.5H19Z"/>',
+  '<circle cx="30" cy="38" r="15.5"/>',
+];
+
+/**
+ * A dancer in a 60 x 150 box: head, hair, shoulders. An arm can be up holding a phone, whose
+ * screen glows. Everything is drawn twice: once in the stage colour, a little higher, so the
+ * lights behind the crowd catch the edges of heads and shoulders.
+ */
+function figure(width: number, hair: number, phone: "left" | "right" | null) {
+  const left = 30 - width;
+  const right = 30 + width;
+  let shape = `<ellipse cx="30" cy="42" rx="10.5" ry="12"/><rect x="25.5" y="50" width="9" height="14" rx="3"/><path d="M${left} 150C${left} 112 ${left + 1} 88 ${left + 4} 77C${left + 6} 68 22 65 30 65C38 65 ${right - 6} 68 ${right - 4} 77C${right - 1} 88 ${right} 112 ${right} 150Z"/>${HAIR[hair]}`;
+  let screen = "";
+  if (phone) {
+    const flip = (x: number) => (phone === "right" ? x : 60 - x);
+    shape += `<path d="M${flip(right - 5)} 80L${flip(right + 3)} 56L${flip(right - 2)} 32" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const x = flip(right - 2);
+    screen = `<circle cx="${x}" cy="25" r="14" fill="#d9f1ff" opacity=".13"/><rect x="${x - 5}" y="16" width="10" height="17" rx="2" fill="#d9f1ff"/>`;
+  }
+  return `<svg viewBox="0 0 60 150" preserveAspectRatio="xMidYMax meet"><g class="ldp-rim">${shape}</g><g>${shape}</g>${screen}</svg>`;
+}
+
+/** An arm that moves on its own, pinned at the shoulder (5, 56 in its 24 x 60 box). */
+const ARM = (() => {
+  const arm = `<path d="M5 56L15 32L9 8" fill="none" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="5.5"/>`;
+  return `<svg viewBox="0 0 24 60"><g class="ldp-rim">${arm}</g><g>${arm}</g></svg>`;
+})();
+
+type Person = { el: HTMLElement; arm: HTMLElement | null; row: number };
 
 function crowd(width: number) {
   const rows = [
-    { count: Math.min(22, Math.ceil(width / 66)), min: 84, max: 108, className: "is-back" },
-    { count: Math.min(15, Math.ceil(width / 96)), min: 112, max: 148, className: "is-front" },
+    { count: Math.min(18, Math.ceil(width / 72)), min: 104, max: 132, className: "is-back" },
+    { count: Math.min(12, Math.ceil(width / 104)), min: 140, max: 182, className: "is-front" },
   ];
   const wrap = document.createElement("div");
   wrap.className = "ldp-crowd";
-  const people: HTMLElement[] = [];
-  for (const row of rows)
+  const people: Person[] = [];
+  const lines: HTMLElement[] = [];
+  rows.forEach((row, index) => {
+    const line = document.createElement("div");
+    line.className = `ldp-row ${row.className}`;
     for (let i = 0; i < row.count; i++) {
-      const person = document.createElement("span");
-      person.className = `ldp-dancer ${row.className}`;
+      const el = document.createElement("span");
+      el.className = "ldp-dancer";
       const size = rand(row.min, row.max);
-      person.style.cssText = `left:${((i + rand(-0.3, 0.3)) / row.count) * 104 - 2}%;height:${size.toFixed(0)}px;width:${(size * 0.46).toFixed(0)}px`;
-      person.innerHTML = dancer(Math.random() < 0.55 ? Math.floor(rand(1, 5)) : 0);
-      wrap.append(person);
-      people.push(person);
+      el.style.cssText = `left:${((i + rand(-0.3, 0.3)) / row.count) * 104 - 2}%;height:${size.toFixed(0)}px;width:${(size * 0.4).toFixed(0)}px`;
+      const shoulders = rand(19, 25);
+      const roll = Math.random();
+      const phone = roll < 0.2 ? (Math.random() < 0.5 ? "left" : "right") : null;
+      el.innerHTML = figure(shoulders, Math.floor(rand(0, HAIR.length)), phone);
+      let arm: HTMLElement | null = null;
+      if (!phone && roll < (index ? 0.55 : 0.4)) {
+        arm = document.createElement("span");
+        const side = Math.random() < 0.5 ? "left" : "right";
+        arm.className = `ldp-arm is-${side}`;
+        const shoulder = side === "right" ? 30 + shoulders - 5 : 30 - shoulders + 5;
+        arm.style.left = `${((shoulder - 5) / 60) * 100}%`;
+        arm.innerHTML = ARM;
+        el.append(arm);
+      }
+      line.append(el);
+      people.push({ el, arm, row: index });
     }
-  return { wrap, people };
+    wrap.append(line);
+    lines.push(line);
+  });
+  return { wrap, people, lines };
 }
+
+/* ---------- The party ---------- */
 
 export async function startParty() {
   const calm = reducedMotion();
   const root = document.documentElement;
   const names = ["--ldt-accent", "--ldt-accent-ink", "--ldt-on-accent"];
   const saved = names.map((name) => root.style.getPropertyValue(name));
-  // One clock for everything: the first beat, a moment from now, on the page's own timeline.
-  const context = takeAudio();
-  // The first beat comes once the sound can be there in time: after the output latency.
-  const latency = context ? Math.max(context.outputLatency || 0, context.baseLatency || 0) : 0;
-  const origin = performance.now() + 220 + Math.min(latency, 0.5) * 1000;
-  const dropAt = origin + INTRO * BAR * 1000;
+  const prime = takeAudio();
+  const audio = prime?.audio ?? null;
+  const context = prime?.context ?? null;
+
+  /* The sound: the track comes in muffled, as if through the club's door, which opens in the
+     intro. Without Web Audio the element plays straight out. */
+  let out: GainNode | null = null;
+  let door: BiquadFilterNode | null = null;
+  if (context && prime?.source) {
+    try {
+      door = context.createBiquadFilter();
+      door.type = "lowpass";
+      door.frequency.value = 340;
+      door.Q.value = 0.9;
+      out = context.createGain();
+      prime.source.connect(door).connect(out).connect(context.destination);
+    } catch {
+      out = null;
+    }
+  }
+  let doorOpen = false;
+  const openDoor = () => {
+    if (doorOpen || !door || !context || !audio) return;
+    doorOpen = true;
+    // Fully open just before the verse (bar 4).
+    const until = Math.max(0.4, FIRST + (3.5 * BAR_MS) / 1000 - audio.currentTime);
+    const now = context.currentTime;
+    door.frequency.cancelScheduledValues(now);
+    door.frequency.setValueAtTime(door.frequency.value, now);
+    door.frequency.exponentialRampToValueAtTime(20_000, now + until);
+  };
 
   const club = document.createElement("div");
   club.className = "ldp-club";
   club.setAttribute("aria-hidden", "true");
+  const reel = calm ? "" : paintBall(Math.min(2, window.devicePixelRatio || 1));
   club.innerHTML = `
     <div class="ldp-dim"></div>
     <div class="ldp-lights">
-      ${BEAMS.map((colour, i) => `<div class="ldp-beam" style="left:${12.5 + i * 25}%">${cone(colour, i)}</div>`).join("")}
+      <div class="ldp-beams">${BEAMS.map((colour, i) => `<div class="ldp-beam" style="left:${12.5 + i * 25}%">${cone(colour, i)}</div>`).join("")}</div>
       <div class="ldp-fan is-left"><div class="ldp-fan-lines">${'<i class="ldp-laser"></i>'.repeat(6)}</div></div>
       <div class="ldp-fan is-right"><div class="ldp-fan-lines">${'<i class="ldp-laser"></i>'.repeat(6)}</div></div>
     </div>
-    <div class="ldp-ball"><div class="ldp-ball-sphere"><div class="ldp-ball-facets"></div></div></div>
+    <div class="ldp-ball">
+      <div class="ldp-ball-halo"></div>
+      <div class="ldp-ball-sphere">${reel ? `<div class="ldp-ball-reel" style="background-image:url(${reel})"></div>` : ""}</div>
+      <i class="ldp-glint" style="--x:-14px;--y:-12px"></i>
+      <i class="ldp-glint" style="--x:16px;--y:4px"></i>
+      <i class="ldp-glint" style="--x:-4px;--y:18px"></i>
+    </div>
     <p class="ldp-sign">After hours</p>`;
-  const { wrap, people } = crowd(window.innerWidth);
+  const { wrap, people, lines } = crowd(window.innerWidth);
   club.append(wrap);
   host().append(club);
 
-  const synced: Animation[] = [];
+  /* One clock. Until the music plays it runs on its own; then it is read from the music. */
+  let origin = performance.now() + 250;
+  type Synced = { animation: Animation; shift: number };
+  const synced: Synced[] = [];
+  let sceneOnly: Synced[] = [];
   const groove = (
     el: Element,
     frames: Keyframe[],
     beats: number,
     options: KeyframeAnimationOptions & { shift?: number } = {},
+    list: Synced[] = synced,
   ) => {
     if (calm) return;
     const { shift = 0, ...rest } = options;
@@ -476,7 +374,7 @@ export async function startParty() {
       ...rest,
     });
     animation.startTime = origin + shift * BEAT_MS;
-    synced.push(animation);
+    list.push({ animation, shift });
   };
 
   club.querySelectorAll(".ldp-beam").forEach((beam, i) => {
@@ -494,9 +392,9 @@ export async function startParty() {
       shift: i * 2,
     }),
   );
-  club.querySelectorAll(".ldp-fan-lines").forEach((lines) =>
+  club.querySelectorAll(".ldp-fan-lines").forEach((fan) =>
     groove(
-      lines,
+      fan,
       [
         { opacity: 1, offset: 0 },
         { opacity: 1, offset: 0.42 },
@@ -506,36 +404,95 @@ export async function startParty() {
       1,
     ),
   );
-  // Light on the kick: the room brightens on every beat, then settles.
+  // The ball: its halo breathes on the beat and its facets catch the light, one after another.
   groove(
-    club.querySelector(".ldp-dim")!,
-    [{ opacity: 0.72, easing: "ease-out" }, { opacity: 0.86, offset: 0.4 }, { opacity: 0.86 }],
+    club.querySelector(".ldp-ball-halo")!,
+    [{ opacity: 1, easing: "ease-out" }, { opacity: 0.55, offset: 0.6 }, { opacity: 0.55 }],
     1,
   );
-  for (const person of people) {
-    const lean = rand(2, 5);
-    const hop = rand(4, 9);
+  club.querySelectorAll(".ldp-glint").forEach((glint, i) =>
     groove(
-      person,
+      glint,
       [
-        { transform: `translateY(${hop}px) rotate(${-lean}deg)`, easing: "ease-out" },
-        { transform: "translateY(-3px) rotate(0deg)", offset: 0.25, easing: "ease-in" },
-        { transform: `translateY(${hop}px) rotate(${lean}deg)`, offset: 0.5, easing: "ease-out" },
-        { transform: "translateY(-3px) rotate(0deg)", offset: 0.75, easing: "ease-in" },
-        { transform: `translateY(${hop}px) rotate(${-lean}deg)` },
+        { opacity: 0, transform: "scale(0.2) rotate(0deg)" },
+        { opacity: 1, transform: "scale(1) rotate(20deg)", offset: 0.12 },
+        { opacity: 0, transform: "scale(0.3) rotate(45deg)", offset: 0.4 },
+        { opacity: 0, transform: "scale(0.2) rotate(45deg)" },
       ],
-      Math.random() < 0.2 ? 4 : 2,
-      { shift: rand(-0.08, 0.08) },
+      3,
+      { shift: i * 1.25 },
+    ),
+  );
+  for (const { el, arm } of people) {
+    const lean = rand(2, 5);
+    const hop = rand(3, 8);
+    const sway = Math.random() < 0.3;
+    groove(
+      el,
+      sway
+        ? [
+            { transform: `rotate(${-lean - 2}deg)`, easing: "ease-in-out" },
+            {
+              transform: `translateY(${hop / 2}px) rotate(0deg)`,
+              offset: 0.25,
+              easing: "ease-in-out",
+            },
+            { transform: `rotate(${lean + 2}deg)`, offset: 0.5, easing: "ease-in-out" },
+            {
+              transform: `translateY(${hop / 2}px) rotate(0deg)`,
+              offset: 0.75,
+              easing: "ease-in-out",
+            },
+            { transform: `rotate(${-lean - 2}deg)` },
+          ]
+        : [
+            { transform: `translateY(${hop}px) rotate(${-lean}deg)`, easing: "ease-out" },
+            { transform: "translateY(-3px) rotate(0deg)", offset: 0.25, easing: "ease-in" },
+            {
+              transform: `translateY(${hop}px) rotate(${lean}deg)`,
+              offset: 0.5,
+              easing: "ease-out",
+            },
+            { transform: "translateY(-3px) rotate(0deg)", offset: 0.75, easing: "ease-in" },
+            { transform: `translateY(${hop}px) rotate(${-lean}deg)` },
+          ],
+      sway ? 4 : 2,
+      { shift: rand(-0.06, 0.06) },
     );
+    if (arm) {
+      const pump = Math.random() < 0.6;
+      groove(
+        arm,
+        pump
+          ? [
+              { transform: "rotate(-30deg)", easing: "ease-out" },
+              { transform: "rotate(8deg)", offset: 0.3, easing: "ease-in" },
+              { transform: "rotate(-30deg)" },
+            ]
+          : [
+              { transform: "rotate(-34deg)", easing: "ease-in-out" },
+              { transform: "rotate(26deg)", offset: 0.5, easing: "ease-in-out" },
+              { transform: "rotate(-34deg)" },
+            ],
+        pump ? 1 : 2,
+        { shift: rand(-0.05, 0.05) },
+      );
+    }
   }
 
-  /* Mirror-ball specks and confetti share one canvas at screen resolution. */
+  /* Mirror-ball spots and confetti share one canvas at screen resolution. The spots sit on a
+     sphere around the ball and turn with it, so they cross the room, faster and longer at the
+     sides, the way light from a real ball moves over walls. */
   const sky = calm ? null : overlayCanvas("ldp-canvas ldp-sky", 1);
-  const specks = Array.from({ length: 72 }, () => ({
-    y: rand(0.04, 0.8),
+  const spot = sky ? spotSprite() : null;
+  const ray = sky ? raySprite() : null;
+  const specks = Array.from({ length: 160 }, (_, i) => ({
+    turn: rand(0, Math.PI * 2),
+    tilt: rand(-0.35, 0.95),
+    size: rand(11, 25),
     phase: rand(0, Math.PI * 2),
-    size: rand(2.5, 5),
     tint: Math.random() < 0.3 ? PALETTE[Math.floor(rand(0, PALETTE.length))] : "#ffffff",
+    ray: i % 11 === 0,
   }));
   type Bit = {
     x: number;
@@ -564,26 +521,72 @@ export async function startParty() {
         colour: PALETTE[Math.floor(rand(0, PALETTE.length))],
       });
   };
+  const ballEl = club.querySelector<HTMLElement>(".ldp-ball-sphere")!;
+  let ballX = 0;
+  let ballY = 0;
+  const findBall = () => {
+    const box = ballEl.getBoundingClientRect();
+    ballX = box.left + box.width / 2;
+    ballY = box.top + box.height / 2;
+  };
+  findBall();
+  window.addEventListener("resize", findBall);
+  let level = 1;
+  let target = 1;
   let frame = 0;
   let previous = performance.now();
   const draw = (now: number) => {
-    if (!sky) return;
-    const { context, width, height } = sky;
+    if (!sky || !spot || !ray) return;
+    const { context: g, width, height, ratio: r } = sky;
     const dt = Math.min(1 / 30, (now - previous) / 1000);
     previous = now;
-    context.setTransform(sky.ratio, 0, 0, sky.ratio, 0, 0);
-    context.clearRect(0, 0, width, height);
-    if (now >= dropAt) {
-      const turn = (now / 1000) * ((Math.PI * 2) / 7);
-      for (const speck of specks) {
-        const angle = (speck.phase + turn) % (Math.PI * 2);
-        const x = (angle / (Math.PI * 2)) * (width + 80) - 40;
-        context.globalAlpha = 0.35 + 0.3 * Math.sin(now / 240 + speck.phase * 3) ** 2;
-        context.fillStyle = speck.tint;
-        context.fillRect(x, speck.y * height, speck.size, speck.size);
+    level += (target - level) * Math.min(1, dt * 3);
+    g.setTransform(r, 0, 0, r, 0, 0);
+    g.clearRect(0, 0, width, height);
+    // One turn every 8 bars, on the music's clock.
+    const turn = ((now - origin) / (BAR_MS * 8)) * Math.PI * 2;
+    const reach = Math.max(width, height) * 0.42;
+    g.globalCompositeOperation = "lighter";
+    for (const speck of specks) {
+      const angle = speck.turn + turn;
+      const facing = Math.cos(angle);
+      if (facing < 0.18) continue;
+      const x = ballX + (Math.sin(angle) / facing) * reach;
+      const y = ballY + (Math.tan(speck.tilt) / facing) * reach * 0.62 + reach * 0.1;
+      if (x < -40 || x > width + 40 || y < -40 || y > height + 40) continue;
+      const fade = Math.min(1, (facing - 0.18) * 5);
+      const twinkle = 0.55 + 0.45 * Math.sin(now / 260 + speck.phase * 3) ** 2;
+      const alpha = level * fade * twinkle;
+      if (speck.ray) {
+        g.globalAlpha = alpha * 0.11;
+        const dx = x - ballX;
+        const dy = y - ballY;
+        const length = Math.hypot(dx, dy);
+        const c = dx / length;
+        const s = dy / length;
+        g.setTransform(
+          (c * length * r) / 256,
+          (s * length * r) / 256,
+          -s * 2.2 * r,
+          c * 2.2 * r,
+          ballX * r,
+          ballY * r,
+        );
+        g.drawImage(ray, 0, -4);
+        g.setTransform(r, 0, 0, r, 0, 0);
       }
-      context.globalAlpha = 1;
+      const h = speck.size;
+      const w = h / facing;
+      g.globalAlpha = alpha * 0.9;
+      g.drawImage(spot, x - w / 2, y - h / 2, w, h);
+      if (speck.tint !== "#ffffff") {
+        g.globalAlpha = alpha * 0.5;
+        g.fillStyle = speck.tint;
+        g.fillRect(x - w / 4, y - h / 4, w / 2, h / 2);
+      }
     }
+    g.globalCompositeOperation = "source-over";
+    g.globalAlpha = 1;
     bits = bits.filter((bit) => bit.y < height + 20);
     for (const bit of bits) {
       bit.vy += 240 * dt;
@@ -594,52 +597,126 @@ export async function startParty() {
       const c = Math.cos(bit.a);
       const s = Math.sin(bit.a);
       const squash = Math.abs(Math.cos(bit.a * 1.7)) + 0.1;
-      context.setTransform(
-        c * sky.ratio,
-        s * sky.ratio,
-        -s * squash * sky.ratio,
-        c * squash * sky.ratio,
-        bit.x * sky.ratio,
-        bit.y * sky.ratio,
-      );
-      context.fillStyle = bit.colour;
-      context.fillRect(-bit.w / 2, -bit.h / 2, bit.w, bit.h);
+      g.setTransform(c * r, s * r, -s * squash * r, c * squash * r, bit.x * r, bit.y * r);
+      g.fillStyle = bit.colour;
+      g.fillRect(-bit.w / 2, -bit.h / 2, bit.w, bit.h);
     }
     frame = requestAnimationFrame(draw);
   };
   if (sky) frame = requestAnimationFrame(draw);
 
-  /* Once a bar: the accent changes with the music, and the room changes with the song. */
+  /* The show follows the song: each part of it has its own lights. */
   const sign = club.querySelector<HTMLElement>(".ldp-sign")!;
-  let stopped = false;
-  const onBar = (bar: number) => {
-    if (bar < 0 || stopped) return;
-    if (bar === 0) {
-      club.classList.add("is-on");
-      confetti(170);
-      if (!calm) {
-        // One white flash as the door opens; the layer exists only while it shows.
-        const flash = document.createElement("div");
-        flash.className = "ldp-flash";
-        club.append(flash);
-        flash
-          .animate([{ opacity: 0 }, { opacity: 0.28, offset: 0.15 }, { opacity: 0 }], 520)
-          .finished.then(
-            () => flash.remove(),
-            () => flash.remove(),
-          );
-      }
-    } else if (bar % 8 === 0) confetti(90);
-    const hex = PALETTE[Math.floor(bar / 2) % PALETTE.length];
-    club.style.setProperty("--ldp-glow", hex);
-    // Recolouring the page restyles all of it (about 50-250 ms on a slow phone), so it happens
-    // every other bar, never per frame. The lights run on the compositor and don't wait for it.
-    if (bar % 2 === 0) {
-      root.style.setProperty(names[0], hex);
-      root.style.setProperty(names[1], accentInk(hex));
-      root.style.setProperty(names[2], onAccent(hex));
+  const beams = club.querySelector<HTMLElement>(".ldp-beams")!;
+  const dim = club.querySelector<HTMLElement>(".ldp-dim")!;
+  const flash = (strength: number) => {
+    if (calm) return;
+    // The layer exists only while it shows.
+    const white = document.createElement("div");
+    white.className = "ldp-flash";
+    club.append(white);
+    white
+      .animate([{ opacity: 0 }, { opacity: strength, offset: 0.15 }, { opacity: 0 }], 520)
+      .finished.then(
+        () => white.remove(),
+        () => white.remove(),
+      );
+  };
+  const enter = (scene: Scene, first: boolean) => {
+    for (const { animation } of sceneOnly) animation.cancel();
+    sceneOnly = [];
+    club.dataset.scene = scene;
+    target = BALL_LEVEL[scene];
+    if (scene === "verse" || scene === "lift" || scene === "drop")
+      // Light on the kick: while the drums play, the room brightens on every beat, then settles.
+      groove(
+        dim,
+        [{ opacity: 0.72, easing: "ease-out" }, { opacity: 0.86, offset: 0.4 }, { opacity: 0.86 }],
+        1,
+        {},
+        sceneOnly,
+      );
+    if (scene === "drop") {
+      flash(0.3);
+      confetti(first ? 170 : 120);
+      // The whole crowd jumps on the beat.
+      lines.forEach((line, i) =>
+        groove(
+          line,
+          [
+            { transform: "translateY(2px)", easing: "ease-out" },
+            { transform: `translateY(${i ? -10 : -7}px)`, offset: 0.45, easing: "ease-in" },
+            { transform: "translateY(2px)" },
+          ],
+          1,
+          { shift: i * 0.04 },
+          sceneOnly,
+        ),
+      );
     }
-    club.dataset.part = bar % 8 >= 4 ? "hook" : "verse";
+    if (scene === "build")
+      // The beams cut in and out on every beat with the snare roll.
+      groove(
+        beams,
+        [
+          { opacity: 1, offset: 0 },
+          { opacity: 1, offset: 0.35 },
+          { opacity: 0.15, offset: 0.4 },
+          { opacity: 0.15, offset: 1 },
+        ],
+        1,
+        {},
+        sceneOnly,
+      );
+  };
+  // The breath before a drop: one beat of dark, on the last beat of the build.
+  let cutTimer = 0;
+  const cut = (at: number) => {
+    if (calm) return;
+    window.clearTimeout(cutTimer);
+    cutTimer = window.setTimeout(() => {
+      const dark = document.createElement("div");
+      dark.className = "ldp-cut";
+      club.insertBefore(dark, wrap);
+      window.setTimeout(() => dark.remove(), BEAT_MS);
+    }, at - performance.now());
+  };
+
+  let stopped = false;
+  let scene: Scene | null = null;
+  let lastBar = Number.NaN;
+  let passes = 0;
+  const onBar = (count: number) => {
+    if (stopped) return;
+    const bar = songBar(count);
+    if (bar === lastBar) return;
+    if (bar < lastBar) passes++;
+    lastBar = bar;
+    if (!club.classList.contains("is-on")) club.classList.add("is-on");
+    const next = sceneAt(bar);
+    if (next !== scene) {
+      scene = next;
+      enter(next, passes === 0);
+    } else if (scene === "drop" && bar % 8 === 0) confetti(80);
+    if (scene === "build" && sceneAt(bar + 1) === "drop") cut(origin + (count * 4 + 3) * BEAT_MS);
+    // The colour moves on every two bars; the intro is warm amber and the break holds a cool violet.
+    if (bar % 2 === 0 || scene === "break" || scene === "intro") {
+      const hex =
+        scene === "intro"
+          ? "#ffb547"
+          : scene === "break"
+            ? "#a98bff"
+            : PALETTE[(bar / 2) % PALETTE.length | 0];
+      club.style.setProperty("--ldp-glow", hex);
+      // Recolouring the page restyles all of it (about 50-250 ms on a slow phone), so it happens
+      // at most every other bar, never per frame. The lights run on the compositor and don't
+      // wait for it.
+      if (root.style.getPropertyValue(names[0]) !== hex) {
+        root.style.setProperty(names[0], hex);
+        root.style.setProperty(names[1], accentInk(hex));
+        root.style.setProperty(names[2], onAccent(hex));
+      }
+    }
     if (!calm && bar % 4 === 0)
       sign.animate(
         [{ opacity: 1 }, { opacity: 0.2 }, { opacity: 1 }, { opacity: 0.4 }, { opacity: 1 }],
@@ -647,53 +724,99 @@ export async function startParty() {
       );
   };
 
-  /* The music, if this browser will play it. Without it the lights still keep time. */
-  let music: Groove | null = null;
   let barTimer = 0;
-  if (context) {
-    try {
-      music = new Groove(context, origin, onBar);
-      music.start();
-    } catch {
-      music = null;
-    }
-  }
-  if (!music) {
-    let bar = -INTRO;
-    const next = () => {
-      onBar(bar);
-      bar++;
-      barTimer = window.setTimeout(next, origin + (bar + INTRO) * BAR * 1000 - performance.now());
-    };
-    barTimer = window.setTimeout(next, origin - performance.now());
-  }
+  const tick = () => {
+    window.clearTimeout(barTimer);
+    if (stopped) return;
+    const count = Math.floor((performance.now() - origin) / BAR_MS + 0.01);
+    if (count >= 0) onBar(count);
+    barTimer = window.setTimeout(tick, origin + (count + 1) * BAR_MS - performance.now() + 4);
+  };
+  barTimer = window.setTimeout(tick, origin - performance.now());
 
+  /** Move the whole show onto a new clock: every light, and the bar counter. */
+  const retime = (next: number) => {
+    origin = next;
+    for (const { animation, shift } of [...synced, ...sceneOnly])
+      animation.startTime = origin + shift * BEAT_MS;
+    tick();
+  };
+
+  /* Read the clock from the music a few times a second. Small wobbles are ignored; a real
+     difference (a stall on a slow connection, the loop back to the start) moves the show. */
+  const lead = context
+    ? Math.min(0.5, Math.max(context.outputLatency || 0, context.baseLatency || 0)) * 1000
+    : 0;
+  let strikes = 0;
+  let loopTimer = 0;
+  const end = FIRST + (LOOP_END * BAR_MS) / 1000;
+  const listen = () => {
+    if (!audio || audio.paused || audio.readyState < 3) return;
+    openDoor();
+    if (!loopTimer && audio.currentTime > end - 0.3)
+      loopTimer = window.setTimeout(
+        () => {
+          loopTimer = 0;
+          // Carry any overshoot across, so the jump lands on the same beat.
+          const over = Math.max(0, audio.currentTime - end);
+          audio.currentTime = FIRST + (LOOP_START * BAR_MS) / 1000 + over;
+        },
+        Math.max(0, (end - audio.currentTime) * 1000),
+      );
+    const heard = performance.now() - (audio.currentTime - FIRST) * 1000 + lead;
+    const off = heard - origin;
+    if (Math.abs(off) > 400) retime(heard);
+    else if (Math.abs(off) > 30) {
+      if (++strikes >= 2) {
+        strikes = 0;
+        retime(heard);
+      }
+    } else strikes = 0;
+  };
+  const listener = window.setInterval(listen, 200);
+  audio?.addEventListener("playing", listen);
+
+  let soundOn = true;
   const hidden = () => {
-    if (!music || !context) return;
-    if (document.hidden) void context.suspend().catch(() => undefined);
-    else if (music.on) void context.resume().catch(() => undefined);
+    if (!audio || stopped) return;
+    if (document.hidden) audio.pause();
+    else void audio.play().catch(() => undefined);
   };
   document.addEventListener("visibilitychange", hidden);
 
   return {
-    sound: Boolean(music),
+    sound: Boolean(audio),
     setSound(on: boolean) {
-      music?.setOn(on);
+      soundOn = on;
+      if (!audio) return;
+      if (out && context) out.gain.setTargetAtTime(on ? 1 : 0, context.currentTime, 0.06);
+      else audio.muted = !on;
     },
     async stop() {
       stopped = true;
-      document.removeEventListener("visibilitychange", hidden);
       window.clearTimeout(barTimer);
+      window.clearInterval(listener);
+      window.clearTimeout(loopTimer);
+      window.clearTimeout(cutTimer);
+      window.removeEventListener("resize", findBall);
+      document.removeEventListener("visibilitychange", hidden);
+      audio?.removeEventListener("playing", listen);
       club.classList.add("is-leaving");
       sky?.canvas.classList.add("is-leaving");
-      const quiet = music?.stop();
+      if (out && context && soundOn) out.gain.setTargetAtTime(0, context.currentTime, 0.08);
       names.forEach((name, index) => {
         if (saved[index]) root.style.setProperty(name, saved[index]);
         else root.style.removeProperty(name);
       });
-      await Promise.all([quiet, new Promise((resolve) => window.setTimeout(resolve, 380))]);
+      await new Promise((resolve) => window.setTimeout(resolve, 380));
+      if (audio) {
+        audio.pause();
+        audio.removeAttribute("src");
+        audio.load();
+      }
+      context?.close().catch(() => undefined);
       cancelAnimationFrame(frame);
-      synced.forEach((animation) => animation.cancel());
+      for (const { animation } of [...synced, ...sceneOnly]) animation.cancel();
       club.remove();
       sky?.canvas.remove();
     },

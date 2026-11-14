@@ -33,7 +33,7 @@
       transparent 100%
     ),
     radial-gradient(120% 70% at 50% 110%, #2b0d45 0%, #0b0720 55%, #05040f 100%);
-  opacity: 0.8;
+  opacity: 0.86;
 }
 .ldp-lights {
   inset: 0;
@@ -45,7 +45,12 @@
 }
 
 /* Moving heads: soft cones hung from the ceiling, sweeping on the bar. */
+.ldp-beams {
+  inset: 0;
+  transition: opacity 0.6s ease-out;
+}
 .ldp-beam {
+  position: absolute;
   top: -4vh;
   width: 40vmin;
   height: 112vh;
@@ -60,7 +65,17 @@
   height: 100%;
 }
 
-/* Lasers fan out from the side walls in the hook, blinking on the beat. */
+/* Each part of the song has its own lights. The intro and the break belong to the mirror ball;
+   the lasers come out for the chorus. */
+.ldp-club:is([data-scene="intro"], [data-scene="break"]) .ldp-beams {
+  opacity: 0;
+}
+.ldp-club[data-scene="outro"] .ldp-beams {
+  opacity: 0.35;
+}
+
+/* Lasers fan out from the side walls, blinking on the beat: softly as the verse lifts, at full
+   strength in the drop. */
 .ldp-fan {
   top: 16%;
   width: 0;
@@ -73,8 +88,11 @@
 .ldp-fan.is-right {
   left: 100%;
 }
-.ldp-club:not([data-part="hook"]) .ldp-fan {
+.ldp-club:not([data-scene="drop"], [data-scene="lift"]) .ldp-fan {
   visibility: hidden;
+}
+.ldp-club[data-scene="lift"] .ldp-fan {
+  opacity: 0.45;
 }
 .ldp-fan.is-right .ldp-fan-lines {
   transform: scaleX(-1);
@@ -110,47 +128,73 @@
   rotate: 39deg;
 }
 
-/* The mirror ball. Its facets slide behind a round window, which reads as turning. */
+/* The mirror ball: a strip of painted frames stepping behind a round window. A halo breathes
+   behind it on the beat and its facets glint, one after another. */
 .ldp-ball {
   top: 0;
   left: 50%;
   width: 2px;
-  height: 8vh;
+  height: 9vh;
   margin-left: -1px;
-  background: #c9cbd399;
+  background: linear-gradient(#c9cbd300, #c9cbd3a6);
 }
-.ldp-ball-sphere {
+.ldp-ball > * {
   position: absolute;
   top: 100%;
   left: 50%;
-  width: 62px;
-  height: 62px;
-  margin-left: -31px;
+}
+.ldp-ball-halo {
+  width: 240px;
+  height: 240px;
+  margin: -88px 0 0 -120px;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    #ffffff4d,
+    color-mix(in srgb, var(--ldp-glow) 22%, transparent) 38%,
+    transparent
+  );
+  will-change: opacity;
+}
+.ldp-ball-sphere {
+  width: 72px;
+  height: 72px;
+  margin: -2px 0 0 -36px;
   overflow: hidden;
   border-radius: 50%;
   background: radial-gradient(circle at 36% 30%, #fff 0 5%, #dfe1ea 16%, #9094a3 50%, #3a3c48 100%);
+  box-shadow:
+    0 0 0 1px #ffffff1f,
+    0 0 26px 4px #ffffff24;
 }
-.ldp-ball-sphere::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: radial-gradient(circle at 36% 30%, transparent 38%, #0000008c 100%);
-}
-.ldp-ball-facets {
-  inset: 0 auto 0 0;
-  position: absolute;
-  width: 200%;
-  background:
-    radial-gradient(#ffffffd9 0 1.1px, transparent 1.5px) 2px 3px / 16px 16px,
-    repeating-linear-gradient(90deg, #00000059 0 1px, transparent 1px 8px),
-    repeating-linear-gradient(0deg, #00000059 0 1px, transparent 1px 8px);
-  animation: ldp-ball-turn 3.4s linear infinite;
+.ldp-ball-reel {
+  width: 1600%;
+  height: 100%;
+  background-size: 100% 100%;
+  animation: ldp-ball-turn 2.4s steps(16) infinite;
 }
 @keyframes ldp-ball-turn {
   to {
-    transform: translateX(-50%);
+    transform: translateX(-100%);
   }
+}
+.ldp-glint {
+  width: 30px;
+  height: 30px;
+  margin: calc(34px + var(--y)) 0 0 calc(-15px + var(--x));
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.ldp-glint::before,
+.ldp-glint::after {
+  content: "";
+  position: absolute;
+  inset: 14px 0;
+  background: linear-gradient(90deg, #fff0, #fff 45% 55%, #fff0);
+}
+.ldp-glint::after {
+  inset: 0 14px;
+  background: linear-gradient(#fff0, #fff 45% 55%, #fff0);
 }
 
 /* A neon sign: outlined type, no glow (no blur). It flickers on the bar. */
@@ -175,14 +219,19 @@
     inset 0 0 0 3px #ff4fd833;
 }
 
-/* The crowd. Two rows of silhouettes, each bouncing on the beat in its own way. */
+/* The crowd: two rows of silhouettes, back-lit, so the stage colour catches heads and shoulders.
+   Some hold phones up; some pump a fist or wave. In the chorus the whole row jumps. */
 .ldp-crowd {
   inset: auto 0 0;
-  height: 160px;
+  height: 190px;
+}
+.ldp-row {
+  position: absolute;
+  inset: 0;
 }
 .ldp-dancer {
   position: absolute;
-  bottom: -10px;
+  bottom: -14px;
   transform-origin: 50% 100%;
   will-change: transform;
 }
@@ -190,16 +239,50 @@
   display: block;
   width: 100%;
   height: 100%;
+  overflow: visible;
   fill: currentColor;
 }
-.ldp-dancer.is-back {
-  bottom: 12px;
-  color: #241739;
+.ldp-rim {
+  fill: var(--ldp-glow);
+  opacity: 0.7;
+  transform: translateY(-2.4px);
 }
-.ldp-dancer.is-front {
+.ldp-rim [stroke] {
+  stroke: var(--ldp-glow);
+}
+.ldp-row.is-back .ldp-dancer {
+  bottom: 18px;
+  color: #22163a;
+}
+.ldp-row.is-back .ldp-rim {
+  opacity: 0.4;
+}
+.ldp-row.is-front .ldp-dancer {
   color: #07050e;
 }
+.ldp-arm {
+  position: absolute;
+  top: 14.67%;
+  width: 40%;
+  height: 40%;
+  transform-origin: 20.8% 93.3%;
+  will-change: transform;
+}
+.ldp-arm.is-left {
+  scale: -1 1;
+}
+.ldp-arm path {
+  stroke: currentColor;
+}
+.ldp-arm .ldp-rim path {
+  stroke: var(--ldp-glow);
+}
 
+.ldp-cut {
+  inset: 0;
+  background: #05040f;
+  opacity: 0.7;
+}
 .ldp-flash {
   inset: 0;
   background: #fff;
@@ -208,9 +291,14 @@
 
 @media (max-width: 640px) {
   .ldp-crowd {
-    height: 120px;
+    height: 140px;
   }
   .ldp-dancer {
-    scale: 0.78;
+    scale: 0.74;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ldp-ball-reel {
+    animation: none;
   }
 }

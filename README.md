@@ -22,8 +22,9 @@ instrument sheets, torn-paper stationery, and a letter that opens on scroll.
   built on (colour, type, layout, surfaces, motion), saves a look in the visitor's browser, and
   has a few toys that act on the whole site: Gravity (each section falls to its own floor as you
   scroll to it), Zero-G (everything floats and still works), Snap, Burn it, Earthquake, and Party
-  (a club with an original groove synthesized live with Web Audio). The panel and toys load only
-  when opened, and each toy puts the page back exactly.
+  (a club whose lights follow a real track, section by section, on the music's own clock; the
+  2 MB track streams only after the click). The panel and toys load only when opened, and each
+  toy puts the page back exactly.
 - **Measured performance.** Lighthouse budgets run in CI; see
   [docs/performance](docs/performance) for the audits and what changed.
 
@@ -59,7 +60,7 @@ components/
   lumen/                      Site components: sheets, letter, reply slip, lab, panel
   lumen/tweaks.ts             Tweak schema, the site's default look, sanitiser
   lumen/play.ts               The panel's toys, loaded on first use
-  lumen/party.ts              Party: club lights and the synthesized music
+  lumen/party.ts              Party: club lights, the crowd, and the song's scene map
   lab/bidRace.ts              Two-bids simulation (pure, unit-tested logic)
 
 data/
