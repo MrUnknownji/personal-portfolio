@@ -208,26 +208,44 @@ test("the tweak panel loads on demand and its colour picker stays on screen", as
   await expect(page.locator("html")).toHaveAttribute("style", /--ldt-accent:\s*#7fe3b4/);
 });
 
-test("toys put the page back exactly", async ({ page }, testInfo) => {
+test("toys reach the whole site and put it back exactly", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name.includes("mobile"), "Desktop toy check");
   await page.goto("/");
-  for (const toy of ["gravity", "snap", "burn", "party"]) {
+  const touched = () =>
+    page.evaluate(
+      () =>
+        [...document.querySelectorAll<HTMLElement>("#ld-main *, .ld-top *, .ld-footer *")].filter(
+          (el) =>
+            el.style.visibility === "hidden" ||
+            el.style.willChange ||
+            el.getAnimations().some((animation) => !(animation instanceof CSSAnimation)) ||
+            (el.style.transform && !el.matches(".ld-drop-knob")),
+        ).length,
+    );
+  const before = await touched();
+  for (const toy of ["gravity", "float", "snap", "burn", "party"]) {
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.getByRole("button", { name: /Tweaks/ }).click();
     await page.locator(`[data-toy="${toy}"]`).click();
     const back = page.getByRole("button", { name: /Put it back|Stop the party/ });
     await expect(back).toBeVisible();
-    await back.click();
-    await expect(page.locator(".ldp-stage, .ldp-canvas, .ldp-caption, .ldp-dusting")).toHaveCount(
-      0,
-    );
-    expect(
-      await page.evaluate(
+    if (toy === "snap") {
+      // Half of everything, including what is far below the fold.
+      const below = await page.evaluate(
         () =>
-          [...document.querySelectorAll<HTMLElement>("#ld-main *")].filter(
-            (el) => el.style.visibility === "hidden",
+          [...document.querySelectorAll<HTMLElement>(".ldp-dusting")].filter(
+            (el) => el.getBoundingClientRect().top > window.innerHeight * 2,
           ).length,
-      ),
-    ).toBe(0);
+      );
+      expect(below).toBeGreaterThan(5);
+    }
+    // The page keeps scrolling while a toy runs.
+    await page.mouse.wheel(0, 900);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
+    if (toy === "party") await expect(page.getByRole("button", { name: "Sound" })).toBeVisible();
+    await back.click();
+    await expect(page.locator(".ldp-club, .ldp-canvas, .ldp-caption, .ldp-dusting")).toHaveCount(0);
+    await expect.poll(touched).toBe(before);
     await expect(page.locator("html")).toHaveAttribute("style", /--ldt-accent:\s*#7fe3b4/);
   }
 });

@@ -1,24 +1,27 @@
 /**
  * Toys from the tweak panel. Loaded the first time a visitor presses one, never before.
  *
- * Every toy works on what is on screen right now and can be undone: "Put it back" (or Escape)
- * restores the page exactly. Nothing here uses blur, and the dragging in Gravity and Zero-G is
- * written straight to the transform on every pointer event, so a held block never trails the cursor.
+ * Every toy works on the whole site, not just the part on screen, and can be undone: "Put it
+ * back" (or Escape, or leaving the page) restores it exactly. The page keeps scrolling throughout.
+ * Nothing here uses blur, and a block held in Gravity is written straight to its transform on every
+ * pointer event, so it never trails the cursor.
  */
 import { haptic } from "./feedback";
-import { accentInk, onAccent } from "./tweaks";
 import "./play.css";
 
 type Stop = () => void | Promise<void>;
+type Extra = { label: string; pressed?: boolean; onToggle: (pressed: boolean) => void };
 
 let active: { stop: Stop } | null = null;
-let pill: HTMLButtonElement | null = null;
+let pills: HTMLDivElement | null = null;
+let watch = 0;
 
-const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
-const rand = (min: number, max: number) => min + Math.random() * (max - min);
-const dpr = () => Math.min(window.devicePixelRatio || 1, 1.5);
+export const wait = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
+export const rand = (min: number, max: number) => min + Math.random() * (max - min);
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 /** Overlays live inside the site root, so they share its fonts and colour tokens. */
-const host = () => document.querySelector<HTMLElement>(".ld") ?? document.body;
+export const host = () => document.querySelector<HTMLElement>(".ld") ?? document.body;
+export const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /* ---------- Shared pieces ---------- */
 
@@ -26,48 +29,54 @@ function onEscape(event: KeyboardEvent) {
   if (event.key === "Escape" && active) void putBack();
 }
 
-function showPill(label: string) {
-  if (!pill) {
-    pill = document.createElement("button");
-    pill.type = "button";
-    pill.className = "ldp-pill";
-    pill.addEventListener("click", () => void putBack());
+/** The "Put it back" pill, plus an optional toggle beside it (Party's sound switch). */
+function showPill(label: string, extra?: Extra) {
+  pills?.remove();
+  pills = document.createElement("div");
+  pills.className = "ldp-pills";
+  const main = document.createElement("button");
+  main.type = "button";
+  main.className = "ldp-pill";
+  main.textContent = label;
+  main.addEventListener("click", () => void putBack());
+  pills.append(main);
+  if (extra) {
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "ldp-pill ldp-pill-quiet";
+    toggle.textContent = extra.label;
+    toggle.setAttribute("aria-pressed", String(extra.pressed ?? true));
+    toggle.addEventListener("click", () => {
+      const pressed = toggle.getAttribute("aria-pressed") !== "true";
+      toggle.setAttribute("aria-pressed", String(pressed));
+      extra.onToggle(pressed);
+    });
+    pills.append(toggle);
   }
-  pill.textContent = label;
-  host().append(pill);
+  host().append(pills);
   window.addEventListener("keydown", onEscape);
+  // Following a link swaps the page underneath; a toy never outlives the page it was played on.
+  const path = location.pathname;
+  window.clearInterval(watch);
+  watch = window.setInterval(() => {
+    if (location.pathname !== path) void putBack();
+  }, 300);
+  return main;
 }
 
 function hidePill() {
-  pill?.remove();
+  pills?.remove();
+  pills = null;
+  window.clearInterval(watch);
   window.removeEventListener("keydown", onEscape);
 }
 
-/** Blocks the page from scrolling without touching layout (no overflow change, no shift). */
-function lockScroll() {
-  const keys = new Set([" ", "PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown"]);
-  const block = (event: Event) => event.preventDefault();
-  const blockKeys = (event: KeyboardEvent) => {
-    const target = event.target as HTMLElement | null;
-    if (target?.closest("input, textarea, select, [contenteditable]")) return;
-    if (keys.has(event.key)) event.preventDefault();
-  };
-  window.addEventListener("wheel", block, { passive: false });
-  window.addEventListener("touchmove", block, { passive: false });
-  window.addEventListener("keydown", blockKeys);
-  return () => {
-    window.removeEventListener("wheel", block);
-    window.removeEventListener("touchmove", block);
-    window.removeEventListener("keydown", blockKeys);
-  };
-}
-
 /** A canvas over the whole viewport, sized for the screen's pixel density (capped for speed). */
-function overlayCanvas(className: string) {
+export function overlayCanvas(className: string, maxRatio = 1.5) {
   const canvas = document.createElement("canvas");
   canvas.className = className;
   canvas.setAttribute("aria-hidden", "true");
-  const ratio = dpr();
+  const ratio = Math.min(window.devicePixelRatio || 1, maxRatio);
   const width = window.innerWidth;
   const height = window.innerHeight;
   canvas.width = Math.round(width * ratio);
@@ -75,7 +84,7 @@ function overlayCanvas(className: string) {
   host().append(canvas);
   const context = canvas.getContext("2d")!;
   context.scale(ratio, ratio);
-  return { canvas, context, width, height };
+  return { canvas, context, width, height, ratio };
 }
 
 const BLOCKS = [
@@ -102,30 +111,40 @@ const BLOCKS = [
   ".ld-chip",
 ].join(",");
 
+const ROOTS = ".ld-top, #ld-main, .ld-footer";
+
 /**
- * The visible pieces of the page, largest whole pieces first: a paragraph moves as one, a section
- * does not. Anything inside a piece that is already taken is skipped.
+ * The pieces of the whole site, largest whole pieces first: a paragraph moves as one, a section
+ * does not. Anything inside a piece that is already taken is skipped. `accept` can turn a piece
+ * down, in which case the pieces inside it are considered instead.
  */
-function pickBlocks(limit: number) {
+function pickBlocks(
+  roots = ROOTS,
+  accept: (el: HTMLElement, style: CSSStyleDeclaration) => boolean = () => true,
+) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const roots = document.querySelectorAll<HTMLElement>(".ld-top, #ld-main, .ld-footer");
   const kept: HTMLElement[] = [];
-  for (const root of roots) {
+  let last: HTMLElement | null = null;
+  for (const root of document.querySelectorAll<HTMLElement>(roots)) {
     for (const el of root.querySelectorAll<HTMLElement>(BLOCKS)) {
-      if (kept.length >= limit * 3) break;
+      // In document order, everything inside a kept piece comes straight after it.
+      if (last?.contains(el)) continue;
       const box = el.getBoundingClientRect();
       if (box.width < 6 || box.height < 6) continue;
-      if (box.bottom <= 0 || box.top >= vh || box.right <= 0 || box.left >= vw) continue;
       if (box.width * box.height > vw * vh * 0.22 || box.height > vh * 0.6) continue;
-      if (kept.some((parent) => parent.contains(el))) continue;
       const style = getComputedStyle(el);
       if (style.visibility === "hidden" || Number(style.opacity) < 0.05) continue;
+      if (!accept(el, style)) continue;
       kept.push(el);
+      last = el;
     }
   }
-  return kept.slice(0, limit);
+  return kept;
 }
+
+const onScreen = (box: DOMRect) =>
+  box.bottom > 0 && box.top < window.innerHeight && box.right > 0 && box.left < window.innerWidth;
 
 function shuffle<T>(items: T[]) {
   for (let i = items.length - 1; i > 0; i--) {
@@ -135,35 +154,39 @@ function shuffle<T>(items: T[]) {
   return items;
 }
 
-/* ---------- Gravity and Zero-G ---------- */
-
-/**
- * A copy of an element that looks the same anywhere: every computed style is written inline, so
- * it no longer depends on where it sat in the page.
- */
-function freeze(el: HTMLElement) {
-  const clone = el.cloneNode(true) as HTMLElement;
-  const copy = (source: Element, target: Element) => {
-    const style = getComputedStyle(source);
-    let css = "";
-    for (let i = 0; i < style.length; i++) {
-      const name = style[i];
-      if (!name.startsWith("--")) css += `${name}:${style.getPropertyValue(name)};`;
-    }
-    (target as HTMLElement).style.cssText =
-      `${css}animation:none;transition:none;content-visibility:visible;pointer-events:none;`;
-    target.removeAttribute("id");
-    if (target.matches("a, button, input, textarea, select, [tabindex]"))
-      target.setAttribute("tabindex", "-1");
-    for (let i = 0; i < source.children.length; i++) copy(source.children[i], target.children[i]);
-  };
-  copy(el, clone);
-  return clone;
+/** Inline styles a toy writes, remembered so they can be put back exactly as they were. */
+const TOUCHED = [
+  "transform",
+  "transform-origin",
+  "transition",
+  "will-change",
+  "display",
+  "cursor",
+  "user-select",
+  "visibility",
+] as const;
+type Saved = [string, string, string][];
+const remember = (el: HTMLElement): Saved =>
+  TOUCHED.map((name) => [
+    name,
+    el.style.getPropertyValue(name),
+    el.style.getPropertyPriority(name),
+  ]);
+function restore(el: HTMLElement, saved: Saved) {
+  for (const [name, value, priority] of saved)
+    if (value) el.style.setProperty(name, value, priority);
+    else el.style.removeProperty(name);
+}
+/** A transform does nothing to a plain inline box, so a lone link becomes an inline block. */
+function transformable(el: HTMLElement) {
+  if (getComputedStyle(el).display === "inline") el.style.display = "inline-block";
 }
 
+/* ---------- Gravity ---------- */
+
 type Body = {
-  source: HTMLElement;
   el: HTMLElement;
+  group: Group;
   homeX: number;
   homeY: number;
   x: number;
@@ -178,72 +201,110 @@ type Body = {
   held: boolean;
 };
 
-async function physics(mode: "gravity" | "float") {
-  const blocks = pickBlocks(mode === "gravity" ? 90 : 70);
+/** One floor: a section, a pinned card, or one screen-high slice of a very tall section. */
+type Group = {
+  room: HTMLElement;
+  top: number;
+  bottom: number;
+  width: number;
+  bodies: Body[];
+  state: "waiting" | "awake" | "asleep";
+  still: number;
+};
+
+/**
+ * Everything falls, but not into one heap at the foot of the site: every section has its own floor,
+ * and a section only lets go when you scroll to it. Pinned cards (the work sheets, the portrait)
+ * are rooms of their own, so what is inside them falls to their own bottom edge.
+ */
+async function gravity() {
+  const pinned = new Map<Element, boolean>();
+  const isPinned = (node: Element) => {
+    let value = pinned.get(node);
+    if (value === undefined) {
+      const position = getComputedStyle(node).position;
+      value = position === "sticky" || position === "fixed";
+      pinned.set(node, value);
+    }
+    return value;
+  };
+  const roomOf = (el: HTMLElement) => {
+    for (let node = el.parentElement; node; node = node.parentElement) {
+      if (node.id === "ld-main") return node;
+      if (isPinned(node) || node.parentElement?.id === "ld-main" || node.matches(".ld-footer"))
+        return node;
+    }
+    return null;
+  };
+
+  const blocks = pickBlocks(
+    "#ld-main, .ld-footer",
+    // A pinned piece becomes a room instead; a piece the page itself animates keeps still.
+    (el) => !isPinned(el) && !el.getAnimations().length,
+  );
   if (!blocks.length) return;
-  const floating = mode === "float";
-  const stage = document.createElement("div");
-  stage.className = "ldp-stage";
-  stage.setAttribute("aria-hidden", "true");
+  const saved = new Map(blocks.map((el) => [el, remember(el)]));
+  for (const el of blocks) transformable(el);
 
-  const bodies: Body[] = blocks.map((source) => {
-    const box = source.getBoundingClientRect();
-    const el = freeze(source);
-    Object.assign(el.style, {
-      position: "absolute",
-      inset: "auto",
-      left: "0px",
-      top: "0px",
-      margin: "0px",
-      width: `${box.width}px`,
-      height: `${box.height}px`,
-      maxWidth: "none",
-      boxSizing: "border-box",
-      translate: "none",
-      rotate: "none",
-      scale: "none",
-      transformOrigin: "50% 50%",
-      transform: `translate3d(${box.left}px, ${box.top}px, 0)`,
-      pointerEvents: "auto",
-      cursor: "grab",
-      touchAction: "none",
-      zIndex: "auto",
+  // Rooms and their floors, measured once, all at the same moment.
+  const vh = window.innerHeight;
+  const groups: Group[] = [];
+  const bodies = new Map<HTMLElement, Body>();
+  const byRoom = new Map<HTMLElement, HTMLElement[]>();
+  for (const el of blocks) {
+    const room = roomOf(el);
+    if (!room) continue;
+    byRoom.set(room, [...(byRoom.get(room) ?? []), el]);
+  }
+  for (const [room, members] of byRoom) {
+    const box = room.getBoundingClientRect();
+    const slices = box.height > vh * 1.5 ? Math.round(box.height / (vh * 0.95)) : 1;
+    const slice = box.height / slices;
+    const own = Array.from({ length: slices }, (_, index) => {
+      const group: Group = {
+        room,
+        top: index * slice,
+        bottom: (index + 1) * slice,
+        width: box.width,
+        bodies: [],
+        state: "waiting",
+        still: 0,
+      };
+      groups.push(group);
+      return group;
     });
-    stage.append(el);
-    const speed = floating ? rand(50, 150) : 0;
-    const angle = rand(0, Math.PI * 2);
-    return {
-      source,
-      el,
-      homeX: box.left,
-      homeY: box.top,
-      x: box.left,
-      y: box.top,
-      w: box.width,
-      h: box.height,
-      vx: floating ? Math.cos(angle) * speed : rand(-30, 30),
-      vy: floating ? Math.sin(angle) * speed : rand(-60, 0),
-      a: 0,
-      va: floating ? rand(-0.5, 0.5) : rand(-0.6, 0.6),
-      inverseMass: 1 / Math.max(1, (box.width * box.height) / 4000),
-      held: false,
-    };
-  });
+    for (const el of members) {
+      const rect = el.getBoundingClientRect();
+      const middle = rect.top + rect.height / 2 - box.top;
+      const group = own[clamp(Math.floor(middle / slice), 0, slices - 1)];
+      const body: Body = {
+        el,
+        group,
+        homeX: 0,
+        homeY: 0,
+        x: 0,
+        y: 0,
+        w: rect.width,
+        h: rect.height,
+        vx: 0,
+        vy: 0,
+        a: 0,
+        va: 0,
+        inverseMass: 1 / Math.max(1, (rect.width * rect.height) / 4000),
+        held: false,
+      };
+      group.bodies.push(body);
+      bodies.set(el, body);
+    }
+  }
 
-  host().append(stage);
-  for (const body of bodies) body.source.style.visibility = "hidden";
-  const unlock = lockScroll();
-
-  const gravity = floating ? 0 : 2600;
-  const bounce = floating ? 0.92 : 0.18;
-  let width = window.innerWidth;
-  let height = window.innerHeight;
+  const fall = 2600;
+  const bounce = 0.18;
   let frame = 0;
   let last = performance.now();
-  let still = 0;
 
   const draw = (body: Body) => {
-    body.el.style.transform = `translate3d(${body.x}px, ${body.y}px, 0) rotate(${body.a}rad)`;
+    body.el.style.transform = `translate(${body.x - body.homeX}px, ${body.y - body.homeY}px) rotate(${body.a}rad)`;
   };
 
   const collide = (a: Body, b: Body) => {
@@ -281,76 +342,139 @@ async function physics(mode: "gravity" | "float") {
         a.vy -= impulse * ia * sign;
         b.vy += impulse * ib * sign;
       }
-      if (!floating && -relative > 500) {
+      if (-relative > 500) {
         a.va += rand(-1, 1) * ia;
         b.va += rand(-1, 1) * ib;
       }
     }
   };
 
-  const step = (dt: number) => {
-    for (const body of bodies) {
+  const step = (group: Group, dt: number) => {
+    const floor = group.bottom - 2;
+    for (const body of group.bodies) {
       if (body.held) continue;
-      body.vy += gravity * dt;
+      body.vy += fall * dt;
       body.x += body.vx * dt;
       body.y += body.vy * dt;
       body.a += body.va * dt;
-      body.va *= floating ? 0.999 : 0.97;
-      if (!floating) body.a *= 0.985;
-      body.a = Math.max(-0.7, Math.min(0.7, body.a));
-      if (body.y + body.h > height) {
-        body.y = height - body.h;
-        if (body.vy > 0) body.vy = Math.abs(body.vy) < 90 ? 0 : -body.vy * bounce;
-        if (!floating) body.vx *= 0.9;
-      }
-      if (body.y < 0) {
-        body.y = 0;
+      body.va *= 0.97;
+      body.a = clamp(body.a * 0.985, -0.7, 0.7);
+      if (body.y < group.top) {
+        body.y = group.top;
         if (body.vy < 0) body.vy = -body.vy * bounce;
+      }
+      if (body.y + body.h > floor) {
+        body.y = floor - body.h;
+        if (body.vy > 0) body.vy = Math.abs(body.vy) < 90 ? 0 : -body.vy * bounce;
+        body.vx *= 0.9;
       }
       if (body.x < 0) {
         body.x = 0;
         if (body.vx < 0) body.vx = -body.vx * bounce;
       }
-      if (body.x + body.w > width) {
-        body.x = Math.max(0, width - body.w);
+      if (body.x + body.w > group.width) {
+        body.x = Math.max(0, group.width - body.w);
         if (body.vx > 0) body.vx = -body.vx * bounce;
       }
     }
+    const list = group.bodies;
     for (let pass = 0; pass < 3; pass++)
-      for (let i = 0; i < bodies.length; i++)
-        for (let j = i + 1; j < bodies.length; j++) collide(bodies[i], bodies[j]);
+      for (let i = 0; i < list.length; i++)
+        for (let j = i + 1; j < list.length; j++) collide(list[i], list[j]);
   };
 
   const tick = (now: number) => {
     const dt = Math.min(1 / 30, (now - last) / 1000);
     last = now;
-    for (let i = 0; i < 3; i++) step(dt / 3);
-    let moving = false;
-    for (const body of bodies) {
-      draw(body);
-      if (body.held || Math.abs(body.vx) + Math.abs(body.vy) > 12 || Math.abs(body.va) > 0.02)
-        moving = true;
+    let running = false;
+    for (const group of groups) {
+      if (group.state !== "awake") continue;
+      for (let i = 0; i < 3; i++) step(group, dt / 3);
+      let moving = false;
+      for (const body of group.bodies) {
+        draw(body);
+        if (body.held || Math.abs(body.vx) + Math.abs(body.vy) > 12 || Math.abs(body.va) > 0.02)
+          moving = true;
+      }
+      group.still = moving ? 0 : group.still + 1;
+      // Settled: this floor stops costing anything until someone picks a block up again.
+      if (group.still > 45) {
+        group.state = "asleep";
+        for (const body of group.bodies) body.el.style.removeProperty("will-change");
+      } else running = true;
     }
-    still = moving || floating ? 0 : still + 1;
-    // Settled: stop the loop until someone picks a block up again.
-    frame = still > 45 ? 0 : requestAnimationFrame(tick);
+    frame = running ? requestAnimationFrame(tick) : 0;
   };
-  const wake = () => {
+  const wake = (group: Group) => {
+    if (group.state === "asleep")
+      for (const body of group.bodies) body.el.style.willChange = "transform";
+    if (group.state !== "waiting") group.state = "awake";
+    group.still = 0;
     if (frame) return;
-    still = 0;
     last = performance.now();
     frame = requestAnimationFrame(tick);
   };
 
-  const onResize = () => {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    wake();
+  // A floor lets go once it is on screen; its pieces are measured at that moment.
+  const release = (group: Group) => {
+    const box = group.room.getBoundingClientRect();
+    group.width = box.width;
+    for (const body of group.bodies) {
+      const rect = body.el.getBoundingClientRect();
+      body.homeX = body.x = rect.left - box.left;
+      body.homeY = body.y = rect.top - box.top;
+      body.w = rect.width;
+      body.h = rect.height;
+      body.vx = rand(-30, 30);
+      body.vy = rand(-80, 0);
+      body.va = rand(-0.6, 0.6);
+      Object.assign(body.el.style, {
+        transition: "none",
+        transformOrigin: "50% 50%",
+        willChange: "transform",
+        cursor: "grab",
+        userSelect: "none",
+      });
+    }
+    group.state = "asleep";
+    wake(group);
   };
-  window.addEventListener("resize", onResize);
+  let checking = 0;
+  const check = () => {
+    checking = 0;
+    const view = window.innerHeight;
+    for (const group of groups) {
+      if (group.state !== "waiting") continue;
+      const box = group.room.getBoundingClientRect();
+      if (box.top + group.top < view * 0.82 && box.top + group.bottom > view * 0.12) release(group);
+    }
+  };
+  const onScroll = () => {
+    if (!checking) checking = requestAnimationFrame(check);
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
 
-  // Picking up and throwing: the block stays exactly where it was grabbed, with no easing.
-  let grab: {
+  // Throw with a mouse or pen; tap (or click) to kick a piece back up. Touch still scrolls.
+  const bodyAt = (target: EventTarget | null) => {
+    for (let node = target as HTMLElement | null; node; node = node.parentElement) {
+      const body = bodies.get(node);
+      if (body) return body.group.state === "waiting" ? null : body;
+    }
+    return null;
+  };
+  const kick = (body: Body) => {
+    body.vy = -rand(950, 1350);
+    body.vx = rand(-380, 380);
+    body.va = rand(-4, 4);
+    wake(body.group);
+    haptic(8);
+  };
+  const local = (body: Body, event: PointerEvent) => {
+    const box = body.group.room.getBoundingClientRect();
+    return [event.clientX - box.left, event.clientY - box.top] as const;
+  };
+  type Grab = {
     body: Body;
     id: number;
     dx: number;
@@ -358,34 +482,47 @@ async function physics(mode: "gravity" | "float") {
     t: number;
     px: number;
     py: number;
-  } | null = null;
-  stage.addEventListener("click", (event) => event.preventDefault(), true);
-  stage.addEventListener("pointerdown", (event) => {
-    const el = (event.target as HTMLElement).closest<HTMLElement>(".ldp-stage > *");
-    const body = bodies.find((item) => item.el === el);
-    if (!body) return;
-    event.preventDefault();
-    stage.setPointerCapture(event.pointerId);
-    body.held = true;
-    body.vx = body.vy = body.va = 0;
-    body.el.style.cursor = "grabbing";
-    body.el.style.zIndex = "1";
+    sx: number;
+    sy: number;
+    moved: boolean;
+    touch: boolean;
+  };
+  let grab: Grab | null = null;
+  const onDown = (event: PointerEvent) => {
+    const body = bodyAt(event.target);
+    if (!body || grab || event.button !== 0) return;
+    const touch = event.pointerType === "touch";
+    const [px, py] = local(body, event);
     grab = {
       body,
       id: event.pointerId,
-      dx: event.clientX - body.x,
-      dy: event.clientY - body.y,
+      dx: px - body.x,
+      dy: py - body.y,
       t: event.timeStamp,
       px: event.clientX,
       py: event.clientY,
+      sx: event.clientX,
+      sy: event.clientY,
+      moved: false,
+      touch,
     };
-    wake();
-  });
-  stage.addEventListener("pointermove", (event) => {
+    if (touch) return;
+    event.preventDefault();
+    body.el.setPointerCapture(event.pointerId);
+    body.held = true;
+    body.vx = body.vy = body.va = 0;
+    body.el.style.cursor = "grabbing";
+    wake(body.group);
+  };
+  const onMove = (event: PointerEvent) => {
     if (!grab || grab.id !== event.pointerId) return;
+    if (Math.hypot(event.clientX - grab.sx, event.clientY - grab.sy) > 6) grab.moved = true;
+    if (grab.touch) return;
     const { body } = grab;
-    body.x = event.clientX - grab.dx;
-    body.y = event.clientY - grab.dy;
+    const { group } = body;
+    const [px, py] = local(body, event);
+    body.x = clamp(px - grab.dx, 0, Math.max(0, group.width - body.w));
+    body.y = clamp(py - grab.dy, group.top, group.bottom - 2 - body.h);
     const dt = Math.max(1, event.timeStamp - grab.t) / 1000;
     body.vx = body.vx * 0.4 + ((event.clientX - grab.px) / dt) * 0.6;
     body.vy = body.vy * 0.4 + ((event.clientY - grab.py) / dt) * 0.6;
@@ -393,43 +530,145 @@ async function physics(mode: "gravity" | "float") {
     grab.px = event.clientX;
     grab.py = event.clientY;
     draw(body);
-  });
-  const release = (event: PointerEvent) => {
+  };
+  const onUp = (event: PointerEvent) => {
     if (!grab || grab.id !== event.pointerId) return;
-    const { body } = grab;
+    const { body, moved, touch } = grab;
+    grab = null;
+    if (touch) {
+      if (event.type === "pointerup" && !moved) kick(body);
+      return;
+    }
     body.held = false;
     body.el.style.cursor = "grab";
-    body.el.style.zIndex = "auto";
+    if (!moved) return kick(body);
     const limit = 3200;
-    body.vx = Math.max(-limit, Math.min(limit, body.vx));
-    body.vy = Math.max(-limit, Math.min(limit, body.vy));
+    body.vx = clamp(body.vx, -limit, limit);
+    body.vy = clamp(body.vy, -limit, limit);
     body.va = body.vx / 900;
-    grab = null;
-    wake();
+    wake(body.group);
   };
-  stage.addEventListener("pointerup", release);
-  stage.addEventListener("pointercancel", release);
+  // A fallen link is a toy, not a way off the page (keyboard activation still works).
+  const onClick = (event: MouseEvent) => {
+    if (event.detail && bodyAt(event.target)) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+  };
+  document.addEventListener("pointerdown", onDown, true);
+  document.addEventListener("pointermove", onMove, true);
+  document.addEventListener("pointerup", onUp, true);
+  document.addEventListener("pointercancel", onUp, true);
+  document.addEventListener("click", onClick, true);
 
-  frame = requestAnimationFrame(tick);
-  haptic(floating ? 8 : [10, 30, 16]);
+  check();
+  haptic([10, 30, 16]);
 
   active = {
     async stop() {
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(checking);
       frame = 0;
-      window.removeEventListener("resize", onResize);
-      stage.style.pointerEvents = "none";
-      for (const body of bodies) {
-        body.el.style.transition = "transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s";
-        if (body.source.isConnected) {
-          const box = body.source.getBoundingClientRect();
-          body.el.style.transform = `translate3d(${box.left}px, ${box.top}px, 0)`;
-        } else body.el.style.opacity = "0";
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      document.removeEventListener("pointerdown", onDown, true);
+      document.removeEventListener("pointermove", onMove, true);
+      document.removeEventListener("pointerup", onUp, true);
+      document.removeEventListener("pointercancel", onUp, true);
+      document.removeEventListener("click", onClick, true);
+      let moved = false;
+      for (const group of groups) {
+        if (group.state === "waiting") continue;
+        moved = true;
+        for (const body of group.bodies) {
+          body.el.style.transition = "transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)";
+          body.el.style.transform = "translate(0px, 0px) rotate(0rad)";
+        }
       }
-      await wait(620);
-      for (const body of bodies) body.source.style.visibility = "";
-      stage.remove();
-      unlock();
+      if (moved) await wait(620);
+      for (const [el, styles] of saved) restore(el, styles);
+    },
+  };
+  showPill("Put it back");
+}
+
+/* ---------- Zero-G ---------- */
+
+/**
+ * The whole site floats: every piece drifts slowly around where it belongs, turning a little, and
+ * still works (links, buttons and the form included). The drift is a compositor animation, and only
+ * pieces near the screen run one, so a long page costs no more than a short one.
+ */
+async function zeroG() {
+  const blocks = pickBlocks(ROOTS, (el) => !el.getAnimations().length);
+  if (!blocks.length) return;
+  const saved = new Map(blocks.map((el) => [el, remember(el)]));
+  for (const el of blocks) transformable(el);
+  const calm = reducedMotion();
+  const drifting = new Map<HTMLElement, Animation[]>();
+
+  const drift = (el: HTMLElement, box: DOMRectReadOnly) => {
+    const size = Math.sqrt(box.width * box.height);
+    const reach = calm ? 3 : clamp(26 - size / 16, 6, 22);
+    const turn = calm ? 0.3 : clamp(4 - size / 110, 0.6, 3.2);
+    // A slow loop through four points near home, starting and ending at the first.
+    const points = Array.from({ length: 4 }, () => {
+      const x = rand(-reach, reach);
+      const y = rand(-reach, reach * 0.6) - reach * 0.25;
+      return {
+        transform: `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) rotate(${rand(-turn, turn).toFixed(2)}deg)`,
+        easing: "ease-in-out",
+      };
+    });
+    const lift = rand(900, 1600);
+    const intro = el.animate(
+      [{ transform: "translate(0px, 0px) rotate(0deg)", easing: "ease-out" }, points[0]],
+      { duration: lift, fill: "forwards" },
+    );
+    const loop = el.animate([...points, points[0]], {
+      duration: rand(9000, 15000),
+      delay: lift,
+      iterations: Infinity,
+    });
+    return [intro, loop];
+  };
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        const el = entry.target as HTMLElement;
+        if (entry.isIntersecting) {
+          if (!drifting.has(el)) drifting.set(el, drift(el, entry.boundingClientRect));
+        } else {
+          // Off screen: back home with nothing running, so it costs nothing.
+          drifting.get(el)?.forEach((animation) => animation.cancel());
+          drifting.delete(el);
+        }
+      }
+    },
+    { rootMargin: "35% 0px" },
+  );
+  for (const el of blocks) observer.observe(el);
+  haptic(8);
+
+  active = {
+    async stop() {
+      observer.disconnect();
+      // Each piece glides home from wherever it is right now.
+      const landing: Animation[] = [];
+      for (const [el, animations] of drifting) {
+        const now = getComputedStyle(el).transform;
+        animations.forEach((animation) => animation.cancel());
+        if (now && now !== "none" && onScreen(el.getBoundingClientRect()))
+          landing.push(
+            el.animate([{ transform: now }, { transform: "none" }], {
+              duration: 600,
+              easing: "cubic-bezier(0.2, 0.8, 0.2, 1)",
+            }),
+          );
+      }
+      drifting.clear();
+      await Promise.all(landing.map((animation) => animation.finished.catch(() => undefined)));
+      for (const [el, styles] of saved) restore(el, styles);
     },
   };
   showPill("Put it back");
@@ -525,95 +764,102 @@ function tonesOf(el: HTMLElement) {
   return tones;
 }
 
+const setProgress = (el: HTMLElement, p: number) => el.style.setProperty("--ldp-p", p.toFixed(4));
+
+/**
+ * Half of every piece on the site, chosen at random. What is on screen turns to dust in front of
+ * you; the rest is already gone when you scroll to it.
+ */
 async function snap() {
-  const victims = shuffle(pickBlocks(80));
+  const victims = shuffle(pickBlocks());
   victims.length = Math.ceil(victims.length / 2);
   if (!victims.length) return;
-  const unlock = lockScroll();
+  const saved = new Map(victims.map((el) => [el, remember(el)]));
   const dust = new Dust();
   const duration = 1500;
-  const spread = 1700;
+  const visible = victims.filter((el) => onScreen(el.getBoundingClientRect()));
+  const spread = Math.min(1700, visible.length * 55);
   const start = performance.now();
-  const runs = victims.map((el, index) => ({
+  const runs = visible.map((el, index) => ({
     el,
-    box: el.getBoundingClientRect(),
     tones: tonesOf(el).map((tone) => dust.tone(tone)),
-    at: (index / victims.length) * spread + rand(0, 160),
+    at: (index / Math.max(1, visible.length)) * spread + rand(0, 160),
     done: false,
   }));
-  for (const run of runs) {
-    run.el.classList.add("ldp-dusting");
-    run.el.style.setProperty("--ldp-noise", NOISE);
-    run.el.style.setProperty("--ldp-p", "0");
+  for (const el of victims) {
+    el.classList.add("ldp-dusting");
+    el.style.setProperty("--ldp-noise", NOISE);
+    setProgress(el, 0);
+    if (!visible.includes(el)) el.style.visibility = "hidden";
   }
   haptic([6, 40, 6, 40, 6]);
 
   let frame = 0;
   let last = start;
-  let stopped = false;
   const tick = (now: number) => {
     const dt = Math.min(1 / 30, (now - last) / 1000);
     last = now;
     let running = false;
-    for (const run of runs) {
-      if (run.done) continue;
+    // Read every box first, then write, so the page lays out once a frame however far it scrolls.
+    const live = runs.filter((run) => !run.done && now - start >= run.at);
+    const boxes = live.map((run) => run.el.getBoundingClientRect());
+    live.forEach((run, index) => {
+      const box = boxes[index];
       const t = (now - start - run.at) / duration;
-      if (t < 0) {
-        running = true;
-        continue;
-      }
       const p = Math.min(1, t * t * (3 - 2 * t));
-      run.el.style.setProperty("--ldp-p", p.toFixed(4));
-      const edge = run.box.left + run.box.width * Math.min(1, p * 1.2 - 0.05);
-      const emit = Math.min(26, Math.ceil(run.box.height / 7));
+      setProgress(run.el, p);
+      const edge = box.left + box.width * Math.min(1, p * 1.2 - 0.05);
+      const emit = Math.min(26, Math.ceil(box.height / 7));
       for (let i = 0; i < emit && p < 1; i++)
         dust.add(
           edge + rand(-14, 4),
-          run.box.top + rand(0, run.box.height),
+          box.top + rand(0, box.height),
           run.tones[Math.floor(Math.random() * run.tones.length)],
         );
       if (t >= 1) {
         run.done = true;
         run.el.style.visibility = "hidden";
-      } else running = true;
-    }
+      }
+    });
+    running = runs.some((run) => !run.done);
     dust.step(dt, now / 1000);
-    if (!stopped && (running || dust.alive)) frame = requestAnimationFrame(tick);
-    else {
-      dust.remove();
-      unlock();
-    }
+    frame = running || dust.alive ? requestAnimationFrame(tick) : 0;
+    if (!frame) dust.remove();
   };
   frame = requestAnimationFrame(tick);
 
   active = {
     async stop() {
-      stopped = true;
       cancelAnimationFrame(frame);
       dust.remove();
-      unlock();
-      // They come back the way they left, in reverse.
-      const back = performance.now();
+      // What is on screen comes back the way it left, in reverse; the rest simply returns.
+      const back = victims.filter((el) => onScreen(el.getBoundingClientRect()));
+      const from = new Map(
+        back.map((el) => [
+          el,
+          el.style.visibility === "hidden" ? 1 : Number(el.style.getPropertyValue("--ldp-p")) || 0,
+        ]),
+      );
+      for (const el of back) {
+        setProgress(el, from.get(el)!);
+        el.style.visibility = "";
+      }
+      const begin = performance.now();
       await new Promise<void>((resolve) => {
         const rewind = (now: number) => {
-          const t = Math.min(1, (now - back) / 700);
-          const p = 1 - t * t * (3 - 2 * t);
-          for (const run of runs) {
-            run.el.style.visibility = "";
-            run.el.style.setProperty(
-              "--ldp-p",
-              Math.min(Number(run.el.style.getPropertyValue("--ldp-p")) || 0, p).toFixed(4),
-            );
-          }
+          const t = Math.min(1, (now - begin) / 700);
+          const k = 1 - t * t * (3 - 2 * t);
+          for (const el of back) setProgress(el, from.get(el)! * k);
           if (t < 1) requestAnimationFrame(rewind);
           else resolve();
         };
         requestAnimationFrame(rewind);
       });
-      for (const run of runs) {
-        run.el.classList.remove("ldp-dusting");
-        run.el.style.removeProperty("--ldp-p");
-        run.el.style.removeProperty("--ldp-noise");
+      for (const [el, styles] of saved) {
+        el.classList.remove("ldp-dusting");
+        el.style.removeProperty("--ldp-p");
+        el.style.removeProperty("--ldp-noise");
+        restore(el, styles);
       }
     },
   };
@@ -815,96 +1061,11 @@ async function quake() {
   root.classList.remove("ldp-quake");
 }
 
-function hslHex(h: number, s: number, l: number) {
-  const a = s * Math.min(l, 1 - l);
-  const f = (n: number) => {
-    const k = (n + h / 30) % 12;
-    return l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
-  };
-  return `#${[f(0), f(8), f(4)]
-    .map((c) =>
-      Math.round(c * 255)
-        .toString(16)
-        .padStart(2, "0"),
-    )
-    .join("")}`;
-}
-
 async function party() {
-  const root = document.documentElement;
-  const names = ["--ldt-accent", "--ldt-accent-ink", "--ldt-on-accent"];
-  const saved = names.map((name) => root.style.getPropertyValue(name));
-  let hue = Math.random() * 360;
-  let frame = 0;
-  let last = 0;
-  const cycle = (now: number) => {
-    // A dozen colour changes a second: enough to party, few enough to keep the page smooth.
-    if (now - last > 80) {
-      last = now;
-      hue = (hue + 9) % 360;
-      const hex = hslHex(hue, 0.85, 0.68);
-      root.style.setProperty(names[0], hex);
-      root.style.setProperty(names[1], accentInk(hex));
-      root.style.setProperty(names[2], onAccent(hex));
-    }
-    frame = requestAnimationFrame(cycle);
-  };
-  frame = requestAnimationFrame(cycle);
-
-  // One burst of confetti.
-  const { canvas, context, width, height } = overlayCanvas("ldp-canvas");
-  const bits = Array.from({ length: 220 }, () => ({
-    x: rand(0, width),
-    y: rand(-height * 0.6, -10),
-    vx: rand(-60, 60),
-    vy: rand(80, 260),
-    a: rand(0, 6.3),
-    va: rand(-8, 8),
-    w: rand(5, 10),
-    h: rand(3, 6),
-    colour: hslHex(rand(0, 360), 0.85, 0.62),
-  }));
-  let confetti = 0;
-  let previous = performance.now();
-  const fall = (now: number) => {
-    const dt = Math.min(1 / 30, (now - previous) / 1000);
-    previous = now;
-    context.clearRect(0, 0, width, height);
-    let visible = false;
-    for (const bit of bits) {
-      bit.vy += 240 * dt;
-      bit.vx += Math.sin(now / 300 + bit.a) * 30 * dt;
-      bit.x += bit.vx * dt;
-      bit.y += bit.vy * dt;
-      bit.a += bit.va * dt;
-      if (bit.y > height + 20) continue;
-      visible = true;
-      context.save();
-      context.translate(bit.x, bit.y);
-      context.rotate(bit.a);
-      context.scale(1, Math.abs(Math.cos(bit.a * 1.7)) + 0.1);
-      context.fillStyle = bit.colour;
-      context.fillRect(-bit.w / 2, -bit.h / 2, bit.w, bit.h);
-      context.restore();
-    }
-    if (visible) confetti = requestAnimationFrame(fall);
-    else canvas.remove();
-  };
-  confetti = requestAnimationFrame(fall);
-  haptic([10, 40, 10, 40, 10]);
-
-  active = {
-    stop() {
-      cancelAnimationFrame(frame);
-      cancelAnimationFrame(confetti);
-      canvas.remove();
-      names.forEach((name, index) => {
-        if (saved[index]) root.style.setProperty(name, saved[index]);
-        else root.style.removeProperty(name);
-      });
-    },
-  };
-  showPill("Stop the party");
+  const { startParty } = await import("./party");
+  const club = await startParty();
+  active = { stop: club.stop };
+  showPill("Stop the party", { label: "Sound", pressed: club.sound, onToggle: club.setSound });
 }
 
 /* ---------- Entry points ---------- */
@@ -918,10 +1079,11 @@ export async function putBack() {
 
 export async function play(name: string) {
   await putBack();
-  if (name === "gravity" || name === "float") await physics(name);
+  if (name === "gravity") await gravity();
+  else if (name === "float") await zeroG();
   else if (name === "snap") await snap();
   else if (name === "burn") await burn();
   else if (name === "quake") await quake();
   else if (name === "party") await party();
-  pill?.focus({ preventScroll: true });
+  pills?.querySelector<HTMLButtonElement>(".ldp-pill")?.focus({ preventScroll: true });
 }

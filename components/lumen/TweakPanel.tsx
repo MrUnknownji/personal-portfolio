@@ -16,6 +16,7 @@ import {
   type RangeControl,
   type Settings,
 } from "./tweaks";
+import { primeAudio } from "./audioPrime";
 import "./tweak-panel.css";
 
 /* ---------- Settings store: one snapshot shared by every subscriber ---------- */
@@ -430,12 +431,12 @@ function ColorField({
 
 /* ---------- Play: toys that act on the page, loaded on first use ---------- */
 const TOYS = [
-  { id: "gravity", label: "Gravity", note: "Let it all fall. Throw things." },
-  { id: "float", label: "Zero-G", note: "Everything drifts loose." },
-  { id: "snap", label: "Snap", note: "Half the page, perfectly balanced." },
+  { id: "gravity", label: "Gravity", note: "Every section drops to its floor. Throw things." },
+  { id: "float", label: "Zero-G", note: "The whole site floats, and still works." },
+  { id: "snap", label: "Snap", note: "Half the site, perfectly balanced." },
   { id: "burn", label: "Burn it", note: "Fire, from the bottom up." },
   { id: "quake", label: "Earthquake", note: "A short, sharp shake." },
-  { id: "party", label: "Party", note: "The accent can't decide." },
+  { id: "party", label: "Party", note: "Lights down, music up. Sound on." },
 ] as const;
 
 function Play({ onStart }: { onStart: () => void }) {
@@ -452,6 +453,8 @@ function Play({ onStart }: { onStart: () => void }) {
             data-toy={toy.id}
             disabled={busy}
             onClick={async () => {
+              // Sound has to start inside the click itself; the party's code arrives after it.
+              if (toy.id === "party") primeAudio();
               setBusy(true);
               try {
                 const { play } = await import("./play");

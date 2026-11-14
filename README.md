@@ -20,8 +20,10 @@ instrument sheets, torn-paper stationery, and a letter that opens on scroll.
   The simulation is a pure, unit-tested module (`components/lab/bidRace.ts`).
 - **Make it yours.** The tweak panel (lower right, or Shift+T) exposes every token the design is
   built on (colour, type, layout, surfaces, motion), saves a look in the visitor's browser, and
-  has a few toys: Gravity, Zero-G, Snap, Burn it, Earthquake, and Party. The panel and toys load
-  only when opened, and each toy puts the page back exactly.
+  has a few toys that act on the whole site: Gravity (each section falls to its own floor as you
+  scroll to it), Zero-G (everything floats and still works), Snap, Burn it, Earthquake, and Party
+  (a club with an original groove synthesized live with Web Audio). The panel and toys load only
+  when opened, and each toy puts the page back exactly.
 - **Measured performance.** Lighthouse budgets run in CI; see
   [docs/performance](docs/performance) for the audits and what changed.
 
@@ -57,6 +59,7 @@ components/
   lumen/                      Site components: sheets, letter, reply slip, lab, panel
   lumen/tweaks.ts             Tweak schema, the site's default look, sanitiser
   lumen/play.ts               The panel's toys, loaded on first use
+  lumen/party.ts              Party: club lights and the synthesized music
   lab/bidRace.ts              Two-bids simulation (pure, unit-tested logic)
 
 data/
