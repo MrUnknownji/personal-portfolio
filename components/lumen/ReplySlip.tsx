@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import CopyEmail from "./CopyEmail";
 import { haptic } from "./feedback";
+import { PaperLayers } from "./Paper";
 import { SoftLayers, softStyle } from "./Soft";
 
 const Scissors = () => (
@@ -55,7 +56,8 @@ export default function ReplySlip({
 
   return (
     <div className="ld-slip" data-cut={cut || undefined}>
-      <div className="ld-slip-keep">
+      <div className="ld-slip-keep ld-paper">
+        <PaperLayers seed={41} edges={{ top: 6, right: 2, left: 2 }} />
         <span className="ld-anno">Open to</span>
         <p className="ld-slip-role">{openTo}</p>
         <p className="ld-slip-note">
@@ -116,7 +118,8 @@ export default function ReplySlip({
           <Scissors />
         </button>
       </div>
-      <div className="ld-slip-reply">
+      <div className="ld-slip-reply ld-paper">
+        <PaperLayers seed={53} edges={{ right: 2, bottom: 7, left: 2 }} />
         <span className="ld-anno">
           {cut ? "Cut out. Now send it." : "Reply slip · cut along the line"}
         </span>

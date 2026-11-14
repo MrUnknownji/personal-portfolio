@@ -7,6 +7,7 @@ import {
   type ContactFormFields,
 } from "@/lib/contactValidation";
 import { animate, Spring } from "@/lib/lumen/springs";
+import { PaperLayers } from "./Paper";
 import { SoftLayers, softStyle } from "./Soft";
 import { haptic } from "./feedback";
 
@@ -103,8 +104,8 @@ export default function ContactForm({ email }: { email: string }) {
   };
 
   return (
-    <div className="ld-form-sheet ld-soft" style={softStyle("sheet")} ref={sheet} data-sent={sent}>
-      <SoftLayers sheen={false} />
+    <div className="ld-form-sheet ld-paper" ref={sheet} data-sent={sent}>
+      <PaperLayers seed={67} edges={{ top: 5, right: 2, bottom: 6, left: 2 }} />
       {!sent ? (
         <form ref={form} onSubmit={submit} noValidate className="ld-form">
           <input

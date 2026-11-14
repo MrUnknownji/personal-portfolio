@@ -5,6 +5,7 @@ import CopyEmail from "@/components/lumen/CopyEmail";
 import LabStudies from "@/components/lumen/LabStudies";
 import Letter from "@/components/lumen/Letter";
 import MeasuredWord from "@/components/lumen/MeasuredWord";
+import PinnedHead from "@/components/lumen/PinnedHead";
 import ProjectSheet, { sheetTimeline } from "@/components/lumen/ProjectSheet";
 import ReplySlip from "@/components/lumen/ReplySlip";
 import { SoftLayers, softStyle } from "@/components/lumen/Soft";
@@ -162,7 +163,7 @@ export default function ReviewHome() {
       {/* Work sits on the light table: the one dark band, so the screens carry the page. */}
       <section id="work" className="ld-section ld-band ld-deferred" aria-labelledby="ld-work-title">
         <div className="ld-wrap">
-          <div className="ld-work-top">
+          <PinnedHead>
             <SectionHead sheet="02 · Work" id="ld-work-title" title="Work that holds up.">
               Real-time bidding, the motion studio I run, a paired-wallpaper product, and an
               end-to-end store. Every number is counted from the project&apos;s repository or its
@@ -182,7 +183,7 @@ export default function ReviewHome() {
                 <dd>{liveCount}</dd>
               </div>
             </dl>
-          </div>
+          </PinnedHead>
           <div
             className="ld-work"
             style={
@@ -358,11 +359,7 @@ export default function ReviewHome() {
         <BuildMap projects={evidence} />
       </section>
 
-      <section
-        id="contact"
-        className="ld-section ld-wrap ld-deferred"
-        aria-labelledby="ld-contact-title"
-      >
+      <section id="contact" className="ld-section ld-wrap" aria-labelledby="ld-contact-title">
         <SectionHead
           sheet="06 · Contact"
           id="ld-contact-title"

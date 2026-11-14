@@ -2,7 +2,7 @@ import Image from "next/image";
 import { PROFILE } from "@/data/profile";
 import { selectedProjects } from "@/data/projects";
 import { SITE_CONFIG } from "@/data/site";
-import { SoftLayers, softStyle } from "./Soft";
+import { PaperLayers } from "./Paper";
 
 const current = PROFILE.experience.find((entry) => "current" in entry && entry.current);
 const studio = PROFILE.experience.find((entry) => entry.organization === "FrameRelay Studio");
@@ -37,9 +37,12 @@ function Postmark({ year }: { year: number }) {
 }
 
 /**
- * A cover letter tucked into an envelope. On tall screens the page pins the envelope and the
- * letter rises out of it as you scroll (scroll-driven CSS only, transform and opacity); elsewhere,
- * or with motion reduced, the letter simply rests with its foot in the pocket.
+ * A cover letter that arrives in a real envelope. On tall screens the envelope is pinned and the
+ * scroll opens it, one step at a time: it lies face up and sealed, turns over, the flap lifts, the
+ * letter is drawn out, and the envelope drops away so the letter can be read. Everything is
+ * scroll-driven CSS (transforms only); the letter stays clipped to the envelope until it leaves.
+ * On phones, short screens, reduced motion or the "resting" tweak, the letter lies on top of its
+ * envelope instead.
  *
  * It renders in two places (before the work and in Contact). The tweak panel picks which one
  * shows; the other is display:none, so it is skipped by assistive tech and costs no layout.
@@ -53,43 +56,59 @@ export default function Letter({ slot }: { slot: "intro" | "contact" }) {
         <p className="ld-post-hint ld-anno" aria-hidden="true">
           A letter for you · scroll to open it <span>↓</span>
         </p>
-        <div className="ld-env-back" aria-hidden="true" />
-        <article className="ld-letter ld-soft" style={softStyle("key", 20)}>
-          <SoftLayers z={20} sheen={false} />
-          <div className="ld-letter-body">
-            <p className="ld-letter-meta">
-              <span>
-                {SITE_CONFIG.name}
-                <br />
-                {PROFILE.location}
-              </span>
-              <span>{dated}</span>
-            </p>
-            <Heading id={id} className="ld-letter-dear">
-              Dear hiring team,
-            </Heading>
-            <p>
-              I&apos;m a full-stack developer building web, mobile, and real-time products with
-              TypeScript, React, Next.js, React Native, and Node.js.
-            </p>
-            <p>
-              Right now I&apos;m a {current?.role.toLowerCase()} at {current?.organization}, and I
-              founded {studio?.organization}, a motion studio for software teams. The work{" "}
-              {slot === "intro" ? "below" : "above"} comes from {selectedProjects.length} products I
-              built end to end, with every number counted from its repository or live site.
-            </p>
-            <p>
-              I&apos;m looking for {PROFILE.openTo.toLowerCase()}, and I&apos;d like to hear what
-              your team is building.
-            </p>
-            <p className="ld-letter-sign">
-              Yours,
-              <span>Sandeep</span>
-            </p>
+        <div className="ld-env">
+          <div className="ld-env-inside" aria-hidden="true" />
+          <div className="ld-env-slot">
+            <article className="ld-letter ld-paper">
+              <PaperLayers
+                seed={slot === "intro" ? 17 : 29}
+                edges={{ top: 7, right: 2.2, bottom: 9, left: 2.2 }}
+              />
+              <div className="ld-letter-body">
+                <p className="ld-letter-meta">
+                  <span>
+                    {SITE_CONFIG.name}
+                    <br />
+                    {PROFILE.location}
+                  </span>
+                  <span>{dated}</span>
+                </p>
+                <Heading id={id} className="ld-letter-dear">
+                  Dear hiring team,
+                </Heading>
+                <p>
+                  I&apos;m a full-stack developer building web, mobile, and real-time products with
+                  TypeScript, React, Next.js, React Native, and Node.js.
+                </p>
+                <p>
+                  Right now I&apos;m a {current?.role.toLowerCase()} at {current?.organization}, and
+                  I founded {studio?.organization}, a motion studio for software teams. The work{" "}
+                  {slot === "intro" ? "below" : "above"} comes from {selectedProjects.length}{" "}
+                  products I built end to end, with every number counted from its repository or live
+                  site.
+                </p>
+                <p>
+                  I&apos;m looking for {PROFILE.openTo.toLowerCase()}, and I&apos;d like to hear
+                  what your team is building.
+                </p>
+                <p className="ld-letter-sign">
+                  Yours,
+                  <span>Sandeep</span>
+                </p>
+              </div>
+            </article>
           </div>
-        </article>
-        <div className="ld-env" aria-hidden="true">
-          <div className="ld-env-front">
+          <div className="ld-env-pocket" aria-hidden="true">
+            <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+              <path className="ld-env-side" d="M0 0 L47 56 L0 100 Z" />
+              <path className="ld-env-side" d="M100 0 L53 56 L100 100 Z" />
+              <path className="ld-env-bottom" d="M0 100 L50 50 L100 100 Z" />
+            </svg>
+          </div>
+          <div className="ld-env-flap" aria-hidden="true">
+            <span className="ld-env-seal">SK</span>
+          </div>
+          <div className="ld-env-front" aria-hidden="true">
             <p className="ld-env-from">
               <span className="ld-anno">From</span>
               {SITE_CONFIG.name}, full-stack developer

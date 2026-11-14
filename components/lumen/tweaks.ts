@@ -335,6 +335,7 @@ export const GROUPS: Group[] = [
           ["grid", "Two-up grid"],
         ],
       },
+      { type: "toggle", key: "pinHead", label: "Pin the title row", def: true },
       { type: "toggle", key: "rail", label: "Project index rail", def: true },
       { type: "toggle", key: "summary", label: "Totals beside the title", def: true },
       {
