@@ -14,9 +14,10 @@ export default function PinnedHead({ children }: { children: ReactNode }) {
     const el = ref.current;
     const section = el?.closest("section");
     if (!el || !section) return;
-    const observer = new ResizeObserver(() =>
-      section.style.setProperty("--ld-work-top", `${Math.ceil(el.offsetHeight)}px`),
-    );
+    const observer = new ResizeObserver(([entry]) => {
+      const size = entry.borderBoxSize?.[0]?.blockSize ?? el.offsetHeight;
+      section.style.setProperty("--ld-work-top", `${Math.ceil(size)}px`);
+    });
     observer.observe(el);
     return () => observer.disconnect();
   }, []);

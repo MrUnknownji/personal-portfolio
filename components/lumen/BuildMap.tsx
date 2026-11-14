@@ -55,14 +55,14 @@ export default function BuildMap({ projects }: { projects: ProjectSummary[] }) {
           {projects.map((project) => (
             <Link
               key={project.id}
-              href={`/review/my-projects/${project.id}`}
+              href={`/my-projects/${project.id}`}
               data-related={related(project.technologies)}
             >
               {project.title}
               <span aria-hidden="true">↗</span>
             </Link>
           ))}
-          <Link href="/review#lab" data-related={!active || labTools.has(active)}>
+          <Link href="/#lab" data-related={!active || labTools.has(active)}>
             The lab<span aria-hidden="true">↗</span>
           </Link>
         </div>

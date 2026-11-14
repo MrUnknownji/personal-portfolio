@@ -1,8 +1,13 @@
 /**
- * The review build's tweak settings. Each control maps to a CSS custom property (--ldt-*) or a
- * data attribute (data-ldt-*) on <html>, and lumen.css reads them. Only values that differ from the
- * default are written, so the untouched page runs on its own stylesheet with nothing applied.
+ * The site's tweak settings, which visitors can play with. Each control maps to a CSS custom
+ * property (--ldt-*) or a data attribute (data-ldt-*) on <html>, and lumen.css reads them.
+ *
+ * A control's `def` is what the stylesheet draws with nothing applied. The site's own look
+ * (SITE_LOOK) differs from that in a few places, so the server writes those values on <html>, and
+ * a visitor's changes are saved relative to the site's look.
  */
+
+import { STORE_KEY } from "./tweakKeys";
 
 type Base = { key: string; label: string; hint?: string };
 export type ChoiceControl = Base & {
@@ -27,6 +32,14 @@ export type Settings = Record<string, string | number | boolean>;
 
 export const ACCENT = "#cdf23c";
 
+/** The look the site ships with, where it differs from the stylesheet's own values. */
+export const SITE_LOOK: Settings = {
+  accent: "#7fe3b4",
+  surface: "flat",
+  lines: "ruled",
+  cursor: "dot",
+};
+
 export const GROUPS: Group[] = [
   {
     id: "colour",
@@ -50,11 +63,11 @@ export const GROUPS: Group[] = [
         hint: "Buttons, highlights, measure lines and the stamp.",
         def: ACCENT,
         swatches: [
+          ["#7fe3b4", "Mint"],
           [ACCENT, "Chartreuse"],
           ["#8ecbff", "Sky"],
           ["#ff9a7d", "Coral"],
           ["#bba8ff", "Violet"],
-          ["#7fe3b4", "Mint"],
           ["#ffcf5c", "Amber"],
           ["#ffa6cf", "Pink"],
           ["#f2f2ee", "Chalk"],
@@ -376,7 +389,6 @@ export const GROUPS: Group[] = [
         def: "contact",
         options: [
           ["contact", "In Contact"],
-          ["intro", "Before the work"],
           ["off", "Off"],
         ],
       },
@@ -457,12 +469,37 @@ export const GROUPS: Group[] = [
 ];
 
 export const CONTROLS = GROUPS.flatMap((group) => group.controls);
-export const DEFAULTS: Settings = Object.fromEntries(
-  CONTROLS.map((control) => [control.key, control.def]),
-);
+/** The site's look: every control, with SITE_LOOK over the stylesheet's own values. */
+export const DEFAULTS: Settings = {
+  ...Object.fromEntries(CONTROLS.map((control) => [control.key, control.def])),
+  ...SITE_LOOK,
+};
+
+/**
+ * Keeps only known keys with values a control accepts: choices from its options, ranges clamped,
+ * colours as #rrggbb. Anything pasted or stored is passed through this before it is applied.
+ */
+export function sanitize(input: unknown): Settings {
+  const out: Settings = {};
+  if (!input || typeof input !== "object") return out;
+  const source = input as Record<string, unknown>;
+  for (const control of CONTROLS) {
+    const value = source[control.key];
+    if (value === undefined || control.key === "theme") continue;
+    if (control.type === "toggle" && typeof value === "boolean") out[control.key] = value;
+    else if (control.type === "range" && typeof value === "number" && Number.isFinite(value))
+      out[control.key] = Math.min(control.max, Math.max(control.min, value));
+    else if (control.type === "choice" && control.options.some(([option]) => option === value))
+      out[control.key] = value as string;
+    else if (control.type === "color" && typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value))
+      out[control.key] = value.toLowerCase();
+  }
+  return out;
+}
 
 export const PRESETS: { name: string; settings: Settings }[] = [
-  { name: "Default", settings: {} },
+  { name: "Site", settings: {} },
+  { name: "Original", settings: Object.fromEntries(CONTROLS.map((c) => [c.key, c.def])) },
   { name: "Wide", settings: { max: 1640, gutter: 72, name: 1.12, portrait: 1.12, head: 1.1 } },
   {
     name: "Compact",
@@ -525,7 +562,10 @@ export const onAccent = (hex: string) => (luminance(rgb(hex)) > 0.36 ? "#15170f"
 
 export type Compiled = { v: Record<string, string>; a: Record<string, string> };
 
-/** Settings to the variables and attributes written on <html>. Theme is handled separately. */
+/**
+ * Settings to the variables and attributes written on <html>, for every value that differs from
+ * what the stylesheet draws by itself. Theme is handled separately.
+ */
 export function compile(settings: Settings): Compiled {
   const v: Record<string, string> = {};
   const a: Record<string, string> = {};
@@ -546,10 +586,11 @@ export function compile(settings: Settings): Compiled {
   return { v, a };
 }
 
-export const STORE_KEY = "ld-tweaks";
+export { CHANGE_EVENT, STORE_KEY } from "./tweakKeys";
 
 /**
- * Runs before first paint (inlined in the review layout), so a saved look never flashes the
- * default first. It reads the compiled form, which needs no schema.
+ * Runs before first paint (inlined in the root layout), so a saved look never flashes the site's
+ * look first. It swaps what the server wrote on <html> for the compiled form saved with the look,
+ * which needs no schema, and only accepts safe names and values.
  */
-export const EARLY_SCRIPT = `try{var d=JSON.parse(localStorage.getItem("${STORE_KEY}")||"null");if(d&&d.out){var r=document.documentElement;for(var k in d.out.v)r.style.setProperty(k,d.out.v[k]);for(var n in d.out.a)r.setAttribute(n,d.out.a[n])}}catch(e){}`;
+export const EARLY_SCRIPT = `try{var d=JSON.parse(localStorage.getItem("${STORE_KEY}")||"null");if(d&&d.out){var r=document.documentElement,i,n;for(i=r.attributes.length-1;i>=0;i--){n=r.attributes[i].name;if(n.indexOf("data-ldt-")===0)r.removeAttribute(n)}for(i=r.style.length-1;i>=0;i--){n=r.style[i];if(n.indexOf("--ldt-")===0)r.style.removeProperty(n)}for(n in d.out.v)if(/^--ldt-[a-z-]+$/.test(n)&&/^[#\\w.-]+$/.test(d.out.v[n]))r.style.setProperty(n,d.out.v[n]);for(n in d.out.a)if(/^data-ldt-[a-z-]+$/.test(n)&&/^[a-z]+$/.test(d.out.a[n]))r.setAttribute(n,d.out.a[n])}}catch(e){}`;

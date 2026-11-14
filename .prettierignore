@@ -9,3 +9,4 @@ pnpm-lock.yaml
 docs
 AGENTS.md
 CLAUDE.md
+.shots-tmp

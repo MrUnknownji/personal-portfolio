@@ -17,8 +17,11 @@ function random(seed: number) {
   };
 }
 
-const px = (value: number) => `${value.toFixed(1)}px`;
-const pct = (value: number) => `${value.toFixed(2)}%`;
+// Rounded hard: a tenth of a pixel or percent is below what a torn edge shows, and every character
+// here is sent in the page's HTML.
+const trim = (value: number, digits: number) => String(Number(value.toFixed(digits)));
+const px = (value: number) => (value < 0.05 ? "0" : `${trim(value, 1)}px`);
+const pct = (value: number) => `${trim(value, 1)}%`;
 
 /** An amplitude for one point: mostly small nicks, now and then a deeper tear. */
 function bite(next: () => number, amplitude: number) {
@@ -32,26 +35,26 @@ export function tornPolygon(seed: number, { top = 0, right = 0, bottom = 0, left
   const along = (amplitude: number, count: number) =>
     amplitude ? Array.from({ length: count + 1 }, (_, i) => i / count) : [0, 1];
 
-  for (const t of along(top, 64)) points.push(`${pct(t * 100)} ${px(bite(next, top))}`);
-  for (const t of along(right, 28))
+  for (const t of along(top, 48)) points.push(`${pct(t * 100)} ${px(bite(next, top))}`);
+  for (const t of along(right, 14))
     points.push(`calc(100% - ${px(bite(next, right))}) ${pct(t * 100)}`);
-  for (const t of along(bottom, 64))
+  for (const t of along(bottom, 48))
     points.push(`${pct(100 - t * 100)} calc(100% - ${px(bite(next, bottom))})`);
-  for (const t of along(left, 28)) points.push(`${px(bite(next, left))} ${pct(100 - t * 100)}`);
+  for (const t of along(left, 14)) points.push(`${px(bite(next, left))} ${pct(100 - t * 100)}`);
   return `polygon(${points.join(", ")})`;
 }
 
+/** Each edge is written once, as a variable, and the layers that share it read it from there. */
 export function PaperLayers({ seed, edges }: { seed: number; edges: Edges }) {
-  const fringe = tornPolygon(seed + 101, edges);
+  const style = {
+    "--ld-tear-edge": tornPolygon(seed + 101, edges),
+    "--ld-tear-face": tornPolygon(seed, edges),
+  } as React.CSSProperties;
   return (
-    <>
-      <span className="ld-paper-shadow" style={{ clipPath: fringe }} aria-hidden="true" />
-      <span className="ld-paper-fringe" style={{ clipPath: fringe }} aria-hidden="true" />
-      <span
-        className="ld-paper-face"
-        style={{ clipPath: tornPolygon(seed, edges) }}
-        aria-hidden="true"
-      />
-    </>
+    <span className="ld-paper-layers" style={style} aria-hidden="true">
+      <span className="ld-paper-shadow" />
+      <span className="ld-paper-fringe" />
+      <span className="ld-paper-face" />
+    </span>
   );
 }

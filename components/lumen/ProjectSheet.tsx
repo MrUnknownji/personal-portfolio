@@ -28,7 +28,7 @@ export default function ProjectSheet({
   index: number;
   last: boolean;
 }) {
-  const caseStudy = `/review/my-projects/${project.id}`;
+  const caseStudy = `/my-projects/${project.id}`;
   const still = stills[project.id];
   const host = project.demoLink ? new URL(project.demoLink).host.replace(/^www\./, "") : null;
   return (
@@ -52,7 +52,6 @@ export default function ProjectSheet({
               alt={`${project.title} website`}
               fill
               sizes="(max-width: 900px) 92vw, 760px"
-              priority={index === 0}
             />
           ) : project.showcaseLoop ? (
             <LoopVideo
@@ -66,7 +65,6 @@ export default function ProjectSheet({
               alt={`${project.title} interface`}
               fill
               sizes="(max-width: 900px) 92vw, 760px"
-              priority={index === 0}
             />
           )}
         </div>

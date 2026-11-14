@@ -49,6 +49,28 @@ describe("contact route", () => {
     mocks.insertOne.mockResolvedValue({ acknowledged: true });
   });
 
+  it("refuses cross-site posts and bodies that are not JSON", async () => {
+    const body = JSON.stringify(validSubmission);
+    mocks.getPortfolioDb.mockResolvedValue({ collection: () => ({ insertOne: mocks.insertOne }) });
+    const crossSite = await POST(createRequest(body, { "sec-fetch-site": "cross-site" }));
+    expect(crossSite.status).toBe(403);
+    const otherOrigin = await POST(
+      createRequest(body, { origin: "https://evil.example", host: "localhost" }),
+    );
+    expect(otherOrigin.status).toBe(403);
+    const sameOrigin = await POST(
+      createRequest(body, {
+        origin: "http://localhost",
+        host: "localhost",
+        "sec-fetch-site": "same-origin",
+      }),
+    );
+    expect(sameOrigin.status).toBe(200);
+    const formPost = await POST(createRequest(body, { "content-type": "text/plain" }));
+    expect(formPost.status).toBe(415);
+    expect(mocks.getPortfolioDb).toHaveBeenCalledTimes(1);
+  });
+
   it("rejects malformed and oversized bodies before storage", async () => {
     const malformed = await POST(createRequest("{"));
     expect(malformed.status).toBe(400);

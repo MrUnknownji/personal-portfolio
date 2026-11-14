@@ -3,7 +3,8 @@
 Personal portfolio of Sandeep Kumar, a full-stack developer building web, mobile,
 and real-time products, and the founder of
 [FrameRelay Studio](https://framerelaystudio.com/). Built with Next.js (App Router), React 19, TypeScript,
-and plain CSS, with a MongoDB-backed contact form and a small portfolio assistant.
+and plain CSS, with a MongoDB-backed contact form. The look is "Lumen Draft": pages drawn like
+instrument sheets, torn-paper stationery, and a letter that opens on scroll.
 
 - **Case studies, not screenshots.** Each selected project has its own route with
   the problem, the constraint, the decision, the trade-offs, and countable facts
@@ -11,13 +12,16 @@ and plain CSS, with a MongoDB-backed contact form and a small portfolio assistan
 - **Facts are checked.** Every stack and number on the site was verified against
   the project's source, and each case study links the files to read first.
   `data/profile.ts` is the single source for experience, skills, and availability;
-  the home page, the 1-page profile, the résumé PDF, and the assistant all read
-  from it.
+  the home page, the 1-page profile, and the résumé PDF all read from it.
 - **A lab with a real idea in it.** "Two bids, one price" simulates two bidders on
   different network latencies, with timeouts and retries, a lossy network, and
   three server rules. It shows a lost update under last-write-wins, a bidder
   outbidding itself after a lost reply, and how request IDs make retries safe.
   The simulation is a pure, unit-tested module (`components/lab/bidRace.ts`).
+- **Make it yours.** The tweak panel (lower right, or Shift+T) exposes every token the design is
+  built on (colour, type, layout, surfaces, motion), saves a look in the visitor's browser, and
+  has a few toys: Gravity, Zero-G, Snap, Burn it, Earthquake, and Party. The panel and toys load
+  only when opened, and each toy puts the page back exactly.
 - **Measured performance.** Lighthouse budgets run in CI; see
   [docs/performance](docs/performance) for the audits and what changed.
 
@@ -40,28 +44,30 @@ and plain CSS, with a MongoDB-backed contact form and a small portfolio assistan
 
 ```text
 app/
-  page.tsx, home.tsx          Home: hero, work, lab, about, contact
-  my-projects/[id]/           Statically generated case-study routes
+  layout.tsx                  Shell: fonts, metadata, structured data, header, footer
+  page.tsx                    Home: hero, work, lab, about, process, letter, contact
+  my-projects/[id]/           Statically generated case studies (with their own OG images)
   quick/                      1-page profile (also the résumé PDF source)
-  api/contact/route.ts        Validated, rate-limited contact submissions
-  actions/chat.ts             Assistant: local answers first, optional Gemini
-  globals.css                 Tailwind entry, tokens, base styles, rendering hints
-  styles/                     One stylesheet per feature, imported in cascade order
+  motion/                     Motion and visual work
+  api/contact/route.ts        Validated, same-origin, rate-limited contact submissions
+  lumen.css                   The design system, in cascade layers (tweaks last)
+  fonts/                      Self-hosted, subset variable fonts (see its README)
 
 components/
-  InteractiveHero, ProjectShowcase, CreativeLab, Experience, HowIBuild, ...
-  lab/                        Two-bids simulation (pure logic + view)
-  Bot/                        Assistant launcher, chat, and commands
+  lumen/                      Site components: sheets, letter, reply slip, lab, panel
+  lumen/tweaks.ts             Tweak schema, the site's default look, sanitiser
+  lumen/play.ts               The panel's toys, loaded on first use
+  lab/bidRace.ts              Two-bids simulation (pure, unit-tested logic)
 
 data/
   profile.ts                  Experience, skills, availability, résumé path
   projects.ts                 Selected projects, verified stacks and facts
   projectStories.ts           Case-study narrative and curated screens
-  archive.ts                  Earlier practice projects (assistant only)
 
 lib/
   contactValidation.ts        Shared client/server validation
   server/rateLimit.ts         Atomic MongoDB-backed request quotas
+  siteUrl.ts                  Canonical origin for metadata, sitemap and robots
 
 scripts/
   build-resume.mjs            Prints /quick to public/sandeep-kumar-resume.pdf
@@ -84,8 +90,7 @@ Playwright's bundled browser.
 
 ## Environment
 
-Create `.env.local`. The contact form needs MongoDB; the assistant works without
-an API key and uses Gemini only when one is configured.
+Create `.env.local`. The contact form needs MongoDB.
 
 ```bash
 MONGO_DB_URI=
@@ -94,16 +99,13 @@ RATE_LIMIT_HASH_SECRET=
 CONTACT_RETENTION_DAYS=365
 
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
-
-GEMINI_AI_STUDIO_API_KEY=
-GEMINI_API_KEY=
-GEMINI_MODEL=gemini-3.1-flash-lite-preview
 ```
 
 ## Contact flow
 
 1. The form validates name, email, category, subject, and message on the client.
-2. `/api/contact` repeats validation on the server and caps the body at 32 KB.
+2. `/api/contact` refuses cross-site posts and non-JSON bodies, repeats validation on the
+   server, and caps the body at 32 KB.
 3. A hidden honeypot field drops obvious bot submissions.
 4. Atomic per-IP and per-email limits in MongoDB block repeated abuse across instances.
 5. Messages are stored with a hashed IP and an automatic deletion date.
@@ -120,4 +122,4 @@ including a Content Security Policy, are set in `next.config.mjs`.
 - Deploy on Vercel or any Node-capable Next.js host.
 - Configure `MONGO_DB_URI`, a strong `RATE_LIMIT_HASH_SECRET`, and
   `NEXT_PUBLIC_SITE_URL`, then run `pnpm db:indexes` once.
-- Optionally add `GEMINI_AI_STUDIO_API_KEY` or `GEMINI_API_KEY` for the assistant.
+- Old `/review/*` addresses redirect permanently to the same page at the root.

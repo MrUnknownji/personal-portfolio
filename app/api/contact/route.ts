@@ -16,8 +16,31 @@ const MAX_BODY_BYTES = 32 * 1024;
 const MAX_USER_AGENT_LENGTH = 300;
 const CONTACT_RETENTION_DAYS = Number(process.env.CONTACT_RETENTION_DAYS || "365");
 
+/**
+ * The form posts from this site only. A cross-site page can't read the reply, but it could still
+ * make a visitor's browser submit; browsers say where a request came from, so refuse those.
+ */
+function isCrossSite(request: NextRequest) {
+  const fetchSite = request.headers.get("sec-fetch-site");
+  if (fetchSite && fetchSite !== "same-origin" && fetchSite !== "none") return true;
+  const origin = request.headers.get("origin");
+  if (!origin) return false;
+  try {
+    return new URL(origin).host !== (request.headers.get("host") ?? request.nextUrl.host);
+  } catch {
+    return true;
+  }
+}
+
 export async function POST(request: NextRequest) {
   let body: ContactRequestBody;
+
+  if (isCrossSite(request)) {
+    return NextResponse.json({ message: "Cross-site requests are not accepted." }, { status: 403 });
+  }
+  if (!(request.headers.get("content-type") ?? "").toLowerCase().includes("application/json")) {
+    return NextResponse.json({ message: "Send the message as JSON." }, { status: 415 });
+  }
 
   try {
     const contentLength = Number(request.headers.get("content-length") || 0);

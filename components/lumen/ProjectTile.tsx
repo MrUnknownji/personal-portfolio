@@ -13,13 +13,21 @@ export default function ProjectTile({
 }) {
   return (
     <Link
-      href={`/review/my-projects/${project.id}`}
+      href={`/my-projects/${project.id}`}
       className="ld-tile-card ld-soft"
       style={softStyle("sheet")}
     >
       <SoftLayers sheen={false} />
       <span className="ld-tile-media">
-        <Image src={project.image} alt="" fill sizes="(max-width: 700px) 92vw, 380px" />
+        {/* The first tile is the largest paint on arrival; the rest load as they come into view. */}
+        <Image
+          src={project.image}
+          alt=""
+          fill
+          sizes="(max-width: 700px) 92vw, 380px"
+          loading={index === 0 ? "eager" : "lazy"}
+          fetchPriority={index === 0 ? "high" : undefined}
+        />
       </span>
       <span className="ld-tile-copy">
         <span className="ld-anno">

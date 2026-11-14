@@ -43,15 +43,11 @@ function Postmark({ year }: { year: number }) {
  * scroll-driven CSS (transforms only); the letter stays clipped to the envelope until it leaves.
  * On phones, short screens, reduced motion or the "resting" tweak, the letter lies on top of its
  * envelope instead.
- *
- * It renders in two places (before the work and in Contact). The tweak panel picks which one
- * shows; the other is display:none, so it is skipped by assistive tech and costs no layout.
  */
-export default function Letter({ slot }: { slot: "intro" | "contact" }) {
-  const Heading = slot === "intro" ? "h2" : "h3";
-  const id = `ld-letter-${slot}`;
+export default function Letter() {
+  const id = "ld-letter";
   return (
-    <section className="ld-post" data-slot={slot} aria-labelledby={id}>
+    <section className="ld-post" aria-labelledby={id}>
       <div className="ld-post-stage">
         <p className="ld-post-hint ld-anno" aria-hidden="true">
           A letter for you · scroll to open it <span>↓</span>
@@ -60,10 +56,7 @@ export default function Letter({ slot }: { slot: "intro" | "contact" }) {
           <div className="ld-env-inside" aria-hidden="true" />
           <div className="ld-env-slot">
             <article className="ld-letter ld-paper">
-              <PaperLayers
-                seed={slot === "intro" ? 17 : 29}
-                edges={{ top: 7, right: 2.2, bottom: 9, left: 2.2 }}
-              />
+              <PaperLayers seed={29} edges={{ top: 7, right: 2.2, bottom: 9, left: 2.2 }} />
               <div className="ld-letter-body">
                 <p className="ld-letter-meta">
                   <span>
@@ -73,19 +66,18 @@ export default function Letter({ slot }: { slot: "intro" | "contact" }) {
                   </span>
                   <span>{dated}</span>
                 </p>
-                <Heading id={id} className="ld-letter-dear">
+                <h3 id={id} className="ld-letter-dear">
                   Dear hiring team,
-                </Heading>
+                </h3>
                 <p>
                   I&apos;m a full-stack developer building web, mobile, and real-time products with
                   TypeScript, React, Next.js, React Native, and Node.js.
                 </p>
                 <p>
                   Right now I&apos;m a {current?.role.toLowerCase()} at {current?.organization}, and
-                  I founded {studio?.organization}, a motion studio for software teams. The work{" "}
-                  {slot === "intro" ? "below" : "above"} comes from {selectedProjects.length}{" "}
-                  products I built end to end, with every number counted from its repository or live
-                  site.
+                  I founded {studio?.organization}, a motion studio for software teams. The work
+                  above comes from {selectedProjects.length} products I built end to end, with every
+                  number counted from its repository or live site.
                 </p>
                 <p>
                   I&apos;m looking for {PROFILE.openTo.toLowerCase()}, and I&apos;d like to hear

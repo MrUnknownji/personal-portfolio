@@ -1,22 +1,19 @@
 import Link from "next/link";
 
-// A last-resort 404 with no stylesheet imports. The root not-found is part of every route's
-// tree, so importing either design's styles here would load them on the other design's pages.
-// Unknown addresses normally reach app/(site)/not-found.tsx or app/review/not-found.tsx instead.
-export default function RootNotFound() {
+export default function NotFound() {
   return (
-    <main
-      style={{
-        fontFamily: "system-ui, sans-serif",
-        padding: "64px 24px",
-        maxWidth: 640,
-        margin: "0 auto",
-      }}
-    >
-      <h1>This page is missing.</h1>
-      <p>
-        The address may have changed. <Link href="/">Return home</Link>.
-      </p>
-    </main>
+    <section className="ld-wrap ld-page ld-state" aria-labelledby="ld-missing-title">
+      <span className="ld-anno">Sheet missing · 404</span>
+      <h1 id="ld-missing-title">This sheet isn&apos;t in the set.</h1>
+      <p>The address may have changed. You can go back to the work or start again.</p>
+      <div className="ld-actions">
+        <Link className="ld-link-strong" href="/my-projects">
+          Explore projects <span aria-hidden="true">→</span>
+        </Link>
+        <Link className="ld-link-strong" href="/">
+          Return home <span aria-hidden="true">→</span>
+        </Link>
+      </div>
+    </section>
   );
 }

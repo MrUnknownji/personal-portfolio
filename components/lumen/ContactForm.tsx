@@ -31,18 +31,35 @@ export default function ContactForm({ email }: { email: string }) {
   const done = useRef<HTMLDivElement>(null);
   const height = useRef<Spring | null>(null);
 
-  // Morph the sheet's height between the form and the confirmation on the morph spring.
+  // The form's height, kept by a ResizeObserver: it reports after layout, so the page load never
+  // waits on a forced layout just to remember a number.
+  const formHeight = useRef(0);
   useEffect(() => {
+    const el = form.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      formHeight.current = entry.borderBoxSize?.[0]?.blockSize ?? formHeight.current;
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Morph the sheet's height between the form and the confirmation on the morph spring.
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
     const el = sheet.current;
     const next = sent ? done.current : form.current;
     if (!el || !next) return;
-    const target = next.offsetHeight;
-    if (!height.current) {
-      height.current = new Spring(target, "morph", 0.5);
-      return;
-    }
-    const spring = height.current;
-    spring.target = target;
+    const spring = (height.current ??= new Spring(
+      formHeight.current || next.offsetHeight,
+      "morph",
+      0.5,
+    ));
+    spring.target = next.offsetHeight;
     el.style.height = `${spring.x}px`;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const stop = animate((dt) => {

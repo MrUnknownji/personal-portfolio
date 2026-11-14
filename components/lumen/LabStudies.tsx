@@ -2,7 +2,6 @@
 
 import { useRef, useState, type ComponentType } from "react";
 import { flushSync } from "react-dom";
-import SnapField from "./SnapField";
 
 type Study = {
   id: string;
@@ -29,9 +28,13 @@ const STUDIES: Study[] = [
   },
 ];
 
-// The simulation is only fetched when someone shows interest in its card.
-let racePromise: Promise<ComponentType> | null = null;
-const loadRace = () => (racePromise ??= import("./RaceLab").then((module) => module.default));
+// Each study is only fetched when someone shows interest in its card.
+const loaders = [
+  () => import("./SnapField").then((module) => module.default as ComponentType),
+  () => import("./RaceLab").then((module) => module.default as ComponentType),
+];
+const loaded: (Promise<ComponentType> | null)[] = [null, null];
+const load = (index: number) => (loaded[index] ??= loaders[index]());
 
 /**
  * Two lab cards. Opening one morphs it to full width with a view transition: the browser
@@ -39,14 +42,15 @@ const loadRace = () => (racePromise ??= import("./RaceLab").then((module) => mod
  */
 export default function LabStudies() {
   const [open, setOpen] = useState<number | null>(null);
-  const [Race, setRace] = useState<ComponentType | null>(null);
+  const [studies, setStudies] = useState<(ComponentType | null)[]>([null, null]);
   const cards = useRef<(HTMLElement | null)[]>([]);
 
   const toggle = async (index: number) => {
     const next = open === index ? null : index;
-    const RaceComponent = next === 1 && !Race ? await loadRace() : null;
+    const Study = next !== null && !studies[next] ? await load(next) : null;
     const apply = () => {
-      if (RaceComponent) setRace(() => RaceComponent);
+      if (Study && next !== null)
+        setStudies((current) => current.map((item, i) => (i === next ? Study : item)));
       setOpen(next);
     };
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -83,7 +87,7 @@ export default function LabStudies() {
             data-state={state}
             style={{ viewTransitionName: `ld-study-${index}` }}
             aria-labelledby={titleId}
-            onPointerEnter={index === 1 ? () => void loadRace() : undefined}
+            onPointerEnter={() => void load(index)}
           >
             <div className="ld-lab-head">
               <span className="ld-anno">{study.anno}</span>
@@ -93,7 +97,7 @@ export default function LabStudies() {
                   className="ld-lab-toggle"
                   aria-expanded={state === "open"}
                   aria-controls={bodyId}
-                  onFocus={index === 1 ? () => void loadRace() : undefined}
+                  onFocus={() => void load(index)}
                   onClick={() => void toggle(index)}
                 >
                   <span>{study.title}</span>
@@ -109,7 +113,7 @@ export default function LabStudies() {
               </div>
             )}
             <div id={bodyId} className="ld-lab-body" hidden={state !== "open"}>
-              {state === "open" && (index === 0 ? <SnapField /> : Race ? <Race /> : null)}
+              {state === "open" && <OpenStudy component={studies[index]} />}
             </div>
           </article>
         );
@@ -180,4 +184,8 @@ function RacePreview() {
       <circle className="ld-preview-packet" cx="176" cy="74" r="6" />
     </svg>
   );
+}
+
+function OpenStudy({ component: Study }: { component: ComponentType | null }) {
+  return Study ? <Study /> : null;
 }
