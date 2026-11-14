@@ -30,8 +30,11 @@ function onEscape(event: KeyboardEvent) {
   if (event.key === "Escape" && active) void putBack();
 }
 
-/** The "Put it back" pill, plus an optional toggle beside it (Party's sound switch). */
-function showPill(label: string, extra?: Extra) {
+/**
+ * The "Put it back" pill, plus an optional toggle beside it (Party's sound switch) and any other
+ * controls the toy brings (Party's track switcher).
+ */
+function showPill(label: string, extra?: Extra, more: HTMLElement[] = []) {
   pills?.remove();
   pills = document.createElement("div");
   pills.className = "ldp-pills";
@@ -54,6 +57,7 @@ function showPill(label: string, extra?: Extra) {
     });
     pills.append(toggle);
   }
+  pills.append(...more);
   host().append(pills);
   window.addEventListener("keydown", onEscape);
   // Following a link swaps the page underneath; a toy never outlives the page it was played on.
@@ -1073,7 +1077,11 @@ async function party() {
     throw error;
   }
   active = { stop: club.stop };
-  showPill("Stop the party", { label: "Sound", pressed: club.sound, onToggle: club.setSound });
+  showPill(
+    "Stop the party",
+    { label: "Sound", pressed: club.sound, onToggle: club.setSound },
+    club.controls,
+  );
 }
 
 /* ---------- Entry points ---------- */

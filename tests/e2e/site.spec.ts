@@ -242,7 +242,16 @@ test("toys reach the whole site and put it back exactly", async ({ page }, testI
     // The page keeps scrolling while a toy runs.
     await page.mouse.wheel(0, 900);
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
-    if (toy === "party") await expect(page.getByRole("button", { name: "Sound" })).toBeVisible();
+    if (toy === "party") {
+      await expect(page.getByRole("button", { name: "Sound" })).toBeVisible();
+      // The track switcher moves on to the next track, and the sign says so.
+      const next = page.getByRole("button", { name: /^Now playing .+\. Play the next track/ });
+      const label = await next.getAttribute("aria-label");
+      const upcoming = label!.split("Play the next track: ")[1];
+      await next.click();
+      await expect(page.locator(".ldp-sign-track")).toContainText(upcoming);
+      await expect(next).toHaveAttribute("aria-label", new RegExp(`^Now playing ${upcoming}\\.`));
+    }
     await back.click();
     await expect(page.locator(".ldp-club, .ldp-canvas, .ldp-caption, .ldp-dusting")).toHaveCount(0);
     await expect.poll(touched).toBe(before);

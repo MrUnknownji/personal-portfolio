@@ -1,75 +1,68 @@
 /**
- * Party: the site becomes a club at closing time. The lights go down, a mirror ball throws spots
- * around the room, beams sweep, lasers fan out in the chorus and a crowd dances along the bottom,
- * all to a real track ("Calor de Madrugada", 105 BPM) that streams in when the party starts.
+ * Party: the site becomes a club in a neon city at night. The lights go down, a mirror ball
+ * throws spots around the room, beams sweep, lasers fan out, rain falls past the skyline in the
+ * quiet parts, a crowd dances along the bottom and a neon sign buzzes, all to the music: one of a
+ * few tracks the visitor can switch between, streamed in when the party starts.
  *
  * Built to stay smooth: every moving light is a compositor animation (transform and opacity only),
  * all of them locked to one beat clock, and that clock is read from the music itself. The page
- * underneath changes at most once every two bars (the accent colour), never every frame.
+ * underneath only changes colour (the accent), on the beat, and backs off if that gets slow.
  */
 import { takeAudio } from "./audioPrime";
+import { type Scene, type Track, TRACKS, saveTrack, trackSource } from "./partyTracks";
 import { host, overlayCanvas, rand, reducedMotion } from "./play";
 import { accentInk, onAccent } from "./tweaks";
 import "./party.css";
 
-/* ---------- The track ---------- */
-
-const BPM = 105;
-const BEAT_MS = 60_000 / BPM;
-const BAR_MS = BEAT_MS * 4;
-/** Where bar 0, beat 1 falls in the file, in seconds (measured from the waveform). */
-const FIRST = 0.184;
-/**
- * The song stops dead at bar 74. Rather than play its tail and the quiet intro again, the party
- * jumps from there straight back into the groove at bar 4, on the beat.
- */
-const LOOP_START = 4;
-const LOOP_END = 74;
-const songBar = (count: number) =>
-  count < LOOP_END ? count : LOOP_START + ((count - LOOP_START) % (LOOP_END - LOOP_START));
-
-type Scene = "intro" | "verse" | "lift" | "break" | "build" | "drop" | "outro";
-
-/**
- * The song, bar by bar, from listening to it (Gemini's notes) and from its measured energy, which
- * changes on these bars. Intro: guitar and keys, no drums. Verse: the four-on-the-floor kick and
- * dembow snare come in; halfway, open hats and plucks lift it. Break: drums filtered out. Build:
- * a snare roll and a riser, with a one-beat cut before each drop. Drop: the hook, full bass.
- */
-const SONG: [bar: number, scene: Scene][] = [
-  [0, "intro"],
-  [4, "verse"],
-  [12, "lift"],
-  [20, "break"],
-  [24, "build"],
-  [28, "drop"],
-  [44, "verse"],
-  [52, "break"],
-  [55, "build"],
-  [58, "drop"],
-  [74, "outro"],
-];
-const sceneAt = (bar: number) => {
-  let scene = SONG[0][1];
-  for (const [start, part] of SONG) if (start <= bar) scene = part;
+const sceneAt = (track: Track, bar: number) => {
+  let scene = track.song[0][1];
+  for (const [start, part] of track.song) if (start <= bar) scene = part;
   return scene;
+};
+
+/** Bars count on past the end of a track; this folds them back into its loop. */
+const songBar = (track: Track, count: number) => {
+  const [start, end] = track.loop;
+  return count < end ? count : start + ((count - start) % (end - start));
 };
 
 /** How bright the mirror ball's spots are in each part: they carry the quiet parts. */
 const BALL_LEVEL: Record<Scene, number> = {
   intro: 1,
-  verse: 0.55,
-  lift: 0.5,
+  verse: 0.6,
+  lift: 0.55,
   break: 1,
-  build: 0.75,
-  drop: 0.7,
+  build: 0.8,
+  drop: 0.75,
   outro: 0.9,
 };
 
-/* ---------- The room ---------- */
+/** Rain over the city in the quiet parts; none once the drums are going. */
+const RAIN_LEVEL: Record<Scene, number> = {
+  intro: 1,
+  verse: 0.25,
+  lift: 0,
+  break: 1,
+  build: 0.5,
+  drop: 0,
+  outro: 1,
+};
 
-const PALETTE = ["#ff4fd8", "#3ee8ff", "#a98bff", "#7fe3b4", "#ffb547"];
-const BEAMS = ["#ff4fd8", "#3ee8ff", "#a98bff", "#ffb547"];
+/**
+ * How often the page's accent changes, in beats: every other beat in a drop, never in the quiet
+ * parts. (Each change restyles the whole page, so this backs off on a slow device.)
+ */
+const ACCENT_EVERY: Record<Scene, number> = {
+  intro: 0,
+  verse: 8,
+  lift: 4,
+  break: 0,
+  build: 4,
+  drop: 2,
+  outro: 0,
+};
+
+/* ---------- The room ---------- */
 
 /**
  * A beam is a cone drawn once as SVG and then only turned. (A clip-path here would make the
@@ -292,7 +285,53 @@ function crowd(width: number) {
   return { wrap, people, lines };
 }
 
+/* ---------- The city ---------- */
+
+/**
+ * A skyline behind the crowd, drawn once as SVG: two rows of towers with lit windows and a few
+ * neon strips on the roofs. It never repaints; in a drop it bumps on the kick, as a transform.
+ */
+function city(width: number, height: number) {
+  const windows = ["#7ff6ff", "#ff7de9", "#ffd27a", "#c7a6ff"];
+  const strips = ["#ff2bd6", "#1ff4ff", "#ffe23d", "#b46bff"];
+  let far = "";
+  let near = "";
+  let lights = "";
+  const row = (fill: number, min: number, max: number, near: boolean) => {
+    let x = -10;
+    let out = "";
+    while (x < width) {
+      const w = rand(near ? 46 : 34, near ? 110 : 80);
+      const h = height * rand(min, max);
+      const top = height - h;
+      out += `<rect x="${x.toFixed(0)}" y="${top.toFixed(0)}" width="${w.toFixed(0)}" height="${h.toFixed(0)}"/>`;
+      if (near && Math.random() < 0.45)
+        lights += `<rect x="${(x + 4).toFixed(0)}" y="${(top - 2).toFixed(0)}" width="${(w - 8).toFixed(0)}" height="2" fill="${strips[Math.floor(rand(0, strips.length))]}"/>`;
+      if (near && Math.random() < 0.3)
+        lights += `<rect x="${(x + w / 2).toFixed(0)}" y="${(top - 26).toFixed(0)}" width="2" height="26" fill="#3a2d58"/><rect x="${(x + w / 2 - 1).toFixed(0)}" y="${(top - 28).toFixed(0)}" width="4" height="4" fill="#ff3d5a"/>`;
+      // Windows: a sparse grid, lit at random.
+      for (let wx = x + 6; wx < x + w - 8; wx += 9)
+        for (let wy = top + 10; wy < height - 8; wy += 13)
+          if (Math.random() < (near ? 0.13 : 0.09))
+            lights += `<rect x="${wx.toFixed(0)}" y="${wy.toFixed(0)}" width="4" height="6" fill="${windows[Math.floor(rand(0, windows.length))]}" opacity="${(near ? rand(0.55, 0.95) : rand(0.25, 0.5)).toFixed(2)}"/>`;
+      x += w + rand(-4, 6) * fill;
+    }
+    return out;
+  };
+  far = row(1, 0.36, 0.8, false);
+  near = row(1, 0.2, 0.62, true);
+  return `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" width="100%" height="100%"><g fill="#1b1233">${far}</g><g fill="#0c0818">${near}</g>${lights}</svg>`;
+}
+
 /* ---------- The party ---------- */
+
+const PALETTE = ["#ff3dd8", "#1ff4ff", "#b46bff", "#3dffa2", "#ffcf3d"];
+/** Drops swing between hard opposites. */
+const DROP = ["#ff2bd6", "#00f0ff", "#ffe600", "#8f5bff", "#3dff8a"];
+const BEAMS = ["#ff3dd8", "#1ff4ff", "#b46bff", "#ffcf3d"];
+
+/** Neon letters: each is its own element, so a single letter can buzz like a failing tube. */
+const neon = (word: string) => [...word].map((letter) => `<i>${letter}</i>`).join("");
 
 export async function startParty() {
   const calm = reducedMotion();
@@ -302,9 +341,13 @@ export async function startParty() {
   const prime = takeAudio();
   const audio = prime?.audio ?? null;
   const context = prime?.context ?? null;
+  let index = prime?.track ?? 0;
+  let track = TRACKS[index];
+  let beatMs = 60_000 / track.bpm;
+  let barMs = beatMs * 4;
 
-  /* The sound: the track comes in muffled, as if through the club's door, which opens in the
-     intro. Without Web Audio the element plays straight out. */
+  /* The sound: the first track comes in muffled, as if through the club's door, which opens in
+     the intro. Without Web Audio the element plays straight out. */
   let out: GainNode | null = null;
   let door: BiquadFilterNode | null = null;
   if (context && prime?.source) {
@@ -313,30 +356,51 @@ export async function startParty() {
       door.type = "lowpass";
       door.frequency.value = 340;
       door.Q.value = 0.9;
+      // A club system: more low end, and a limiter so the extra bass never clips.
+      const bass = context.createBiquadFilter();
+      bass.type = "lowshelf";
+      bass.frequency.value = 95;
+      bass.gain.value = 4;
+      const limiter = context.createDynamicsCompressor();
+      limiter.threshold.value = -3;
+      limiter.knee.value = 2;
+      limiter.ratio.value = 20;
+      limiter.attack.value = 0.002;
+      limiter.release.value = 0.12;
       out = context.createGain();
-      prime.source.connect(door).connect(out).connect(context.destination);
+      prime.source
+        .connect(door)
+        .connect(bass)
+        .connect(limiter)
+        .connect(out)
+        .connect(context.destination);
     } catch {
       out = null;
     }
   }
   let doorOpen = false;
-  const openDoor = () => {
+  const openDoor = (now = false) => {
     if (doorOpen || !door || !context || !audio) return;
     doorOpen = true;
-    // Fully open just before the verse (bar 4).
-    const until = Math.max(0.4, FIRST + (3.5 * BAR_MS) / 1000 - audio.currentTime);
-    const now = context.currentTime;
-    door.frequency.cancelScheduledValues(now);
-    door.frequency.setValueAtTime(door.frequency.value, now);
-    door.frequency.exponentialRampToValueAtTime(20_000, now + until);
+    // Fully open half a bar before the drums come in.
+    const firstGroove = track.song.find(([, scene]) => scene !== "intro")?.[0] ?? 4;
+    const until = now
+      ? 0.3
+      : Math.max(0.4, track.first + ((firstGroove - 0.5) * barMs) / 1000 - audio.currentTime);
+    const at = context.currentTime;
+    door.frequency.cancelScheduledValues(at);
+    door.frequency.setValueAtTime(door.frequency.value, at);
+    door.frequency.exponentialRampToValueAtTime(20_000, at + until);
   };
 
   const club = document.createElement("div");
   club.className = "ldp-club";
   club.setAttribute("aria-hidden", "true");
   const reel = calm ? "" : paintBall(Math.min(2, window.devicePixelRatio || 1));
+  const skyline = Math.round(window.innerHeight * 0.36);
   club.innerHTML = `
     <div class="ldp-dim"></div>
+    <div class="ldp-city">${city(window.innerWidth, skyline)}</div>
     <div class="ldp-lights">
       <div class="ldp-beams">${BEAMS.map((colour, i) => `<div class="ldp-beam" style="left:${12.5 + i * 25}%">${cone(colour, i)}</div>`).join("")}</div>
       <div class="ldp-fan is-left"><div class="ldp-fan-lines">${'<i class="ldp-laser"></i>'.repeat(6)}</div></div>
@@ -349,14 +413,23 @@ export async function startParty() {
       <i class="ldp-glint" style="--x:16px;--y:4px"></i>
       <i class="ldp-glint" style="--x:-4px;--y:18px"></i>
     </div>
-    <p class="ldp-sign">After hours</p>`;
+    <div class="ldp-sign">
+      <p class="ldp-sign-name"><span class="is-a">${neon("After")}</span> <span class="is-b">${neon("Hours")}</span></p>
+      <p class="ldp-sign-track"></p>
+    </div>`;
   const { wrap, people, lines } = crowd(window.innerWidth);
   club.append(wrap);
   host().append(club);
+  const sign = club.querySelector<HTMLElement>(".ldp-sign")!;
+  const nowPlaying = club.querySelector<HTMLElement>(".ldp-sign-track")!;
+  const letters = [...sign.querySelectorAll<HTMLElement>(".ldp-sign-name i")];
+  const beams = club.querySelector<HTMLElement>(".ldp-beams")!;
+  const dim = club.querySelector<HTMLElement>(".ldp-dim")!;
+  const skylineEl = club.querySelector<HTMLElement>(".ldp-city")!;
 
   /* One clock. Until the music plays it runs on its own; then it is read from the music. */
   let origin = performance.now() + 250;
-  type Synced = { animation: Animation; shift: number };
+  type Synced = { animation: Animation; beats: number; shift: number };
   const synced: Synced[] = [];
   let sceneOnly: Synced[] = [];
   const groove = (
@@ -369,12 +442,12 @@ export async function startParty() {
     if (calm) return;
     const { shift = 0, ...rest } = options;
     const animation = el.animate(frames, {
-      duration: beats * BEAT_MS,
+      duration: beats * beatMs,
       iterations: Infinity,
       ...rest,
     });
-    animation.startTime = origin + shift * BEAT_MS;
-    list.push({ animation, shift });
+    animation.startTime = origin + shift * beatMs;
+    list.push({ animation, beats, shift });
   };
 
   club.querySelectorAll(".ldp-beam").forEach((beam, i) => {
@@ -422,6 +495,12 @@ export async function startParty() {
       3,
       { shift: i * 1.25 },
     ),
+  );
+  // The sign hums on the beat.
+  groove(
+    sign,
+    [{ opacity: 1, easing: "ease-out" }, { opacity: 0.78, offset: 0.5 }, { opacity: 0.86 }],
+    1,
   );
   for (const { el, arm } of people) {
     const lean = rand(2, 5);
@@ -480,8 +559,29 @@ export async function startParty() {
     }
   }
 
-  /* Mirror-ball spots and confetti share one canvas at screen resolution. The spots sit on a
-     sphere around the ball and turn with it, so they cross the room, faster and longer at the
+  /* A failing tube: now and then one letter of the sign stutters out and back. */
+  let buzzTimer = 0;
+  const buzz = () => {
+    if (calm) return;
+    const letter = letters[Math.floor(rand(0, letters.length))];
+    letter.animate(
+      [
+        { opacity: 1 },
+        { opacity: 0.08 },
+        { opacity: 0.9 },
+        { opacity: 0.15 },
+        { opacity: 1 },
+        { opacity: 0.4 },
+        { opacity: 1 },
+      ],
+      { duration: rand(260, 520), easing: "steps(7)" },
+    );
+    buzzTimer = window.setTimeout(buzz, rand(600, 2400));
+  };
+  buzzTimer = window.setTimeout(buzz, 900);
+
+  /* Mirror-ball spots, rain and confetti share one canvas at screen resolution. The spots sit on
+     a sphere around the ball and turn with it, so they cross the room, faster and longer at the
      sides, the way light from a real ball moves over walls. */
   const sky = calm ? null : overlayCanvas("ldp-canvas ldp-sky", 1);
   const spot = sky ? spotSprite() : null;
@@ -491,9 +591,17 @@ export async function startParty() {
     tilt: rand(-0.35, 0.95),
     size: rand(11, 25),
     phase: rand(0, Math.PI * 2),
-    tint: Math.random() < 0.3 ? PALETTE[Math.floor(rand(0, PALETTE.length))] : "#ffffff",
+    tint: Math.random() < 0.35 ? PALETTE[Math.floor(rand(0, PALETTE.length))] : "#ffffff",
     ray: i % 11 === 0,
   }));
+  const drops = sky
+    ? Array.from({ length: 150 }, () => ({
+        x: rand(0, sky.width + 120),
+        y: rand(0, sky.height),
+        length: rand(10, 22),
+        speed: rand(700, 1100),
+      }))
+    : [];
   type Bit = {
     x: number;
     y: number;
@@ -533,6 +641,8 @@ export async function startParty() {
   window.addEventListener("resize", findBall);
   let level = 1;
   let target = 1;
+  let rain = 1;
+  let rainTarget = 1;
   let frame = 0;
   let previous = performance.now();
   const draw = (now: number) => {
@@ -541,10 +651,29 @@ export async function startParty() {
     const dt = Math.min(1 / 30, (now - previous) / 1000);
     previous = now;
     level += (target - level) * Math.min(1, dt * 3);
+    rain += (rainTarget - rain) * Math.min(1, dt * 1.5);
     g.setTransform(r, 0, 0, r, 0, 0);
     g.clearRect(0, 0, width, height);
+    if (rain > 0.02) {
+      // All the rain is one path, stroked once.
+      g.globalAlpha = rain * 0.32;
+      g.strokeStyle = "#b9c8ff";
+      g.lineWidth = 1;
+      g.beginPath();
+      for (const drop of drops) {
+        drop.y += drop.speed * dt;
+        drop.x -= drop.speed * 0.18 * dt;
+        if (drop.y > height) {
+          drop.y = rand(-40, 0);
+          drop.x = rand(0, width + 120);
+        }
+        g.moveTo(drop.x, drop.y);
+        g.lineTo(drop.x + drop.length * 0.18, drop.y - drop.length);
+      }
+      g.stroke();
+    }
     // One turn every 8 bars, on the music's clock.
-    const turn = ((now - origin) / (BAR_MS * 8)) * Math.PI * 2;
+    const turn = ((now - origin) / (barMs * 8)) * Math.PI * 2;
     const reach = Math.max(width, height) * 0.42;
     g.globalCompositeOperation = "lighter";
     for (const speck of specks) {
@@ -558,7 +687,7 @@ export async function startParty() {
       const twinkle = 0.55 + 0.45 * Math.sin(now / 260 + speck.phase * 3) ** 2;
       const alpha = level * fade * twinkle;
       if (speck.ray) {
-        g.globalAlpha = alpha * 0.11;
+        g.globalAlpha = alpha * 0.12;
         const dx = x - ballX;
         const dy = y - ballY;
         const length = Math.hypot(dx, dy);
@@ -577,10 +706,10 @@ export async function startParty() {
       }
       const h = speck.size;
       const w = h / facing;
-      g.globalAlpha = alpha * 0.9;
+      g.globalAlpha = Math.min(1, alpha);
       g.drawImage(spot, x - w / 2, y - h / 2, w, h);
       if (speck.tint !== "#ffffff") {
-        g.globalAlpha = alpha * 0.5;
+        g.globalAlpha = alpha * 0.6;
         g.fillStyle = speck.tint;
         g.fillRect(x - w / 4, y - h / 4, w / 2, h / 2);
       }
@@ -606,9 +735,6 @@ export async function startParty() {
   if (sky) frame = requestAnimationFrame(draw);
 
   /* The show follows the song: each part of it has its own lights. */
-  const sign = club.querySelector<HTMLElement>(".ldp-sign")!;
-  const beams = club.querySelector<HTMLElement>(".ldp-beams")!;
-  const dim = club.querySelector<HTMLElement>(".ldp-dim")!;
   const flash = (strength: number) => {
     if (calm) return;
     // The layer exists only while it shows.
@@ -627,19 +753,25 @@ export async function startParty() {
     sceneOnly = [];
     club.dataset.scene = scene;
     target = BALL_LEVEL[scene];
+    rainTarget = RAIN_LEVEL[scene];
     if (scene === "verse" || scene === "lift" || scene === "drop")
       // Light on the kick: while the drums play, the room brightens on every beat, then settles.
+      // Harder in the drop.
       groove(
         dim,
-        [{ opacity: 0.72, easing: "ease-out" }, { opacity: 0.86, offset: 0.4 }, { opacity: 0.86 }],
+        [
+          { opacity: scene === "drop" ? 0.56 : 0.7, easing: "ease-out" },
+          { opacity: 0.86, offset: 0.45 },
+          { opacity: 0.86 },
+        ],
         1,
         {},
         sceneOnly,
       );
     if (scene === "drop") {
-      flash(0.3);
+      flash(0.32);
       confetti(first ? 170 : 120);
-      // The whole crowd jumps on the beat.
+      // The whole crowd jumps on the beat, and the city bumps with the bass.
       lines.forEach((line, i) =>
         groove(
           line,
@@ -653,6 +785,23 @@ export async function startParty() {
           sceneOnly,
         ),
       );
+      groove(
+        skylineEl,
+        [
+          { transform: "scaleY(1.035)", easing: "ease-out" },
+          { transform: "scaleY(1)", offset: 0.5 },
+          { transform: "scaleY(1)" },
+        ],
+        1,
+        {},
+        sceneOnly,
+      );
+      // The sign goes wild for the first bar of the drop.
+      if (!calm)
+        sign.animate(
+          [{ opacity: 1 }, { opacity: 0.1 }, { opacity: 1 }, { opacity: 0.1 }, { opacity: 1 }],
+          { duration: barMs, easing: `steps(${8})`, composite: "replace" },
+        );
     }
     if (scene === "build")
       // The beams cut in and out on every beat with the snare roll.
@@ -670,16 +819,33 @@ export async function startParty() {
       );
   };
   // The breath before a drop: one beat of dark, on the last beat of the build.
-  let cutTimer = 0;
-  const cut = (at: number) => {
+  const cut = () => {
     if (calm) return;
-    window.clearTimeout(cutTimer);
-    cutTimer = window.setTimeout(() => {
-      const dark = document.createElement("div");
-      dark.className = "ldp-cut";
-      club.insertBefore(dark, wrap);
-      window.setTimeout(() => dark.remove(), BEAT_MS);
-    }, at - performance.now());
+    const dark = document.createElement("div");
+    dark.className = "ldp-cut";
+    club.insertBefore(dark, wrap);
+    window.setTimeout(() => dark.remove(), beatMs);
+  };
+
+  /* The page's accent follows the music. Each change restyles the whole page, so if a change
+     makes a frame slow, changes come half as often (down to once every 4 bars), and speed back
+     up once they're quick again. */
+  let slow = 1;
+  let shade = 0;
+  const recolour = (hex: string) => {
+    club.style.setProperty("--ldp-glow", hex);
+    if (root.style.getPropertyValue(names[0]) === hex) return;
+    const before = performance.now();
+    root.style.setProperty(names[0], hex);
+    root.style.setProperty(names[1], accentInk(hex));
+    root.style.setProperty(names[2], onAccent(hex));
+    requestAnimationFrame(() =>
+      requestAnimationFrame((now) => {
+        const took = now - before;
+        if (took > 75) slow = Math.min(8, slow * 2);
+        else if (took < 45) slow = Math.max(1, slow / 2);
+      }),
+    );
   };
 
   let stopped = false;
@@ -687,83 +853,87 @@ export async function startParty() {
   let lastBar = Number.NaN;
   let passes = 0;
   const onBar = (count: number) => {
-    if (stopped) return;
-    const bar = songBar(count);
+    const bar = songBar(track, count);
     if (bar === lastBar) return;
     if (bar < lastBar) passes++;
     lastBar = bar;
     if (!club.classList.contains("is-on")) club.classList.add("is-on");
-    const next = sceneAt(bar);
+    const next = sceneAt(track, bar);
     if (next !== scene) {
       scene = next;
       enter(next, passes === 0);
+      if (next === "intro") recolour("#ffb547");
+      if (next === "break") recolour("#b46bff");
     } else if (scene === "drop" && bar % 8 === 0) confetti(80);
-    if (scene === "build" && sceneAt(bar + 1) === "drop") cut(origin + (count * 4 + 3) * BEAT_MS);
-    // The colour moves on every two bars; the intro is warm amber and the break holds a cool violet.
-    if (bar % 2 === 0 || scene === "break" || scene === "intro") {
-      const hex =
-        scene === "intro"
-          ? "#ffb547"
-          : scene === "break"
-            ? "#a98bff"
-            : PALETTE[(bar / 2) % PALETTE.length | 0];
-      club.style.setProperty("--ldp-glow", hex);
-      // Recolouring the page restyles all of it (about 50-250 ms on a slow phone), so it happens
-      // at most every other bar, never per frame. The lights run on the compositor and don't
-      // wait for it.
-      if (root.style.getPropertyValue(names[0]) !== hex) {
-        root.style.setProperty(names[0], hex);
-        root.style.setProperty(names[1], accentInk(hex));
-        root.style.setProperty(names[2], onAccent(hex));
-      }
-    }
-    if (!calm && bar % 4 === 0)
+    if (!calm && bar % 4 === 0 && scene !== "drop")
       sign.animate(
         [{ opacity: 1 }, { opacity: 0.2 }, { opacity: 1 }, { opacity: 0.4 }, { opacity: 1 }],
         { duration: 260, easing: "steps(5)" },
       );
   };
-
-  let barTimer = 0;
-  const tick = () => {
-    window.clearTimeout(barTimer);
+  const onBeat = (beats: number) => {
     if (stopped) return;
-    const count = Math.floor((performance.now() - origin) / BAR_MS + 0.01);
-    if (count >= 0) onBar(count);
-    barTimer = window.setTimeout(tick, origin + (count + 1) * BAR_MS - performance.now() + 4);
+    const count = Math.floor(beats / 4);
+    onBar(count);
+    if (!scene) return;
+    if (
+      beats % 4 === 3 &&
+      scene === "build" &&
+      sceneAt(track, songBar(track, count) + 1) === "drop"
+    )
+      cut();
+    const every = ACCENT_EVERY[scene] * slow;
+    if (!every || beats % every !== 0) return;
+    const colours = scene === "drop" ? DROP : PALETTE;
+    shade = (shade + 1) % colours.length;
+    recolour(colours[shade]);
   };
-  barTimer = window.setTimeout(tick, origin - performance.now());
 
-  /** Move the whole show onto a new clock: every light, and the bar counter. */
+  let beatTimer = 0;
+  let lastBeat = Number.NaN;
+  const tick = () => {
+    window.clearTimeout(beatTimer);
+    if (stopped) return;
+    const beats = Math.floor((performance.now() - origin) / beatMs + 0.01);
+    if (beats >= 0 && beats !== lastBeat) {
+      lastBeat = beats;
+      onBeat(beats);
+    }
+    beatTimer = window.setTimeout(tick, origin + (beats + 1) * beatMs - performance.now() + 4);
+  };
+  beatTimer = window.setTimeout(tick, origin - performance.now());
+
+  /** Move the whole show onto a new clock: every light, and the beat counter. */
   const retime = (next: number) => {
     origin = next;
     for (const { animation, shift } of [...synced, ...sceneOnly])
-      animation.startTime = origin + shift * BEAT_MS;
+      animation.startTime = origin + shift * beatMs;
+    lastBeat = Number.NaN;
     tick();
   };
 
   /* Read the clock from the music a few times a second. Small wobbles are ignored; a real
-     difference (a stall on a slow connection, the loop back to the start) moves the show. */
+     difference (a stall on a slow connection, the loop, a new track) moves the show. */
   const lead = context
     ? Math.min(0.5, Math.max(context.outputLatency || 0, context.baseLatency || 0)) * 1000
     : 0;
   let strikes = 0;
   let loopTimer = 0;
-  const end = FIRST + (LOOP_END * BAR_MS) / 1000;
   const listen = () => {
     if (!audio || audio.paused || audio.readyState < 3) return;
     openDoor();
+    const end = track.first + (track.loop[1] * barMs) / 1000;
     if (!loopTimer && audio.currentTime > end - 0.3)
       loopTimer = window.setTimeout(
         () => {
           loopTimer = 0;
           // Carry any overshoot across, so the jump lands on the same beat.
           const over = Math.max(0, audio.currentTime - end);
-          audio.currentTime = FIRST + (LOOP_START * BAR_MS) / 1000 + over;
+          audio.currentTime = track.first + (track.loop[0] * barMs) / 1000 + over;
         },
         Math.max(0, (end - audio.currentTime) * 1000),
       );
-    const heard = performance.now() - (audio.currentTime - FIRST) * 1000 + lead;
+    const heard = performance.now() - (audio.currentTime - track.first) * 1000 + lead;
     const off = heard - origin;
     if (Math.abs(off) > 400) retime(heard);
     else if (Math.abs(off) > 30) {
@@ -776,6 +946,45 @@ export async function startParty() {
   const listener = window.setInterval(listen, 200);
   audio?.addEventListener("playing", listen);
 
+  /* Switching tracks: the new one starts where its groove does, and every light takes its tempo. */
+  const trackButton = document.createElement("button");
+  trackButton.type = "button";
+  trackButton.className = "ldp-pill ldp-pill-quiet ldp-pill-track";
+  const label = () => {
+    trackButton.textContent = track.title;
+    trackButton.setAttribute(
+      "aria-label",
+      `Now playing ${track.title}. Play the next track: ${TRACKS[(index + 1) % TRACKS.length].title}`,
+    );
+    nowPlaying.textContent = track.title;
+  };
+  label();
+  if (TRACKS.length < 2) trackButton.hidden = true;
+  trackButton.addEventListener("click", () => {
+    index = (index + 1) % TRACKS.length;
+    track = TRACKS[index];
+    saveTrack(index);
+    label();
+    window.clearTimeout(loopTimer);
+    loopTimer = 0;
+    beatMs = 60_000 / track.bpm;
+    barMs = beatMs * 4;
+    for (const { animation, beats } of [...synced, ...sceneOnly])
+      animation.effect?.updateTiming({ duration: beats * beatMs });
+    const start = track.loop[0];
+    scene = null;
+    lastBar = Number.NaN;
+    passes = 1;
+    if (audio) {
+      openDoor(true);
+      audio.src = trackSource(track, audio);
+      audio.currentTime = track.first + (start * barMs) / 1000;
+      void audio.play().catch(() => undefined);
+    }
+    // Until the new track is heard, keep time from now.
+    retime(performance.now() + 300 - start * barMs);
+  });
+
   let soundOn = true;
   const hidden = () => {
     if (!audio || stopped) return;
@@ -786,6 +995,7 @@ export async function startParty() {
 
   return {
     sound: Boolean(audio),
+    controls: [trackButton],
     setSound(on: boolean) {
       soundOn = on;
       if (!audio) return;
@@ -794,18 +1004,18 @@ export async function startParty() {
     },
     async stop() {
       stopped = true;
-      window.clearTimeout(barTimer);
+      window.clearTimeout(beatTimer);
+      window.clearTimeout(buzzTimer);
       window.clearInterval(listener);
       window.clearTimeout(loopTimer);
-      window.clearTimeout(cutTimer);
       window.removeEventListener("resize", findBall);
       document.removeEventListener("visibilitychange", hidden);
       audio?.removeEventListener("playing", listen);
       club.classList.add("is-leaving");
       sky?.canvas.classList.add("is-leaving");
       if (out && context && soundOn) out.gain.setTargetAtTime(0, context.currentTime, 0.08);
-      names.forEach((name, index) => {
-        if (saved[index]) root.style.setProperty(name, saved[index]);
+      names.forEach((name, i) => {
+        if (saved[i]) root.style.setProperty(name, saved[i]);
         else root.style.removeProperty(name);
       });
       await new Promise((resolve) => window.setTimeout(resolve, 380));

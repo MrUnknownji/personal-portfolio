@@ -7,27 +7,26 @@
  * Audio available it is routed through a graph the party connects (it stays silent until then),
  * so the music can come in through a muffled door.
  */
+import { TRACKS, savedTrack, trackSource } from "./partyTracks";
+
 export type Prime = {
   audio: HTMLAudioElement;
   context: AudioContext | null;
   source: AudioNode | null;
+  /** Which of the party's tracks is playing: the one the visitor picked last time. */
+  track: number;
 };
 
 let primed: Prime | null = null;
-
-const TRACKS = [
-  { src: "/audio/club-night-1.webm", type: 'audio/webm; codecs="opus"' },
-  { src: "/audio/club-night-1.m4a", type: 'audio/mp4; codecs="mp4a.40.2"' },
-];
 
 export function primeAudio() {
   dropAudio();
   try {
     const audio = new Audio();
-    const track = TRACKS.find(({ type }) => audio.canPlayType(type)) ?? TRACKS[1];
+    const track = savedTrack();
     audio.preload = "auto";
     audio.loop = true;
-    audio.src = track.src;
+    audio.src = trackSource(TRACKS[track], audio);
     let context: AudioContext | null = null;
     let source: AudioNode | null = null;
     try {
@@ -45,7 +44,7 @@ export function primeAudio() {
       source = null;
     }
     void audio.play().catch(() => undefined);
-    primed = { audio, context, source };
+    primed = { audio, context, source, track };
   } catch {
     primed = null;
   }

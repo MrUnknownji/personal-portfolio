@@ -29,7 +29,7 @@
   background:
     radial-gradient(
       60% 40% at 50% 100%,
-      color-mix(in srgb, var(--ldp-glow) 34%, transparent),
+      color-mix(in srgb, var(--ldp-glow) 46%, transparent),
       transparent 100%
     ),
     radial-gradient(120% 70% at 50% 110%, #2b0d45 0%, #0b0720 55%, #05040f 100%);
@@ -56,7 +56,7 @@
   height: 112vh;
   margin-left: -20vmin;
   transform-origin: 50% 0;
-  opacity: 0.32;
+  opacity: 0.42;
   will-change: transform;
 }
 .ldp-beam svg {
@@ -104,10 +104,10 @@
   width: 150vmax;
   height: 3px;
   transform-origin: 0 50%;
-  background: linear-gradient(90deg, #ff2d55, #ff2d5500 75%);
+  background: linear-gradient(90deg, #ff3d6e, #ff3d6e00 80%);
 }
 .ldp-fan.is-right .ldp-laser {
-  background: linear-gradient(90deg, #3dff8a, #3dff8a00 75%);
+  background: linear-gradient(90deg, #3dffa2, #3dffa200 80%);
 }
 .ldp-laser:nth-child(1) {
   rotate: 4deg;
@@ -197,26 +197,90 @@
   background: linear-gradient(#fff0, #fff 45% 55%, #fff0);
 }
 
-/* A neon sign: outlined type, no glow (no blur). It flickers on the bar. */
+/* The neon sign: two tubes, pink and cyan, buzzing on the beat, with a letter failing now and
+   then. The glow is drawn, not blurred: hard outlines in the tube's colour and a soft gradient
+   behind, so it costs nothing per frame. */
 .ldp-sign {
-  top: calc(var(--ld-header, 64px) + 18px);
-  right: clamp(14px, 3vw, 36px);
+  top: calc(var(--ld-header, 64px) + 16px);
+  right: clamp(12px, 3vw, 36px);
+  padding: 10px 16px 9px;
+  border: 2px solid #ff3dd8;
+  border-radius: 14px;
+  background: radial-gradient(closest-side, #ff3dd833, #ff3dd800) center / 140% 190% no-repeat;
+  rotate: -4deg;
+  box-shadow:
+    0 0 0 2px #0a0614,
+    0 0 0 5px #ff3dd84d,
+    inset 0 0 0 2px #ffffff40,
+    inset 0 0 0 5px #ff3dd833;
+  will-change: opacity;
+}
+.ldp-sign p {
   margin: 0;
-  padding: 6px 14px 7px;
-  border: 2px solid #ff4fd8;
-  border-radius: 12px;
-  color: #ffe1f8;
+}
+.ldp-sign-name {
   font:
-    700 clamp(15px, 1.8vw, 21px) / 1 var(--ld-font-display),
+    800 clamp(17px, 2vw, 24px) / 1 var(--ld-font-display),
     system-ui,
     sans-serif;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  -webkit-text-stroke: 1px #ff4fd8;
-  rotate: -4deg;
-  box-shadow:
-    0 0 0 3px #ff4fd833,
-    inset 0 0 0 3px #ff4fd833;
+  white-space: nowrap;
+}
+.ldp-sign-name i {
+  display: inline-block;
+  font-style: normal;
+}
+.ldp-sign-name .is-a {
+  color: #fff0fb;
+  -webkit-text-stroke: 1px #ff3dd8;
+  text-shadow:
+    1px 1px 0 #ff3dd8,
+    -1px -1px 0 #ff3dd8,
+    0 2px 0 #ff3dd899;
+}
+.ldp-sign-name .is-b {
+  color: #effeff;
+  -webkit-text-stroke: 1px #1ff4ff;
+  text-shadow:
+    1px 1px 0 #1ff4ff,
+    -1px -1px 0 #1ff4ff,
+    0 2px 0 #1ff4ff99;
+}
+.ldp-sign-track {
+  max-width: 26ch;
+  margin-top: 7px !important;
+  overflow: hidden;
+  color: #7ff6ff;
+  font:
+    600 11px / 1.2 var(--ldf-mono, ui-monospace),
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.ldp-sign-track::before {
+  content: "";
+  display: inline-block;
+  margin-right: 6px;
+  border-block: 4px solid transparent;
+  border-left: 6px solid currentColor;
+  vertical-align: 0;
+}
+
+/* The city: a skyline behind the crowd. It bumps with the bass in a drop. */
+.ldp-city {
+  inset: auto 0 0;
+  height: 36vh;
+  opacity: 0.85;
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+.ldp-city svg {
+  display: block;
 }
 
 /* The crowd: two rows of silhouettes, back-lit, so the stage colour catches heads and shoulders.
@@ -290,6 +354,10 @@
 }
 
 @media (max-width: 640px) {
+  .ldp-sign {
+    top: calc(var(--ld-header, 64px) + 150px);
+    scale: 0.9;
+  }
   .ldp-crowd {
     height: 140px;
   }
