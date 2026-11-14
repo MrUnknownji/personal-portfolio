@@ -42,33 +42,11 @@ export const TRACKS: Track[] = [
       [74, "outro"],
     ],
   },
-  /* Three originals made for the party with Google's Lyria 3.5 in the same family as Calor (full
+  /* Two originals made for the party with Google's Lyria 3.5 in the same family as Calor (full
      songs, two takes of each, the best picked by ear by Gemini against Calor). Sections come from
      the measured sub-bass, which drops out in every break and comes back on every drop, with
      Gemini's notes where the bass alone doesn't tell. Each loops from its first drop or groove to
      its last bar, skipping the intro. */
-  {
-    // Latin tech house, D minor: four-on-the-floor, congas and timbales, horn hook. The first
-    // drop lands straight out of the intro.
-    id: "noche",
-    title: "Noche Sin Fin",
-    files: ["/audio/party-noche-1.webm", "/audio/party-noche-1.m4a"],
-    bpm: 124.58,
-    first: 0.294,
-    loop: [8, 68],
-    song: [
-      [0, "intro"],
-      [8, "drop"],
-      [16, "lift"],
-      [24, "break"],
-      [28, "build"],
-      [32, "verse"],
-      [40, "lift"],
-      [48, "build"],
-      [52, "drop"],
-      [68, "outro"],
-    ],
-  },
   {
     // Dembow house, G minor: nylon guitar, 808 sub, brass stabs and crowd chants. Three drops.
     id: "fuego",
