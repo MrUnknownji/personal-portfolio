@@ -372,71 +372,93 @@
   stroke: var(--ldp-glow);
 }
 
-/* The word the song is built around, slammed onto the screen each time it is sung: hard
-   outlines and a two-colour split instead of a glow, and two slices that jitter like a glitch. */
+/* The word the song is built around, on a neon sign that lands each time it is sung: hollow
+   letters in pink tube (a white-hot core, then wider, fainter outlines for the glow, no blur) on
+   a dark panel in a cyan tube frame, with electric arcs crackling along the frame. */
 .ldp-word {
   position: fixed;
   left: 50%;
   top: 44%;
   z-index: 92;
-  margin: 0;
-  color: #fff;
+  padding: 0.12em 0.32em 0.16em;
+  border: 4px solid #bdfcff;
+  border-radius: 0.22em;
+  background: #0a0614c7;
+  box-shadow:
+    0 0 0 3px #1ff4ff,
+    0 0 0 9px #1ff4ff40,
+    0 0 0 18px #1ff4ff17,
+    inset 0 0 0 3px #1ff4ff,
+    inset 0 0 0 10px #1ff4ff26;
   font:
-    900 clamp(64px, 15vw, 210px) / 1 var(--ld-font-display),
+    800 clamp(54px, 12.5vw, 180px) / 1 var(--ld-font-display),
     system-ui,
     sans-serif;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   white-space: nowrap;
-  -webkit-text-stroke: 2px #ff2bd6;
-  text-shadow:
-    5px 0 0 #00f0ff,
-    -5px 0 0 #ff2bd6,
-    0 6px 0 #0a0614;
   transform: translate(-50%, -50%);
   pointer-events: none;
   will-change: transform, opacity;
 }
-.ldp-word::before,
-.ldp-word::after {
+.ldp-word-text {
+  position: relative;
+  display: block;
+  color: #ff2bd626;
+  -webkit-text-stroke: 3px #ffe3fa;
+}
+.ldp-word-text::before,
+.ldp-word-text::after {
   content: attr(data-word);
   position: absolute;
   inset: 0;
-  text-shadow: none;
+  z-index: -1;
+  color: transparent;
 }
-.ldp-word::before {
-  color: #00f0ff;
-  clip-path: inset(0 0 64% 0);
-  animation: ldp-glitch-a 0.22s steps(2) infinite;
+.ldp-word-text::before {
+  -webkit-text-stroke: 22px #ff2bd622;
 }
-.ldp-word::after {
-  color: #ff2bd6;
-  clip-path: inset(60% 0 0 0);
-  animation: ldp-glitch-b 0.3s steps(2) infinite;
+.ldp-word-text::after {
+  -webkit-text-stroke: 10px #ff2bd666;
 }
-@keyframes ldp-glitch-a {
+.ldp-bolts {
+  position: absolute;
+  inset: -14px;
+  width: calc(100% + 28px);
+  height: calc(100% + 28px);
+  overflow: visible;
+  fill: none;
+  stroke-linejoin: round;
+}
+.ldp-bolts path {
+  stroke: #f2feff;
+  stroke-width: 1.6px;
+  vector-effect: non-scaling-stroke;
+}
+.ldp-bolts path.is-halo {
+  stroke: #1ff4ff;
+  stroke-width: 7px;
+  stroke-opacity: 0.4;
+}
+.ldp-bolts g {
+  opacity: 0;
+  animation: ldp-crackle 0.24s steps(1) infinite;
+}
+.ldp-bolts g:nth-child(2) {
+  animation-delay: -0.08s;
+}
+.ldp-bolts g:nth-child(3) {
+  animation-delay: -0.16s;
+}
+@keyframes ldp-crackle {
   0% {
-    transform: translateX(-8px);
+    opacity: 1;
   }
-  50% {
-    transform: translateX(6px);
-  }
-  100% {
-    transform: translateX(-3px);
-  }
-}
-@keyframes ldp-glitch-b {
-  0% {
-    transform: translateX(7px);
-  }
-  50% {
-    transform: translateX(-6px);
-  }
-  100% {
-    transform: translateX(2px);
+  33% {
+    opacity: 0;
   }
 }
 
-/* Subtitles: only when the visitor turns them on in the panel. */
+/* Subtitles: on unless the visitor turns them off in the panel. */
 .ldp-subs {
   position: fixed;
   left: 50%;
@@ -461,8 +483,11 @@
   transform: translate(-50%, 0);
   pointer-events: none;
 }
-:root[data-ldt-lyrics="on"] .ldp-subs:not(:empty) {
+.ldp-subs:not(:empty) {
   display: block;
+}
+:root[data-ldt-lyrics="off"] .ldp-subs {
+  display: none;
 }
 
 /* The hidden seek bar: a tower's roof line. Only a tiny dark dot moves along it. */
@@ -523,9 +548,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .ldp-ball-reel,
-  .ldp-word::before,
-  .ldp-word::after {
+  .ldp-ball-reel {
     animation: none;
   }
 }

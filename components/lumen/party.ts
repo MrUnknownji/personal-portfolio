@@ -367,6 +367,43 @@ const PALETTE = ["#ff3dd8", "#1ff4ff", "#b46bff", "#3dffa2", "#ffcf3d"];
 const DROP = ["#ff2bd6", "#00f0ff", "#ffe600", "#8f5bff", "#3dff8a"];
 const BEAMS = ["#ff3dd8", "#1ff4ff", "#b46bff", "#ffcf3d"];
 
+/**
+ * Electric arcs along a sign's frame: three sets of jagged lines, shown one after another in
+ * quick steps by the stylesheet, so the edges crackle. Drawn on a 1000 x 300 box that stretches
+ * with the sign; the strokes keep their width.
+ */
+function bolts() {
+  const arc = (x1: number, y1: number, x2: number, y2: number) => {
+    const steps = 7;
+    let d = `M${x1} ${y1}`;
+    for (let i = 1; i < steps; i++) {
+      const k = i / steps;
+      const jitter = rand(-14, 14);
+      // Off to the side of the edge it runs along.
+      const x = x1 + (x2 - x1) * k + (y1 === y2 ? 0 : jitter);
+      const y = y1 + (y2 - y1) * k + (y1 === y2 ? jitter : 0);
+      d += `L${x.toFixed(0)} ${y.toFixed(0)}`;
+    }
+    return `${d}L${x2} ${y2}`;
+  };
+  const set = () => {
+    let paths = "";
+    for (let i = 0; i < 5; i++) {
+      const edge = Math.floor(rand(0, 4));
+      const from = rand(0, 0.7);
+      const to = from + rand(0.12, 0.3);
+      paths +=
+        edge === 0
+          ? arc(from * 1000, 0, to * 1000, 0)
+          : edge === 1
+            ? arc(from * 1000, 300, to * 1000, 300)
+            : arc(edge === 2 ? 0 : 1000, from * 300, edge === 2 ? 0 : 1000, Math.min(1, to) * 300);
+    }
+    return `<g><path class="is-halo" d="${paths}"/><path d="${paths}"/></g>`;
+  };
+  return `<svg class="ldp-bolts" viewBox="0 0 1000 300" preserveAspectRatio="none">${set()}${set()}${set()}</svg>`;
+}
+
 /** Neon letters: each is its own element, so a single letter can buzz like a failing tube. */
 const neon = (word: string) => [...word].map((letter) => `<i>${letter}</i>`).join("");
 
@@ -1018,7 +1055,7 @@ export async function startParty() {
     }
     lineIndex = -2;
     lastHeard = Number.NEGATIVE_INFINITY;
-    lastShout?.remove();
+    shouts.splice(0).forEach((el) => el.remove());
     // Until the new track is heard, keep time from now.
     retime(performance.now() + 300 - start * barMs);
   });
@@ -1069,7 +1106,7 @@ export async function startParty() {
     });
   };
 
-  // Subtitles, for songs with words. Shown when the visitor turns them on in the panel (the
+  // Subtitles, for songs with words. On unless the visitor turns them off in the panel (the
   // stylesheet reads that from <html>), so they can come and go mid-song.
   const subs = document.createElement("p");
   subs.className = "ldp-subs";
@@ -1102,37 +1139,45 @@ export async function startParty() {
   const LEAD_IN = 0.19;
   let hookNext = 0;
   let lastHeard = Number.NEGATIVE_INFINITY;
-  let lastShout: HTMLElement | null = null;
+  const shouts: HTMLElement[] = [];
   const shout = (word: string) => {
-    lastShout?.remove();
+    // Quick repeats overlap: the last one flies out while the next one lands.
+    while (shouts.length > 1) shouts.shift()!.remove();
     const el = document.createElement("div");
     el.className = "ldp-word";
-    el.dataset.word = word.toUpperCase();
-    el.textContent = word.toUpperCase();
     el.setAttribute("aria-hidden", "true");
+    const text = word.toUpperCase();
+    el.innerHTML = `<span class="ldp-word-text" data-word="${text}">${text}</span>${calm ? "" : bolts()}`;
     host().append(el);
-    lastShout = el;
-    const at = (scale: number, skew = 0) =>
-      `translate(-50%, -50%) scale(${scale}) skewX(${skew}deg)`;
+    shouts.push(el);
+    const at = (scale: number) => `translate(-50%, -50%) scale(${scale})`;
+    // Out of nothing in the middle, full size on the sung beat, a tube flicker, then out past the
+    // edges of the screen.
+    const duration = 1000;
+    const peak = (LEAD_IN * 1000) / duration;
     el.animate(
       calm
         ? [
             { opacity: 0 },
-            { opacity: 1, offset: 0.17 },
-            { opacity: 1, offset: 0.7 },
+            { opacity: 1, offset: peak },
+            { opacity: 1, offset: 0.65 },
             { opacity: 0 },
           ]
         : [
-            { opacity: 0, transform: at(2.6, -14) },
-            { opacity: 1, transform: at(0.94), offset: 0.17, easing: "ease-out" },
-            { opacity: 1, transform: at(1.08), offset: 0.24 },
-            { opacity: 1, transform: at(1), offset: 0.32 },
-            { opacity: 0.2, transform: at(1), offset: 0.4 },
-            { opacity: 1, transform: at(1.01), offset: 0.45 },
-            { opacity: 1, transform: at(1.03), offset: 0.72 },
-            { opacity: 0, transform: at(1.45, 8) },
+            { opacity: 0, transform: at(0.02), easing: "cubic-bezier(0.2, 1.25, 0.45, 1)" },
+            { opacity: 1, transform: at(1), offset: peak },
+            { opacity: 1, transform: at(1.02), offset: 0.34 },
+            { opacity: 0.25, transform: at(1.03), offset: 0.38 },
+            { opacity: 1, transform: at(1.04), offset: 0.42 },
+            {
+              opacity: 1,
+              transform: at(1.12),
+              offset: 0.6,
+              easing: "cubic-bezier(0.55, 0, 0.85, 0.4)",
+            },
+            { opacity: 0, transform: at(3.4) },
           ],
-      { duration: 950 },
+      { duration },
     ).finished.then(
       () => el.remove(),
       () => el.remove(),
@@ -1286,7 +1331,7 @@ export async function startParty() {
       window.removeEventListener("resize", placeSeek);
       seek.remove();
       subs.remove();
-      lastShout?.remove();
+      shouts.splice(0).forEach((el) => el.remove());
       document.removeEventListener("visibilitychange", hidden);
       audio?.removeEventListener("playing", listen);
       club.classList.add("is-leaving");

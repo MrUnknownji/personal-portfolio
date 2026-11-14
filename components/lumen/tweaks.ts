@@ -475,7 +475,7 @@ export const GROUPS: Group[] = [
         key: "lyrics",
         label: "Song subtitles",
         hint: "Shows the words of songs that have them, during the Party.",
-        def: false,
+        def: true,
       },
     ],
   },
