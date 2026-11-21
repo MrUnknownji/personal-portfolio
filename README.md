@@ -1,8 +1,8 @@
 # Sandeep Kumar — Portfolio
 
 Personal portfolio of Sandeep Kumar, a full-stack developer building web, mobile,
-and real-time products, and the founder of
-[FrameRelay Studio](https://framerelaystudio.com/). Built with Next.js (App Router), React 19, TypeScript,
+and real-time products, who also built the website of
+[FrameRelay Studio](https://framerelaystudio.com/) for its owner. Built with Next.js (App Router), React 19, TypeScript,
 and plain CSS, with a MongoDB-backed contact form. The look is "Lumen Draft": pages drawn like
 instrument sheets, torn-paper stationery, and a letter that opens on scroll.
 
@@ -23,9 +23,9 @@ instrument sheets, torn-paper stationery, and a letter that opens on scroll.
   has a few toys that act on the whole site: Gravity (each section falls to its own floor as you
   scroll to it), Zero-G (everything floats and still works), Snap, Burn it, Earthquake, and Party
   (a neon-city club whose lights follow the music section by section, on the music's own
-  clock, with a skyline that moves like an equaliser; four tracks to switch between, each
-  streamed only after the click, one with timed subtitles and its hook word flashed on screen;
-  a seek bar hides on one tower's roof). The panel and toys load only when opened, and each toy
+  clock, with a skyline that moves like an equaliser; three tracks to switch between, each
+  streamed only after the click, and a fourth, with timed subtitles and its hook word flashed on
+  screen, for whoever finds it; a seek bar hides on one tower's roof). The panel and toys load only when opened, and each toy
   puts the page back exactly.
 - **Measured performance.** Lighthouse budgets run in CI; see
   [docs/performance](docs/performance) for the audits and what changed.
@@ -37,7 +37,7 @@ instrument sheets, torn-paper stationery, and a letter that opens on scroll.
 | Project            | What it is                                                                | Stack                                   |
 | ------------------ | ------------------------------------------------------------------------- | --------------------------------------- |
 | BidStrike          | Real-time auctions with server-side bid validation and proxy auto-bidding | Next.js, Socket.io, MongoDB, Stripe     |
-| FrameRelay Studio  | My motion studio: WebGL2 site with quality tiers, films in Remotion       | Astro, Three.js, Remotion, Cloudflare   |
+| FrameRelay Studio  | Client site I built: WebGL2 with quality tiers, films in Remotion         | Astro, Three.js, Remotion, Cloudflare   |
 | Mirror Wallpapers  | Paired wallpapers: Expo app, Next.js admin, FastAPI AI (private repo)     | React Native, Supabase, FastAPI, Gemini |
 | OmniMart           | Store with cart, checkout, support, and admin                             | Next.js, MongoDB, Gemini, Cloudinary    |
 | YouTube Content OS | Creator workspace with AI and storage fallbacks                           | React, Vite, Express, MongoDB           |

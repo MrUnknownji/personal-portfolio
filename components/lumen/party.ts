@@ -9,7 +9,7 @@
  * underneath only changes colour (the accent), on the beat, and backs off if that gets slow.
  */
 import { takeAudio } from "./audioPrime";
-import { type Scene, type Track, TRACKS, saveTrack, trackSource } from "./partyTracks";
+import { type Scene, type Track, TRACKS, nextTrack, saveTrack, trackSource } from "./partyTracks";
 import { host, overlayCanvas, rand, reducedMotion } from "./play";
 import { accentInk, onAccent } from "./tweaks";
 import "./party.css";
@@ -1026,14 +1026,14 @@ export async function startParty() {
     trackButton.textContent = track.title;
     trackButton.setAttribute(
       "aria-label",
-      `Now playing ${track.title}. Play the next track: ${TRACKS[(index + 1) % TRACKS.length].title}`,
+      `Now playing ${track.title}. Play the next track: ${TRACKS[nextTrack(index)].title}`,
     );
     nowPlaying.textContent = track.title;
   };
   label();
-  if (TRACKS.length < 2) trackButton.hidden = true;
-  trackButton.addEventListener("click", () => {
-    index = (index + 1) % TRACKS.length;
+  if (nextTrack(index) === index) trackButton.hidden = true;
+  const play = (next: number) => {
+    index = next;
     track = TRACKS[index];
     saveTrack(index);
     label();
@@ -1058,7 +1058,46 @@ export async function startParty() {
     shouts.splice(0).forEach((el) => el.remove());
     // Until the new track is heard, keep time from now.
     retime(performance.now() + 300 - start * barMs);
-  });
+  };
+  trackButton.addEventListener("click", () => play(nextTrack(index)));
+
+  /* The secret track: tap S, O, T on the sign, in that order, within a few seconds of each other.
+     Each tap only makes the tube flicker, as if it were knocked, so the sign gives nothing away;
+     the third one lights the whole sign and plays the hidden song. */
+  const secret = TRACKS.findIndex((entry) => entry.secret);
+  const CODE = "SOT";
+  let typed = 0;
+  let lastTap = 0;
+  const knock = (event: PointerEvent) => {
+    const letter = (event.target as Element).closest<HTMLElement>(".ldp-sign-name i");
+    if (!letter || secret < 0) return;
+    const now = performance.now();
+    if (now - lastTap > 4000) typed = 0;
+    lastTap = now;
+    const key = letter.textContent!.toUpperCase();
+    typed = key === CODE[typed] ? typed + 1 : key === CODE[0] ? 1 : 0;
+    letter.animate(
+      [{ opacity: 1 }, { opacity: 0.15 }, { opacity: 1 }, { opacity: 0.5 }, { opacity: 1 }],
+      {
+        duration: 240,
+        easing: "steps(5)",
+      },
+    );
+    if (typed < CODE.length) return;
+    typed = 0;
+    sign.animate(
+      [
+        { opacity: 1 },
+        { opacity: 0.2 },
+        { opacity: 1, scale: "1.08" },
+        { opacity: 0.4 },
+        { opacity: 1, scale: "1" },
+      ],
+      { duration: 520, easing: "steps(5)" },
+    );
+    if (index !== secret) play(secret);
+  };
+  sign.addEventListener("pointerdown", knock);
 
   /* ---------- Every frame: the towers, the subtitles, the hook word and the seek dot ---------- */
 

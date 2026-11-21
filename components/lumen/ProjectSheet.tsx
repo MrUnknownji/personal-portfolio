@@ -9,7 +9,7 @@ const pad = (value: number) => String(value).padStart(2, "0");
 export const sheetTimeline = (index: number) => `--ld-sheet-${index}`;
 
 /**
- * Stills chosen for the work sheets. FrameRelay's sheet is about the studio's own painted site,
+ * Stills chosen for the work sheets. FrameRelay's sheet is about the painted site built for it,
  * so it shows that site rather than a client-style product film.
  */
 const stills: Partial<Record<number, string>> = { 13: "/images/framerelay/hero.webp" };

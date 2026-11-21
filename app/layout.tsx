@@ -178,14 +178,7 @@ const structuredData = {
       url: SITE_URL,
       image: absolute("/images/sandeep-cutout-640.webp"),
       email: `mailto:${SITE_CONFIG.email}`,
-      worksFor: [
-        { "@type": "Organization", name: "Tata Consultancy Services" },
-        {
-          "@type": "Organization",
-          name: "FrameRelay Studio",
-          url: "https://framerelaystudio.com/",
-        },
-      ],
+      worksFor: [{ "@type": "Organization", name: "Tata Consultancy Services" }],
       alumniOf: PROFILE.education.map((entry) => ({
         "@type": "CollegeOrUniversity",
         name: entry.institution,

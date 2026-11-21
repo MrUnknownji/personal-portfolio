@@ -233,6 +233,10 @@
 .ldp-sign-name i {
   display: inline-block;
   font-style: normal;
+  /* The letters take taps (the sign hides a secret); nothing about them says so. */
+  pointer-events: auto;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .ldp-sign-name .is-a {
   color: #fff0fb;

@@ -19,11 +19,11 @@ export const PROFILE = {
   resumePath: "/sandeep-kumar-resume.pdf",
   experience: [
     {
-      period: "Oct 2026 — Now",
-      role: "Founder",
+      period: "Oct 2026",
+      role: "Website developer (client project)",
       organization: "FrameRelay Studio",
       summary:
-        "A motion studio for software teams. I built its site, film pipeline, pricing, and intake.",
+        "Built the whole website for a motion studio for software teams, front end to back end: the site, its film pipeline, pricing, and intake.",
       highlights: [
         {
           text: "framerelaystudio.com: a painted WebGL2 world with four quality tiers and a frame-time governor.",

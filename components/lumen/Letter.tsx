@@ -75,9 +75,10 @@ export default function Letter() {
                 </p>
                 <p>
                   Right now I&apos;m a {current?.role.toLowerCase()} at {current?.organization}, and
-                  I founded {studio?.organization}, a motion studio for software teams. The work
-                  above comes from {selectedProjects.length} products I built end to end, with every
-                  number counted from its repository or live site.
+                  I recently built the whole website of {studio?.organization}, a motion studio for
+                  software teams, from front end to back end. The work above comes from{" "}
+                  {selectedProjects.length} products I built end to end, with every number counted
+                  from its repository or live site.
                 </p>
                 <p>
                   I&apos;m looking for {PROFILE.openTo.toLowerCase()}, and I&apos;d like to hear

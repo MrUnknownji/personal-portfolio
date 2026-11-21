@@ -133,9 +133,9 @@ export const selectedProjects: Project[] = [
     id: 13,
     title: "FrameRelay Studio",
     shortDescription:
-      "The motion studio I founded and run. Its site is a hand-painted WebGL world that lowers its own quality on slower phones, and every product film is written as code.",
+      "A motion studio's website, built for its owner from front end to back end. It is a hand-painted WebGL world that lowers its own quality on slower phones, and every product film is written as code.",
     longDescription:
-      "FrameRelay Studio makes launch films, product walkthroughs, and landing pages for software teams. I founded it in October 2026 and built everything it runs on: an Astro site on Cloudflare Workers with a scroll-driven WebGL2 scene, a Remotion pipeline that renders each film in three formats, a free MIT-licensed motion component, and the pricing, intake, and delivery workflow. The films on the site are original concept studies with fictional products, and the site says so.",
+      "FrameRelay Studio makes launch films, product walkthroughs, and landing pages for software teams. In October 2026 I built its whole website for the studio's owner, front end and back end: an Astro site on Cloudflare Workers with a scroll-driven WebGL2 scene, a Remotion pipeline that renders each film in three formats, a free MIT-licensed motion component, and the pricing, intake, and delivery workflow. The films on the site are original concept studies with fictional products, and the site says so.",
     image: "/images/framerelay/reel.webp",
     technologies: ["Astro", "TypeScript", "Three.js", "WebGL2", "Remotion", "Cloudflare Workers"],
     features: [
@@ -147,8 +147,8 @@ export const selectedProjects: Project[] = [
       "A free, MIT-licensed focus-highlight component with a standalone example",
     ],
     demoLink: "https://framerelaystudio.com/",
-    sourceNote: "Private studio repository · code walkthrough on request",
-    category: "Studio",
+    sourceNote: "Private client repository · code walkthrough on request",
+    category: "Client work",
     year: 2026,
     showcaseVariant: "film",
     showcaseLoop: {
@@ -199,7 +199,7 @@ export const selectedProjects: Project[] = [
     ],
     caseStudy: {
       problem:
-        "Software teams want short films that look like their real product. A new studio has to prove it can make them before anyone has hired it, and its own site is the first proof.",
+        "Software teams want short films that look like their real product. A new studio has to prove it can make them before anyone has hired it, and its own site is the first proof, so the site I was hired to build had to be that proof.",
       solution:
         "I built the site as the studio's demo: a hand-painted WebGL2 world that plays on capable devices and steps aside everywhere else. Films are React code in Remotion, so timing, formats, and revisions are exact and repeatable.",
       architecture: [

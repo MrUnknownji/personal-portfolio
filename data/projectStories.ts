@@ -229,7 +229,7 @@ export const projectStories: Partial<Record<number, ProjectStory>> = {
     ],
   },
   13: {
-    contribution: "Founder: brand, design, engineering, films, and operations",
+    contribution: "Website developer for the studio: front end, back end, film pipeline, and tests",
     scope: "Studio website, film pipeline, free component, pricing, and intake",
     constraint:
       "The site has to show off motion on a fast laptop without punishing a budget phone, a slow connection, or a visitor who prefers less motion.",

@@ -127,7 +127,7 @@ export default function Home() {
               <dd>{PROFILE.openTo}</dd>
             </div>
             <div>
-              <dt className="ld-anno">Studio</dt>
+              <dt className="ld-anno">Client build</dt>
               <dd>
                 <a href="https://framerelaystudio.com/" target="_blank" rel="noopener noreferrer">
                   {studio?.organization}
@@ -173,9 +173,9 @@ export default function Home() {
         <div className="ld-wrap">
           <PinnedHead>
             <SectionHead sheet="02 · Work" id="ld-work-title" title="Work that holds up.">
-              Real-time bidding, the motion studio I run, a paired-wallpaper product, and an
-              end-to-end store. Every number is counted from the project&apos;s repository or its
-              live site.
+              Real-time bidding, a motion studio&apos;s website built for a client, a
+              paired-wallpaper product, and an end-to-end store. Every number is counted from the
+              project&apos;s repository or its live site.
             </SectionHead>
             <dl className="ld-facts ld-work-sum">
               <div>

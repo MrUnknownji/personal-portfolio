@@ -19,6 +19,8 @@ export type Track = {
   /** A word the song is built around, flashed on screen each time it is sung (seconds into the
       file, on the stressed syllable). */
   hook?: { word: string; at: number[] };
+  /** Left out of the switcher and never resumed; it plays only when the sign's secret is found. */
+  secret?: boolean;
 };
 
 export const TRACKS: Track[] = [
@@ -55,6 +57,7 @@ export const TRACKS: Track[] = [
     // where they agree with each other and with the lyrics.
     id: "bukhaar",
     title: "Sandeep Ka Bukhaar",
+    secret: true,
     files: ["/audio/party-bukhaar-1.webm", "/audio/party-bukhaar-1.m4a"],
     bpm: 120.02,
     first: 0.062,
@@ -217,18 +220,28 @@ const KEY = "ld-party-track";
 export function savedTrack() {
   try {
     const index = TRACKS.findIndex((track) => track.id === localStorage.getItem(KEY));
-    return Math.max(0, index);
+    return index < 0 || TRACKS[index].secret ? 0 : index;
   } catch {
     return 0;
   }
 }
 
 export function saveTrack(index: number) {
+  if (TRACKS[index].secret) return;
   try {
     localStorage.setItem(KEY, TRACKS[index].id);
   } catch {
     // Private mode or blocked storage: the choice lasts for this party only.
   }
+}
+
+/** The track the switcher plays after this one: the secret one is never in the rotation. */
+export function nextTrack(index: number) {
+  for (let step = 1; step <= TRACKS.length; step++) {
+    const next = (index + step) % TRACKS.length;
+    if (!TRACKS[next].secret) return next;
+  }
+  return index;
 }
 
 /** The file this browser can play. */
