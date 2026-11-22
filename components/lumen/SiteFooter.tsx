@@ -74,6 +74,11 @@ export default function SiteFooter() {
                   Résumé PDF <span aria-hidden="true">↓</span>
                 </a>
               </li>
+              <li>
+                <a href="/llms.txt" title="The portfolio as Markdown and JSON, for AI agents">
+                  For AI agents
+                </a>
+              </li>
             </ul>
           </div>
         </div>

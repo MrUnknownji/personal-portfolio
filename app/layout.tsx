@@ -111,7 +111,11 @@ export const metadata: Metadata = {
     "portfolio",
     "India",
   ],
-  alternates: { canonical: "/" },
+  // Machine-readable copies of the portfolio, for AI agents and applicant-tracking tools.
+  alternates: {
+    canonical: "/",
+    types: { "text/markdown": "/llms-full.txt", "application/json": "/resume.json" },
+  },
   openGraph: {
     title,
     description,
@@ -173,9 +177,44 @@ const structuredData = {
       "@type": "Person",
       "@id": `${SITE_URL}/#person`,
       name: SITE_CONFIG.name,
+      givenName: SITE_CONFIG.firstName,
+      familyName: SITE_CONFIG.name.split(" ").slice(1).join(" "),
       jobTitle: SITE_CONFIG.role,
-      description: PROFILE.headline,
+      description: `${PROFILE.headline} Open to: ${PROFILE.openTo.toLowerCase()}.`,
       url: SITE_URL,
+      hasOccupation: {
+        "@type": "Occupation",
+        name: SITE_CONFIG.role,
+        occupationLocation: { "@type": "Country", name: "India" },
+        skills: PROFILE.skills.flatMap((skill) => skill.items).join(", "),
+      },
+      seeks: { "@type": "Demand", name: PROFILE.openTo },
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "recruiting",
+        email: SITE_CONFIG.email,
+        url: absolute("/#contact"),
+      },
+      subjectOf: [
+        {
+          "@type": "DigitalDocument",
+          name: `${SITE_CONFIG.name} résumé (PDF)`,
+          url: absolute(PROFILE.resumePath),
+          encodingFormat: "application/pdf",
+        },
+        {
+          "@type": "DigitalDocument",
+          name: `${SITE_CONFIG.name} résumé (JSON Resume)`,
+          url: absolute("/resume.json"),
+          encodingFormat: "application/json",
+        },
+        {
+          "@type": "DigitalDocument",
+          name: `${SITE_CONFIG.name} portfolio for AI agents (Markdown)`,
+          url: absolute("/llms-full.txt"),
+          encodingFormat: "text/markdown",
+        },
+      ],
       image: absolute("/images/sandeep-cutout-640.webp"),
       email: `mailto:${SITE_CONFIG.email}`,
       worksFor: [{ "@type": "Organization", name: "Tata Consultancy Services" }],

@@ -9,6 +9,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/my-projects`, lastModified, changeFrequency: "monthly", priority: 0.9 },
     { url: `${SITE_URL}/quick`, lastModified, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE_URL}/motion`, lastModified, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/llms.txt`, lastModified, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/llms-full.txt`, lastModified, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/resume.json`, lastModified, changeFrequency: "monthly", priority: 0.6 },
     ...selectedProjects.map((project) => ({
       url: `${SITE_URL}/my-projects/${project.id}`,
       lastModified,

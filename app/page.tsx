@@ -15,6 +15,7 @@ import { PROFILE } from "@/data/profile";
 import { selectedProjects, toProjectSummary } from "@/data/projects";
 import { SITE_CONFIG } from "@/data/site";
 import { SOCIAL_PROFILES } from "@/data/social";
+import { SITE_URL, absolute } from "@/lib/siteUrl";
 import type { ShowcaseProject } from "@/types/Project";
 
 const featured = selectedProjects
@@ -69,6 +70,25 @@ function SectionHead({
   );
 }
 
+// The home page is the candidate's profile: say so to search engines and agents, with the work.
+const profilePage = {
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  "@id": `${SITE_URL}/#profile`,
+  url: SITE_URL,
+  name: `${SITE_CONFIG.name} · ${SITE_CONFIG.role}`,
+  mainEntity: { "@id": `${SITE_URL}/#person` },
+  hasPart: selectedProjects.map((project) => ({
+    "@type": "CreativeWork",
+    "@id": `${absolute(`/my-projects/${project.id}`)}#work`,
+    name: project.title,
+    url: absolute(`/my-projects/${project.id}`),
+    description: project.shortDescription,
+    keywords: project.technologies.join(", "),
+    author: { "@id": `${SITE_URL}/#person` },
+  })),
+};
+
 export default function Home() {
   // The portrait is the largest paint: ask for it from <head>, ahead of anything else on the page.
   preload(PORTRAIT.src, {
@@ -79,6 +99,10 @@ export default function Home() {
   });
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(profilePage).replace(/</g, "\\u003c") }}
+      />
       <section className="ld-hero ld-wrap" aria-labelledby="ld-home-title">
         <div className="ld-hero-head">
           <span className="ld-anno">01 · Full-stack developer</span>

@@ -27,6 +27,12 @@ instrument sheets, torn-paper stationery, and a letter that opens on scroll.
   streamed only after the click, and a fourth, with timed subtitles and its hook word flashed on
   screen, for whoever finds it; a seek bar hides on one tower's roof). The panel and toys load only when opened, and each toy
   puts the page back exactly.
+- **Readable by machines.** Recruiters increasingly screen with AI agents, so the portfolio is
+  also published for them: [`/llms.txt`](https://llmstxt.org/) (an index), `/llms-full.txt` (the
+  whole portfolio as one Markdown document), `/resume.json` (the
+  [JSON Resume](https://jsonresume.org/schema) schema), schema.org `Person` and `ProfilePage` data,
+  and a robots.txt that names AI crawlers as welcome. All of it is generated from the same typed
+  data as the pages (`lib/agentProfile.ts`), so it never says more than the site does.
 - **Measured performance.** Lighthouse budgets run in CI; see
   [docs/performance](docs/performance) for the audits and what changed.
 
